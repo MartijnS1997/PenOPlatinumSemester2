@@ -110,6 +110,11 @@ public class DroneBuilder {
                 return new AutopilotConfig() {
 
                     @Override
+                    public String getDroneID() {
+                        return "0";
+                    }
+
+                    @Override
                     public float getGravity() {
                         return 9.81f;
                     }
@@ -122,6 +127,51 @@ public class DroneBuilder {
                     @Override
                     public float getTailSize() {
                         return STABILIZE_POS.getzValue();
+                    }
+
+                    @Override
+                    public float getWheelY() {
+                        return 0;
+                    }
+
+                    @Override
+                    public float getFrontWheelZ() {
+                        return 0;
+                    }
+
+                    @Override
+                    public float getRearWheelZ() {
+                        return 0;
+                    }
+
+                    @Override
+                    public float getRearWheelX() {
+                        return 0;
+                    }
+
+                    @Override
+                    public float getTyreSlope() {
+                        return 0;
+                    }
+
+                    @Override
+                    public float getDampSlope() {
+                        return 0;
+                    }
+
+                    @Override
+                    public float getTyreRadius() {
+                        return 0;
+                    }
+
+                    @Override
+                    public float getRMax() {
+                        return 0;
+                    }
+
+                    @Override
+                    public float getFcMax() {
+                        return 0;
                     }
 
                     @Override
@@ -188,6 +238,11 @@ public class DroneBuilder {
             case PhysXEngine.BETA_MODE:
                 return new AutopilotConfig(){
                     @Override
+                    public String getDroneID() {
+                        return "0";
+                    }
+
+                    @Override
                     public float getGravity() {
                         return 9.81f;
                     }
@@ -200,6 +255,51 @@ public class DroneBuilder {
                     @Override
                     public float getTailSize() {
                         return BETA_STABILIZE_POS.getzValue();
+                    }
+
+                    @Override
+                    public float getWheelY() {
+                        return 0;
+                    }
+
+                    @Override
+                    public float getFrontWheelZ() {
+                        return 0;
+                    }
+
+                    @Override
+                    public float getRearWheelZ() {
+                        return 0;
+                    }
+
+                    @Override
+                    public float getRearWheelX() {
+                        return 0;
+                    }
+
+                    @Override
+                    public float getTyreSlope() {
+                        return 0;
+                    }
+
+                    @Override
+                    public float getDampSlope() {
+                        return 0;
+                    }
+
+                    @Override
+                    public float getTyreRadius() {
+                        return 0;
+                    }
+
+                    @Override
+                    public float getRMax() {
+                        return 0;
+                    }
+
+                    @Override
+                    public float getFcMax() {
+                        return 0;
                     }
 
                     @Override

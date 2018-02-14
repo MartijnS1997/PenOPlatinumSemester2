@@ -4,7 +4,7 @@ import static java.lang.Math.sin;
 
 /**
  * Created by Martijn on 13/02/2018.
- *
+ * A class of tyres, normal Tyres only exert a force in the y-component as an reaction to deltaRadius
  */
 //TODO: checker for tyre position
 public class TyrePhysX {
@@ -18,7 +18,25 @@ public class TyrePhysX {
         this.maxFricCoeff = maxFricCoeff;
     }
 
-    public Vector getNetForceTyre(Vector orientation, Vector rotation, Vector position, Vector velocity, float breakForce){
+    /**
+     * Changes the state of the tyre (used for radiusDelta)
+     * @param orientation the orientation of the drone
+     * @param position the position of the drone
+     */
+    public void nextState(Vector orientation, Vector position){
+        this.setPrevRadiusDelta(this.getCurrentRadiusDelta());
+        this.setCurrentRadiusDelta(this.calcRadiusDelta(orientation, position));
+    }
+
+    /**
+     * returns the net force exerted by the tyre: the force exerted by the deltaRadius and the brakes in world axis system
+     * @param orientation the orientation of the drone
+     * @param position the position of the drone (world axis system)
+     * @param velocity the velocity of the drone (world axis system)
+     * @param brakeForce the force exerted by the brakes
+     * @return the net forces exerted by the tyres in the world axis sytem
+     */
+    public Vector getNetForceTyre(Vector orientation, Vector position, Vector velocity, float brakeForce, float deltaTime){
         float groundDist = this.getTyreDistanceToGround(orientation, position);
         //if the tyre doesn't touch the ground, the exerted force is zero
         if(groundDist >= this.getTyreRadius()){
@@ -26,18 +44,64 @@ public class TyrePhysX {
         }
         //not so easy case:
 
+        //first calculate the normal force:
+        Vector verticalForce = this.getNormalForce(deltaTime); //naming for consistency
+
+        //then get the brake force
+        Vector brakes = this.getBrakeForce(orientation, velocity, brakeForce);
+
+        // the resulting force on the tyres
+        return brakes.vectorSum(verticalForce);
 
     }
 
     /**
+     * Calculates the brake force exerted on the wheels of the drone in the world axis system
+     * @param orientation the orientation of the drone
+     * @param velocity the velocity of the drone
+     * @param brakeForce the brake force exerted on the wheels (abs value)
+     * @return  zero vector if the cannot be a brake force exerted (@see canExertBrakeForce)
+     *          the brakeForce set in the opposite direction of the velocity in the drone axis system
+     */
+    private Vector getBrakeForce(Vector orientation, Vector velocity, float brakeForce){
+        //calculate the brake force in the world axis system
+        //get the sign of the velocity component amongst the z-axis of the drone
+        Vector velocityDrone = PhysXEngine.worldOnDrone(velocity, orientation);
+
+        //check if we may brake
+        if(canExertBrakeForce(velocityDrone)){
+            return new Vector(); // if not, return zero vector
+        }
+
+        //get the sign
+        float xVelSign = velocityDrone.getzValue();
+
+        //if we may brake, set the brake force opposite to the sign of the velocity in the drone axis system
+        Vector brakeForceDrone =  new Vector(0,0, - Math.abs(brakeForce)*xVelSign);
+
+        //then transform the brake force to the world axis system
+        //all the y-components of the brake force need to be set to zero (can be a result of the transformation)
+        Vector tBrakeForceDrone= PhysXEngine.droneOnWorld(brakeForceDrone, orientation);
+        return new Vector(tBrakeForceDrone.getxValue(), 0f, tBrakeForceDrone.getzValue());
+
+    }
+
+    /**
+     * Checks if a brake force may be exerted, is only valid if the drone is not stationary
+     * @param velocityDrone the velocity of the drone in drone axis system
+     * @return true if and only if the velocity amongst the z-axis is nonzero
+     * note: may add interval
+     */
+    private boolean canExertBrakeForce(Vector velocityDrone){
+        return Math.abs(velocityDrone.getzValue()) > 0;
+    }
+
+    /**
      * Calculates the normal force exerted on the tyre, given in the world axis system
-     * @param orientation
-     * @param rotation
-     * @param position
      * @return
      */
-    public Vector getNormalForce(Vector orientation, Vector rotation, Vector position, float deltaTime){
-        float tyreDelta = this.calcRadiusDelta(orientation, position);
+    private Vector getNormalForce(float deltaTime){
+        float tyreDelta = this.getCurrentRadiusDelta();
         if(tyreDelta <= 0){
             return new Vector();
         }
@@ -127,6 +191,14 @@ public class TyrePhysX {
         this.prevRadiusDelta = prevRadiusDelta;
     }
 
+    public float getCurrentRadiusDelta() {
+        return currentRadiusDelta;
+    }
+
+    public void setCurrentRadiusDelta(float currentRadiusDelta) {
+        this.currentRadiusDelta = currentRadiusDelta;
+    }
+
     private Vector tyrePosition;
     private float tyreRadius;
     private float tyreSlope;
@@ -134,6 +206,7 @@ public class TyrePhysX {
     private float maxBrake;
     private float maxFricCoeff;
     private float prevRadiusDelta; //D from the assignment
+    private float currentRadiusDelta;
 
 
 }

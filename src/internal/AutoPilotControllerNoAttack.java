@@ -289,6 +289,21 @@ public class AutoPilotControllerNoAttack {
             return this.verStabInclination;
         }
 
+        @Override
+        public float getFrontBrakeForce() {
+            return 0;
+        }
+
+        @Override
+        public float getLeftBrakeForce() {
+            return 0;
+        }
+
+        @Override
+        public float getRightBrakeForce() {
+            return 0;
+        }
+
         /**
          * Setter for the Thrust
          * @param thrust the desired thrust

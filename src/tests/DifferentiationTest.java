@@ -58,6 +58,21 @@ public class DifferentiationTest {
             public float getVerStabInclination() {
                 return 0;
             }
+
+            @Override
+            public float getFrontBrakeForce() {
+                return 0;
+            }
+
+            @Override
+            public float getLeftBrakeForce() {
+                return 0;
+            }
+
+            @Override
+            public float getRightBrakeForce() {
+                return 0;
+            }
         });
         for (int i = 0; i != NB_ITERATIONS1; i++) {
             drone.toNextState(INTERVAL1);
@@ -99,6 +114,21 @@ public class DifferentiationTest {
 
             @Override
             public float getVerStabInclination() {
+                return 0;
+            }
+
+            @Override
+            public float getFrontBrakeForce() {
+                return 0;
+            }
+
+            @Override
+            public float getLeftBrakeForce() {
+                return 0;
+            }
+
+            @Override
+            public float getRightBrakeForce() {
                 return 0;
             }
         });
