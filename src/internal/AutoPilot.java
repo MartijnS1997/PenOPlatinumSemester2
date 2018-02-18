@@ -1,15 +1,7 @@
 package internal;
 
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import Autopilot.*;
 
@@ -23,23 +15,37 @@ import Autopilot.*;
  */
 public class AutoPilot implements Autopilot {
 
+	/**
+	 * Primary constructor for the Autopilot
+	 * @param controllerConfig
+	 */
 	public AutoPilot(String controllerConfig){
+		// first make sure we can takeoff
+		this.setTakeoffController(new AutopilotTakeoffController(this));
+
+		// then we mus assure our customers a smooth ride
 		switch(controllerConfig){
 			case PhysXEngine.ALPHA_MODE:
-				this.setController(new AlphaController(this));
-				return;
+				this.setFlightController(new AlphaFlightController(this));
+				break;
 			case PhysXEngine.BETA_MODE:
-				this.setController(new BetaController(this));
+				this.setFlightController(new BetaFlightController(this));
+				break;
 		}
+		// and last, we need to land
+		this.setLandingController(new AutopilotLandingController(this));
+
 	}
 
+	/**
+	 * Default constructor for the autopilot
+	 */
     public AutoPilot() {
 
-    	// set the controller of the autopilot
-		//Todo uncomment when normal controller works again
+    	// set the flightController of the autopilot
+		//Todo uncomment when normal flightController works again
     	this(PhysXEngine.ALPHA_MODE);
     	//this.attackController = new AutoPilotControllerNoAttack(this);
-
     }
 
     @Override
@@ -74,6 +80,12 @@ public class AutoPilot implements Autopilot {
 		this.setPhysXEngine(new PhysXEngine(configuration));
 		//initialize the Physics Engine Optimisations
 		this.setPhysXOptimisations(this.getPhysXEngine().createPhysXOptimisations());
+		//initialize the takeoff controller
+		this.getTakeoffController().setConfig(configuration);
+		//initialize the flight controller
+		this.getFlightController().setConfig(configuration);
+		//initialize the takeoff controller
+		this.getTakeoffController().setConfig(configuration);
 
 
         //Initialize the autopilot camera
@@ -88,13 +100,17 @@ public class AutoPilot implements Autopilot {
     }
 
 
-
+	/**
+	 * Generates the control outputs of the autpilot destined for the drone
+	 * @param inputs the inputs of the drone containing information such as location, orientation etc.
+	 * @return control outputs for the drone
+	 */
+	//Todo implement the 3 stages of the flight: takeoff, flight and landing
     private AutopilotOutputs getControlOutputs(AutopilotInputs inputs){
-    	AutoPilotController controller = this.getController();
-    	controller.setCurrentInputs(inputs);
-		//AutoPilotControllerNoAttack controller = this.attackController;
+    	AutoPilotFlightController controller = this.getFlightController();
+		//AutoPilotControllerNoAttack flightController = this.attackController;
 		//attackController.setCurrentInputs(inputs);
-    	return controller.getControlActions();
+    	return controller.getControlActions(inputs);
 	}
 
 
@@ -122,7 +138,7 @@ public class AutoPilot implements Autopilot {
 	/**
 	 * @author anthonyrathe
 	 */
-	public void setAPCamera(AutoPilotCamera newAPCamera){
+	private void setAPCamera(AutoPilotCamera newAPCamera){
 		this.APCamera = newAPCamera;
 	}
 	
@@ -132,27 +148,84 @@ public class AutoPilot implements Autopilot {
      */
 
 	/**
-	 * Getter for the autopilot controller
-	 * @return the controller of the autopilot
+	 * Setter for the takeoff flightController
+	 * @param controller the takeoff flightController of the autopilot
 	 */
-	public AutoPilotController getController() {
-		return controller;
+	private void setTakeoffController(AutopilotTakeoffController controller){
+		if(!canHaveAsTakeoffController(controller))
+			throw new IllegalArgumentException(INVALID_CONTROLLER);
+		this.takeoffController = controller;
+	}
+
+	/**
+	 * Checker if the given takeoff flightController is valid
+	 * @param controller the flightController responsible for the takeoff
+	 * @return true if the flightController is not a null reference and the flightController already references the autopilot
+	 * 		   and the takeoff flightController of the autopilot is uninitialized
+	 */
+	private boolean canHaveAsTakeoffController(AutopilotTakeoffController controller){
+		return controller != null && controller.getAutopilot() == this && this.takeoffController == null;
+	}
+
+	/**
+	 * Getter for the takeoff flightController of the autopilot
+	 * @return the takeoff flightController of the autopilot
+	 */
+	public AutopilotTakeoffController getTakeoffController() {
+		return takeoffController;
+	}
+
+	/**
+	 * Getter for the autopilot flightController
+	 * @return the flightController of the autopilot
+	 */
+	private AutoPilotFlightController getFlightController() {
+		return flightController;
 	}
 
 	/**
 	 * setter for the autopilotController other part of the bidirectional relationship
-	 * @param controller the desired controller
+	 * @param controller the desired flightController
 	 */
-	public void setController(AutoPilotController controller) {
-		if(!this.canHaveAsController(controller))
+	private void setFlightController(AutoPilotFlightController controller) {
+		if(!this.canHaveAsFlightController(controller))
 			throw new IllegalArgumentException(INVALID_CONTROLLER);
-		this.controller = controller;
+		this.flightController = controller;
 	}
 
-	public boolean canHaveAsController(AutoPilotController controller){
+	private boolean canHaveAsFlightController(AutoPilotFlightController controller){
 
-		return controller.getAssociatedAutopilot() == this && this.controller == null;
+		return controller != null && controller.getAutopilot() == this && this.flightController == null;
 	}
+
+	/**
+	 * Setter for the landing flightController of the drone
+	 * @param controller the landing flightController for constraints @see canHaveAsLandingController
+	 */
+	private void setLandingController(AutopilotLandingController controller){
+		if(!canHaveAsLandingController(controller))
+			throw new IllegalArgumentException(INVALID_CONTROLLER);
+		this.landingController = controller;
+	}
+
+	/**
+	 * Checker if the given flightController is valid
+	 * @param controller the flightController to be checked
+	 * @return the flightController may not be a null reference, must already reference the autopilot as its
+	 * 		   designated autopilot and the landingController of the autopilot must be uninitialized
+	 */
+	private boolean canHaveAsLandingController(AutopilotLandingController controller){
+		return controller != null && controller.getAutopilot() == this && this.landingController == null;
+	}
+
+	/**
+	 * Getter for the landingController
+	 * @return the landing flightController of the autopilot
+	 */
+	public AutopilotLandingController getLandingController() {
+		return landingController;
+	}
+
 
 	/**
 	 * Getter for the main wing mass of the drone
@@ -184,23 +257,23 @@ public class AutoPilot implements Autopilot {
 	 * Setter for the flight recorder
 	 */
 	public void setFlightRecorder(FlightRecorder flightRecorder){
-		this.getController().setFlightRecorder(flightRecorder);
+		this.getFlightController().setFlightRecorder(flightRecorder);
 		//this.attackController.setFlightRecorder(flightRecorder);
 	}
 
-	public PhysXEngine getPhysXEngine() {
+	private PhysXEngine getPhysXEngine() {
 		return physXEngine;
 	}
 
-	public void setPhysXEngine(PhysXEngine physXEngine) {
+	private void setPhysXEngine(PhysXEngine physXEngine) {
 		this.physXEngine = physXEngine;
 	}
 
-	public PhysXEngine.PhysXOptimisations getPhysXOptimisations() {
+	protected PhysXEngine.PhysXOptimisations getPhysXOptimisations() {
 		return physXOptimisations;
 	}
 
-	public void setPhysXOptimisations(PhysXEngine.PhysXOptimisations physXOptimisations) {
+	private void setPhysXOptimisations(PhysXEngine.PhysXOptimisations physXOptimisations) {
 		this.physXOptimisations = physXOptimisations;
 	}
 
@@ -213,9 +286,19 @@ public class AutoPilot implements Autopilot {
 	}
 
 	/**
-	 * Object that stores the autopilot controller
+	 * Object that stores the autopilot flight flightController
 	 */
-	private AutoPilotController controller;
+	private AutoPilotFlightController flightController;
+
+	/**
+	 * Object that stores the autopilot landing flightController
+	 */
+	private AutopilotLandingController landingController;
+
+	/**
+	 * Object that stores the autopilot takeoffController
+	 */
+	private AutopilotTakeoffController takeoffController;
 
 	/**
 	 * Variable that stores the configuration of the autopilot
@@ -241,27 +324,13 @@ public class AutoPilot implements Autopilot {
 	 */
 	private AutoPilotControllerNoAttack attackController;
 
-	//------- Parameters -------
-	private static final float STANDARD_INCLINATION = (float)Math.PI/8;
-	private static final float SHARP_INCLINATION = (float)Math.PI/4;
-	private static final float STABLE_INCLINATION = (float)Math.PI/12;
-	private static final float THRESHOLD_ANGLE = (float)Math.PI/36;
-	private static final float THRESHOLD_PIXELS = 5f;
-	private static final float INCREASE_THRUST_ANGLE = (float)(Math.PI*0.025);
-	private static final int STANDARD_CUBE_SIZE = 10;
-	private static final float NODE_REACHED_DISTANCE = 4f;
-	private static final float STANDARD_THRUST = 32.859283f;
-	private static final float CUBE_LOCATION_DELTA_THRESHOLD = 0.5f;
-	private static final String ALPHA_CONTROLLER = "ALPHA_CONTROLLER";
-	private static final String BETA_CONTROLLER = "BETA_CONTROLLER";
-
 
 
     /*
     Error messages
      */
     public final static String INVALID_THRUST = "The supplied thrust is out of bounds";
-	public final static String INVALID_CONTROLLER = "The controller is already initialized";
+	public final static String INVALID_CONTROLLER = "The flightController is already initialized";
 
 }
 

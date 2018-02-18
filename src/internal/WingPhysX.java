@@ -90,6 +90,18 @@ public abstract class WingPhysX {
         return lift;
     }
 
+    /**
+     * Returns true if the center of mass of the wing touches the ground
+     * @param orientation the orientation of the drone
+     * @param position the position of the drone
+     * @return true if the wing touches the ground
+     */
+    public boolean checkCrash(Vector orientation, Vector position){
+        Vector relPosDrone = this.getRelativePosition();
+        Vector relPosWorld = PhysXEngine.droneOnWorld(relPosDrone, orientation);
+        Vector absPos = position.vectorSum(relPosWorld);
+        return absPos.getyValue() <= 0;
+    }
 
     /*
     getters, setters and checkers for the drone

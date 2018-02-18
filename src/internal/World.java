@@ -176,6 +176,11 @@ public class World {
 			// if the goal was not reached, set the new state
 			for (WorldObject worldObject : worldObjectSet) {
 				worldObject.toNextState(timeInterval);
+				if(worldObject instanceof  Drone && ((Drone) worldObject).checkCrash()){
+					//Todo uncomment if world is ready for handling crashes
+//					this.removeWorldObject(worldObject);
+//					System.out.println("The drone has crashed");
+				}
 			}
 		}
 

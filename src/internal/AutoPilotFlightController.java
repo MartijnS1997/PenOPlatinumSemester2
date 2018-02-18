@@ -1,18 +1,9 @@
 package internal;
 
-import Autopilot.Autopilot;
 import Autopilot.AutopilotInputs;
 import Autopilot.AutopilotOutputs;
-import org.lwjgl.opengles.EXTRobustness;
 
-import javax.naming.ldap.Control;
-
-import java.awt.datatransfer.FlavorListener;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import static java.lang.Math.*;
 
@@ -21,16 +12,15 @@ import static java.lang.Math.*;
  * Appended and edited by Anthony Rath� on 6/11/2017
  * A class of Autopilot Controllers
  */
-public abstract class AutoPilotController {
+public abstract class AutoPilotFlightController extends Controller{
 
-    private List<Vector> nbCubes;
 
 	/**
      * Constructor for the autopilotController
-     * @param autoPilot
+     * @param autopilot
      */
-    public AutoPilotController(AutoPilot autoPilot){
-        this.associatedAutopilot = autoPilot;
+    public AutoPilotFlightController(AutoPilot autopilot){
+        super(autopilot);
         this.setPreviousInputs(dummyData);
         this.currentInputs = dummyData;
     }
@@ -39,7 +29,11 @@ public abstract class AutoPilotController {
      * Generates the appropriate control actions for the drone
      * @return the outputs for the autopilot
      */
-    public abstract AutopilotOutputs getControlActions();
+    @Override
+    public AutopilotOutputs getControlActions(AutopilotInputs inputs){
+        this.setCurrentInputs(inputs);
+        return null;
+    }
 
 
     /*
@@ -73,12 +67,12 @@ public abstract class AutoPilotController {
             return;
         }
         //first prepare all the variables
-        PhysXEngine.PhysXOptimisations optimisations = this.getAssociatedAutopilot().getPhysXOptimisations();
+        PhysXEngine.PhysXOptimisations optimisations = this.getAutopilot().getPhysXOptimisations();
         AutopilotInputs inputs = this.getCurrentInputs();
         Vector orientation = extractOrientation(inputs);
         Vector velocity = this.getVelocityApprox();
         Vector rotation = this.getRotationApprox();
-        float angleOfAttack = this.getAssociatedAutopilot().getConfig().getMaxAOA();
+        float angleOfAttack = this.getAutopilot().getConfig().getMaxAOA();
 
         //change until the controls fit
         AOAControlMainLeft(controlOutputs, optimisations,angleOfAttack, orientation, rotation, velocity);
@@ -234,7 +228,7 @@ public abstract class AutoPilotController {
     }
 
     protected float getTotalMass(){
-        AutoPilot autopilot = this.getAssociatedAutopilot();
+        AutoPilot autopilot = this.getAutopilot();
         float mainWings = autopilot.getMainWingMass()*2;
         float stabilizers = autopilot.getStabilizerMass()*2;
         float engine = autopilot.getEngineMass();
@@ -266,7 +260,7 @@ public abstract class AutoPilotController {
     }
 
     /**
-     * Approximats the current rotation of the drone based on the old rotations
+     * Approximates the current rotation of the drone based on the old rotations
      * @return
      */
     private Vector getRotationApprox(){
@@ -360,14 +354,6 @@ public abstract class AutoPilotController {
     }
 
     /**
-     * getter for the associated Autopilot
-     * @return the associated autopilot
-     */
-    public AutoPilot getAssociatedAutopilot() {
-        return associatedAutopilot;
-    }
-
-    /**
      * Getter for the current inputs (the autopilot inputs object)
      * @return the current outputs
      */
@@ -422,13 +408,11 @@ public abstract class AutoPilotController {
     /*
     Getters and setters
      */
-    protected abstract float getMainStableInclination();
 
-    protected abstract float getStabilizerStableInclination();
-
-    protected abstract float getRollThreshold();
-
-    protected abstract float getInclinationAOAMargin();
+    @Override
+    protected float getStandardThrust() {
+        return STANDARD_THRUST;
+    }
 
     /**
      * Get the PID used for the corrections on the x-coordinate inputs
@@ -446,7 +430,6 @@ public abstract class AutoPilotController {
         return yPID;
     }
 
-    private AutoPilot associatedAutopilot;
     private AutopilotInputs currentInputs;
     private AutopilotInputs previousInputs;
     private FlightRecorder flightRecorder;
@@ -503,127 +486,7 @@ public abstract class AutoPilotController {
         }
     };
 
-    /**
-     * An implementation of AutopilotOutputs used in the controller for cascading control (passes trough the basic
-     * controller, roll control and AOA controll)
-     */
-    class ControlOutputs implements AutopilotOutputs{
 
-        ControlOutputs(){
-            //do nothing, everything stays initialized on zero
-        }
-
-        /**
-         * Set to default values
-         * used to reset the outputs if the controller is not fully initialized
-         */
-        private void reset(){
-
-            this.setRightWingInclination(getMainStableInclination());
-            this.setLeftWingInclination(getMainStableInclination());
-            this.setHorStabInclination(getStabilizerStableInclination());
-            this.setVerStabInclination(getStabilizerStableInclination());
-
-        }
-
-        @Override
-        public float getThrust() {
-            return this.thrust;
-        }
-
-        @Override
-        public float getLeftWingInclination() {
-            return this.leftWingInclination;
-        }
-
-        @Override
-        public float getRightWingInclination() {
-            return this.rightWingInclination;
-        }
-
-        @Override
-        public float getHorStabInclination() {
-            return this.horStabInclination;
-        }
-
-        @Override
-        public float getVerStabInclination() {
-            return this.verStabInclination;
-        }
-
-        @Override
-        public float getFrontBrakeForce() {
-            return 0;
-        }
-
-        @Override
-        public float getLeftBrakeForce() {
-            return 0;
-        }
-
-        @Override
-        public float getRightBrakeForce() {
-            return 0;
-        }
-
-        /**
-         * Setter for the Thrust
-         * @param thrust the desired thrust
-         */
-        public void setThrust(float thrust) {
-            this.thrust = thrust;
-        }
-
-        /**
-         * Setter for the left wing inclination
-         * @param leftWingInclination
-         */
-        public void setLeftWingInclination(float leftWingInclination) {
-            this.leftWingInclination = leftWingInclination;
-        }
-
-        /**
-         * Setter for the right wing inclination
-         * @param rightWingInclination the desired right wing inclination
-         */
-        public void setRightWingInclination(float rightWingInclination) {
-            this.rightWingInclination = rightWingInclination;
-        }
-
-        /**
-         * Setter for the horizontal stabilizer inclination
-         * @param horStabInclination the desired horizontal stabilizer inclination
-         */
-        public void setHorStabInclination(float horStabInclination) {
-            this.horStabInclination = horStabInclination;
-        }
-
-        /**
-         * Setter for the vertical stabilizer inclination
-         * @param verStabInclination the desired vertical stabilizer inclination
-         */
-        public void setVerStabInclination(float verStabInclination) {
-            this.verStabInclination = verStabInclination;
-        }
-
-        //initialize the writes to the stable state of the drone
-        private float thrust = STANDARD_THRUST;
-        private float leftWingInclination = getMainStableInclination();
-        private float rightWingInclination = getMainStableInclination();
-        private float horStabInclination = getStabilizerStableInclination();
-        private float verStabInclination = getStabilizerStableInclination();
-
-        @Override
-        public String toString() {
-            return "ControlOutputs{" +
-                    "thrust=" + thrust +
-                    ", leftWingInclination=" + leftWingInclination +
-                    ", rightWingInclination=" + rightWingInclination +
-                    ", horStabInclination=" + horStabInclination +
-                    ", verStabInclination=" + verStabInclination +
-                    '}';
-        }
-    }
 
     /**
      * A class of PID controllers

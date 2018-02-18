@@ -11,16 +11,17 @@ import static java.lang.Math.pow;
  * Created by Martijn on 7/12/2017.
  * A controller for the 30 degree maxAOA
  */
-public class BetaController extends AutoPilotController{
+public class BetaFlightController extends AutoPilotFlightController {
 
-    public BetaController(AutoPilot autoPilot){
+    public BetaFlightController(AutoPilot autoPilot){
         super(autoPilot);
     }
 
     @Override
-    public AutopilotOutputs getControlActions(){
+    public AutopilotOutputs getControlActions(AutopilotInputs inputs){
+        super.getControlActions(inputs);
         ControlOutputs outputs = new ControlOutputs();
-        AutoPilotCamera APCamera = this.getAssociatedAutopilot().getAPCamera();
+        AutoPilotCamera APCamera = this.getAutopilot().getAPCamera();
         AutopilotInputs currentInputs = this.getCurrentInputs();
         PIDController xPIDController = this.getxPID();
         PIDController yPIDController = this.getyPID();
@@ -96,9 +97,9 @@ public class BetaController extends AutoPilotController{
     private void setThrustOut(ControlOutputs outputs, float cubeCoeff){
         //Todo implement: write the output to the outputs
         float pitch = this.getCurrentInputs().getPitch();
-        float maxThrust =  this.getAssociatedAutopilot().getConfig().getMaxThrust();
+        float maxThrust =  this.getAutopilot().getConfig().getMaxThrust();
         int threshold = Math.round(THRESHOLD_DISTANCE);
-        float gravity = this.getAssociatedAutopilot().getConfig().getGravity();
+        float gravity = this.getAutopilot().getConfig().getGravity();
 
         // Thrust
         float thrust = (float) ((maxThrust/4) + THRUST_FACTOR*this.getTotalMass()*gravity*cubeCoeff);

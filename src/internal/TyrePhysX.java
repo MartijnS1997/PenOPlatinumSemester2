@@ -159,6 +159,19 @@ public class TyrePhysX {
         return (float) (centerHeight/sin(roll));
     }
 
+    /**
+     * returns true if and only if the centre of the tyre goes below the y = 0 mark (the axle touches the ground, not so good)
+     * @param orientation the orientation of the drone
+     * @param position the position of the drone
+     * @return true if the axle touches the ground
+     */
+    public boolean checkCrash(Vector orientation, Vector position){
+        Vector relTyrePosDrone = this.getTyrePosition();
+        Vector relTyrePosWorld = PhysXEngine.droneOnWorld(relTyrePosDrone, orientation);
+        Vector absPos = position.vectorSum(relTyrePosWorld);
+        return absPos.getyValue() <= 0;
+    }
+
     public Vector getTyrePosition() {
         return tyrePosition;
     }

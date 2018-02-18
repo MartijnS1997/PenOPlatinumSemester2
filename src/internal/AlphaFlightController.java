@@ -13,9 +13,9 @@ import java.util.List;
  * Created by Martijn on 7/12/2017.
  * controller for AOA different from 30
  */
-public class AlphaController extends AutoPilotController {
+public class AlphaFlightController extends AutoPilotFlightController {
 
-    public AlphaController(AutoPilot autoPilot){
+    public AlphaFlightController(AutoPilot autoPilot){
         super(autoPilot);
     }
 
@@ -23,10 +23,10 @@ public class AlphaController extends AutoPilotController {
     private void setThrustOut(ControlOutputs outputs, float xPosition, float yPosition){
         //Todo implement: write the output to the outputs
         float pitch = this.getCurrentInputs().getPitch();
-        float cubeSize =  this.getAssociatedAutopilot().getAPCamera().getTotalQualifiedPixels();
+        float cubeSize =  this.getAutopilot().getAPCamera().getTotalQualifiedPixels();
         int threshold = Math.round(THRESHOLD_DISTANCE);
-        float standardThrust = this.getAssociatedAutopilot().getConfig().getMaxThrust()/4;
-        float maxThrust = this.getAssociatedAutopilot().getConfig().getMaxThrust();
+        float standardThrust = this.getAutopilot().getConfig().getMaxThrust()/4;
+        float maxThrust = this.getAutopilot().getConfig().getMaxThrust();
 
         // Thrust
         float sigmoidFactor = 4f;
@@ -101,13 +101,15 @@ public class AlphaController extends AutoPilotController {
      * @return the outputs for the autopilot
      */
     @Override
-    public AutopilotOutputs getControlActions(){
+    public AutopilotOutputs getControlActions(AutopilotInputs inputs){
+
+        super.getControlActions(inputs);
 
         ControlOutputs controlOutputs = new ControlOutputs();
         AutopilotInputs currentInputs = this.getCurrentInputs();
 
         //APCamera.loadNextImage(currentInputs.getImage());
-        AutoPilotCamera APCamera = this.getAssociatedAutopilot().getAPCamera();
+        AutoPilotCamera APCamera = this.getAutopilot().getAPCamera();
         APCamera.loadNewImage(currentInputs.getImage());
 
         float elapsedTime = this.getCurrentInputs().getElapsedTime();

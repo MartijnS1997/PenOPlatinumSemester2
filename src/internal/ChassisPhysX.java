@@ -64,6 +64,23 @@ public class ChassisPhysX {
         return null;
     }
 
+    /**
+     * Returns true if one of the tyres has crashed
+     * @param orientation the orientation of the drone
+     * @param position the position of the drone
+     * @return true if the chassis experienced a crash
+     */
+    public boolean checkCrash(Vector orientation, Vector position){
+        if(this.getFrontTyre().checkCrash(orientation, position))
+            return true;
+        else if(this.getRearLeftTyre().checkCrash(orientation, position))
+            return true;
+        else if(this.getRearRightTyre().checkCrash(orientation, position))
+            return true;
+        else {
+            return false;
+        }
+    }
 
 
     private TyrePhysX getFrontTyre() {

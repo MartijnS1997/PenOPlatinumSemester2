@@ -32,7 +32,7 @@ public class PhysXEngine {
                 configuration.getHorStabLiftSlope(), configuration.getTailMass(), configuration.getMaxAOA(), 0));
         this.setVerticalStabilizer(new VerticalWingPhysX(new Vector(0,0, configuration.getTailSize()),
                 configuration.getVerStabLiftSlope(), configuration.getTailMass(), configuration.getMaxAOA(), 0));
-
+        this.setDroneChassis(new ChassisPhysX(configuration));
         this.setEnginePosition();
         this.setInertiaTensor();
 
@@ -185,6 +185,48 @@ public class PhysXEngine {
 
         Vector result = (k1.vectorSum(k2.scalarMult(2.0f)).vectorSum(k3.scalarMult(2.0f)).vectorSum(k4)).scalarMult(deltaTime/6.0f);
         return orientation.vectorSum(result);
+    }
+
+    /**
+     * Checks if the drone has crashed in any way
+     * the drone crashes if the point masses (eg engine and wings) go below ground level (y <= 0) or
+     * when the chassis goes below ground level
+     * @param orientation the orientation of the drone
+     * @param position the position of the drone
+     * @return true if and only if a component of the drone has crashed
+     */
+    public boolean checkCrash(Vector orientation, Vector position){
+        return checkEngineCrash(orientation, position)||checkWingCrash(orientation, position)
+                ||this.getDroneChassis().checkCrash(orientation, position);
+    }
+
+    /**
+     * Checks if the engine has crashed
+     * @param orientation the orientation of the drone
+     * @param position the position of the drone
+     * @return true if and only if the engine goes below ground level
+     */
+    private boolean checkEngineCrash(Vector orientation, Vector position){
+        Vector relEnginePosDrone = this.getEnginePosition();
+        Vector relEnginePosWorld = PhysXEngine.droneOnWorld(relEnginePosDrone, orientation);
+        Vector absPos = position.vectorSum(relEnginePosWorld);
+        return absPos.getyValue() <= 0;
+    }
+
+    /**
+     * Checks if any of the wings have crashed
+     * @param orientation the orientation of the drone
+     * @param position the position of the drone
+     * @return true if and only if the wings have crashed
+     */
+    private boolean checkWingCrash(Vector orientation, Vector position){
+        if(this.getMainLeft().checkCrash(orientation, position))
+            return true;
+        if(this.getMainRight().checkCrash(orientation, position))
+            return true;
+        if(this.getHorizontalStabilizer().checkCrash(orientation, position)) // no need to check the vertical stabilizer, same point
+            return true;
+        return false;
     }
 
 
@@ -880,6 +922,22 @@ public class PhysXEngine {
         this.verticalStabilizer = verticalStabilizer;
     }
 
+    /**
+     * Getter for the chassis of the drone
+     * @return the chassis of the drone
+     */
+    private ChassisPhysX getDroneChassis() {
+        return droneChassis;
+    }
+
+    /**
+     * Setter for the chassis of the drone
+     * @param droneChassis the chassis of the drone
+     */
+    private void setDroneChassis(ChassisPhysX droneChassis) {
+        this.droneChassis = droneChassis;
+    }
+
     public FlightRecorder getFlightRecorder() {
         return flightRecorder;
     }
@@ -906,6 +964,11 @@ public class PhysXEngine {
      * Variable that stores the wing physics of the vertical stabilizer
      */
     private VerticalWingPhysX verticalStabilizer;
+
+    /**
+     * Variable that stores the chassis of the drone
+     */
+    private ChassisPhysX droneChassis;
 
     /**
      * Variable that stores the configuration of the physics engine

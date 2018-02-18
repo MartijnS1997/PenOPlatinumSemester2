@@ -150,6 +150,13 @@ public class Drone implements WorldObject {
 
 	}
 
+	//TODO implement, pass the required arguments to the physXEngine he knows how to handle the request
+	public boolean checkCrash(){
+		Vector orientation = this.getOrientation();
+		Vector position = this.getPosition();
+		return this.getPhysXEngine().checkCrash(orientation, position);
+	}
+
 
 	/*
 	 ############################# Gui configuration methods #############################
