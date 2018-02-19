@@ -1010,6 +1010,7 @@ public class PhysXEngine {
 
     public final static String ALPHA_MODE = "ALPHA_MODE";
     public final static String BETA_MODE = "BETA_MODE";
+    public final static String GAMMA_MODE = "GAMMA_MODE";
 
 
     public PhysXOptimisations createPhysXOptimisations(){

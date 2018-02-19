@@ -31,6 +31,8 @@ public class AutoPilot implements Autopilot {
 			case PhysXEngine.BETA_MODE:
 				this.setFlightController(new BetaFlightController(this));
 				break;
+			case PhysXEngine.GAMMA_MODE:
+				this.setFlightController(new GammaFlightController(this));
 		}
 		// and last, we need to land
 		this.setLandingController(new AutopilotLandingController(this));

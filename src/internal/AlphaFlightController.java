@@ -103,7 +103,7 @@ public class AlphaFlightController extends AutoPilotFlightController {
     @Override
     public AutopilotOutputs getControlActions(AutopilotInputs inputs){
 
-        super.getControlActions(inputs);
+        this.setCurrentInputs(inputs);
 
         ControlOutputs controlOutputs = new ControlOutputs();
         AutopilotInputs currentInputs = this.getCurrentInputs();
@@ -140,7 +140,7 @@ public class AlphaFlightController extends AutoPilotFlightController {
         // Thrust
         this.setThrustOut(controlOutputs, xPosition, yPosition);
 
-        String controlString = "Control action ";
+        //String controlString = "Control action ";
         
         List<Vector> cubesPictuur = APCamera.getCubesInPicture();
         if (cubesPictuur.isEmpty()){
@@ -154,7 +154,7 @@ public class AlphaFlightController extends AutoPilotFlightController {
             // Turn right
             //System.out.println("This is your captain speaking: the red cube is located at our right-hand-side");
             this.startTurnRight(controlOutputs, xPosition, yPosition);
-            controlString += "Turning Right: \n";
+            //controlString += "Turning Right: \n";
         } else if (xPosition >= -threshold && xPosition <= threshold) {
             // Stop turning
             this.stopTurn(controlOutputs, xPosition, yPosition);
@@ -165,32 +165,32 @@ public class AlphaFlightController extends AutoPilotFlightController {
                 // Descend
                 //System.out.println("This is your captain speaking: the red cube is located underneath us");
                 this.startDescend(controlOutputs, xPosition, yPosition);
-                controlString += "Start Descend: \n";
+                //controlString += "Start Descend: \n";
 
             } else if ((yPosition >= -threshold - bias && yPosition <= threshold - bias) && (xPosition >= -threshold && xPosition <= threshold)) {
                 // Stop descending/ascending
                 this.stopAscendDescend(controlOutputs, xPosition, yPosition);
-                controlString += "Stop Ascending: \n";
+                //controlString += "Stop Ascending: \n";
 
             } else if (yPosition > threshold - bias && (xPosition >= -threshold && xPosition <= threshold)) {
                 // Ascend
                 //System.out.println("This is your captain speaking: the red cube is located above us");
                 this.startAscend(controlOutputs, xPosition, yPosition);
-                controlString += "Start Ascending: \n";
+                //controlString += "Start Ascending: \n";
 
             }
         } else if (xPosition < -threshold) {
             // Turn left
             //System.out.println("This is your captain speaking: the red cube is located at our left-hand-side");
             this.startTurnLeft(controlOutputs, xPosition, yPosition);
-            controlString += "Start Turn left: \n";
+            //controlString += "Start Turn left: \n";
         }
 
 
 
-        this.rollControl(controlOutputs);
+        this.rollControl(controlOutputs, this.getCurrentInputs());
 
-        this.angleOfAttackControl(controlOutputs);
+        this.angleOfAttackControl(controlOutputs, this.getPreviousInputs(), this.getCurrentInputs());
         //System.out.println("Controls delivered");
         //System.out.println(controlOutputs);
 
@@ -214,7 +214,7 @@ public class AlphaFlightController extends AutoPilotFlightController {
         return ROLL_THESHOLD;
     }
     @Override
-    protected float getInclinationAOAMargin() {
+    protected float getInclinationAOAErrorMargin() {
         return ERROR_INCLINATION_MARGIN;
     }
 

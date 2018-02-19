@@ -17,9 +17,14 @@ public class BetaFlightController extends AutoPilotFlightController {
         super(autoPilot);
     }
 
+    /**
+     * Generayes the control actions of the autopilot that will be passed to the drone
+     * @param inputs the inputs of the autopilot
+     * @return an autopilot outputs object that contains the instructions for the testbed
+     */
     @Override
     public AutopilotOutputs getControlActions(AutopilotInputs inputs){
-        super.getControlActions(inputs);
+        this.setCurrentInputs(inputs);
         ControlOutputs outputs = new ControlOutputs();
         AutoPilotCamera APCamera = this.getAutopilot().getAPCamera();
         AutopilotInputs currentInputs = this.getCurrentInputs();
@@ -54,8 +59,8 @@ public class BetaFlightController extends AutoPilotFlightController {
 
         //System.out.println("Outputs Horizontal: " + outputs.getHorStabInclination()*RAD2DEGREE + "; Vertical: " + outputs.getVerStabInclination()*RAD2DEGREE );
 
-        rollControl(outputs);
-        angleOfAttackControl(outputs);
+        rollControl(outputs, this.getCurrentInputs());
+        angleOfAttackControl(outputs, this.getPreviousInputs(), this.getCurrentInputs());
 
         return outputs;
     }
@@ -123,7 +128,7 @@ public class BetaFlightController extends AutoPilotFlightController {
         return ROLL_THRESHOLD;
     }
     @Override
-    protected float getInclinationAOAMargin() {
+    protected float getInclinationAOAErrorMargin() {
         return ERROR_INCLINATION_MARGIN;
     }
 

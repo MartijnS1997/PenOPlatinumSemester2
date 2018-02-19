@@ -41,7 +41,7 @@ public class AutopilotTakeoffController extends Controller{
     }
 
     @Override
-    protected float getInclinationAOAMargin() {
+    protected float getInclinationAOAErrorMargin() {
         return 0;
     }
 
