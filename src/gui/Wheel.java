@@ -11,7 +11,7 @@ import math.Matrix3f;
 import math.Vector3f;
 import tests.VectorTest;
 
-public class Wheel implements GraphicsObject{
+public class Wheel implements Polygon{
 
 	private float[] positions;
 	private int[] indices;
@@ -30,7 +30,7 @@ public class Wheel implements GraphicsObject{
 		g = graphics;
 	}
 	
-	public Wheel(Vector3f colour, boolean isGoalCube, int nPolygon) {
+	public Wheel(Vector3f colour, int nPolygon) {
 		setData(colour, nPolygon);
 
 		for (String key: g.windows.keySet()) {
@@ -41,14 +41,14 @@ public class Wheel implements GraphicsObject{
 		}
 	}
 	
-	public Wheel(Vector3f position, Vector3f colour, boolean isGoalCube, int nbOfSides) {
-		this(colour, isGoalCube, nbOfSides);
+	public Wheel(Vector3f position, Vector3f colour, int nbOfSides) {
+		this(colour, nbOfSides);
 		
 		this.position = position;
 	}
 
-	public Wheel(Vector3f relativePosition, Vector3f colour, Cube attachedCube, boolean isGoalCube, int nbOfSides) {
-		this(attachedCube.getPos(), colour, isGoalCube, nbOfSides);
+	public Wheel(Vector3f relativePosition, Vector3f colour, Cube attachedCube, int nbOfSides) {
+		this(attachedCube.getPos(), colour, nbOfSides);
 		
 		this.relativePosition = relativePosition;
 	}

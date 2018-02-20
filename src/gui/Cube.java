@@ -11,7 +11,7 @@ import math.Matrix3f;
 import math.Vector3f;
 import tests.VectorTest;
 
-public class Cube implements GraphicsObject {
+public class Cube implements Polygon {
 	
 	static float[] positions = new float[]{
 			// VO

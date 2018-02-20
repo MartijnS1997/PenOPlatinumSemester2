@@ -204,9 +204,11 @@ public class Window {
         		}
         	}
         	else if(object.getClass() == Drone.class) {
-        		for (GraphicsObject cube: object.getAssociatedGraphicsObjects()) {
-        			program.setUniform("modelMatrix", getModelMatrix(((Drone) object).getOrientation().convertToVector3f(), ((Cube) cube).getRelPos(), cube.getSize()));
-        			cube.render();
+        		for (GraphicsObject polygon: object.getAssociatedGraphicsObjects()) {
+        			System.out.println("testerino");
+        			program.setUniform("modelMatrix", getModelMatrix(((Drone) object).getOrientation().convertToVector3f(), ((Polygon) polygon).getRelPos(), polygon.getSize()));
+        			System.out.println("tototo");
+        			polygon.render();
         		}
         	}
         	else if(object.getClass() == Floor.class) {

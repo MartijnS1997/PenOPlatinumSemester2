@@ -273,6 +273,8 @@ public class TestbedMain implements Runnable{
         // GraphicsObjects needs graphics to be able to initialize cubes
         Cube.setGraphics(this.getGraphics());
         Tile.setGraphics(this.getGraphics());
+		Wheel.setGraphics(this.getGraphics());
+
 
         this.setDroneCam(new Window(200, 200, 0.5f, 0.4f, "bytestream window", new Vector3f(1.0f, 1.0f, 1.0f), false));
 
