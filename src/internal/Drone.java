@@ -55,50 +55,50 @@ public class Drone implements WorldObject {
 		// the cube associated with the drone
 		try {
 			
-			Cube droneCube1 = new Cube(position.convertToVector3f(), new Vector3f(240f, 1f, 1f));
-			droneCube1.setSize(new Vector3f(8f, 0.5f, 2f).scale(scalingFactor));
-			this.setAssociatedGraphicsObjects(droneCube1);
+			Cube wings = new Cube(position.convertToVector3f(), new Vector3f(240f, 1f, 1f), false);
+			wings.setSize(new Vector3f(5f, 0.1f, 1f).scale(scalingFactor));
+			this.setAssociatedGraphicsObjects(wings);
 			
 			Vector3f position2 = new Vector3f(0f, 0f, 1f).scale(scalingFactor);
-			Cube droneCube2 = new Cube(position2, new Vector3f(240f, 1f, 1f), droneCube1);
-			droneCube2.setSize(new Vector3f(1f, 1f, 4f).scale(scalingFactor));
-			this.setAssociatedGraphicsObjects(droneCube2);
+			Cube middleFrame = new Cube(position2, new Vector3f(60f, 1f, 1f), wings, false);
+			middleFrame.setSize(new Vector3f(1f, 1f, 4f).scale(scalingFactor));
+			this.setAssociatedGraphicsObjects(middleFrame);
 			
 			Vector3f position3 = new Vector3f(0f, 0.5f, 5f).scale(scalingFactor);
-			Cube droneCube3 = new Cube(position3, new Vector3f(240f, 1f, 1f), droneCube1);
-			droneCube3.setSize(new Vector3f(0.2f, 1f, 1f).scale(scalingFactor));
-			this.setAssociatedGraphicsObjects(droneCube3);
+			Cube verticalStabilizer = new Cube(position3, new Vector3f(240f, 1f, 1f), wings, false);
+			verticalStabilizer.setSize(new Vector3f(0.2f, 1f, 1f).scale(scalingFactor));
+			this.setAssociatedGraphicsObjects(verticalStabilizer);
 			
 			Vector3f position4 = new Vector3f(0f, 0f, 5f).scale(scalingFactor);
-			Cube droneCube4 = new Cube(position4, new Vector3f(240f, 1f, 1f), droneCube1);
-			droneCube4.setSize(new Vector3f(3f, 0.2f, 1f).scale(scalingFactor));
-			this.setAssociatedGraphicsObjects(droneCube4);
+			Cube horizontalStabilizer = new Cube(position4, new Vector3f(240f, 1f, 1f), wings, false);
+			horizontalStabilizer.setSize(new Vector3f(3f, 0.2f, 1f).scale(scalingFactor));
+			this.setAssociatedGraphicsObjects(horizontalStabilizer);
 			
 			Vector3f position5 = new Vector3f(0f, 0f, 4f).scale(scalingFactor);
-			Cube droneCube5 = new Cube(position5, new Vector3f(240f, 1f, 1f), droneCube1);
-			droneCube5.setSize(new Vector3f(0.7f, 0.5f, 2f).scale(scalingFactor));
-			this.setAssociatedGraphicsObjects(droneCube5);
+			Cube longFrame = new Cube(position5, new Vector3f(240f, 1f, 1f), wings, false);
+			longFrame.setSize(new Vector3f(0.7f, 0.5f, 2f).scale(scalingFactor));
+			this.setAssociatedGraphicsObjects(longFrame);
 			
 			Vector3f position6 = new Vector3f(0f, 0.2f, 0f).scale(scalingFactor);
-			Cube droneCube6 = new Cube(position6, new Vector3f(240f, 1f, 1f), droneCube1);
-			droneCube6.setSize(new Vector3f(1.5f, 1f, 3f).scale(scalingFactor));
-			this.setAssociatedGraphicsObjects(droneCube6);
+			Cube shortFrame = new Cube(position6, new Vector3f(240f, 1f, 1f), wings, false);
+			shortFrame.setSize(new Vector3f(1.5f, 1f, 3f).scale(scalingFactor));
+			this.setAssociatedGraphicsObjects(shortFrame);
 			
 			Vector3f position7 = new Vector3f(0f, 0.7f, 0f).scale(scalingFactor);
-			Cube droneCube7 = new Cube(position7, new Vector3f(240f, 1f, 1f), droneCube1);
-			droneCube7.setSize(new Vector3f(0.7f, 0.5f, 2f).scale(scalingFactor));
-			this.setAssociatedGraphicsObjects(droneCube7);
+			Cube cockpit = new Cube(position7, new Vector3f(240f, 1f, 1f), wings, false);
+			cockpit.setSize(new Vector3f(0.7f, 0.5f, 2f).scale(scalingFactor));
+			this.setAssociatedGraphicsObjects(cockpit);
 			
 			Vector3f position8 = new Vector3f(0f, 0f, -1f).scale(scalingFactor);
-			Cube droneCube8 = new Cube(position8, new Vector3f(240f, 1f, 1f), droneCube1);
-			droneCube8.setSize(new Vector3f(1f, 1f, 2f).scale(scalingFactor));
-			this.setAssociatedGraphicsObjects(droneCube8);
+			Cube front = new Cube(position8, new Vector3f(240f, 1f, 1f), wings, false);
+			front.setSize(new Vector3f(1f, 1f, 2f).scale(scalingFactor));
+			this.setAssociatedGraphicsObjects(front);
 			
 //			Cube droneCube = new Cube(position.convertToVector3f(), new Vector3f(240f, 1f, 1f));
 //			this.setAssociatedCube(droneCube);
 			
 		}catch(NullPointerException e){
-			this.setAssociatedGraphicsObjects(new Cube(position.convertToVector3f(), new Vector3f(240f, 100f, 100f)));
+			this.setAssociatedGraphicsObjects(new Cube(position.convertToVector3f(), new Vector3f(240f, 1f, 1f), false));
 		}
 
 		this.setAutopilotConfig(configuration);
