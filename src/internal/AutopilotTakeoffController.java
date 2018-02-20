@@ -1,8 +1,11 @@
 package internal;
 
+import static java.lang.Math.PI;
+
 import Autopilot.AutopilotConfig;
 import Autopilot.AutopilotInputs;
 import Autopilot.AutopilotOutputs;
+import internal.Controller.ControlOutputs;
 
 /**
  * Created by Martijn on 18/02/2018.
@@ -22,7 +25,47 @@ public class AutopilotTakeoffController extends Controller{
      */
     @Override
     public AutopilotOutputs getControlActions(AutopilotInputs inputs){
-        return null;
+    	
+    	setCurrentInputs(inputs);
+    	
+    	ControlOutputs controlOutputs = new ControlOutputs();
+    	
+    	AutopilotInputs currentInputs = getCurrentInputs();
+    	AutopilotInputs previousInputs = getPreviousInputs();
+    	
+    	float currentHeight = currentInputs.getY();
+    	
+    	Vector velocityApprox = this.getVelocityApprox(previousInputs, currentInputs);
+    	
+    	if (currentHeight < STOP_TAKEOFF_HEIGHT) {
+    		// Still on the ground
+    		
+    		// Set max thrust
+    		controlOutputs.setThrust(this.getAutopilot().getConfig().getMaxThrust());
+    		
+    		if (velocityApprox.getyValue() >= LIFTOFF_THRESHOLD ) {
+    			// Drone is lifting off
+    			
+    			if (currentInputs.getPitch() <= TAKEOFF_PITCH) {
+    				// Start ascending
+    				controlOutputs.setHorStabInclination(-STANDARD_INCLINATION);
+    			}else if(currentInputs.getPitch() >= MAX_PITCH){
+    				// Start descending
+    				controlOutputs.setHorStabInclination(STANDARD_INCLINATION);
+    			}else {
+    				// Stop ascending/descending
+    				controlOutputs.setHorStabInclination(0f);
+    			}
+    			
+    		}
+    		
+    	}else {
+    		// In mid-air
+    		// Turn to flight mode
+    		this.getAutopilot().setAPMode(2);
+    		
+    	}
+        return controlOutputs;
     }
 
     @Override
@@ -49,4 +92,10 @@ public class AutopilotTakeoffController extends Controller{
     protected float getStandardThrust() {
         return 0;
     }
+    
+    private static final float LIFTOFF_THRESHOLD = 1f;
+    private static final float STOP_TAKEOFF_HEIGHT = 10f;
+    private static final float TAKEOFF_PITCH = (float)Math.PI/18f;
+    private static final float MAX_PITCH = (float)Math.PI/4f;
+    private static final float STANDARD_INCLINATION = (float) PI/12;
 }

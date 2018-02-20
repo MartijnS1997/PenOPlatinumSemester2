@@ -628,6 +628,8 @@ public class PhysXEngine {
             Vector momentOnDrone = positionWing.crossProduct(liftOnDrone);
             momentVectorsDrone[index] = momentOnDrone;
         }
+        
+        
 
         return Vector.sumVectorArray(momentVectorsDrone);
     }

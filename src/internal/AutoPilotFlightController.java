@@ -19,8 +19,7 @@ public abstract class AutoPilotFlightController extends Controller{
      */
     public AutoPilotFlightController(AutoPilot autopilot){
         super(autopilot);
-        this.setPreviousInputs(dummyData);
-        this.currentInputs = dummyData;
+        
     }
 
 
@@ -76,15 +75,6 @@ public abstract class AutoPilotFlightController extends Controller{
      */
 
 
-
-    /**
-     * Getter for the current inputs (the autopilot inputs object)
-     * @return the current outputs
-     */
-    public AutopilotInputs getCurrentInputs() {
-        return currentInputs;
-    }
-
     /**
      * get the flight recorder of the drone
      * @return
@@ -101,33 +91,7 @@ public abstract class AutoPilotFlightController extends Controller{
         this.flightRecorder = flightRecorder;
     }
 
-    /**
-     * Setter for the current inputs of the drone, the old currentInputs are automatically
-     * set previous inputs
-     * @param currentInputs the current input for the autopilot
-     */
-    public void setCurrentInputs(AutopilotInputs currentInputs) {
-        //first write to the previous outputs
-        this.setPreviousInputs(this.getCurrentInputs());
-
-        //then write to the new ones.
-        this.currentInputs = currentInputs;
-    }
-
-    /**
-     * Returns the previous Autopilot Inputs
-     */
-    public AutopilotInputs getPreviousInputs() {
-        return previousInputs;
-    }
-
-    /**
-     * Setter for the autopilot inputs
-     * @param previousInputs the pervious inputs
-     */
-    private void setPreviousInputs(AutopilotInputs previousInputs){
-        this.previousInputs = previousInputs;
-    }
+    
 
     /*
     Getters and setters
@@ -154,8 +118,7 @@ public abstract class AutoPilotFlightController extends Controller{
         return yPID;
     }
 
-    private AutopilotInputs currentInputs;
-    private AutopilotInputs previousInputs;
+    
     private FlightRecorder flightRecorder;
     private PIDController xPID = new PIDController(1.f, 0.2f, 0.2f);
     private PIDController yPID = new PIDController(1.f, 0.2f, 0.2f);
@@ -165,50 +128,7 @@ public abstract class AutoPilotFlightController extends Controller{
     private static final float RAD2DEGREE = (float) (180f/ PI);
 
 
-    /**
-     * dummy data used for the initialization of the drone
-     */
-    private  static AutopilotInputs dummyData = new AutopilotInputs() {
-        @Override
-        public byte[] getImage() {
-            return new byte[0];
-        }
-
-        @Override
-        public float getX() {
-            return 0;
-        }
-
-        @Override
-        public float getY() {
-            return 0;
-        }
-
-        @Override
-        public float getZ() {
-            return 0;
-        }
-
-        @Override
-        public float getHeading() {
-            return 0;
-        }
-
-        @Override
-        public float getPitch() {
-            return 0;
-        }
-
-        @Override
-        public float getRoll() {
-            return 0;
-        }
-
-        @Override
-        public float getElapsedTime() {
-            return 0;
-        }
-    };
+    
 
 
 

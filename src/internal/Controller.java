@@ -16,6 +16,8 @@ public abstract class Controller {
 
     public Controller(AutoPilot autopilot){
         this.autopilot = autopilot;
+        this.setPreviousInputs(dummyData);
+        this.currentInputs = dummyData;
     }
 
     /**
@@ -265,7 +267,7 @@ public abstract class Controller {
      * elaboration: see textbook numerical math for derivative methods, the
      * derivative of f(k+1) - f(k-1) / (2*timeStep) has O(h²) correctness
      */
-    private Vector getVelocityApprox(AutopilotInputs prevInputs, AutopilotInputs currentInputs){
+    protected Vector getVelocityApprox(AutopilotInputs prevInputs, AutopilotInputs currentInputs){
         float prevTime = prevInputs.getElapsedTime();
         float currentTime = currentInputs.getElapsedTime();
 
@@ -346,7 +348,45 @@ public abstract class Controller {
     protected void setConfig(AutopilotConfig config){
         this.config = config;
     }
+    
+    /**
+     * Getter for the current inputs (the autopilot inputs object)
+     * @return the current outputs
+     */
+    public AutopilotInputs getCurrentInputs() {
+        return currentInputs;
+    }
+    
+    /**
+     * Setter for the current inputs of the drone, the old currentInputs are automatically
+     * set previous inputs
+     * @param currentInputs the current input for the autopilot
+     */
+    protected void setCurrentInputs(AutopilotInputs currentInputs) {
+        //first write to the previous outputs
+        this.setPreviousInputs(this.getCurrentInputs());
 
+        //then write to the new ones.
+        this.currentInputs = currentInputs;
+    }
+
+    /**
+     * Returns the previous Autopilot Inputs
+     */
+    public AutopilotInputs getPreviousInputs() {
+        return previousInputs;
+    }
+
+    /**
+     * Setter for the autopilot inputs
+     * @param previousInputs the pervious inputs
+     */
+    protected void setPreviousInputs(AutopilotInputs previousInputs){
+        this.previousInputs = previousInputs;
+    }
+
+    private AutopilotInputs currentInputs;
+    private AutopilotInputs previousInputs;
 
     /**
      * Object that stores the autopilot of the drone
@@ -480,4 +520,49 @@ public abstract class Controller {
                     '}';
         }
     }
+    
+    /**
+     * dummy data used for the initialization of the drone
+     */
+    private  static AutopilotInputs dummyData = new AutopilotInputs() {
+        @Override
+        public byte[] getImage() {
+            return new byte[0];
+        }
+
+        @Override
+        public float getX() {
+            return 0;
+        }
+
+        @Override
+        public float getY() {
+            return 0;
+        }
+
+        @Override
+        public float getZ() {
+            return 0;
+        }
+
+        @Override
+        public float getHeading() {
+            return 0;
+        }
+
+        @Override
+        public float getPitch() {
+            return 0;
+        }
+
+        @Override
+        public float getRoll() {
+            return 0;
+        }
+
+        @Override
+        public float getElapsedTime() {
+            return 0;
+        }
+    };
 }
