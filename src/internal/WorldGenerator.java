@@ -134,7 +134,7 @@ public class WorldGenerator {
 	 */
 	public float xPosGen(){
 		Random r = new Random();	
-		float val = (float) r.nextGaussian() * 3;
+		float val = (float) r.nextGaussian() * getStdDevX() + getMeanX();
 		return val;
 	}
 	
@@ -144,7 +144,7 @@ public class WorldGenerator {
 	 */
 	public float yPosGen(){
 		Random r = new Random();	
-		float val = (float) r.nextGaussian() * 1.5f + 5f;
+		float val = (float) r.nextGaussian() * getStdDevY() + getMeanY();
 		return val;
 	}
 	
@@ -154,7 +154,7 @@ public class WorldGenerator {
 	 */
 	public float zPosGen(){
 		Random r = new Random();	
-		float val = (float) r.nextGaussian() * 14 - 55;
+		float val = (float) r.nextGaussian() *  getStdDevZ() + getMeanZ();
 		return val;
 	}
 
@@ -184,30 +184,37 @@ public class WorldGenerator {
 	 */
 	public Vector positionGenerator(){;
 
-		float r =  radiusGen();
-		float a = angleGen();
-
-		float x = (float) Math.cos(a) * r;
-		float y = (float) Math.sin(a) * r;
-		float z = -40f;
+//		float r =  radiusGen();
+//		float a = angleGen();
+//
+//		float x = (float) Math.cos(a) * r;
+//		float y = (float) Math.sin(a) * r;
+//		float z = -40f;
+	
+		float x = xPosGen();
+		float y = yPosGen();
+		float z = zPosGen();
 		
-		if (x > 10){
-			x = 10f;
+
+		if (x > getMaxX()){
+			x = getMaxX();
 		}
-		if (x < -10){
-			x = -10f;
+		if (x < getMinX()){
+			x = getMinX();
 		}
-		if (y > 10){
-			y = 10f;
+		if (y > getMaxY()){
+			y = getMaxY();
 		}
-		if (y < 0){
-			y = 0f;
+		
+		//cube can't go through the ground, so minY has to be >= 0.5m (+1m so they aren't on the ground)
+		if (y < getAdaptedMinY()){
+			y = getAdaptedMinY();
 		}
-		if (z > -10){ 
-			z = -10f;
+		if (z > getMaxZ()){ 
+			z = getMaxZ();
 		}
-		if (z < -100){
-			z = -100f;
+		if (z < getMinZ()){
+			z = getMinZ();
 		}
 		
 		Vector position = new Vector(x,y,z);
@@ -280,6 +287,43 @@ public class WorldGenerator {
 	
 	
 	/**
+	 * Creates all cubes from a given path
+	 * @param path a path contains lists of x,y,z coordinates
+	 * @return world from given path
+	 */
+	public World createWorldFromPath(Path path){
+		int n = path.getX().length;
+		
+		//uncomment the line below for cubes with different colors
+		ArrayList<Vector> allColors = colorGenerator();
+		
+		//uncomment the line below for red cubes only
+//		ArrayList<Vector> allColors = redGenerator();
+
+		//the current objective is visit all
+		World world = new World(World.VISIT_ALL_OBJECTIVE);
+		Random r = new Random();	
+		
+		for (int i = 0; i < n; i++){
+			int range = n-i;
+			int index = r.nextInt(range);
+			
+			Vector pos = new Vector(path.getX()[i],path.getY()[i],path.getZ()[i]);
+			Vector clr = allColors.get(index);
+			allColors.remove(index);
+			
+			Block block = new Block(pos);
+			Cube cube = new Cube(pos.convertToVector3f(), clr.convertToVector3f());
+			cube.setSize(1f);
+			block.setAssocatedCube(cube);
+			
+			world.addWorldObject(block);
+			
+		}
+		return world;
+	}
+	
+	/**
 	 * The initial position of the drone
 	 */
 	private Vector initialPosition = new Vector(0,0,0);
@@ -288,6 +332,88 @@ public class WorldGenerator {
 	 */
 	private int nbOfCubes;
 	
+	/**
+	 * max and min difference in coordinates between two cubes
+	 */
+	private float maxX = 10;
+	private float minX = -10;
+	private float maxY = 10;
+	private float minY = 0;
+	private float maxZ = -10;
+	private float minZ = -100;
 	
+	//cube can't go through the ground, so minY has to be >= 0.5m (+1m so they aren't on the ground)
+	private float adaptedMinY = 1.5f;
+	
+	
+	/**
+	 * getters for max/min X,Y,Z
+	 */
+	public float getMaxX() {
+		return maxX;
+	}
+
+	public float getMinX() {
+		return minX;
+	}
+
+	public float getMaxY() {
+		return maxY;
+	}
+
+	public float getMinY() {
+		return minY;
+	}
+
+	public float getMaxZ() {
+		return maxZ;
+	}
+
+	public float getMinZ() {
+		return minZ;
+	}
+	
+	public float getAdaptedMinY() {
+		return adaptedMinY;
+	}
+	
+	
+	/**
+	 * the means and standard deviations
+	 */
+	private float meanX = 0;
+	private float stdDevX = 3;
+	private float meanY = 5;
+	private float stdDevY = 1.5f;
+	private float meanZ = -55;
+	private float stdDevZ = 13;
+
+	/**
+	 * getters for the means and standard deviations
+	 */	
+	public float getMeanX(){
+		return meanX;
+	}
+
+	public float getMeanY(){
+		return meanY;
+	}
+	
+	public float getMeanZ(){
+		return meanZ;
+	}
+	
+	public float getStdDevX(){
+		return stdDevX;
+	}
+	
+	public float getStdDevY(){
+		return stdDevY;
+	}
+	
+	public float getStdDevZ(){
+		return stdDevZ;
+	}
+
 	
 }
