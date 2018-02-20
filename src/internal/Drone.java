@@ -55,7 +55,7 @@ public class Drone implements WorldObject {
 		// the cube associated with the drone
 		try {
 			
-			Cube droneCube1 = new Cube(position.convertToVector3f(), new Vector3f(240f, 100f, 100f));
+			Cube droneCube1 = new Cube(position.convertToVector3f(), new Vector3f(240f, 1f, 1f));
 			droneCube1.setSize(new Vector3f(8f, 0.5f, 2f).scale(scalingFactor));
 			this.setAssociatedGraphicsObjects(droneCube1);
 			
@@ -456,7 +456,7 @@ public class Drone implements WorldObject {
 	/**
 	 * variable used for the size of the drone.
 	 */
-	private static final float scalingFactor = 1/4f;
+	private static final float scalingFactor = 1f;
 	    
 	/*
 	 * Error Messages:

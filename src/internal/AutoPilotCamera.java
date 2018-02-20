@@ -113,8 +113,11 @@ public class AutoPilotCamera {
                 if (Float.isNaN(H)) {
                     H = 0.0f;
                 }
-                //if it is a white pixel ignore it
-                if( H == 0.0f &&S == 0.0f&&V==1.0f)
+//                //if it is a white pixel ignore it
+//                if( H == 0.0f &&S == 0.0f&&V==1.0f)
+//                    continue;
+              //if it is a light colored pixel ignore it
+                if( V >= 0.5f)
                     continue;
 
                 //generate a coordinates object

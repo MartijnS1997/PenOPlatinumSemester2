@@ -33,18 +33,18 @@ public class DroneBuilder {
     public final static Vector BETA_START_ROTATION = new Vector();
 
 
-    public final static float ENGINE_MASS = 5.0f;
+    public final static float ENGINE_MASS = 400.0f;
     public final static float MAX_THRUST = 250.0f;
-    public final static float MAIN_WING_MASS = 2.5f;
-    public final static float STABILIZER_MASS = 1.25f;
+    public final static float MAIN_WING_MASS = 30f;
+    public final static float STABILIZER_MASS = 40f;
     public final static float MAINWING_START_INCL = (float) PI/12.0f;
     public final static float STABS_START_INCL = 0.0f;
-    public final static float MAX_ANGLE_OF_ATTACK = (float) ( PI/2.0 - 0.001f);
+    public final static float MAX_ANGLE_OF_ATTACK = (float) ( PI/12.0);
     public final static float LIFT_COEFFICIENT = 5.0f;
     public final static float LIFT_COEFFICIENT_STAB =1.0f;
-    public final static Vector LEFTWING_POS = new Vector(-1.0f, 0.0f, 0.0f);
-    public final static Vector RIGHTWING_POS = new Vector(1.0f, 0.0f, 0.0f);
-    public final static Vector STABILIZE_POS = new Vector(0.0f, 0.0f, 2.0f);
+    public final static Vector LEFTWING_POS = new Vector(-2.5f, 0.0f, -0.7f);
+    public final static Vector RIGHTWING_POS = new Vector(2.5f, 0.0f, -0.7f);
+    public final static Vector STABILIZE_POS = new Vector(0.0f, 0.0f, 3.5f);
     public final static Vector STARTPOS = new Vector(0, 20, 0);
     public final static Vector START_VEL = new Vector(0,0,-6.32f);
     public final static Vector START_ORIENTATION = new Vector();

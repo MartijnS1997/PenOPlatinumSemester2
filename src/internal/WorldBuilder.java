@@ -45,7 +45,7 @@ public class WorldBuilder {
             for (int i = 0; i < n*n; i++) {
             	Vector delta = new Vector(nx*(i%n), 0, nz*(i/n));
             	Vector position = delta.vectorSum(floor.getPosition());
-                Vector color = new Vector((float) (60.0+(i%2)*120), 1, 1);
+                Vector color = new Vector((float) (60.0+(i%2)*60), 1, 0.6f);
             	Tile tile = new Tile(position.convertToVector3f(), color.convertToVector3f());
             	tile.setSize(new Vector(nx, 0, nz));
             	floor.setAssociatedGraphicsObject(tile);
