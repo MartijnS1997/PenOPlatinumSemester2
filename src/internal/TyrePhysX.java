@@ -19,24 +19,15 @@ public class TyrePhysX {
     }
 
     /**
-     * Changes the state of the tyre (used for radiusDelta)
-     * @param orientation the orientation of the drone
-     * @param position the position of the drone
-     */
-    public void nextState(Vector orientation, Vector position){
-        this.setPrevRadiusDelta(this.getCurrentRadiusDelta());
-        this.setCurrentRadiusDelta(this.calcRadiusDelta(orientation, position));
-    }
-
-    /**
      * returns the net force exerted by the tyre: the force exerted by the deltaRadius and the brakes in world axis system
      * @param orientation the orientation of the drone
      * @param position the position of the drone (world axis system)
      * @param velocity the velocity of the drone (world axis system)
      * @param brakeForce the force exerted by the brakes
-     * @return the net forces exerted by the tyres in the world axis sytem
+     * @param prevTyreDelta the previous tyre compression
+     * @return the net forces exerted by the tyres in the world axis system
      */
-    public Vector getNetForceTyre(Vector orientation, Vector position, Vector velocity, float brakeForce, float deltaTime){
+    public Vector getNetForceTyre(Vector orientation, Vector rotation, Vector position, Vector velocity, float brakeForce, float deltaTime, float prevTyreDelta){
         float groundDist = this.getTyreDistanceToGround(orientation, position);
         //if the tyre doesn't touch the ground, the exerted force is zero
         if(groundDist >= this.getTyreRadius()){
@@ -45,7 +36,7 @@ public class TyrePhysX {
         //not so easy case:
 
         //first calculate the normal force:
-        Vector verticalForce = this.getNormalForce(deltaTime); //naming for consistency
+        Vector verticalForce = this.getNormalForce(orientation, position, deltaTime, prevTyreDelta); //naming for consistency
 
         //then get the brake force
         Vector brakes = this.getBrakeForce(orientation, velocity, brakeForce);
@@ -53,6 +44,25 @@ public class TyrePhysX {
         // the resulting force on the tyres
         return brakes.vectorSum(verticalForce);
 
+    }
+
+    /**
+     * Calculates the netto moment on the drone
+     * @param orientation the orientation of the drone
+     * @param netForce the net force exerted on the drone
+     * @return the net moment in the drone axis system
+     */
+    public Vector getNetMomentTyre(Vector orientation, Vector position,  Vector netForce){
+        //first calculate the force arm
+        Vector relPosAxleDrone = this.getTyrePosition();
+        float currentTyreRadius = this.getTyreRadius() - this.calcRadiusDelta(orientation, position);
+        Vector relPosTyreBottomDrone = relPosAxleDrone.vectorSum(new Vector(0f, currentTyreRadius, 0f)); //given in the drone axis system
+
+        //all the forces apply to the bottom of the tyre
+        //1. transform the net forces to the drone axis system
+        Vector netForceDrone = PhysXEngine.worldOnDrone(netForce, orientation);
+
+        return netForceDrone.crossProduct(relPosTyreBottomDrone);
     }
 
     /**
@@ -100,8 +110,9 @@ public class TyrePhysX {
      * Calculates the normal force exerted on the tyre, given in the world axis system
      * @return
      */
-    private Vector getNormalForce(float deltaTime){
-        float tyreDelta = this.getCurrentRadiusDelta();
+    protected Vector getNormalForce(Vector orientation, Vector position, float deltaTime, float prevTyreDelta){
+        float tyreDelta = this.calcRadiusDelta(orientation, position);
+
         if(tyreDelta <= 0){
             return new Vector();
         }
@@ -111,7 +122,6 @@ public class TyrePhysX {
 
         //dampSlope force calculation
         float dampSlope = this.getDampSlope();
-        float prevTyreDelta = this.getPrevRadiusDelta();
         float deltaTyreDelta = tyreDelta - prevTyreDelta;
         float deltaDiff = deltaTyreDelta/deltaTime;
         float dampSlopeForce = dampSlope*deltaDiff;
@@ -119,8 +129,21 @@ public class TyrePhysX {
         return new Vector(0f, tyreSlopeForce + dampSlopeForce, 0f);
     }
 
-    public Vector getAbsoluteVelocity(Vector orientation, Vector rotation, Vector velocity){
-        return null;
+
+
+    /**
+     * Calculates the absolute position of the tyre
+     * @param orientation the orientation of the drone
+     * @param position the position of the drone in the world axis system
+     * @return the absolute postion of the tyre
+     */
+    private Vector getAbsolutePosition(Vector orientation, Vector position){
+        //first get the position of the wheel
+        Vector relTyrePosDrone = this.getTyrePosition();
+        //then transform it to the world
+        Vector relTyrePosWorld = PhysXEngine.droneOnWorld(relTyrePosDrone, orientation);
+        //then get the absolute position
+        return relTyrePosWorld.vectorSum(position);
     }
 
     /**
@@ -129,7 +152,7 @@ public class TyrePhysX {
      * @param position the position of the drone
      * @return the radius delta
      */
-    private float calcRadiusDelta(Vector orientation, Vector position){
+    protected float calcRadiusDelta(Vector orientation, Vector position){
         float groundDist = this.getTyreDistanceToGround(orientation, position);
         float tyreRad = this.getTyreRadius();
 
@@ -196,21 +219,6 @@ public class TyrePhysX {
         return maxFricCoeff;
     }
 
-    public float getPrevRadiusDelta() {
-        return prevRadiusDelta;
-    }
-
-    public void setPrevRadiusDelta(float prevRadiusDelta) {
-        this.prevRadiusDelta = prevRadiusDelta;
-    }
-
-    public float getCurrentRadiusDelta() {
-        return currentRadiusDelta;
-    }
-
-    public void setCurrentRadiusDelta(float currentRadiusDelta) {
-        this.currentRadiusDelta = currentRadiusDelta;
-    }
 
     private Vector tyrePosition;
     private float tyreRadius;
@@ -218,8 +226,7 @@ public class TyrePhysX {
     private float dampSlope;
     private float maxBrake;
     private float maxFricCoeff;
-    private float prevRadiusDelta; //D from the assignment
-    private float currentRadiusDelta;
+
 
 
 }
