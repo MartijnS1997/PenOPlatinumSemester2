@@ -3,7 +3,7 @@ package internal;
 import java.io.IOException;
 import java.util.Set;
 
-import gui.Cube;
+import gui.GraphicsObject;
 
 /**
  * 
@@ -39,5 +39,5 @@ public interface WorldObject {
 	 */
 	Vector getPosition();
 
-	Set<Cube> getAssociatedCubes();
+	Set<GraphicsObject> getAssociatedGraphicsObjects();
 }

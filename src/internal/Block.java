@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import gui.Cube;
-import math.Vector3f;
+import gui.GraphicsObject;
 
 public class Block implements WorldObject {
 	
@@ -24,15 +24,15 @@ public class Block implements WorldObject {
 	}
 
 	@Override
-	public Set<Cube> getAssociatedCubes(){
+	public Set<GraphicsObject> getAssociatedGraphicsObjects(){
 		return this.blockCubes;
 	}
 
 	/**
-	 * Sets the associated cube of the block
+	 * Sets the associated graphics object of the block
 	 * @param cube the cube to be associated
 	 */
-	public void setAssocatedCube(Cube cube){
+	public void setAssociatedGraphicsObject(Cube cube){
 		if(!canHaveAsCube(cube))
 			throw new IllegalArgumentException(INVALID_CUBE);
 		this.blockCubes.add(cube);
@@ -72,7 +72,7 @@ public class Block implements WorldObject {
 
 	private Vector position;
 
-	private Set<Cube> blockCubes = new HashSet<>();
+	private Set<GraphicsObject> blockCubes = new HashSet<>();
 
 	/**
 	 * Flag that stores if the block was visited by the drone.

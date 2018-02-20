@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.List;
 
 import gui.Cube;
+import gui.Tile;
 import math.Vector3f;
 /*
 *//**
@@ -33,9 +34,23 @@ public class WorldBuilder {
                 Block block = new Block(position);
                 Cube cube = new Cube(position.convertToVector3f(), color.convertToVector3f());
                 cube.setSize(1f);
-                block.setAssocatedCube(cube);
+                block.setAssociatedGraphicsObject(cube);
                 world.addWorldObject(block);
     		}
+            
+            int n = 25; // n moet oneven zijn
+            float nx = 15;
+            float nz = 15;
+            Floor floor = new Floor(new Vector(-n*nx/2, 0, -n*nz + 50f));
+            for (int i = 0; i < n*n; i++) {
+            	Vector delta = new Vector(nx*(i%n), 0, nz*(i/n));
+            	Vector position = delta.vectorSum(floor.getPosition());
+                Vector color = new Vector((float) (60.0+(i%2)*120), 1, 1);
+            	Tile tile = new Tile(position.convertToVector3f(), color.convertToVector3f());
+            	tile.setSize(new Vector(nx, 0, nz));
+            	floor.setAssociatedGraphicsObject(tile);
+            }
+            world.addWorldObject(floor);
     	}
         
         //world.addWorldObject(block1);

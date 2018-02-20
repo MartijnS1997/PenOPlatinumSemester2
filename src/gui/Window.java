@@ -3,6 +3,7 @@ package gui;
 import internal.Block;
 import internal.CameraImage;
 import internal.Drone;
+import internal.Floor;
 import internal.Pixel;
 import internal.World;
 import internal.WorldObject;
@@ -196,12 +197,23 @@ public class Window {
         program.setUniform("viewMatrix", viewMatrix);
 
         for (WorldObject object: world.getObjectSet()) {
-        	for (Cube cube: object.getAssociatedCubes()) {
-	        	if (object.getClass() == Block.class)
-	        		program.setUniform("modelMatrix", getModelMatrix(cube.getRelPos(), cube.getSize()));
-	        	else 
-	        		program.setUniform("modelMatrix", getModelMatrix(((Drone) object).getOrientation().convertToVector3f(), cube.getRelPos(), cube.getSize()));
-	    		cube.render();
+        	if (object.getClass() == Block.class) {
+        		for (GraphicsObject cube: object.getAssociatedGraphicsObjects()) {
+        			program.setUniform("modelMatrix", getModelMatrix(((Cube) cube).getRelPos(), cube.getSize()));
+        			cube.render();
+        		}
+        	}
+        	else if(object.getClass() == Drone.class) {
+        		for (GraphicsObject cube: object.getAssociatedGraphicsObjects()) {
+        			program.setUniform("modelMatrix", getModelMatrix(((Drone) object).getOrientation().convertToVector3f(), ((Cube) cube).getRelPos(), cube.getSize()));
+        			cube.render();
+        		}
+        	}
+        	else if(object.getClass() == Floor.class) {
+        		for (GraphicsObject tile: object.getAssociatedGraphicsObjects()) {
+        			program.setUniform("modelMatrix", getModelMatrix(tile.getPos(), tile.getSize()));
+        			tile.render();
+        		}
         	}
     	}
 		
@@ -221,8 +233,8 @@ public class Window {
 	     * Releases in use OpenGL resources.
 	     */
 		for (WorldObject object: world.getObjectSet()) {
-			for (Cube cube: object.getAssociatedCubes())
-				cube.delete();
+			for (GraphicsObject graphicsObject: object.getAssociatedGraphicsObjects())
+				graphicsObject.delete();
     	}
 		
 		terminated = true;
