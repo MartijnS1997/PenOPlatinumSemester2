@@ -60,7 +60,7 @@ public class Drone implements WorldObject {
 			this.setAssociatedGraphicsObjects(wings);
 			
 			Vector3f position2 = new Vector3f(0f, 0f, 1f).scale(scalingFactor);
-			Cube middleFrame = new Cube(position2, new Vector3f(60f, 1f, 1f), wings, false);
+			Cube middleFrame = new Cube(position2, new Vector3f(240f, 1f, 1f), wings, false);
 			middleFrame.setSize(new Vector3f(1f, 1f, 4f).scale(scalingFactor));
 			this.setAssociatedGraphicsObjects(middleFrame);
 			
@@ -85,7 +85,7 @@ public class Drone implements WorldObject {
 			this.setAssociatedGraphicsObjects(shortFrame);
 			
 			Vector3f position7 = new Vector3f(0f, 0.7f, 0f).scale(scalingFactor);
-			Cube cockpit = new Cube(position7, new Vector3f(240f, 1f, 1f), wings, false);
+			Cube cockpit = new Cube(position7, new Vector3f(60f, 1f, 1f), wings, false);
 			cockpit.setSize(new Vector3f(0.7f, 0.5f, 2f).scale(scalingFactor));
 			this.setAssociatedGraphicsObjects(cockpit);
 			

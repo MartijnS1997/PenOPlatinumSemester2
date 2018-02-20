@@ -29,6 +29,4 @@ public interface GraphicsObject {
 	public default Vector3f getPos() {
 		return GraphicsObject.position;
 	}
-	
-	public void setColours(Vector3f colour);
 }
