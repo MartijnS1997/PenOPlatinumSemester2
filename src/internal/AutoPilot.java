@@ -36,6 +36,8 @@ public class AutoPilot implements Autopilot {
 		}
 		// and last, we need to land
 		this.setLandingController(new AutopilotLandingController(this));
+		
+		this.setAPMode(1);
 
 	}
 
@@ -109,7 +111,27 @@ public class AutoPilot implements Autopilot {
 	 */
 	//Todo implement the 3 stages of the flight: takeoff, flight and landing
     private AutopilotOutputs getControlOutputs(AutopilotInputs inputs){
+    	
     	AutoPilotFlightController controller = this.getFlightController();
+    	AutopilotTakeoffController takeoffController = this.getTakeoffController();
+    	AutopilotLandingController landingController = this.getLandingController();
+    	
+    	
+    	if (getAPMode() == 1) {
+    		//takeoffController.setCurrentInputs(inputs);
+    		return takeoffController.getControlActions(inputs);
+    	}
+    	else if (getAPMode() == 2){
+    		//controller.setCurrentInputs(inputs);
+    		return controller.getControlActions(inputs);
+    	}
+    	else if (getAPMode() == 3){
+    		//landingController.setCurrentInputs(inputs);
+    		return landingController.getControlActions(inputs);
+    	}
+    		
+    		
+    	
 		//AutoPilotControllerNoAttack flightController = this.attackController;
 		//attackController.setCurrentInputs(inputs);
     	return controller.getControlActions(inputs);
@@ -286,6 +308,14 @@ public class AutoPilot implements Autopilot {
 	public void setConfig(AutopilotConfig config) {
 		this.config = config;
 	}
+	
+	public int getAPMode() {
+		return this.APMode;
+	}
+	
+	protected void setAPMode(int newAPMode) {
+		this.APMode = newAPMode;
+	}
 
 	/**
 	 * Object that stores the autopilot flight flightController
@@ -325,6 +355,14 @@ public class AutoPilot implements Autopilot {
 	 * used for engine validation
 	 */
 	private AutoPilotControllerNoAttack attackController;
+	
+	/**
+	 * store current AutoPilot mode:
+	 * 1 = landing mode
+	 * 2 = flight mode
+	 * 3 = takeoff mode
+	 */
+	private int APMode;
 
 
 
