@@ -12,6 +12,7 @@ import static org.junit.Assert.assertNotEquals;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.concurrent.ExecutionException;
 
 import internal.WingPhysX;
 
@@ -134,7 +135,7 @@ public class autoPilotTests {
 	}
 	
 	@Test
-	public final void autoPilotDroneInstructionTest() throws IOException{
+	public final void autoPilotDroneInstructionTest() throws IOException, ExecutionException, InterruptedException {
 		for (int i = 0; i < 1000; i++) {
 			System.out.println(world.getDrone().getPosition());
 			world.advanceWorldState(TIME_STEP, STEPS_PER_ITERATION);

@@ -10,6 +10,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutionException;
 
 
 /**
@@ -55,7 +56,7 @@ public class TestbedMain implements Runnable{
     public void run() {
         try {
             this.testbedMainLoop();
-        } catch (IOException | InterruptedException e) {
+        } catch (IOException | InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
     }
@@ -84,7 +85,7 @@ public class TestbedMain implements Runnable{
 
     //Todo configure the autopilot in the autopilot main
     //open separate threads for both main loops, where the first one waits for the other one.
-    public void testbedMainLoop() throws IOException, InterruptedException {
+    public void testbedMainLoop() throws IOException, InterruptedException, ExecutionException {
 
         // first initialize the testbed itself
         this.initTestbed();
@@ -188,7 +189,7 @@ public class TestbedMain implements Runnable{
      * @throws InterruptedException
      * @throws IOException
      */
-    public AutopilotInputs testbedCycle(AutopilotOutputs autopilotOutputs) throws InterruptedException, IOException {
+    public AutopilotInputs testbedCycle(AutopilotOutputs autopilotOutputs) throws InterruptedException, IOException, ExecutionException {
         AutopilotInputs autopilotInputs;
         // update time
 

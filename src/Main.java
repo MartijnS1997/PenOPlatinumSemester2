@@ -11,6 +11,7 @@ import math.Vector3f;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 public class Main {
 
@@ -19,7 +20,7 @@ public class Main {
 	 * @param args
 	 * @author Martijn Sauwens
 	 */
-	public static void main(String[] args) throws IOException, InterruptedException {
+	public static void main(String[] args) throws IOException, InterruptedException, ExecutionException {
 
 		// initialize graphics capabilities
 		Graphics graphics = new Graphics();

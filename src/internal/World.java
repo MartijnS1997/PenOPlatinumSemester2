@@ -2,9 +2,16 @@ package internal;
 import internal.Drone;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import java.util.function.BiPredicate;
+
+import static java.util.concurrent.Executors.newFixedThreadPool;
 
 /**
  * Class for creating a World object.
@@ -13,10 +20,19 @@ import java.util.function.BiPredicate;
 public class World {
 	
 	public World(String objective){
+		this(objective, 1);
+
+	}
+
+	public World(String objective, int nbOfDrones){
 		Xsize = 0;	//max groottes initialiseren
 		Ysize = 0;
 		Zsize = 0;
 		this.setObjective(objective);
+
+		this.droneThreads = newFixedThreadPool(nbOfDrones);
+
+
 	}
 	
 	private Set<WorldObject> objects = new HashSet<>();
@@ -140,7 +156,7 @@ public class World {
 	
 
 
-	//Todo evolve the states of the world, for the given time interval, until the stop criteria is met
+	//Todo implement execution pool of threads to serve all the world objects in parallel
 
 	/**
 	 * Advances the world state with a given time interval
@@ -150,7 +166,7 @@ public class World {
 	 * @author Martijn Sauwens
 	 * @throws IOException 
 	 */
-	public void advanceWorldState(float timeInterval, int nbIntervals) throws IllegalArgumentException, IOException{
+	public void advanceWorldState(float timeInterval, int nbIntervals) throws IllegalArgumentException, IOException, ExecutionException, InterruptedException {
 
 		if(!isValidTimeInterval(timeInterval))
 			throw new IllegalArgumentException(INVALID_TIME_INTERVAL);
@@ -173,16 +189,63 @@ public class World {
 					}
 				}
 			}
-			// if the goal was not reached, set the new state
-			for (WorldObject worldObject : worldObjectSet) {
-				worldObject.toNextState(timeInterval);
-				if(worldObject instanceof  Drone && ((Drone) worldObject).checkCrash()){
-					//Todo uncomment if world is ready for handling crashes
-//					this.removeWorldObject(worldObject);
-//					System.out.println("The drone has crashed");
+
+			//advance all the drones:
+			this.advanceAllDrones(droneSet, timeInterval);
+			//now check for a crash
+			for(Drone drone: droneSet){
+				//drone.checkCrash();
+			}
+//			// if the goal was not reached, set the new state
+//			for (WorldObject worldObject : worldObjectSet) {
+//				worldObject.toNextState(timeInterval);
+//				if(worldObject instanceof  Drone && ((Drone) worldObject).checkCrash()){
+//					//Todo uncomment if world is ready for handling crashes
+////					this.removeWorldObject(worldObject);
+////					System.out.println("The drone has crashed");
+//				}
+//			}
+		}
+
+	}
+
+	/**
+	 * Method to advance all the drones in the drone set for exactly one iteration step
+	 * @param droneSet
+	 * @throws InterruptedException
+	 * @throws ExecutionException
+	 */
+	private void advanceAllDrones(Set<Drone> droneSet, float deltaTime) throws InterruptedException, ExecutionException {
+		//first set the time interval for all the drones
+		for(Drone drone: droneSet){
+			drone.setDeltaTime(deltaTime);
+		}
+
+		//get the execution pool
+		ExecutorService droneThreads = this.getDroneThreads();
+		//first invoke all the next states
+		List<Future<Void>> droneFutures = droneThreads.invokeAll(droneSet);
+		//then wait for all the futures to finish
+		boolean allFinished = false;
+		while(!allFinished){
+			droneFutures.get(0).get();
+			//if the first element is finished check up on the rest is they have finished, if not keep going
+			//1. create list to store the finished simulations
+			List<Future<Void>> finishedFutures = new ArrayList<>();
+			for(Future<Void> droneFuture: droneFutures){
+				if(droneFuture.isDone()){
+					finishedFutures.add(droneFuture);
 				}
 			}
+			//then remove all the futures from the list
+			droneFutures.removeAll(finishedFutures);
+			//then check if finished executing all the steps
+			if(droneFutures.size() == 0){
+				allFinished = true;
+			}
 		}
+
+		//we may exit, all the drones have been set to state k+1
 
 	}
 
@@ -224,6 +287,10 @@ public class World {
 				return true;
 		}
 		return false;
+	}
+
+	public ExecutorService getDroneThreads() {
+		return droneThreads;
 	}
 
 	/**
@@ -283,6 +350,11 @@ public class World {
 	private final int Xsize;
 	private final int Ysize;
 	private final int Zsize;
+
+	/**
+	 * An execution pool created for faster simulation of the drones
+	 */
+	private ExecutorService droneThreads;
 
 	/**
 	 * Variable containing the current objective (atm only vist all cubes and reach cube)

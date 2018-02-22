@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.lang.Math;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.Callable;
 
 import Autopilot.AutopilotConfig;
 import Autopilot.AutopilotOutputs;
@@ -20,7 +21,8 @@ import static java.lang.Math.PI;
  * 	note: Orientation = (heading, pitch, roll) (in that order)
  * 	the orientation has always values in the range [-PI, PI]
  */
-public class Drone implements WorldObject {
+public class Drone implements WorldObject, Callable<Void> {
+
 
 	/*
 	########################## Methods used for initialisation ##########################
@@ -107,6 +109,21 @@ public class Drone implements WorldObject {
 	/*
 	########################## Next state methods ##########################
 	 */
+
+	/**
+	 * Executes one iteration of the to next state method (needed for concurrent calculation in the world)
+	 * @return nothing
+	 * @throws Exception may throw AOA exception
+	 *
+	 * Todo: Now every time a next step is calculated we need to call this callable, maybe more efficient if
+	 * we only call once for all steps (but how to check? do some sub iterations that are non critical? eg 5 of the 20)
+	 */
+	@Override
+	public Void call() throws Exception {
+		float deltaTime = this.getDeltaTime();
+		toNextState(deltaTime);
+		return null;
+	}
 
 	/**
 	 * advances the drone for a given time step, it changes the position, velocity, orientation and rotation
@@ -429,6 +446,29 @@ public class Drone implements WorldObject {
 	}
 
 	/**
+	 * Getter for the time step for a next state calculation (needed for callable)
+	 * @return the time needed for an execution
+	 */
+	public float getDeltaTime() {
+		return deltaTime;
+	}
+
+	/**
+	 * Setter for the time interval needed for execution
+	 * @param deltaTime the desired time
+	 */
+	public void setDeltaTime(float deltaTime) {
+		if(!isValidDeltaTime(deltaTime)){
+			throw new IllegalArgumentException(INVALID_TIME);
+		}
+		this.deltaTime = deltaTime;
+	}
+
+	private static boolean isValidDeltaTime(float deltaTime) {
+		return deltaTime > 0.f;
+	}
+
+	/**
 	 * Variable containing the autopilot outputs
 	 */
 	AutopilotOutputs autopilotOutputs;
@@ -479,6 +519,10 @@ public class Drone implements WorldObject {
 	 */
 	private AutopilotConfig autopilotConfig;
 
+	/**
+	 * A variable containing the time step for next state
+	 */
+	private float deltaTime;
 
 	/*
 	 * Constants
@@ -514,6 +558,7 @@ public class Drone implements WorldObject {
 	private final static String ILLEGAL_CONFIG = "The given configuration contains illegal values and or arguments";
 	private final static String INVALID_TIMESTEP = "The provided time needs to be strictly positive";
 	private final static String AUTOPILOT_CONFIG = "the autopilot has already been initialized";
+	public static final String INVALID_TIME = "Invalid Time";
 }
 	/*
 	code graveyard:
