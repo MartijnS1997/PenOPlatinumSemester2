@@ -79,7 +79,7 @@ public class DroneBuilder {
         }
 
         System.out.println("Drone velocity: " + drone.getVelocity());
-        System.out.println("Drone thrust: " + drone.getThrust());
+        //System.out.println("Drone thrust: " + drone.getThrust());
 
         return drone;
     }
@@ -136,17 +136,17 @@ public class DroneBuilder {
 
                     @Override
                     public float getFrontWheelZ() {
-                        return 0;
+                        return -1f;
                     }
 
                     @Override
                     public float getRearWheelZ() {
-                        return 0;
+                        return 1f;
                     }
 
                     @Override
                     public float getRearWheelX() {
-                        return 0;
+                        return 1f;
                     }
 
                     @Override

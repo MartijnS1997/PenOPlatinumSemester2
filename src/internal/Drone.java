@@ -125,9 +125,9 @@ public class Drone implements WorldObject {
 		//engage autopilot
 		AutopilotOutputs autopilotOutputs = this.getAutopilotOutputs();
 
+		DroneState state = this.getDroneState();
 		//calculate the next state of the physics engine
-		PhysicsEngineState nextState = this.getPhysXEngine().getNextStatePhysXEngine(deltaTime, autopilotOutputs, this.getPosition(),
-				this.getVelocity(), this.getOrientation(), this.getRotationVector(), INSIGNIFICANCE);
+		PhysicsEngineState nextState = this.getPhysXEngine().getNextStatePhysXEngine(deltaTime,state, autopilotOutputs, INSIGNIFICANCE);
 
 
 		Vector differencePos = (nextState.getPosition()).vectorDifference(this.getPosition());
@@ -175,6 +175,45 @@ public class Drone implements WorldObject {
 	/*
 	 ############################# Drone configuration methods #############################
 	  */
+
+	public DroneState getDroneState(){
+		return new DroneState() {
+			@Override
+			public Vector getPosition() {
+				return Drone.this.getPosition();
+			}
+
+			@Override
+			public Vector getVelocity() {
+				return Drone.this.getVelocity();
+			}
+
+			@Override
+			public Vector getOrientation() {
+				return Drone.this.getOrientation();
+			}
+
+			@Override
+			public Vector getRotation() {
+				return Drone.this.getRotationVector();
+			}
+
+			@Override
+			public float getPrevFrontTyreDelta() {
+				return Drone.this.getPrevFrontTyreDelta();
+			}
+
+			@Override
+			public float getPrevRearLeftTyreDelta() {
+				return Drone.this.getPrevRearLeftTyreDelta();
+			}
+
+			@Override
+			public float getPrevRearRightTyreDelta() {
+				return Drone.this.getPrevRearRightTyreDelta();
+			}
+		};
+	}
 
 	/**
 	 * Getter for the orientation of the drone
@@ -314,25 +353,6 @@ public class Drone implements WorldObject {
 		return maxThrust > 0;
 	}
 
-	/**
-	 * getter for the thrust of the drone
-	 *
-	 * @author Martijn Sauwens
-	 */
-	public float getThrust() {
-		return thrust;
-	}
-
-	/**
-	 * Gets the thrust vector of the drone in the drone axis
-	 *
-	 * @return a vector containing the thrust of the drone in the drone axis
-	 * @author Martijn Sauwens
-	 */
-	public Vector getThrustVector() {
-		return new Vector(0, 0, -this.getThrust());
-	}
-
 
 	/**
 	 * Getter for the rotation vector
@@ -355,7 +375,6 @@ public class Drone implements WorldObject {
 
 
 	//Todo add comment
-
 
 	public PhysXEngine getPhysXEngine() {
 		return physXEngine;
@@ -385,6 +404,30 @@ public class Drone implements WorldObject {
 		this.getPhysXEngine().setFlightRecorder(flightRecorder);
 	}
 
+	private float getPrevFrontTyreDelta() {
+		return prevFrontTyreDelta;
+	}
+
+	private void setPrevFrontTyreDelta(float prevFrontTyreDelta) {
+		this.prevFrontTyreDelta = prevFrontTyreDelta;
+	}
+
+	private float getPrevRearLeftTyreDelta() {
+		return prevRearLeftTyreDelta;
+	}
+
+	private void setPrevRearLeftTyreDelta(float prevRearLeftTyreDelta) {
+		this.prevRearLeftTyreDelta = prevRearLeftTyreDelta;
+	}
+
+	private float getPrevRearRightTyreDelta() {
+		return prevRearRightTyreDelta;
+	}
+
+	private void setPrevRearRightTyreDelta(float prevRearRightTyreDelta) {
+		this.prevRearRightTyreDelta = prevRearRightTyreDelta;
+	}
+
 	/**
 	 * Variable containing the autopilot outputs
 	 */
@@ -411,9 +454,19 @@ public class Drone implements WorldObject {
 	private Vector rotationVector;
 
 	/**
-	 * A variable containing the current thrust of the drone
+	 * A variable storing the compression of the front tyre
 	 */
-	private float thrust;
+	private float prevFrontTyreDelta;
+
+	/**
+	 * A variable storing the compression of the rear left tyre
+	 */
+	private float prevRearLeftTyreDelta;
+
+	/**
+	 * A variable storing the compression of the rear right tyre
+	 */
+	private float prevRearRightTyreDelta;
 
 
 	/**
@@ -436,27 +489,10 @@ public class Drone implements WorldObject {
 	private static float LIGHTSPEED = 300000000;
 
 	/**
-	 * Constant: the gravity zone constant for Belgium (simulation place)
-	 */
-	private static float GRAVITY = 9.81060f;
-
-
-	/**
 	 * Variable that stores the cubes representing the drone
 	 */
 	private Set<Cube> droneCubes = new HashSet<>();
 
-	/**
-	 * variables used for the configuration of the streams
-	 */
-	private static final int nbRows = 200;
-	private static final int nbColumns = 200;
-	private static final float Angleofview = (float) (4 * Math.PI / 6);
-
-	/**
-	 * variable used for the max allowed error on the position between de drone and the cube
-	 */
-	private final static float maxPosDifference = 1E-6f;
 
 	/**
 	 * variable used for the size of the drone.

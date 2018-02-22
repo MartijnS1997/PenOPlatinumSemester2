@@ -1,6 +1,7 @@
 package internal;
 
 import Autopilot.AutopilotConfig;
+import Autopilot.AutopilotOutputs;
 
 /**
  * Created by Martijn on 20/02/2018.
@@ -11,25 +12,25 @@ public class RearTyrePhysX extends TyrePhysX {
     }
 
     @Override
-    public Vector getNetForceTyre(Vector orientation, Vector rotation, Vector position, Vector velocity, float brakeForce, float deltaTime, float prevTyreDelta) {
-        Vector base =  super.getNetForceTyre(orientation, rotation, position, velocity, brakeForce, deltaTime, prevTyreDelta);
-        Vector lateralForce = this.getLateralForce(orientation, rotation, position, velocity, deltaTime, prevTyreDelta);
+    public Vector getNetForceTyre(DroneState state, float brakeForce, float deltaTime, float prevTyreDelta) {
+        Vector base =  super.getNetForceTyre(state, brakeForce, deltaTime, prevTyreDelta);
+        Vector lateralForce = this.getLateralForce(state, deltaTime, prevTyreDelta);
         return base.vectorSum(lateralForce);
     }
 
     /**
      * Calculates the lateral force exerted on the tyre
-     * @param orientation the orientation of the drone
-     * @param rotation the rotation of the drone
-     * @param velocity the velocity of the drone
+     * @param state the state of the drone at instance of invocation
      * @param deltaTime the time passed
      * @return the lateral force exerted on the tyre
      */
-    public Vector getLateralForce(Vector orientation, Vector rotation, Vector position, Vector velocity, float deltaTime, float prevTyreDelta) {
+    public Vector getLateralForce(DroneState state, float deltaTime, float prevTyreDelta) {
 
+        Vector orientation = state.getOrientation();
+        Vector position = state.getPosition();
         //first get the x component in the drone axis system of the velocity
         //1. get the velocity
-        Vector velocityWorld = this.getAbsoluteVelocity(orientation, rotation, position, velocity);
+        Vector velocityWorld = this.getAbsoluteVelocity(state);
         //2. transform the world coordinates to drone coordinates
         Vector velocityDrone = PhysXEngine.worldOnDrone(velocityWorld, orientation);
         //3. calculate the normal force of the wheel
@@ -68,12 +69,15 @@ public class RearTyrePhysX extends TyrePhysX {
 
     /**
      * Calculates the absolute velocity of the tyre
-     * @param orientation the orientation of the drone
-     * @param rotation the rotation of the drone
-     * @param velocity the velocity of the drone (world axis system)
+     * @param state the state of the drone at moment of invocation of the method
      * @return the absolute velocity of the drone
      */
-    public Vector getAbsoluteVelocity(Vector orientation, Vector rotation, Vector position, Vector velocity){
+    public Vector getAbsoluteVelocity(DroneState state){
+        Vector orientation = state.getOrientation();
+        Vector rotation = state.getRotation();
+        Vector position = state.getPosition();
+        Vector velocity = state.getVelocity();
+
         Vector relPosAxleDrone = this.getTyrePosition();
         float currentTyreRadius = this.getTyreRadius() - this.calcRadiusDelta(orientation, position);
         Vector relPosTyreBottomDrone = relPosAxleDrone.vectorSum(new Vector(0f, currentTyreRadius, 0f));

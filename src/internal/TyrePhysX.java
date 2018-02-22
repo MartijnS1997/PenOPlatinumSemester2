@@ -1,6 +1,6 @@
 package internal;
 
-import static java.lang.Math.sin;
+import static java.lang.Math.*;
 
 /**
  * Created by Martijn on 13/02/2018.
@@ -9,6 +9,15 @@ import static java.lang.Math.sin;
 //TODO: checker for tyre position
 public class TyrePhysX {
 
+    /**
+     * Constructor for a Tyre
+     * @param tyrePosition the position of the tyre relative to the center of mass of the drone
+     * @param tyreRadius the radius of the Tyre
+     * @param tyreSlope the slope used in the upward force (tyre delta dependence)
+     * @param dampSlope the slope used in the upward force (time derivative of the tyre delta)
+     * @param maxBrake the maximum brake force that can be exerted on the tyre
+     * @param maxFricCoeff the maximal friction coëfficient of the tyre used in lateral force compensation
+     */
     public TyrePhysX(Vector tyrePosition, float tyreRadius, float tyreSlope, float dampSlope, float maxBrake, float maxFricCoeff) {
         this.tyrePosition = tyrePosition;
         this.tyreRadius = tyreRadius;
@@ -20,14 +29,17 @@ public class TyrePhysX {
 
     /**
      * returns the net force exerted by the tyre: the force exerted by the deltaRadius and the brakes in world axis system
-     * @param orientation the orientation of the drone
-     * @param position the position of the drone (world axis system)
-     * @param velocity the velocity of the drone (world axis system)
+     * @param state  the state of the drone at the moment of invoking the function
      * @param brakeForce the force exerted by the brakes
      * @param prevTyreDelta the previous tyre compression
+     * @param deltaTime the time that has passed between two simulation steps
      * @return the net forces exerted by the tyres in the world axis system
      */
-    public Vector getNetForceTyre(Vector orientation, Vector rotation, Vector position, Vector velocity, float brakeForce, float deltaTime, float prevTyreDelta){
+    public Vector getNetForceTyre(DroneState  state, float brakeForce, float deltaTime, float prevTyreDelta){
+
+        Vector orientation = state.getOrientation();
+        Vector position = state.getPosition();
+        Vector velocity = state.getVelocity();
         float groundDist = this.getTyreDistanceToGround(orientation, position);
         //if the tyre doesn't touch the ground, the exerted force is zero
         if(groundDist >= this.getTyreRadius()){
@@ -48,11 +60,13 @@ public class TyrePhysX {
 
     /**
      * Calculates the netto moment on the drone
-     * @param orientation the orientation of the drone
+     * @param state the state of the drone at the moment of invoking the method
      * @param netForce the net force exerted on the drone
      * @return the net moment in the drone axis system
      */
-    public Vector getNetMomentTyre(Vector orientation, Vector position,  Vector netForce){
+    public Vector getNetMomentTyre(DroneState state,  Vector netForce){
+        Vector orientation = state.getOrientation();
+        Vector position = state.getPosition();
         //first calculate the force arm
         Vector relPosAxleDrone = this.getTyrePosition();
         float currentTyreRadius = this.getTyreRadius() - this.calcRadiusDelta(orientation, position);
@@ -87,7 +101,7 @@ public class TyrePhysX {
         float xVelSign = velocityDrone.getzValue();
 
         //if we may brake, set the brake force opposite to the sign of the velocity in the drone axis system
-        Vector brakeForceDrone =  new Vector(0,0, - Math.abs(brakeForce)*xVelSign);
+        Vector brakeForceDrone =  new Vector(0,0, - min(abs(brakeForce), this.getMaxBrake())*xVelSign);
 
         //then transform the brake force to the world axis system
         //all the y-components of the brake force need to be set to zero (can be a result of the transformation)
@@ -167,6 +181,7 @@ public class TyrePhysX {
      * @return the distance to the ground
      */
     private float getTyreDistanceToGround(Vector orientation, Vector position){
+
         //calculate the position of the center of the tyre in the world axis system
         Vector tyrePos = this.getTyrePosition();
         //transform to world axis
@@ -175,11 +190,14 @@ public class TyrePhysX {
         Vector worldTyrePos = tyrePos.vectorSum(position);
         //get the height of the center coord of the tyre
         float centerHeight = worldTyrePos.getyValue();
+        //System.out.println("Drone Height: " + position.getyValue());
+        //System.out.println("Axle height: " + centerHeight);
         //get the roll of the plane
         float roll = orientation.getzValue();
 
+        //System.out.println("Distance to ground: " + centerHeight/cos(roll));
         //calculate the distance from the center of the tyre to the ground parallel to the tyre orientation
-        return (float) (centerHeight/sin(roll));
+        return (float) (centerHeight/cos(roll));
     }
 
     /**
@@ -195,36 +213,82 @@ public class TyrePhysX {
         return absPos.getyValue() <= 0;
     }
 
-    public Vector getTyrePosition() {
+    /**
+     * Getter for the tyre position relative to the drone mass center
+     * @return tyre position (drone axis system)
+     */
+    protected Vector getTyrePosition() {
         return tyrePosition;
     }
 
-    public float getTyreRadius() {
+    /**
+     * Getter for the tyre radius
+     * @return the radius of said tyre
+     */
+    protected float getTyreRadius() {
         return tyreRadius;
     }
 
-    public float getTyreSlope() {
+    /**
+     * Getter for the tyre slope of the tyre (relation to the tyre Delta)
+     * @return the tyre slope
+     */
+    protected float getTyreSlope() {
         return tyreSlope;
     }
 
-    public float getDampSlope() {
+    /**
+     * Getter for the damp slope of the tyre (relation to the time derivative of the tyre delta)
+     * @return
+     */
+    protected float getDampSlope() {
         return dampSlope;
     }
 
-    public float getMaxBrake() {
+    /**
+     * Getter for the maximal brake force that can be exerted onto the brakes of the tyre
+     * @return the maximal brake force
+     */
+    protected float getMaxBrake() {
         return maxBrake;
     }
 
-    public float getMaxFricCoeff() {
+    /**
+     * Getter for the maximal friction coefficient used to compensate for lateral drift during taxiing and landing
+     * @return the maximal friction coefficient
+     */
+    protected float getMaxFricCoeff() {
         return maxFricCoeff;
     }
 
-
+    /**
+     * Variable that stores the position of the tyre in the drone axis system
+     */
     private Vector tyrePosition;
+
+    /**
+     * Variable that stores the radius of the tyre
+     */
     private float tyreRadius;
+
+    /**
+     * Variable that stores the tyre slope, used to calculate the normal force, linear with tyre delta
+     */
     private float tyreSlope;
+
+    /**
+     * Variable that stores the damp slope, used to calculate the normal force, linear with time derivative of tyre delta
+     */
     private float dampSlope;
+
+    /**
+     * Variable that stores the maximum brake force for the tyre
+     */
     private float maxBrake;
+
+    /**
+     * Variable that stores the maximal friction coefficient of the tyre for compensating lateral drift
+     */
     private float maxFricCoeff;
 
 
