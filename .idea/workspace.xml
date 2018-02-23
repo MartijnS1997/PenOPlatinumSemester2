@@ -7,15 +7,131 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d323ea48-d204-4a33-8b2f-5ef56461506e" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/internal/AutoPilot.class" afterPath="$PROJECT_DIR$/bin/internal/AutoPilot.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/internal/WorldGenerator.class" afterPath="$PROJECT_DIR$/bin/internal/WorldGenerator.class" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/Autopilot/AutopilotModule.java" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/bin/internal/Array2D.class" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/bin/internal/AutoPilot.class" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/bin/internal/AutoPilotCamera$1.class" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/bin/internal/AutoPilotCamera$Coordinates.class" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/bin/internal/AutoPilotCamera.class" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/bin/internal/AutoPilotControllerNoAttack$ControlOutputs.class" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/bin/internal/AutoPilotControllerNoAttack.class" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/bin/internal/AutoPilotInputs.class" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/bin/internal/Block.class" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/bin/internal/CameraImage.class" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/bin/internal/Drone.class" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/bin/internal/DroneBuilder$1.class" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/bin/internal/DroneBuilder$2.class" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/bin/internal/DroneBuilder.class" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/bin/internal/FlightRecorder.class" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/bin/internal/HSVconverter.class" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/bin/internal/HorizontalWingPhysX.class" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/bin/internal/Matrix.class" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/bin/internal/NoCubeException.class" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/bin/internal/Parser.class" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/bin/internal/PhysXEngine$1.class" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/bin/internal/PhysXEngine$PhysXOptimisations.class" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/bin/internal/PhysXEngine.class" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/bin/internal/PhysicsEngineState.class" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/bin/internal/Pixel.class" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/bin/internal/SquareMatrix.class" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/bin/internal/Vector.class" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/bin/internal/VerticalWingPhysX.class" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/bin/internal/WingPhysX.class" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/bin/internal/World.class" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/bin/internal/WorldBuilder.class" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/bin/internal/WorldGenerator.class" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/bin/internal/WorldObject.class" afterPath="" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/internal/AlphaFlightController.java" afterPath="$PROJECT_DIR$/src/internal/Autopilot/AlphaFlightController.java" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/internal/Array2D.java" afterPath="$PROJECT_DIR$/src/internal/Helper/Array2D.java" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/internal/AutoPilot.java" afterPath="$PROJECT_DIR$/src/internal/Autopilot/AutoPilot.java" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/internal/AutoPilotCamera.java" afterPath="$PROJECT_DIR$/src/internal/Autopilot/AutoPilotCamera.java" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/internal/AutoPilotControllerNoAttack.java" afterPath="$PROJECT_DIR$/src/internal/Autopilot/AutoPilotControllerNoAttack.java" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/internal/AutoPilotFlightController.java" afterPath="$PROJECT_DIR$/src/internal/Autopilot/AutoPilotFlightController.java" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/internal/AutoPilotInputs.java" afterPath="$PROJECT_DIR$/src/internal/Autopilot/AutoPilotInputs.java" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/internal/AutopilotLandingController.java" afterPath="$PROJECT_DIR$/src/internal/Autopilot/AutopilotLandingController.java" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/internal/AutopilotTakeoffController.java" afterPath="$PROJECT_DIR$/src/internal/Autopilot/AutopilotTakeoffController.java" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/internal/BetaFlightController.java" afterPath="$PROJECT_DIR$/src/internal/Autopilot/BetaFlightController.java" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/internal/Block.java" afterPath="$PROJECT_DIR$/src/internal/Testbed/Block.java" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/internal/CameraImage.java" afterPath="$PROJECT_DIR$/src/internal/Helper/CameraImage.java" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/internal/ChassisPhysX.java" afterPath="$PROJECT_DIR$/src/internal/Physics/ChassisPhysX.java" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/internal/Controller.java" afterPath="$PROJECT_DIR$/src/internal/Autopilot/Controller.java" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/internal/Drone.java" afterPath="$PROJECT_DIR$/src/internal/Testbed/Drone.java" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/internal/DroneBuilder.java" afterPath="$PROJECT_DIR$/src/internal/Testbed/DroneBuilder.java" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/internal/DroneState.java" afterPath="$PROJECT_DIR$/src/internal/Testbed/DroneState.java" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/internal/FlightRecorder.java" afterPath="$PROJECT_DIR$/src/internal/Testbed/FlightRecorder.java" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/internal/GammaFlightController.java" afterPath="$PROJECT_DIR$/src/internal/Autopilot/GammaFlightController.java" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/internal/HSVconverter.java" afterPath="$PROJECT_DIR$/src/internal/Helper/HSVconverter.java" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/internal/HorizontalWingPhysX.java" afterPath="$PROJECT_DIR$/src/internal/Physics/HorizontalWingPhysX.java" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/internal/Matrix.java" afterPath="$PROJECT_DIR$/src/internal/Helper/Matrix.java" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/internal/Parser.java" afterPath="$PROJECT_DIR$/src/internal/Helper/Parser.java" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/internal/PhysXEngine.java" afterPath="$PROJECT_DIR$/src/internal/Physics/PhysXEngine.java" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/internal/PhysicsEngineState.java" afterPath="$PROJECT_DIR$/src/internal/Physics/PhysicsEngineState.java" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/internal/Pixel.java" afterPath="$PROJECT_DIR$/src/internal/Helper/Pixel.java" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/internal/RearTyrePhysX.java" afterPath="$PROJECT_DIR$/src/internal/Physics/RearTyrePhysX.java" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/internal/SquareMatrix.java" afterPath="$PROJECT_DIR$/src/internal/Helper/SquareMatrix.java" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/internal/TyrePhysX.java" afterPath="$PROJECT_DIR$/src/internal/Physics/TyrePhysX.java" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/internal/Vector.java" afterPath="$PROJECT_DIR$/src/internal/Helper/Vector.java" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/internal/VerticalWingPhysX.java" afterPath="$PROJECT_DIR$/src/internal/Physics/VerticalWingPhysX.java" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/internal/WingPhysX.java" afterPath="$PROJECT_DIR$/src/internal/Physics/WingPhysX.java" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/internal/World.java" afterPath="$PROJECT_DIR$/src/internal/Testbed/World.java" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/internal/WorldBuilder.java" afterPath="$PROJECT_DIR$/src/internal/Testbed/WorldBuilder.java" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/internal/WorldGenerator.java" afterPath="$PROJECT_DIR$/src/internal/Testbed/WorldGenerator.java" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/internal/WorldObject.java" afterPath="$PROJECT_DIR$/src/internal/Testbed/WorldObject.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/AccuracyMain.class" afterPath="$PROJECT_DIR$/bin/AccuracyMain.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/AutopilotMain.class" afterPath="$PROJECT_DIR$/bin/AutopilotMain.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/DemoMain.class" afterPath="$PROJECT_DIR$/bin/DemoMain.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/Main$MainAutopilotInputs.class" afterPath="$PROJECT_DIR$/bin/Main$MainAutopilotInputs.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/Main.class" afterPath="$PROJECT_DIR$/bin/Main.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/SocketMain$1.class" afterPath="$PROJECT_DIR$/bin/SocketMain$1.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/SocketMain.class" afterPath="$PROJECT_DIR$/bin/SocketMain.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/TestbedMain$MainAutopilotInputs.class" afterPath="$PROJECT_DIR$/bin/TestbedMain$MainAutopilotInputs.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/TestbedMain.class" afterPath="$PROJECT_DIR$/bin/TestbedMain.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/datatypes/CodeGenerator.class" afterPath="$PROJECT_DIR$/bin/datatypes/CodeGenerator.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/datatypes/CompilationUnit.class" afterPath="$PROJECT_DIR$/bin/datatypes/CompilationUnit.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/datatypes/Datatype.class" afterPath="$PROJECT_DIR$/bin/datatypes/Datatype.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/datatypes/Field.class" afterPath="$PROJECT_DIR$/bin/datatypes/Field.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/datatypes/FieldType$1.class" afterPath="$PROJECT_DIR$/bin/datatypes/FieldType$1.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/datatypes/FieldType.class" afterPath="$PROJECT_DIR$/bin/datatypes/FieldType.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/datatypes/Parser.class" afterPath="$PROJECT_DIR$/bin/datatypes/Parser.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/datatypes/ParserException.class" afterPath="$PROJECT_DIR$/bin/datatypes/ParserException.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/datatypes/Util.class" afterPath="$PROJECT_DIR$/bin/datatypes/Util.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/gui/Cube.class" afterPath="$PROJECT_DIR$/bin/gui/Cube.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/gui/Graphics.class" afterPath="$PROJECT_DIR$/bin/gui/Graphics.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/gui/TextWindow.class" afterPath="$PROJECT_DIR$/bin/gui/TextWindow.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/gui/Window.class" afterPath="$PROJECT_DIR$/bin/gui/Window.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/internal/AngleOfAttackException.class" afterPath="$PROJECT_DIR$/bin/internal/AngleOfAttackException.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/internal/Pathfinding$1.class" afterPath="$PROJECT_DIR$/bin/internal/Pathfinding$1.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/internal/Pathfinding$N.class" afterPath="$PROJECT_DIR$/bin/internal/Pathfinding$N.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/internal/Pathfinding.class" afterPath="$PROJECT_DIR$/bin/internal/Pathfinding.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/math/Vector3f.class" afterPath="$PROJECT_DIR$/bin/math/Vector3f.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/tests/Array2Dtests.class" afterPath="$PROJECT_DIR$/bin/tests/Array2Dtests.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/tests/DifferentiationTest$1.class" afterPath="$PROJECT_DIR$/bin/tests/DifferentiationTest$1.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/tests/DifferentiationTest$2.class" afterPath="$PROJECT_DIR$/bin/tests/DifferentiationTest$2.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/tests/DifferentiationTest.class" afterPath="$PROJECT_DIR$/bin/tests/DifferentiationTest.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/tests/ParserTests.class" afterPath="$PROJECT_DIR$/bin/tests/ParserTests.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/tests/SquareMatrixTest.class" afterPath="$PROJECT_DIR$/bin/tests/SquareMatrixTest.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/tests/VectorTest.class" afterPath="$PROJECT_DIR$/bin/tests/VectorTest.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/tests/autoPilotTests.class" afterPath="$PROJECT_DIR$/bin/tests/autoPilotTests.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/tests/hsvConvertTest.class" afterPath="$PROJECT_DIR$/bin/tests/hsvConvertTest.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/AccuracyMain.java" afterPath="$PROJECT_DIR$/src/AccuracyMain.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/AutopilotMain.java" afterPath="$PROJECT_DIR$/src/AutopilotMain.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/DemoMain.java" afterPath="$PROJECT_DIR$/src/DemoMain.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Main.java" afterPath="$PROJECT_DIR$/src/Main.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/SocketMain.java" afterPath="$PROJECT_DIR$/src/SocketMain.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/TestbedMain.java" afterPath="$PROJECT_DIR$/src/TestbedMain.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/internal/AutoPilot.java" afterPath="$PROJECT_DIR$/src/internal/AutoPilot.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/internal/Drone.java" afterPath="$PROJECT_DIR$/src/internal/Drone.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/internal/World.java" afterPath="$PROJECT_DIR$/src/internal/World.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/gui/Cube.java" afterPath="$PROJECT_DIR$/src/gui/Cube.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/gui/Window.java" afterPath="$PROJECT_DIR$/src/gui/Window.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/internal/AngleOfAttackException.java" afterPath="$PROJECT_DIR$/src/internal/AngleOfAttackException.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/internal/Pathfinding.java" afterPath="$PROJECT_DIR$/src/internal/Pathfinding.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/math/Vector3f.java" afterPath="$PROJECT_DIR$/src/math/Vector3f.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/tests/Array2Dtests.java" afterPath="$PROJECT_DIR$/src/tests/Array2Dtests.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/tests/DifferentiationTest.java" afterPath="$PROJECT_DIR$/src/tests/DifferentiationTest.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/tests/ParserTests.java" afterPath="$PROJECT_DIR$/src/tests/ParserTests.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/tests/SquareMatrixTest.java" afterPath="$PROJECT_DIR$/src/tests/SquareMatrixTest.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/tests/VectorTest.java" afterPath="$PROJECT_DIR$/src/tests/VectorTest.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/tests/autoPilotTests.java" afterPath="$PROJECT_DIR$/src/tests/autoPilotTests.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/tests/hsvConvertTest.java" afterPath="$PROJECT_DIR$/src/tests/hsvConvertTest.java" />
     </list>
     <ignored path="$PROJECT_DIR$/bin/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -31,222 +147,101 @@
   <component name="ExecutionTargetManager" SELECTED_TARGET="default_target" />
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="PhysXEngine.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/internal/PhysXEngine.java">
+      <file leaf-file-name="AngleOfAttackException.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/internal/Exceptions/AngleOfAttackException.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="6426">
-              <caret line="1124" column="1" lean-forward="false" selection-start-line="1124" selection-start-column="1" selection-end-line="1124" selection-end-column="1" />
-              <folding>
-                <element signature="e#4347#4348#0" expanded="true" />
-                <element signature="e#4449#4450#0" expanded="true" />
-                <element signature="e#4514#4515#0" expanded="true" />
-                <element signature="e#4616#4617#0" expanded="true" />
-                <element signature="e#4879#4880#0" expanded="true" />
-                <element signature="e#4981#4982#0" expanded="true" />
-                <element signature="e#38370#38371#0" expanded="true" />
-                <element signature="e#38407#38408#0" expanded="true" />
-                <element signature="e#40364#40365#0" expanded="true" />
-                <element signature="e#40404#40405#0" expanded="true" />
-                <element signature="e#41015#41016#0" expanded="true" />
-                <element signature="e#41073#41074#0" expanded="true" />
-                <element signature="e#41261#41262#0" expanded="true" />
-                <element signature="e#41297#41298#0" expanded="true" />
-                <element signature="e#41480#41481#0" expanded="true" />
-                <element signature="e#41512#41513#0" expanded="true" />
-                <element signature="e#41725#41726#0" expanded="true" />
-                <element signature="e#41767#41768#0" expanded="true" />
-                <element signature="e#41958#41959#0" expanded="true" />
-                <element signature="e#41989#41990#0" expanded="true" />
-                <element signature="e#42198#42199#0" expanded="true" />
-                <element signature="e#42238#42239#0" expanded="true" />
-                <element signature="e#42444#42445#0" expanded="true" />
-                <element signature="e#42487#42488#0" expanded="true" />
-                <element signature="e#42985#42986#0" expanded="true" />
-                <element signature="e#43026#43027#0" expanded="true" />
-                <element signature="e#43448#43449#0" expanded="true" />
-                <element signature="e#43483#43484#0" expanded="true" />
-                <element signature="e#43657#43658#0" expanded="true" />
-                <element signature="e#43705#43706#0" expanded="true" />
-                <element signature="e#43754#43755#0" expanded="true" />
-                <element signature="e#43791#43792#0" expanded="true" />
-                <element signature="e#43859#43860#0" expanded="true" />
-                <element signature="e#43911#43912#0" expanded="true" />
-                <element signature="e#46403#46404#0" expanded="true" />
-                <element signature="e#46450#46451#0" expanded="true" />
-                <element signature="e#48207#48208#0" expanded="true" />
-                <element signature="e#48292#48293#0" expanded="true" />
-                <element signature="e#48373#48374#0" expanded="true" />
-                <element signature="e#48461#48462#0" expanded="true" />
-                <element signature="e#48545#48546#0" expanded="true" />
-                <element signature="e#48612#48613#0" expanded="true" />
-                <element signature="e#48693#48694#0" expanded="true" />
-                <element signature="e#48760#48761#0" expanded="true" />
-                <element signature="e#48850#48851#0" expanded="true" />
-                <element signature="e#48906#48907#0" expanded="true" />
-                <element signature="e#48999#49000#0" expanded="true" />
-                <element signature="e#49055#49056#0" expanded="true" />
-                <element signature="e#49149#49150#0" expanded="true" />
-                <element signature="e#49205#49206#0" expanded="true" />
-                <element signature="e#50049#50050#0" expanded="true" />
-                <element signature="e#50126#50127#0" expanded="true" />
-                <element signature="e#50199#50200#0" expanded="true" />
-                <element signature="e#50273#50274#0" expanded="true" />
-                <element signature="e#50349#50350#0" expanded="true" />
-                <element signature="e#50408#50409#0" expanded="true" />
-                <element signature="e#50481#50482#0" expanded="true" />
-                <element signature="e#50540#50541#0" expanded="true" />
-                <element signature="e#50622#50623#0" expanded="true" />
-                <element signature="e#50670#50671#0" expanded="true" />
-                <element signature="e#50755#50756#0" expanded="true" />
-                <element signature="e#50803#50804#0" expanded="true" />
-                <element signature="e#50889#50890#0" expanded="true" />
-                <element signature="e#50937#50938#0" expanded="true" />
-                <element signature="e#52019#52020#0" expanded="true" />
-                <element signature="e#52104#52105#0" expanded="true" />
-                <element signature="e#52185#52186#0" expanded="true" />
-                <element signature="e#52249#52250#0" expanded="true" />
-                <element signature="e#52333#52334#0" expanded="true" />
-                <element signature="e#52400#52401#0" expanded="true" />
-                <element signature="e#52481#52482#0" expanded="true" />
-                <element signature="e#52548#52549#0" expanded="true" />
-                <element signature="e#52638#52639#0" expanded="true" />
-                <element signature="e#52694#52695#0" expanded="true" />
-                <element signature="e#52787#52788#0" expanded="true" />
-                <element signature="e#52843#52844#0" expanded="true" />
-                <element signature="e#52937#52938#0" expanded="true" />
-                <element signature="e#52993#52994#0" expanded="true" />
-                <element signature="e#54012#54013#0" expanded="true" />
-                <element signature="e#54089#54090#0" expanded="true" />
-                <element signature="e#54162#54163#0" expanded="true" />
-                <element signature="e#54218#54219#0" expanded="true" />
-                <element signature="e#54294#54295#0" expanded="true" />
-                <element signature="e#54353#54354#0" expanded="true" />
-                <element signature="e#54426#54427#0" expanded="true" />
-                <element signature="e#54485#54486#0" expanded="true" />
-                <element signature="e#54567#54568#0" expanded="true" />
-                <element signature="e#54615#54616#0" expanded="true" />
-                <element signature="e#54700#54701#0" expanded="true" />
-                <element signature="e#54748#54749#0" expanded="true" />
-                <element signature="e#54834#54835#0" expanded="true" />
-                <element signature="e#54882#54883#0" expanded="true" />
-                <element signature="e#61890#61891#0" expanded="true" />
-                <element signature="e#61930#61931#0" expanded="true" />
-                <element signature="e#62005#62006#0" expanded="true" />
-                <element signature="e#62045#62046#0" expanded="true" />
-                <element signature="e#62121#62122#0" expanded="true" />
-                <element signature="e#62161#62162#0" expanded="true" />
-                <element signature="e#62235#62236#0" expanded="true" />
-                <element signature="e#62275#62276#0" expanded="true" />
-                <element signature="e#62349#62350#0" expanded="true" />
-                <element signature="e#62389#62390#0" expanded="true" />
-                <element signature="e#62460#62461#0" expanded="true" />
-                <element signature="e#62500#62501#0" expanded="true" />
-                <element signature="e#62570#62571#0" expanded="true" />
-                <element signature="e#62610#62611#0" expanded="true" />
-                <element signature="e#62681#62682#0" expanded="true" />
-                <element signature="e#62721#62722#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="AutopilotTakeoffController.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/internal/AutopilotTakeoffController.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-543">
-              <caret line="29" column="8" lean-forward="false" selection-start-line="29" selection-start-column="8" selection-end-line="29" selection-end-column="8" />
+            <state relative-caret-position="136">
+              <caret line="8" column="13" lean-forward="false" selection-start-line="8" selection-start-column="13" selection-end-line="8" selection-end-column="13" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="World.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/internal/World.java">
+      <file leaf-file-name="Matrix.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/internal/Helper/Matrix.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="467">
-              <caret line="196" column="37" lean-forward="false" selection-start-line="196" selection-start-column="37" selection-end-line="196" selection-end-column="37" />
-              <folding>
-                <element signature="e#8160#8161#0" expanded="true" />
-                <element signature="e#8186#8187#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="TestbedMain.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/TestbedMain.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="265">
-              <caret line="61" column="5" lean-forward="false" selection-start-line="61" selection-start-column="5" selection-end-line="61" selection-end-column="5" />
+            <state relative-caret-position="-8">
+              <caret line="7" column="13" lean-forward="false" selection-start-line="7" selection-start-column="13" selection-end-line="7" selection-end-column="13" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="autoPilotTests.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/tests/autoPilotTests.java">
+      <file leaf-file-name="NoCubeException.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/internal/Exceptions/NoCubeException.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="379">
-              <caret line="140" column="48" lean-forward="false" selection-start-line="140" selection-start-column="48" selection-end-line="140" selection-end-column="48" />
+            <state relative-caret-position="85">
+              <caret line="5" column="13" lean-forward="false" selection-start-line="5" selection-start-column="13" selection-end-line="5" selection-end-column="13" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Main.java" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/Main.java">
+      <file leaf-file-name="SimulationEndedException.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/internal/Exceptions/SimulationEndedException.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="610">
-              <caret line="139" column="53" lean-forward="false" selection-start-line="139" selection-start-column="53" selection-end-line="139" selection-end-column="53" />
+            <state relative-caret-position="102">
+              <caret line="6" column="13" lean-forward="false" selection-start-line="6" selection-start-column="13" selection-end-line="6" selection-end-column="13" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="AutoPilot.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/internal/AutoPilot.java">
+      <file leaf-file-name="Path.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/internal/Autopilot/Path.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="374">
-              <caret line="39" column="24" lean-forward="false" selection-start-line="39" selection-start-column="24" selection-end-line="39" selection-end-column="24" />
-              <folding>
-                <element signature="e#9524#9525#0" expanded="true" />
-                <element signature="e#9554#9555#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="WorldBuilder.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/internal/WorldBuilder.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="35">
-              <caret line="41" column="48" lean-forward="false" selection-start-line="41" selection-start-column="48" selection-end-line="41" selection-end-column="48" />
+            <state relative-caret-position="0">
+              <caret line="2" column="13" lean-forward="false" selection-start-line="2" selection-start-column="13" selection-end-line="2" selection-end-column="13" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Drone.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/internal/Drone.java">
+      <file leaf-file-name="Pathfinding.java" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/internal/Autopilot/Pathfinding.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="255">
-              <caret line="122" column="46" lean-forward="false" selection-start-line="122" selection-start-column="46" selection-end-line="122" selection-end-column="46" />
-              <folding>
-                <element signature="class#6839:7562" expanded="false" />
-                <element signature="e#13013#13014#0" expanded="true" />
-                <element signature="e#13036#13037#0" expanded="true" />
-                <element signature="e#13371#13372#0" expanded="true" />
-                <element signature="e#13400#13401#0" expanded="true" />
-              </folding>
+            <state relative-caret-position="204">
+              <caret line="20" column="13" lean-forward="false" selection-start-line="20" selection-start-column="13" selection-end-line="20" selection-end-column="13" />
+              <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="TyrePhysX.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/internal/TyrePhysX.java">
+      <file leaf-file-name="Parser.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/internal/Helper/Parser.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="392">
-              <caret line="289" column="103" lean-forward="false" selection-start-line="289" selection-start-column="103" selection-end-line="289" selection-end-column="103" />
+            <state relative-caret-position="-8">
+              <caret line="16" column="13" lean-forward="false" selection-start-line="16" selection-start-column="13" selection-end-line="16" selection-end-column="13" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Pixel.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/internal/Helper/Pixel.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-8">
+              <caret line="9" column="13" lean-forward="false" selection-start-line="9" selection-start-column="13" selection-end-line="9" selection-end-column="13" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="SquareMatrix.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/internal/Helper/SquareMatrix.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-8">
+              <caret line="6" column="13" lean-forward="false" selection-start-line="6" selection-start-column="13" selection-end-line="6" selection-end-column="13" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Vector.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/internal/Helper/Vector.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="272">
+              <caret line="18" column="13" lean-forward="false" selection-start-line="18" selection-start-column="13" selection-end-line="18" selection-end-column="13" />
               <folding />
             </state>
           </provider>
@@ -264,7 +259,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>throw</find>
       <find>attac</find>
       <find>attack</find>
       <find>rollCont</find>
@@ -294,6 +288,7 @@
       <find>ortho</find>
       <find>sum</find>
       <find>deltaTime</find>
+      <find>throw new ang</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -326,14 +321,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/src/internal/WorldBuilder.java" />
-        <option value="$PROJECT_DIR$/src/internal/AlphaController.java" />
-        <option value="$PROJECT_DIR$/src/AutopilotMain.java" />
-        <option value="$PROJECT_DIR$/src/internal/AutoPilotCamera.java" />
-        <option value="$PROJECT_DIR$/src/AccuracyMain.java" />
-        <option value="$PROJECT_DIR$/src/internal/BetaController.java" />
-        <option value="$PROJECT_DIR$/src/SocketMain.java" />
-        <option value="$PROJECT_DIR$/src/blockDemoHard.txt" />
         <option value="$PROJECT_DIR$/src/internal/TirePhysX.java" />
         <option value="$PROJECT_DIR$/src/internal/rearTyrePhysX.java" />
         <option value="$PROJECT_DIR$/src/Autopilot/AutopilotOutputs.java" />
@@ -355,7 +342,6 @@
         <option value="$PROJECT_DIR$/src/internal/AutoPilotController.java" />
         <option value="$PROJECT_DIR$/src/internal/AutoPilotControllerNoAttack.java" />
         <option value="$PROJECT_DIR$/src/tests/DifferentiationTest.java" />
-        <option value="$PROJECT_DIR$/src/internal/WingPhysX.java" />
         <option value="$PROJECT_DIR$/src/Autopilot/AutopilotTakeoff.java" />
         <option value="$PROJECT_DIR$/src/internal/AutopilotLanding.java" />
         <option value="$PROJECT_DIR$/src/internal/AutopilotTakeoffController.java" />
@@ -373,10 +359,19 @@
         <option value="$PROJECT_DIR$/src/internal/PhysXEngine.java" />
         <option value="$PROJECT_DIR$/src/internal/AutoPilot.java" />
         <option value="$PROJECT_DIR$/src/internal/Drone.java" />
-        <option value="$PROJECT_DIR$/src/internal/World.java" />
         <option value="$PROJECT_DIR$/src/TestbedMain.java" />
         <option value="$PROJECT_DIR$/src/tests/autoPilotTests.java" />
         <option value="$PROJECT_DIR$/src/Main.java" />
+        <option value="$PROJECT_DIR$/src/internal/World.java" />
+        <option value="$PROJECT_DIR$/src/internal/WingPhysX.java" />
+        <option value="$PROJECT_DIR$/src/Autopilot/AutopilotModule.java" />
+        <option value="$PROJECT_DIR$/src/internal/Autopilot/Controller.java" />
+        <option value="$PROJECT_DIR$/src/internal/Testbed/WorldObject.java" />
+        <option value="$PROJECT_DIR$/src/internal/Physics/WingPhysX.java" />
+        <option value="$PROJECT_DIR$/src/internal/Helper/Vector.java" />
+        <option value="$PROJECT_DIR$/src/internal/NoCubeException.java" />
+        <option value="$PROJECT_DIR$/src/internal/Exceptions/SimulationEndedException.java" />
+        <option value="$PROJECT_DIR$/src/internal/Autopilot/Pathfinding.java" />
       </list>
     </option>
   </component>
@@ -420,7 +415,8 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scratches" />
+      <pane id="Scope" />
+      <pane id="PackagesPane" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -513,8 +509,7 @@
           </PATH>
         </subPane>
       </pane>
-      <pane id="PackagesPane" />
-      <pane id="Scope" />
+      <pane id="Scratches" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -853,13 +848,6 @@
       <option name="presentableId" value="Default" />
       <updated>1507557670691</updated>
     </task>
-    <task id="LOCAL-00034" summary="pixel adjustments">
-      <created>1509302095989</created>
-      <option name="number" value="00034" />
-      <option name="presentableId" value="LOCAL-00034" />
-      <option name="project" value="LOCAL" />
-      <updated>1509302095989</updated>
-    </task>
     <task id="LOCAL-00035" summary="pixel adjustments">
       <created>1509352378620</created>
       <option name="number" value="00035" />
@@ -1196,7 +1184,14 @@
       <option name="project" value="LOCAL" />
       <updated>1519328185251</updated>
     </task>
-    <option name="localTasksCounter" value="83" />
+    <task id="LOCAL-00083" summary="drones are now advanced multi-threaded, graphics and controllers not yet (next on the list, graphics need to be revisited together with the graphics team for multiple input)">
+      <created>1519332735301</created>
+      <option name="number" value="00083" />
+      <option name="presentableId" value="LOCAL-00083" />
+      <option name="project" value="LOCAL" />
+      <updated>1519332735301</updated>
+    </task>
+    <option name="localTasksCounter" value="84" />
     <servers />
   </component>
   <component name="TestHistory">
@@ -1250,23 +1245,23 @@
       <window_info id="Palette&#9;" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.30232558" sideWeight="0.50208336" order="1" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32975295" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.28060672" sideWeight="0.49791667" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3250283" sideWeight="0.49791667" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.28060672" sideWeight="0.49791667" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32930845" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.20149253" sideWeight="0.5" order="3" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.20362474" sideWeight="0.5" order="3" side_tool="false" content_ui="combo" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3261105" sideWeight="0.49582464" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.24973147" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.39637598" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="true" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.39637598" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Coverage" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32975295" sideWeight="0.5" order="4" side_tool="true" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="6" side_tool="false" content_ui="combo" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32616082" sideWeight="0.49582464" order="5" side_tool="false" content_ui="tabs" />
     </layout>
     <layout-to-restore>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
@@ -1284,7 +1279,7 @@
       <window_info id="Coverage" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32975295" sideWeight="0.5" order="4" side_tool="true" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32930845" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.25692964" sideWeight="0.5" order="3" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.20362474" sideWeight="0.5" order="3" side_tool="false" content_ui="combo" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="6" side_tool="false" content_ui="combo" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32616082" sideWeight="0.49582464" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.24973147" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
@@ -1309,7 +1304,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="CHECK_NEW_TODO" value="false" />
-    <MESSAGE value="camera upgrade" />
     <MESSAGE value="pixel adjustments" />
     <MESSAGE value="the purge of the drone/ the final solution/ the cleanse/ final destination/ real slim shady" />
     <MESSAGE value="added adaptive delay for real time experience" />
@@ -1334,7 +1328,8 @@
     <MESSAGE value="Prepared the controller for takeoff and landing" />
     <MESSAGE value="tyre physics modded" />
     <MESSAGE value="Tyre physics added and physics engine restructured" />
-    <option name="LAST_COMMIT_MESSAGE" value="Tyre physics added and physics engine restructured" />
+    <MESSAGE value="drones are now advanced multi-threaded, graphics and controllers not yet (next on the list, graphics need to be revisited together with the graphics team for multiple input)" />
+    <option name="LAST_COMMIT_MESSAGE" value="drones are now advanced multi-threaded, graphics and controllers not yet (next on the list, graphics need to be revisited together with the graphics team for multiple input)" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1347,170 +1342,6 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/internal/FlightRecorder.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="119">
-          <caret line="10" column="13" lean-forward="false" selection-start-line="10" selection-start-column="13" selection-end-line="10" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/internal/HorizontalWingPhysX.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="102">
-          <caret line="6" column="13" lean-forward="false" selection-start-line="6" selection-start-column="13" selection-end-line="6" selection-end-column="13" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/internal/HSVconverter.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="85">
-          <caret line="6" column="13" lean-forward="false" selection-start-line="6" selection-start-column="13" selection-end-line="6" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/internal/Matrix.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="119">
-          <caret line="7" column="13" lean-forward="false" selection-start-line="7" selection-start-column="13" selection-end-line="7" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/internal/NoCubeException.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="85">
-          <caret line="5" column="13" lean-forward="false" selection-start-line="5" selection-start-column="13" selection-end-line="5" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/internal/Parser.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="136">
-          <caret line="16" column="13" lean-forward="false" selection-start-line="16" selection-start-column="13" selection-end-line="16" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/internal/Pathfinding.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="204">
-          <caret line="18" column="13" lean-forward="false" selection-start-line="18" selection-start-column="13" selection-end-line="18" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/internal/Pixel.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="187">
-          <caret line="11" column="13" lean-forward="false" selection-start-line="11" selection-start-column="13" selection-end-line="11" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/internal/SimulationEndedException.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="102">
-          <caret line="6" column="13" lean-forward="false" selection-start-line="6" selection-start-column="13" selection-end-line="6" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/internal/SquareMatrix.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="119">
-          <caret line="7" column="13" lean-forward="false" selection-start-line="7" selection-start-column="13" selection-end-line="7" selection-end-column="13" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/internal/VerticalWingPhysX.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="85">
-          <caret line="5" column="13" lean-forward="false" selection-start-line="5" selection-start-column="13" selection-end-line="5" selection-end-column="13" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/internal/WorldGenerator.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="136">
-          <caret line="10" column="13" lean-forward="false" selection-start-line="10" selection-start-column="13" selection-end-line="10" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/internal/WorldObject.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="153">
-          <caret line="12" column="17" lean-forward="false" selection-start-line="12" selection-start-column="17" selection-end-line="12" selection-end-column="17" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Autopilot/AutopilotConfigReader.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="34">
-          <caret line="2" column="13" lean-forward="false" selection-start-line="2" selection-start-column="13" selection-end-line="2" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Autopilot/AutopilotConfig.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="34">
-          <caret line="2" column="17" lean-forward="false" selection-start-line="2" selection-start-column="17" selection-end-line="2" selection-end-column="17" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/tests/DifferentiationTest.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="465">
-          <caret line="121" column="16" lean-forward="false" selection-start-line="121" selection-start-column="16" selection-end-line="121" selection-end-column="25" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Autopilot/AutopilotInputs_v2.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="34">
-          <caret line="2" column="17" lean-forward="false" selection-start-line="2" selection-start-column="17" selection-end-line="2" selection-end-column="17" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Autopilot/AutopilotInputs_v2Reader.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="34">
-          <caret line="2" column="13" lean-forward="false" selection-start-line="2" selection-start-column="13" selection-end-line="2" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Autopilot/AutopilotInputs_v2Writer.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="374">
-          <caret line="22" column="0" lean-forward="false" selection-start-line="22" selection-start-column="0" selection-end-line="22" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://C:/Program Files/Java/jdk1.8.0_144/src.zip!/java/io/DataOutputStream.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="209">
-          <caret line="322" column="0" lean-forward="false" selection-start-line="322" selection-start-column="0" selection-end-line="322" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Autopilot/AutopilotConfigWriter.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="204">
-          <caret line="12" column="0" lean-forward="false" selection-start-line="12" selection-start-column="0" selection-end-line="12" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/autopilot-src-generated/AutopilotInputs.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/autopilot-src-generated/AutopilotInputs_v2Reader.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/autopilot-src-generated/AutopilotOutputs.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
@@ -1549,305 +1380,18 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/Autopilot/AutopilotTakeoff.java" />
-    <entry file="file://$PROJECT_DIR$/src/internal/Controller.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1092">
-          <caret line="59" column="36" lean-forward="false" selection-start-line="59" selection-start-column="36" selection-end-line="59" selection-end-column="36" />
-          <folding>
-            <element signature="imports" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/internal/BetaFlightController.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1239">
-          <caret line="66" column="0" lean-forward="false" selection-start-line="66" selection-start-column="0" selection-end-line="66" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/internal/AutoPilotFlightController.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="441">
-          <caret line="24" column="0" lean-forward="false" selection-start-line="24" selection-start-column="0" selection-end-line="24" selection-end-column="0" />
-          <folding>
-            <element signature="imports" expanded="false" />
-            <element signature="e#4002#4003#0" expanded="false" />
-            <element signature="e#6604#6605#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/internal/GammaFlightController.java">
+    <entry file="file://$PROJECT_DIR$/src/internal/Autopilot/GammaFlightController.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="210">
           <caret line="11" column="0" lean-forward="false" selection-start-line="11" selection-start-column="0" selection-end-line="11" selection-end-column="0" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/internal/Vector.java">
+    <entry file="file://$PROJECT_DIR$/src/Main.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="428">
-          <caret line="331" column="0" lean-forward="true" selection-start-line="331" selection-start-column="0" selection-end-line="331" selection-end-column="0" />
+        <state relative-caret-position="1477">
+          <caret line="139" column="53" lean-forward="false" selection-start-line="139" selection-start-column="53" selection-end-line="139" selection-end-column="53" />
           <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/internal/AutopilotLandingController.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="425">
-          <caret line="27" column="46" lean-forward="false" selection-start-line="27" selection-start-column="46" selection-end-line="27" selection-end-column="46" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/internal/WingPhysX.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1173">
-          <caret line="69" column="0" lean-forward="false" selection-start-line="69" selection-start-column="0" selection-end-line="69" selection-end-column="0" />
-          <folding>
-            <element signature="e#5545#5546#0" expanded="false" />
-            <element signature="e#5586#5587#0" expanded="false" />
-            <element signature="e#7312#7313#0" expanded="false" />
-            <element signature="e#7350#7351#0" expanded="false" />
-            <element signature="e#8411#8412#0" expanded="false" />
-            <element signature="e#8454#8455#0" expanded="false" />
-            <element signature="e#8540#8541#0" expanded="false" />
-            <element signature="e#8567#8568#0" expanded="false" />
-            <element signature="e#8727#8728#0" expanded="false" />
-            <element signature="e#8758#8759#0" expanded="false" />
-            <element signature="e#8882#8883#0" expanded="false" />
-            <element signature="e#8921#8922#0" expanded="false" />
-            <element signature="e#10158#10159#0" expanded="false" />
-            <element signature="e#10211#10212#0" expanded="false" />
-            <element signature="e#10306#10307#0" expanded="false" />
-            <element signature="e#10343#10344#0" expanded="false" />
-            <element signature="e#10511#10512#0" expanded="false" />
-            <element signature="e#10547#10548#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/internal/ChassisPhysX.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1122">
-          <caret line="69" column="45" lean-forward="false" selection-start-line="69" selection-start-column="45" selection-end-line="69" selection-end-column="45" />
-          <folding>
-            <element signature="imports" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/internal/RearTyrePhysX.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="442">
-          <caret line="27" column="0" lean-forward="false" selection-start-line="27" selection-start-column="0" selection-end-line="27" selection-end-column="0" />
-          <folding>
-            <element signature="imports" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/internal/DroneState.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="102">
-          <caret line="6" column="17" lean-forward="false" selection-start-line="6" selection-start-column="17" selection-end-line="6" selection-end-column="17" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/internal/AlphaFlightController.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-3042">
-          <caret line="21" column="0" lean-forward="false" selection-start-line="21" selection-start-column="0" selection-end-line="21" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/internal/DroneBuilder.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1326">
-          <caret line="133" column="32" lean-forward="false" selection-start-line="133" selection-start-column="32" selection-end-line="133" selection-end-column="32" />
-          <folding>
-            <element signature="e#5258#5259#0" expanded="true" />
-            <element signature="e#5314#5315#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/internal/PhysXEngine.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="6426">
-          <caret line="1124" column="1" lean-forward="false" selection-start-line="1124" selection-start-column="1" selection-end-line="1124" selection-end-column="1" />
-          <folding>
-            <element signature="e#4347#4348#0" expanded="true" />
-            <element signature="e#4449#4450#0" expanded="true" />
-            <element signature="e#4514#4515#0" expanded="true" />
-            <element signature="e#4616#4617#0" expanded="true" />
-            <element signature="e#4879#4880#0" expanded="true" />
-            <element signature="e#4981#4982#0" expanded="true" />
-            <element signature="e#38370#38371#0" expanded="true" />
-            <element signature="e#38407#38408#0" expanded="true" />
-            <element signature="e#40364#40365#0" expanded="true" />
-            <element signature="e#40404#40405#0" expanded="true" />
-            <element signature="e#41015#41016#0" expanded="true" />
-            <element signature="e#41073#41074#0" expanded="true" />
-            <element signature="e#41261#41262#0" expanded="true" />
-            <element signature="e#41297#41298#0" expanded="true" />
-            <element signature="e#41480#41481#0" expanded="true" />
-            <element signature="e#41512#41513#0" expanded="true" />
-            <element signature="e#41725#41726#0" expanded="true" />
-            <element signature="e#41767#41768#0" expanded="true" />
-            <element signature="e#41958#41959#0" expanded="true" />
-            <element signature="e#41989#41990#0" expanded="true" />
-            <element signature="e#42198#42199#0" expanded="true" />
-            <element signature="e#42238#42239#0" expanded="true" />
-            <element signature="e#42444#42445#0" expanded="true" />
-            <element signature="e#42487#42488#0" expanded="true" />
-            <element signature="e#42985#42986#0" expanded="true" />
-            <element signature="e#43026#43027#0" expanded="true" />
-            <element signature="e#43448#43449#0" expanded="true" />
-            <element signature="e#43483#43484#0" expanded="true" />
-            <element signature="e#43657#43658#0" expanded="true" />
-            <element signature="e#43705#43706#0" expanded="true" />
-            <element signature="e#43754#43755#0" expanded="true" />
-            <element signature="e#43791#43792#0" expanded="true" />
-            <element signature="e#43859#43860#0" expanded="true" />
-            <element signature="e#43911#43912#0" expanded="true" />
-            <element signature="e#46403#46404#0" expanded="true" />
-            <element signature="e#46450#46451#0" expanded="true" />
-            <element signature="e#48207#48208#0" expanded="true" />
-            <element signature="e#48292#48293#0" expanded="true" />
-            <element signature="e#48373#48374#0" expanded="true" />
-            <element signature="e#48461#48462#0" expanded="true" />
-            <element signature="e#48545#48546#0" expanded="true" />
-            <element signature="e#48612#48613#0" expanded="true" />
-            <element signature="e#48693#48694#0" expanded="true" />
-            <element signature="e#48760#48761#0" expanded="true" />
-            <element signature="e#48850#48851#0" expanded="true" />
-            <element signature="e#48906#48907#0" expanded="true" />
-            <element signature="e#48999#49000#0" expanded="true" />
-            <element signature="e#49055#49056#0" expanded="true" />
-            <element signature="e#49149#49150#0" expanded="true" />
-            <element signature="e#49205#49206#0" expanded="true" />
-            <element signature="e#50049#50050#0" expanded="true" />
-            <element signature="e#50126#50127#0" expanded="true" />
-            <element signature="e#50199#50200#0" expanded="true" />
-            <element signature="e#50273#50274#0" expanded="true" />
-            <element signature="e#50349#50350#0" expanded="true" />
-            <element signature="e#50408#50409#0" expanded="true" />
-            <element signature="e#50481#50482#0" expanded="true" />
-            <element signature="e#50540#50541#0" expanded="true" />
-            <element signature="e#50622#50623#0" expanded="true" />
-            <element signature="e#50670#50671#0" expanded="true" />
-            <element signature="e#50755#50756#0" expanded="true" />
-            <element signature="e#50803#50804#0" expanded="true" />
-            <element signature="e#50889#50890#0" expanded="true" />
-            <element signature="e#50937#50938#0" expanded="true" />
-            <element signature="e#52019#52020#0" expanded="true" />
-            <element signature="e#52104#52105#0" expanded="true" />
-            <element signature="e#52185#52186#0" expanded="true" />
-            <element signature="e#52249#52250#0" expanded="true" />
-            <element signature="e#52333#52334#0" expanded="true" />
-            <element signature="e#52400#52401#0" expanded="true" />
-            <element signature="e#52481#52482#0" expanded="true" />
-            <element signature="e#52548#52549#0" expanded="true" />
-            <element signature="e#52638#52639#0" expanded="true" />
-            <element signature="e#52694#52695#0" expanded="true" />
-            <element signature="e#52787#52788#0" expanded="true" />
-            <element signature="e#52843#52844#0" expanded="true" />
-            <element signature="e#52937#52938#0" expanded="true" />
-            <element signature="e#52993#52994#0" expanded="true" />
-            <element signature="e#54012#54013#0" expanded="true" />
-            <element signature="e#54089#54090#0" expanded="true" />
-            <element signature="e#54162#54163#0" expanded="true" />
-            <element signature="e#54218#54219#0" expanded="true" />
-            <element signature="e#54294#54295#0" expanded="true" />
-            <element signature="e#54353#54354#0" expanded="true" />
-            <element signature="e#54426#54427#0" expanded="true" />
-            <element signature="e#54485#54486#0" expanded="true" />
-            <element signature="e#54567#54568#0" expanded="true" />
-            <element signature="e#54615#54616#0" expanded="true" />
-            <element signature="e#54700#54701#0" expanded="true" />
-            <element signature="e#54748#54749#0" expanded="true" />
-            <element signature="e#54834#54835#0" expanded="true" />
-            <element signature="e#54882#54883#0" expanded="true" />
-            <element signature="e#61890#61891#0" expanded="true" />
-            <element signature="e#61930#61931#0" expanded="true" />
-            <element signature="e#62005#62006#0" expanded="true" />
-            <element signature="e#62045#62046#0" expanded="true" />
-            <element signature="e#62121#62122#0" expanded="true" />
-            <element signature="e#62161#62162#0" expanded="true" />
-            <element signature="e#62235#62236#0" expanded="true" />
-            <element signature="e#62275#62276#0" expanded="true" />
-            <element signature="e#62349#62350#0" expanded="true" />
-            <element signature="e#62389#62390#0" expanded="true" />
-            <element signature="e#62460#62461#0" expanded="true" />
-            <element signature="e#62500#62501#0" expanded="true" />
-            <element signature="e#62570#62571#0" expanded="true" />
-            <element signature="e#62610#62611#0" expanded="true" />
-            <element signature="e#62681#62682#0" expanded="true" />
-            <element signature="e#62721#62722#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/internal/AutopilotTakeoffController.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-543">
-          <caret line="29" column="8" lean-forward="false" selection-start-line="29" selection-start-column="8" selection-end-line="29" selection-end-column="8" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/internal/AutoPilot.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="374">
-          <caret line="39" column="24" lean-forward="false" selection-start-line="39" selection-start-column="24" selection-end-line="39" selection-end-column="24" />
-          <folding>
-            <element signature="e#9524#9525#0" expanded="true" />
-            <element signature="e#9554#9555#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/internal/WorldBuilder.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="35">
-          <caret line="41" column="48" lean-forward="false" selection-start-line="41" selection-start-column="48" selection-end-line="41" selection-end-column="48" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/internal/Drone.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="255">
-          <caret line="122" column="46" lean-forward="false" selection-start-line="122" selection-start-column="46" selection-end-line="122" selection-end-column="46" />
-          <folding>
-            <element signature="class#6839:7562" expanded="false" />
-            <element signature="e#13013#13014#0" expanded="true" />
-            <element signature="e#13036#13037#0" expanded="true" />
-            <element signature="e#13371#13372#0" expanded="true" />
-            <element signature="e#13400#13401#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/internal/TyrePhysX.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="392">
-          <caret line="289" column="103" lean-forward="false" selection-start-line="289" selection-start-column="103" selection-end-line="289" selection-end-column="103" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/internal/World.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="467">
-          <caret line="196" column="37" lean-forward="false" selection-start-line="196" selection-start-column="37" selection-end-line="196" selection-end-column="37" />
-          <folding>
-            <element signature="e#8160#8161#0" expanded="true" />
-            <element signature="e#8186#8187#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1859,18 +1403,340 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/tests/autoPilotTests.java">
+    <entry file="file://$PROJECT_DIR$/src/Autopilot/AutopilotModule.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="379">
-          <caret line="140" column="48" lean-forward="false" selection-start-line="140" selection-start-column="48" selection-end-line="140" selection-end-column="48" />
+        <state relative-caret-position="51">
+          <caret line="3" column="36" lean-forward="false" selection-start-line="3" selection-start-column="36" selection-end-line="3" selection-end-column="36" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/Main.java">
+    <entry file="file://$PROJECT_DIR$/src/tests/autoPilotTests.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="610">
-          <caret line="139" column="53" lean-forward="false" selection-start-line="139" selection-start-column="53" selection-end-line="139" selection-end-column="53" />
+        <state relative-caret-position="299">
+          <caret line="131" column="23" lean-forward="false" selection-start-line="131" selection-start-column="23" selection-end-line="131" selection-end-column="23" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/internal/Autopilot/AlphaFlightController.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-8">
+          <caret line="17" column="13" lean-forward="false" selection-start-line="17" selection-start-column="13" selection-end-line="17" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/internal/Autopilot/AutoPilotInputs.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="119">
+          <caret line="7" column="13" lean-forward="false" selection-start-line="7" selection-start-column="13" selection-end-line="7" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/internal/Autopilot/AutoPilot.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-8">
+          <caret line="17" column="13" lean-forward="false" selection-start-line="17" selection-start-column="13" selection-end-line="17" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/internal/Autopilot/AutoPilotCamera.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-8">
+          <caret line="37" column="13" lean-forward="false" selection-start-line="37" selection-start-column="13" selection-end-line="37" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/internal/Autopilot/AutoPilotControllerNoAttack.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-8">
+          <caret line="15" column="13" lean-forward="false" selection-start-line="15" selection-start-column="13" selection-end-line="15" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/internal/Autopilot/AutoPilotFlightController.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-8">
+          <caret line="11" column="22" lean-forward="false" selection-start-line="11" selection-start-column="22" selection-end-line="11" selection-end-column="22" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/internal/Autopilot/AutopilotLandingController.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-8">
+          <caret line="9" column="13" lean-forward="false" selection-start-line="9" selection-start-column="13" selection-end-line="9" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/internal/Autopilot/AutopilotTakeoffController.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-8">
+          <caret line="12" column="13" lean-forward="false" selection-start-line="12" selection-start-column="13" selection-end-line="12" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/internal/Autopilot/BetaFlightController.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-8">
+          <caret line="15" column="13" lean-forward="false" selection-start-line="15" selection-start-column="13" selection-end-line="15" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/internal/Autopilot/Controller.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="153">
+          <caret line="16" column="22" lean-forward="false" selection-start-line="16" selection-start-column="22" selection-end-line="16" selection-end-column="22" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/internal/Testbed/Block.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-8">
+          <caret line="9" column="13" lean-forward="false" selection-start-line="9" selection-start-column="13" selection-end-line="9" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/internal/Testbed/FlightRecorder.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-8">
+          <caret line="12" column="13" lean-forward="false" selection-start-line="12" selection-start-column="13" selection-end-line="12" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/internal/Testbed/DroneState.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-8">
+          <caret line="8" column="17" lean-forward="false" selection-start-line="8" selection-start-column="17" selection-end-line="8" selection-end-column="17" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/internal/Testbed/DroneBuilder.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-8">
+          <caret line="16" column="13" lean-forward="false" selection-start-line="16" selection-start-column="13" selection-end-line="16" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/internal/Testbed/Drone.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-8">
+          <caret line="26" column="13" lean-forward="false" selection-start-line="26" selection-start-column="13" selection-end-line="26" selection-end-column="13" />
+          <folding>
+            <element signature="class#6971:7694" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/internal/Testbed/World.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-8">
+          <caret line="18" column="13" lean-forward="false" selection-start-line="18" selection-start-column="13" selection-end-line="18" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/internal/Testbed/WorldBuilder.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-8">
+          <caret line="14" column="13" lean-forward="false" selection-start-line="14" selection-start-column="13" selection-end-line="14" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/internal/Testbed/WorldGenerator.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-8">
+          <caret line="12" column="13" lean-forward="false" selection-start-line="12" selection-start-column="13" selection-end-line="12" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/internal/Testbed/WorldObject.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="153">
+          <caret line="13" column="17" lean-forward="false" selection-start-line="13" selection-start-column="17" selection-end-line="13" selection-end-column="17" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/internal/Physics/ChassisPhysX.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-8">
+          <caret line="11" column="13" lean-forward="false" selection-start-line="11" selection-start-column="13" selection-end-line="11" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/internal/Physics/HorizontalWingPhysX.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-8">
+          <caret line="8" column="13" lean-forward="false" selection-start-line="8" selection-start-column="13" selection-end-line="8" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/internal/Physics/PhysicsEngineState.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-8">
+          <caret line="7" column="17" lean-forward="false" selection-start-line="7" selection-start-column="17" selection-end-line="7" selection-end-column="17" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/internal/Physics/PhysXEngine.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-8">
+          <caret line="16" column="13" lean-forward="false" selection-start-line="16" selection-start-column="13" selection-end-line="16" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/internal/Physics/RearTyrePhysX.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-8">
+          <caret line="8" column="13" lean-forward="false" selection-start-line="8" selection-start-column="13" selection-end-line="8" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/internal/Physics/TyrePhysX.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-8">
+          <caret line="12" column="13" lean-forward="false" selection-start-line="12" selection-start-column="13" selection-end-line="12" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/internal/Physics/VerticalWingPhysX.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-8">
+          <caret line="7" column="13" lean-forward="false" selection-start-line="7" selection-start-column="13" selection-end-line="7" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/internal/Physics/WingPhysX.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="153">
+          <caret line="12" column="22" lean-forward="false" selection-start-line="12" selection-start-column="22" selection-end-line="12" selection-end-column="22" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/internal/Helper/Array2D.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="136">
+          <caret line="10" column="13" lean-forward="false" selection-start-line="10" selection-start-column="13" selection-end-line="10" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/internal/Helper/CameraImage.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-8">
+          <caret line="9" column="13" lean-forward="false" selection-start-line="9" selection-start-column="13" selection-end-line="9" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/internal/Helper/HSVconverter.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-8">
+          <caret line="6" column="13" lean-forward="false" selection-start-line="6" selection-start-column="13" selection-end-line="6" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/internal/Helper/Matrix.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-8">
+          <caret line="7" column="13" lean-forward="false" selection-start-line="7" selection-start-column="13" selection-end-line="7" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/internal/Helper/Parser.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-8">
+          <caret line="16" column="13" lean-forward="false" selection-start-line="16" selection-start-column="13" selection-end-line="16" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/internal/Helper/Pixel.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-8">
+          <caret line="9" column="13" lean-forward="false" selection-start-line="9" selection-start-column="13" selection-end-line="9" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/internal/Helper/SquareMatrix.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-8">
+          <caret line="6" column="13" lean-forward="false" selection-start-line="6" selection-start-column="13" selection-end-line="6" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/internal/Helper/Vector.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="272">
+          <caret line="18" column="13" lean-forward="false" selection-start-line="18" selection-start-column="13" selection-end-line="18" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/internal/Exceptions/AngleOfAttackException.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="136">
+          <caret line="8" column="13" lean-forward="false" selection-start-line="8" selection-start-column="13" selection-end-line="8" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/internal/Exceptions/NoCubeException.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="85">
+          <caret line="5" column="13" lean-forward="false" selection-start-line="5" selection-start-column="13" selection-end-line="5" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/internal/Exceptions/SimulationEndedException.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="102">
+          <caret line="6" column="13" lean-forward="false" selection-start-line="6" selection-start-column="13" selection-end-line="6" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/internal/Autopilot/Path.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="2" column="13" lean-forward="false" selection-start-line="2" selection-start-column="13" selection-end-line="2" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/internal/Autopilot/Pathfinding.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="204">
+          <caret line="20" column="13" lean-forward="false" selection-start-line="20" selection-start-column="13" selection-end-line="20" selection-end-column="13" />
           <folding />
         </state>
       </provider>

@@ -1,6 +1,6 @@
-import internal.AngleOfAttackException;
-import internal.AutoPilot;
-import internal.PhysXEngine;
+import internal.Exceptions.AngleOfAttackException;
+import internal.Autopilot.AutoPilot;
+import internal.Physics.PhysXEngine;
 
 import java.util.concurrent.*;
 

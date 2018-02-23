@@ -1,6 +1,11 @@
 import Autopilot.*;
 import gui.*;
-import internal.*;
+import internal.Exceptions.AngleOfAttackException;
+import internal.Exceptions.SimulationEndedException;
+import internal.Testbed.Drone;
+import internal.Testbed.FlightRecorder;
+import internal.Testbed.World;
+import internal.Testbed.WorldBuilder;
 import math.Vector3f;
 
 

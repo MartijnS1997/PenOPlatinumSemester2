@@ -1,6 +1,6 @@
 import Autopilot.*;
-import internal.AutoPilot;
-import internal.FlightRecorder;
+import internal.Autopilot.AutoPilot;
+import internal.Testbed.FlightRecorder;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;

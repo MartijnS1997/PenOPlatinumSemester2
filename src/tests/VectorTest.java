@@ -1,6 +1,6 @@
 package tests;
-import internal.HSVconverter;
-import internal.Vector;
+import internal.Helper.HSVconverter;
+import internal.Helper.Vector;
 import org.junit.Test;
 
 import org.junit.Before;

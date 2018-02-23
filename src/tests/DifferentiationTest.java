@@ -1,10 +1,9 @@
 package tests;
 
 import Autopilot.AutopilotOutputs;
-import internal.Drone;
-import internal.Vector;
-import internal.World;
-import internal.WorldBuilder;
+import internal.Testbed.Drone;
+import internal.Helper.Vector;
+import internal.Testbed.WorldBuilder;
 import org.junit.Before;
 import org.junit.Test;
 

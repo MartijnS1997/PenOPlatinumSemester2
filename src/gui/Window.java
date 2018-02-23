@@ -1,11 +1,9 @@
 package gui;
 
-import internal.Block;
-import internal.CameraImage;
-import internal.Drone;
-import internal.Pixel;
-import internal.World;
-import internal.WorldObject;
+import internal.Testbed.Block;
+import internal.Testbed.Drone;
+import internal.Testbed.World;
+import internal.Testbed.WorldObject;
 import math.Matrix3f;
 import math.Matrix4f;
 import math.Vector3f;
@@ -15,13 +13,9 @@ import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.*;
 import org.lwjgl.system.*;
 
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.nio.*;
-import java.util.List;
 
 import static org.lwjgl.glfw.Callbacks.*;
 import static org.lwjgl.glfw.GLFW.*;

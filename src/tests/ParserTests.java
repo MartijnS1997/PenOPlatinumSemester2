@@ -1,7 +1,7 @@
 package tests;
 import org.junit.Test;
 
-import internal.Parser;
+import internal.Helper.Parser;
 
 import java.io.IOException;
 

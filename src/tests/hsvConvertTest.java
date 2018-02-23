@@ -2,7 +2,7 @@ package tests;
 
 
 
-import internal.HSVconverter;
+import internal.Helper.HSVconverter;
 
 public class hsvConvertTest {
 

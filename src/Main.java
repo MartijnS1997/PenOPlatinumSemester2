@@ -5,7 +5,10 @@ import gui.Graphics;
 import gui.Settings;
 import gui.Time;
 import gui.Window;
-import internal.*;
+import internal.Autopilot.AutoPilot;
+import internal.Exceptions.SimulationEndedException;
+import internal.Physics.PhysXEngine;
+import internal.Testbed.*;
 import math.Vector3f;
 
 import java.io.IOException;

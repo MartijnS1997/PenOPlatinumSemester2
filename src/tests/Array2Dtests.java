@@ -1,6 +1,6 @@
 package tests;
 
-import internal.Array2D;
+import internal.Helper.Array2D;
 import org.junit.Before;
 import org.junit.Test;
 

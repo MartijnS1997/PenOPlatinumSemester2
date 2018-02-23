@@ -1,7 +1,15 @@
 package tests;
 import gui.Window;
 
-import internal.*;
+import internal.Autopilot.AutoPilot;
+import internal.Autopilot.AutoPilotCamera;
+import internal.Autopilot.AutoPilotInputs;
+import internal.Helper.Pixel;
+import internal.Helper.Vector;
+import internal.Physics.PhysXEngine;
+import internal.Testbed.Block;
+import internal.Testbed.Drone;
+import internal.Testbed.World;
 import org.junit.Test;
 
 import Autopilot.AutopilotConfig;
@@ -14,7 +22,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 
-import internal.WingPhysX;
+import internal.Physics.WingPhysX;
 
 import static org.junit.Assert.assertEquals;
 

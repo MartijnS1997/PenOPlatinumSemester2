@@ -1,4 +1,8 @@
-import internal.*;
+import internal.Autopilot.AutoPilot;
+import internal.Exceptions.AngleOfAttackException;
+import internal.Exceptions.SimulationEndedException;
+import internal.Physics.PhysXEngine;
+import internal.Testbed.FlightRecorder;
 
 import java.io.*;
 

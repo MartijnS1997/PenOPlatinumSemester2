@@ -1,7 +1,7 @@
 package gui;
 
-import internal.HSVconverter;
-import internal.Vector;
+import internal.Helper.HSVconverter;
+import internal.Helper.Vector;
 import math.Matrix3f;
 import math.Vector3f;
 
