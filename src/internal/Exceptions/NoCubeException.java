@@ -1,4 +1,4 @@
-package internal;
+package internal.Exceptions;
 
 /**
  * Created by Martijn on 29/11/2017.

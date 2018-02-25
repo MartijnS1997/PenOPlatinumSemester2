@@ -1,5 +1,6 @@
 package internal.Testbed;
 import internal.Exceptions.SimulationEndedException;
+import internal.Helper.Vector;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -8,13 +9,12 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-
-import static java.util.concurrent.Executors.newFixedThreadPool;
 
 /**
  * Class for creating a World object.
- * @author anthonyrathe & ...
+ * @author anthonyrathe & Martijn Sauwens
  */
 public class World {
 	
@@ -29,7 +29,7 @@ public class World {
 		Zsize = 0;
 		this.setObjective(objective);
 
-		this.droneThreads = newFixedThreadPool(nbOfDrones);
+		this.droneThreads = Executors.newFixedThreadPool(nbOfDrones);
 
 
 	}
@@ -171,12 +171,12 @@ public class World {
 			throw new IllegalArgumentException(INVALID_TIME_INTERVAL);
 
 		Set<Block> blockSet = this.getBlockSet();
-		Set<Drone> droneSet = this.getDroneSet();
-		Set<WorldObject> worldObjectSet = this.getObjectSet();
 
 		//System.out.println("nb Intervals: " + nbIntervals);
 
 		for(int index = 0; index != nbIntervals; index++) {
+			//needs to refresh the drone set on each iteration
+			Set<Drone> droneSet = this.getDroneSet();
 
 			// first check if the goal is reached
 			for (Block block : blockSet) {
@@ -191,26 +191,92 @@ public class World {
 
 			//advance all the drones:
 			this.advanceAllDrones(droneSet, timeInterval);
+			//TODO uncomment if ready to handle crashes properly
 			//now check for a crash
-			for(Drone drone: droneSet){
-				//drone.checkCrash();
-			}
-//			// if the goal was not reached, set the new state
-//			for (WorldObject worldObject : worldObjectSet) {
-//				worldObject.toNextState(timeInterval);
-//				if(worldObject instanceof  Drone && ((Drone) worldObject).checkCrash()){
-//					//Todo uncomment if world is ready for handling crashes
-////					this.removeWorldObject(worldObject);
-////					System.out.println("The drone has crashed");
-//				}
-//			}
+			//checkForCrashes(droneSet);
 		}
 
 	}
 
+	private void checkForCrashes(Set<Drone> droneSet){
+		//first check if the drones have crashed with the ground
+		checkForGroundCollisions(droneSet);
+		//then if they have collided with each other
+		checkForDroneCollisions(droneSet);
+
+
+	}
+
+	/**
+	 * Checks if the drones have crashed with the ground if so it removes the drones from the world object set
+	 * and removes it from the provided drone set (need for integrity)
+	 * @param droneSet the set of drones to check
+	 * for definition of crash see the check crash implementation
+	 */
+	private void checkForGroundCollisions(Set<Drone> droneSet) {
+		for(Drone drone: droneSet){
+			//if so, delete the drone from the set
+			if(drone.checkCrash()){
+				this.removeDrone(drone);
+				droneSet.remove(drone);
+			}
+		}
+	}
+
+	/**
+	 * Checks for drones that have collided with each other and removes the collided drones from the world object set
+	 * as well from the provided drone set
+	 * @param droneSet the set of drones that needs to be checked for collisions
+	 */
+	private void checkForDroneCollisions(Set<Drone> droneSet) {
+		//then check if any drone is in a 5m vicinity of another
+		//first cast the set to a list
+		List<Drone> droneList = new ArrayList<>(droneSet);
+		//create a list to store the crashed indices
+		Set<Integer> crashedDroneIndices = new HashSet<>();
+		//get the size of the list
+		int listSize = droneList.size();
+
+		//Outer loop, check every drone once
+		for(int i = 0; i != listSize; i++){
+			//inner loop, only the following drones need to be checked, all the previous have already passed the outer loop
+			for(int j = i + 1; j  < listSize; j++){
+				//first get the positions of the drone
+				Vector pos1 = droneList.get(i).getPosition();
+				Vector pos2 = droneList.get(j).getPosition();
+
+				//then get the distance between the two drones
+				float distance = pos1.distanceBetween(pos2);
+				if(distance <= CRASH_DISTANCE){
+					crashedDroneIndices.add(i);
+					crashedDroneIndices.add(j);
+				}
+			}
+		}
+
+		//all the drones that have collided with eachother need to be removed
+		for(Integer droneIndex: crashedDroneIndices){
+			//first get the drone
+			Drone currDrone = droneList.get(droneIndex);
+			//then remove it from the world
+			this.removeDrone(currDrone);
+			//remove it from the drone set (for consistency and performance improvement)
+			droneSet.remove(currDrone);
+		}
+	}
+
+	/**
+	 * Remove a given drone from the world object set
+	 * @param drone the drone to be removed from the world
+	 */
+	private void removeDrone(Drone drone){
+		this.getObjectSet().remove(drone);
+	}
+
 	/**
 	 * Method to advance all the drones in the drone set for exactly one iteration step
-	 * @param droneSet
+	 * @param droneSet the set of drones to be advanced
+	 * @param deltaTime the time for the next state step
 	 * @throws InterruptedException
 	 * @throws ExecutionException
 	 */
@@ -382,6 +448,11 @@ public class World {
 	 */
 	public final static String REACH_CUBE_OBJECTIVE = "reach cube";
 	public final static String VISIT_ALL_OBJECTIVE = "visit all the cubes";
+
+	/**
+	 * Constants
+	 */
+	public final static float CRASH_DISTANCE = 5.0f;
 
 
 

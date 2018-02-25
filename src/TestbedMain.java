@@ -16,8 +16,10 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutionException;
-
-
+//TODO implement in such a way that the testbed can support multiple drones (and thus multiple autopilots)
+//TODO also be able to handle crashes and correctly close the autopilots that are connected via the testbed (close the socket?)
+//note: can we split the rendering stage in two separate operations? rendering the camera image for the autopilot
+//and while the AP is processing, rendering the other on screen images
 /**
  * Created by Martijn on 13/11/2017.
  * supervised by Bart
