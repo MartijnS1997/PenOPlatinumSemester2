@@ -5,13 +5,14 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.concurrent.Callable;
 
 /**
  * Created (and fully implemented) by Martijn on 23/02/2018.
  * a class of threads for a testbed server
  * each thread is responsible for the communication with an autopilot from the autopilot module
  */
-public class TestbedConnection implements Runnable{
+public class TestbedConnection implements Callable<Void> {
 
 
     /**
@@ -20,7 +21,7 @@ public class TestbedConnection implements Runnable{
      * @param drone the drone the thread is responsible for instructing
      * @param testBedServer the server associated with the threads
      */
-    public TestbedConnection(Socket socket, Drone drone, TestBedServer testBedServer) throws IOException {
+    TestbedConnection(Socket socket, Drone drone, TestBedServer testBedServer) throws IOException {
         this.drone = drone;
         this.socket = socket;
         this.testBedServer = testBedServer;
@@ -35,7 +36,7 @@ public class TestbedConnection implements Runnable{
      * invocation at other moments may result in incorrect functioning
      */
     @Override
-    public void run() {
+    public Void call() {
         //first check if the autopilot is already configured
         if(!this.isConfiguredAutopilot()){
             //if not configure it
@@ -51,6 +52,8 @@ public class TestbedConnection implements Runnable{
         //write the acquired information to the drone
         this.writeInputsToDrone(droneInputs);
         //then we are finished and ready for the next cycle
+
+        return null;
     }
 
     /**
@@ -115,7 +118,7 @@ public class TestbedConnection implements Runnable{
     /**
      * Called to terminate the thread, closes all sockets and streams properly
      */
-    private void terminateThread(){
+    void terminateConnection(){
         try {
             this.getOutputStream().close();
             this.getInputStream().close();

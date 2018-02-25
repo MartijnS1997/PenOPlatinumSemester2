@@ -11,6 +11,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 /**
  * Class for creating a World object.
@@ -165,7 +166,7 @@ public class World {
 	 * @author Martijn Sauwens
 	 * @throws IOException 
 	 */
-	public void advanceWorldState(float timeInterval, int nbIntervals) throws IllegalArgumentException, IOException, ExecutionException, InterruptedException {
+	public void advanceWorldState(float timeInterval, int nbIntervals) throws IllegalArgumentException, IOException, InterruptedException {
 
 		if(!isValidTimeInterval(timeInterval))
 			throw new IllegalArgumentException(INVALID_TIME_INTERVAL);
@@ -280,7 +281,7 @@ public class World {
 	 * @throws InterruptedException
 	 * @throws ExecutionException
 	 */
-	private void advanceAllDrones(Set<Drone> droneSet, float deltaTime) throws InterruptedException, ExecutionException {
+	private void advanceAllDrones(Set<Drone> droneSet, float deltaTime) throws InterruptedException {
 		//first set the time interval for all the drones
 		for(Drone drone: droneSet){
 			drone.setDeltaTime(deltaTime);
@@ -294,27 +295,35 @@ public class World {
 		boolean allFinished = false;
 		//keeps looping until all drones are advanced to the next state
 		while(!allFinished){
-			droneFutures.get(0).get();
-			//if the first element is finished check up on the rest is they have finished, if not keep going
-			//1. create list to store the finished simulations
-			List<Future<Void>> finishedFutures = new ArrayList<>();
-			for(Future<Void> droneFuture: droneFutures){
-				if(droneFuture.isDone()){
-					finishedFutures.add(droneFuture);
-				}
-			}
-			//then remove all the futures from the list
-			droneFutures.removeAll(finishedFutures);
-			//then check if finished executing all the steps
+			droneFutures.get(0);
+			//filter out all the elements that are finished
+			droneFutures = droneFutures.stream()
+						   .filter(future -> !future.isDone())
+						   .collect(Collectors.toList());
+			//check if drone futures is empty ot not
 			if(droneFutures.size() == 0){
 				allFinished = true;
 			}
 		}
-
 		//we may exit, all the drones have been set to state k+1
-
 	}
 
+//
+//			droneFutures.get(0).get();
+//			//if the first element is finished check up on the rest is they have finished, if not keep going
+//			//1. create list to store the finished simulations
+//			List<Future<Void>> finishedFutures = new ArrayList<>();
+//			for(Future<Void> droneFuture: droneFutures){
+//				if(droneFuture.isDone()){
+//					finishedFutures.add(droneFuture);
+//				}
+//			}
+//			//then remove all the futures from the list
+//			droneFutures.removeAll(finishedFutures);
+//			//then check if finished executing all the steps
+//			if(droneFutures.size() == 0){
+//				allFinished = true;
+//			}
 
 	/**
 	 * Checks if the current objective is completed

@@ -2,6 +2,8 @@ import gui.Cube;
 import gui.Graphics;
 import gui.Settings;
 import gui.Window;
+import internal.Exceptions.AngleOfAttackException;
+import internal.Exceptions.SimulationEndedException;
 import internal.Testbed.Drone;
 import internal.Testbed.World;
 import math.Vector3f;
@@ -10,9 +12,12 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 /**
  * Created by Martijn on 23/02/2018.
@@ -35,8 +40,9 @@ import java.util.concurrent.Executors;
 public class TestBedServer implements Runnable {
 
 
-    public TestBedServer(float timeStep, int maxNbConnections, int maxNbThreads) {
+    public TestBedServer(float timeStep, int stepsPerCycle, int maxNbConnections, int maxNbThreads) {
         this.timeStep = timeStep;
+        this.stepsPerCycle = stepsPerCycle;
         this.maxNbOfConnections = maxNbConnections;
         this.maxNbOfThreads = maxNbThreads;
     }
@@ -52,15 +58,109 @@ public class TestBedServer implements Runnable {
         //first initialize the testbed server
         this.initTestbedServer();
         //then start simulating the server
+        this.serverMainLoop();
+    }
 
+    /**
+     * The main loop of the server
+     */
+    private void serverMainLoop(){
+        boolean simulationActive = true;
+        while(simulationActive){
+            try{
+                //simulate the next step
+                this.simulateStep();
+            }catch(java.io.EOFException | SimulationEndedException e) {
+                //the connection at the other side has closed or the simulation has ended
+                //terminate the testbed
+                this.terminateServer();
+                simulationActive = false;
+
+            }catch(AngleOfAttackException angleOffAttackException){
+                //angle of attack exception occurred
+                this.terminateServer();
+                throw angleOffAttackException;
+
+            }catch(IOException | InterruptedException e){
+                //no clue what happened
+                e.printStackTrace();
+            }
+
+        }
     }
 
     /*
     Methods for the simulation cycle
      */
     //Todo implement the simulation cycle
-    private void simulateStep(){
+    private void simulateStep() throws IOException, InterruptedException {
 
+        //first open up the connection and communicate the state to the autopilot
+        //wait for a response
+        autopilotCommunication();
+
+        //now that all the communication is done, we can simulate the next step
+        //(all the drones have received their commands for the next step)
+        advanceWorld();
+
+        //once the world is advanced, we are finished here
+    }
+
+    /**
+     * Sends the current state to all the connections which in turn send the state to the connected autopilots
+     * Post: the commands needed to simulate the next step are in place for each drone (the autopilotOutputs)
+     * @throws InterruptedException i have no idea why (something with interrupted threads, but we dit not put timers in place)
+     */
+    private void autopilotCommunication() throws InterruptedException {
+        //first send all the connections to the thread pool
+        ExecutorService threadPool = this.getThreadPool();
+        Set<TestbedConnection> connections = this.getServerTestbedConnections();
+        //invoke all the connections to get a response from their connected autopilots
+        List<Future<Void>> busyConnectionList = threadPool.invokeAll(connections);
+
+        //now we wait for all the connections to finish
+        boolean allConnectionsFinished = false;
+        while(!allConnectionsFinished){
+            //wait for the first element to finish
+            busyConnectionList.get(0);
+            //then filter for futures that are not yet complete (keep em)
+            busyConnectionList = busyConnectionList.stream()
+                    .filter(connection -> !connection.isDone())
+                    .collect(Collectors.toList());
+            //if all the elements are finished then all the communication is done
+            if(busyConnectionList.size() == 0){
+                allConnectionsFinished = true;
+            }
+        }
+        // if all communication is done, return
+    }
+
+    /**
+     * Advances the world state n times for a given time step t
+     */
+    private void advanceWorld() throws InterruptedException, IOException {
+        World world = this.getWorld();
+        float timeStep = this.getTimeStep();
+        int stepsPerCycles = this.getStepsPerCycle();
+        //advance the state of the world for n steps of time delta t
+        world.advanceWorldState(timeStep, stepsPerCycles);
+        //increment the time that was simulated
+        this.incrementElapsedTime();
+    }
+
+    /**
+     * Called for proper termination of the server (closing all sockets and streams etc)
+     */
+    private void terminateServer(){
+        for(TestbedConnection connection: this.getServerTestbedConnections()){
+            connection.terminateConnection();
+        }
+        try {
+            this.getServerSocket().close();
+        } catch (IOException e) {
+            //doesn't matter if we're closing down
+            e.printStackTrace();
+        }
     }
 
     /*
@@ -206,7 +306,7 @@ public class TestBedServer implements Runnable {
      * elapsed time += getTimeStep()
      */
     private void incrementElapsedTime(){
-        this.elapsedTime += this.getTimeStep();
+        this.elapsedTime += this.getTimeStep()*this.getStepsPerCycle();
     }
 
     /**
@@ -215,6 +315,14 @@ public class TestBedServer implements Runnable {
      */
     private float getTimeStep() {
         return timeStep;
+    }
+
+    /**
+     * Getter for the number of steps that are taken each simulation cycle (no communication with the autopilot in between)
+     * @return the nb op steps per simulation cycle
+     */
+    private int getStepsPerCycle() {
+        return stepsPerCycle;
     }
 
     /*
@@ -235,6 +343,11 @@ public class TestBedServer implements Runnable {
      * Variable that stores the in simulation time between the simulation steps
      */
     private float timeStep;
+
+    /**
+     * Variable that stores the number of steps that are simulated within as single execution cycle
+     */
+    private int stepsPerCycle;
 
    /*
    Server related getters and setters #################################
