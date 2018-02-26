@@ -4,16 +4,16 @@ import gui.Settings;
 import gui.Window;
 import internal.Exceptions.AngleOfAttackException;
 import internal.Exceptions.SimulationEndedException;
+import internal.Helper.Vector;
 import internal.Testbed.Drone;
 import internal.Testbed.World;
+import internal.Testbed.WorldBuilder_v2;
 import math.Vector3f;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -218,7 +218,12 @@ public class TestBedServer implements Runnable {
     // Todo implement the world initializer, first cleanup the world and drone builder
     // note: the amount of created drones is equal to the number of connections we can make
     private void initWorld(){
-
+        Map<Vector, Float> droneSates = new HashMap<>();
+        droneSates.put(new Vector(0,20,0), 0f); // a drone facing forward
+        droneSates.put(new Vector(0, 30f, 20f), (float) Math.PI); // a drone facing backward
+        WorldBuilder_v2 builder = new WorldBuilder_v2();
+        World world = builder.createWorld(null, this.getThreadPool());
+        this.setWorld(world);
     }
 
     /**
@@ -289,8 +294,16 @@ public class TestBedServer implements Runnable {
      * the drones and cubes
      * @return the world that is simulated
      */
-    public World getWorld() {
+    private World getWorld() {
         return world;
+    }
+
+    /**
+     * Setter for the world that is simuated by the server, contains all the drones and cubes
+     * @param world the world to simulate
+     */
+    private void setWorld(World world) {
+        this.world = world;
     }
 
     /**
@@ -597,6 +610,8 @@ public class TestBedServer implements Runnable {
     private static final String INVALID_SERVER_SOCKET = "Invalid server socket, provided socket is null reference or the server socket is already initialized";
     private static final String INVALID_THREAD_POOL = "Invalid thread pool, thread pool is already initialized or the provided pool is a null reference";
     private static final String INVALID_GRAPHICS = "Invalid graphics, graphics engine is already initialized or the provided engine is a null reference";
+
+
 }
 
 

@@ -232,6 +232,16 @@ public class PhysXEngine {
         return false;
     }
 
+    /**
+     * Checks if the chassis of the drone touches the ground at any point
+     * @param orientation the orientation of the drone
+     * @param position the position of the drone
+     * @return true if and only if one tyre touches the ground
+     */
+    public boolean chassisTouchesGround(Vector orientation, Vector position){
+        return this.getDroneChassis().touchesGround(orientation, position);
+    }
+
 
     /*
     Transformations
@@ -953,7 +963,7 @@ public class PhysXEngine {
      * Getter for the chassis of the drone
      * @return the chassis of the drone
      */
-    private ChassisPhysX getDroneChassis() {
+    public ChassisPhysX getDroneChassis() {
         return droneChassis;
     }
 

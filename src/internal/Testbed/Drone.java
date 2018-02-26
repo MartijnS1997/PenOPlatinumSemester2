@@ -32,16 +32,49 @@ public class Drone implements WorldObject, Callable<Void> {
 	 */
 
 	/**
+	 * Simple constructor for generating drones that do not touch the ground (tyre delta's are initialized at zero)
+	 * @param position the position of the drone in the simulation world
+	 * @param velocity the velocity of the drone in the simulation world
+	 * @param orientation the orientation of the drone in the simulation world
+	 * @param rotationVector the rotation of the drone
+	 * @param config the configuration for the physical properties of the drone
+	 */
+	public Drone(Vector position, Vector velocity, Vector orientation, Vector rotationVector, AutopilotConfig config){
+		this(position, velocity, orientation, rotationVector, 0f, 0f, 0f, config);
+		//check if the drone is actually flying
+		if(this.getPhysXEngine().chassisTouchesGround(orientation, position)){
+			//Todo uncomment if the simulator is ready for ground
+			//throw new IllegalStateException("Drone touches ground, cannot initialize");
+		}
+	}
+
+	/**
+	 * More compact constructor used for building drones in the drone builder class
+	 * @param state the state of the drone at the start of the simulation
+	 * @param config the configuration of the drone
+	 */
+	public Drone(DroneState state, AutopilotConfig config){
+
+		this(state.getPosition(), state.getVelocity(), state.getOrientation(), state.getRotation()
+				, state.getPrevFrontTyreDelta(), state.getPrevRearLeftTyreDelta(), state.getPrevRearRightTyreDelta(), config);
+
+	}
+
+	/**
 	 * Constructor for a drone class object
 	 *
 	 * @param position       the position of the drone in space
 	 * @param velocity       the velocity of the drone
 	 * @param orientation    the orientation of the drone (roll, pitch heading)
 	 * @param rotationVector the rotational vector of the drone
+	 * @param prevFrontTyreDelta the previous compression of the front tyre
+	 * @param prevRearLeftTyreDelta the previous compression of the rear left tyre
+	 * @param prevRearRightTyreDelta the previous compression of the rear right tyre
 	 * @param configuration  the configuration needed for the physics engine
 	 */
 	public Drone(Vector position, Vector velocity, Vector orientation,
-                 Vector rotationVector, AutopilotConfig configuration) {
+                 Vector rotationVector, float prevFrontTyreDelta, float prevRearLeftTyreDelta, float prevRearRightTyreDelta,
+				 AutopilotConfig configuration) {
 
 		PhysXEngine physXEngine = new PhysXEngine(configuration);
 		this.setPhysXEngine(physXEngine);
@@ -52,9 +85,15 @@ public class Drone implements WorldObject, Callable<Void> {
 		this.setOrientation(orientation);
 		this.setRotationVector(rotationVector);
 
+		//more instance variables used for the chassis of the drone
+		this.setPrevFrontTyreDelta(prevFrontTyreDelta);
+		this.setPrevRearLeftTyreDelta(prevRearLeftTyreDelta);
+		this.setPrevRearRightTyreDelta(prevRearRightTyreDelta);
+
 		PhysXEngine.PhysXOptimisations optimisations = this.getPhysXEngine().createPhysXOptimisations();
 		this.setVelocity(optimisations.balanceDrone(this.getOrientation(), (float) (7*PI/180), 0.0f)[1]);
 
+		//Todo set the tyreDelta to appropriate initial value
 
 		// the cube associated with the drone
 		try {
@@ -428,7 +467,7 @@ public class Drone implements WorldObject, Callable<Void> {
 		return prevFrontTyreDelta;
 	}
 
-	private void setPrevFrontTyreDelta(float prevFrontTyreDelta) {
+	public void setPrevFrontTyreDelta(float prevFrontTyreDelta) {
 		this.prevFrontTyreDelta = prevFrontTyreDelta;
 	}
 
@@ -436,7 +475,7 @@ public class Drone implements WorldObject, Callable<Void> {
 		return prevRearLeftTyreDelta;
 	}
 
-	private void setPrevRearLeftTyreDelta(float prevRearLeftTyreDelta) {
+	public void setPrevRearLeftTyreDelta(float prevRearLeftTyreDelta) {
 		this.prevRearLeftTyreDelta = prevRearLeftTyreDelta;
 	}
 
@@ -444,7 +483,7 @@ public class Drone implements WorldObject, Callable<Void> {
 		return prevRearRightTyreDelta;
 	}
 
-	private void setPrevRearRightTyreDelta(float prevRearRightTyreDelta) {
+	public void setPrevRearRightTyreDelta(float prevRearRightTyreDelta) {
 		this.prevRearRightTyreDelta = prevRearRightTyreDelta;
 	}
 

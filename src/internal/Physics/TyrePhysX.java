@@ -154,7 +154,7 @@ public class TyrePhysX {
      * @param position the position of the drone in the world axis system
      * @return the absolute postion of the tyre
      */
-    private Vector getAbsolutePosition(Vector orientation, Vector position){
+    protected Vector getAbsolutePosition(Vector orientation, Vector position){
         //first get the position of the wheel
         Vector relTyrePosDrone = this.getTyrePosition();
         //then transform it to the world
@@ -183,7 +183,7 @@ public class TyrePhysX {
      * @param position position of the drone
      * @return the distance to the ground
      */
-    private float getTyreDistanceToGround(Vector orientation, Vector position){
+    protected float getTyreDistanceToGround(Vector orientation, Vector position){
 
         //calculate the position of the center of the tyre in the world axis system
         Vector tyrePos = this.getTyrePosition();

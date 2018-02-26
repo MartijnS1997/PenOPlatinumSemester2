@@ -3,10 +3,7 @@ import internal.Exceptions.SimulationEndedException;
 import internal.Helper.Vector;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -33,6 +30,22 @@ public class World {
 		this.droneThreads = Executors.newFixedThreadPool(nbOfDrones);
 
 
+	}
+
+	/**
+	 * Constructor used for a shared thread pool with the testbed server (since the amount of communication threads are
+	 * equal to the amount of drones. The threads are never active at the same time so we may share them)
+	 * @param objective the objective of the drone in the world
+	 * @param threadPool the thread pool assigned to the world for simulating drones
+	 */
+	public World(String objective, ExecutorService threadPool){
+
+		Xsize = 0;	//max groottes initialiseren
+		Ysize = 0;
+		Zsize = 0;
+		this.setObjective(objective);
+
+		this.droneThreads = threadPool;
 	}
 	
 	private Set<WorldObject> objects = new HashSet<>();
@@ -153,7 +166,27 @@ public class World {
 	public Set<Block> getBlockSet(){
 		return this.getSet(Block.class);
 	}
-	
+
+
+	/**
+	 * Adds all the world objects in the list to the world
+	 * @param worldObjects the world objects to be added
+	 */
+	public void addWorldObjects(Collection<WorldObject> worldObjects){
+		for(WorldObject object: worldObjects){
+			this.addWorldObject(object);
+		}
+	}
+
+	/**
+	 * Add all the drones in list to the world
+	 * @param drones the drones to be added
+	 */
+	public void addDrones(Collection<Drone> drones){
+		for(Drone drone: drones){
+			this.addWorldObject(drone);
+		}
+	}
 
 
 	//Todo implement execution pool of threads to serve all the world objects in parallel
@@ -308,22 +341,6 @@ public class World {
 		//we may exit, all the drones have been set to state k+1
 	}
 
-//
-//			droneFutures.get(0).get();
-//			//if the first element is finished check up on the rest is they have finished, if not keep going
-//			//1. create list to store the finished simulations
-//			List<Future<Void>> finishedFutures = new ArrayList<>();
-//			for(Future<Void> droneFuture: droneFutures){
-//				if(droneFuture.isDone()){
-//					finishedFutures.add(droneFuture);
-//				}
-//			}
-//			//then remove all the futures from the list
-//			droneFutures.removeAll(finishedFutures);
-//			//then check if finished executing all the steps
-//			if(droneFutures.size() == 0){
-//				allFinished = true;
-//			}
 
 	/**
 	 * Checks if the current objective is completed
@@ -360,6 +377,8 @@ public class World {
 				}
 				//only if all the cubes are visited the for loop will terminate
 				return true;
+			case NO_OBJECTIVE:
+				return false; // no objective was set
 		}
 		return false;
 	}
@@ -398,6 +417,8 @@ public class World {
 			case REACH_CUBE_OBJECTIVE:
 				return true;
 			case VISIT_ALL_OBJECTIVE:
+				return true;
+			case NO_OBJECTIVE:
 				return true;
 			default:
 				return false;
@@ -457,6 +478,7 @@ public class World {
 	 */
 	public final static String REACH_CUBE_OBJECTIVE = "reach cube";
 	public final static String VISIT_ALL_OBJECTIVE = "visit all the cubes";
+	public final static String NO_OBJECTIVE = "no objective";
 
 	/**
 	 * Constants

@@ -2,8 +2,11 @@ package internal.Physics;
 
 import Autopilot.AutopilotConfig;
 import Autopilot.AutopilotOutputs;
+import internal.Testbed.Drone;
 import internal.Testbed.DroneState;
 import internal.Helper.Vector;
+
+import java.util.List;
 
 /**
  * Created by Martijn on 14/02/2018.
@@ -34,6 +37,22 @@ public class ChassisPhysX {
         this.rearRightTyre = new RearTyrePhysX(rearRightTyrePos, tyreReadius, tyreSlope, dampSlope, maxBrake, maxFricCoeff);
 
 
+    }
+
+    /**
+     * Checks if the chassis touches the ground, used in validation for usage of drone constructor in the air
+     * @param orientation the orientation of the drone
+     * @param position the position of the drone
+     * @return true if and only if one of the tyres touches the ground
+     */
+    protected boolean touchesGround(Vector orientation, Vector position){
+
+        TyrePhysX frontTyre = this.getFrontTyre();
+        TyrePhysX rearLeftTyre = this.getRearLeftTyre();
+        TyrePhysX rearRightTyre = this.getRearRightTyre();
+        boolean groundTouched = frontTyre.getTyreDistanceToGround(orientation, position) <= frontTyre.getTyreRadius();
+        groundTouched = groundTouched || (rearLeftTyre.getTyreDistanceToGround(orientation, position) <= rearLeftTyre.getTyreRadius());
+        return groundTouched || (rearRightTyre.getTyreDistanceToGround(orientation, position) <= rearRightTyre.getTyreRadius());
     }
 
 
@@ -77,6 +96,27 @@ public class ChassisPhysX {
         Vector[] moments = {frontTyreMoment, rearLeftTyreMoment, rearRightTyreMoment};
 
         return Vector.sumVectorArray(moments);
+    }
+
+    /**
+     * Sets the correct tyre delta for all the tyres of the drone
+     * @param drone the drone where the tyre delta needs to be initialized
+     */
+    public void setDroneTyreDelta(Drone drone){
+        Vector orientation = drone.getOrientation();
+        Vector position = drone.getPosition();
+        if(!drone.getPhysXEngine().chassisTouchesGround(orientation, position)){
+            throw new IllegalStateException("Chassis is not Touching the ground");
+        }
+        //acquire the tyres
+        TyrePhysX frontTyre = this.getFrontTyre();
+        TyrePhysX rearLeftTyre = this.getRearLeftTyre();
+        TyrePhysX rearRightTyre = this.getRearRightTyre();
+
+        //then set the deltas
+        drone.setPrevFrontTyreDelta(frontTyre.calcRadiusDelta(orientation, position));
+        drone.setPrevRearLeftTyreDelta(rearLeftTyre.calcRadiusDelta(orientation, position));
+        drone.setPrevRearRightTyreDelta(rearRightTyre.calcRadiusDelta(orientation, position));
     }
 
     /**
