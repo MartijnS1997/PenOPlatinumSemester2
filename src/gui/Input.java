@@ -41,7 +41,7 @@ public class Input {
     		pitch = (float) -Math.PI/2;
     		break;
     	case DRONE_SIDE_CAM: 
-    		position = new Vector3f(150f, 0f, -0f);
+    		position = new Vector3f(150f, 1f, -0f);
     		yaw = (float) Math.PI/2;
     		pitch = 0;
     		break;
@@ -123,7 +123,7 @@ public Matrix4f getViewMatrix(Settings setting) {
 			pitch = (float) -Math.PI/2;
 			break;
 		case DRONE_SIDE_CAM: 
-			position = new Vector3f(130f, 0f, -120f);
+			position = new Vector3f(130f, 1f, -120f);
 			yaw = (float) Math.PI/2;	
 			pitch = 0;
 			break;

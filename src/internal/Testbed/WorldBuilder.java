@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.List;
 
 import gui.Cube;
+import gui.Tile;
 import internal.Helper.Parser;
 import internal.Helper.Vector;
 /*
@@ -32,7 +33,7 @@ public class WorldBuilder {
                 Vector position = data.get(i);
                 Vector color = data.get(i+1);
                 Block block = new Block(position);
-                Cube cube = new Cube(position.convertToVector3f(), color.convertToVector3f());
+                Cube cube = new Cube(position.convertToVector3f(), color.convertToVector3f(), true);
                 cube.setSize(1f);
                 block.setAssocatedCube(cube);
                 world.addWorldObject(block);
@@ -42,6 +43,9 @@ public class WorldBuilder {
         //world.addWorldObject(block1);
         this.setDrone(new DroneBuilder(true).createDrone(config));
         world.addWorldObject(this.getDrone());
+        
+        Floor floor = new Floor(new Vector());
+        world.addWorldObject(floor);
 
         return world;
     }
