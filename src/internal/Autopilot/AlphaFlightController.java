@@ -126,8 +126,6 @@ public class AlphaFlightController extends AutoPilotFlightController {
 //        Vector center = APCamera.getCenterOfNCubes(1);
         float xPosition = this.getxPID().getPIDOutput(-center.getxValue(), elapsedTime);
         float yPosition = this.getyPID().getPIDOutput(center.getyValue(), elapsedTime);
-
-        System.out.println(xPosition + "            " + yPosition);
         
         int cubeSize = Math.round(center.getzValue());
 
