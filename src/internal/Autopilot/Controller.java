@@ -5,6 +5,7 @@ import Autopilot.AutopilotInputs;
 import Autopilot.AutopilotOutputs;
 import internal.Physics.PhysXEngine;
 import internal.Helper.Vector;
+import internal.Testbed.DroneBuilder;
 
 import static java.lang.Math.PI;
 import static java.lang.Math.abs;
@@ -97,6 +98,7 @@ public abstract class Controller {
         PhysXEngine.PhysXOptimisations optimisations = this.getAutopilot().getPhysXOptimisations();
         Vector orientation = extractOrientation(currentInputs);
         Vector velocity = this.getVelocityApprox(prevInputs, currentInputs);
+        System.out.println("Velocity: " + velocity);
         Vector rotation = this.getRotationApprox(prevInputs, currentInputs);
         float angleOfAttack = this.getAutopilot().getConfig().getMaxAOA();
 
@@ -551,7 +553,7 @@ public abstract class Controller {
 
         @Override
         public float getY() {
-            return 0;
+            return DroneBuilder.GAMMA_STARTPOS.getyValue();
         }
 
         @Override
