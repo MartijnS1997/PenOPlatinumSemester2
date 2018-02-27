@@ -70,10 +70,12 @@ public abstract class WingPhysX {
      * @return N*liftSlope*AOA*s^2
      */
     public Vector getLift(Vector orientation, Vector rotation, Vector velocity){
+
         Vector normal = PhysXEngine.droneOnWorld(this.getNormal(), orientation);
         Vector airspeed = this.getAbsoluteVelocity(orientation, rotation,  velocity);
         Vector axisVector = PhysXEngine.droneOnWorld(this.getAxisVector(), orientation);
         Vector projectedAirspeed = airspeed.orthogonalProjection(axisVector);
+
         float angleOfAttack = this.calcAngleOfAttack(orientation, rotation, velocity);
         float liftSlope = this.getLiftSlope();
         //System.out.println("angle of attack: " + angleOfAttack);
@@ -86,8 +88,12 @@ public abstract class WingPhysX {
         Vector lift = normal.scalarMult(-scalarPart);
 
         //if the lift on the wing is lower than the threshold, AOA is disabled
-        if(lift.getSize() >= AOA_LIFT_THRESHOLD &&  Math.abs(angleOfAttack) >= this.getMaximumAngleOfAttack())
+        if(lift.getSize() >= AOA_LIFT_THRESHOLD &&  Math.abs(angleOfAttack) >= this.getMaximumAngleOfAttack()) {
+            System.out.println("AOA exception thrown, AOA: " + angleOfAttack);
+            System.out.println("Velocity: " + velocity);
+            System.out.println("Lift: " + lift);
             throw new AngleOfAttackException(this);
+        }
 
         return lift;
     }

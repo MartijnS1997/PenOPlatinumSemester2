@@ -90,8 +90,8 @@ public class Drone implements WorldObject, Callable<Void> {
 		this.setPrevRearLeftTyreDelta(prevRearLeftTyreDelta);
 		this.setPrevRearRightTyreDelta(prevRearRightTyreDelta);
 
-		PhysXEngine.PhysXOptimisations optimisations = this.getPhysXEngine().createPhysXOptimisations();
-		this.setVelocity(optimisations.balanceDrone(this.getOrientation(), (float) (7*PI/180), 0.0f)[1]);
+		//PhysXEngine.PhysXOptimisations optimisations = this.getPhysXEngine().createPhysXOptimisations();
+		//this.setVelocity(optimisations.balanceDrone(this.getOrientation(), (float) (7*PI/180), 0.0f)[1]);
 
 		//Todo set the tyreDelta to appropriate initial value
 
@@ -206,6 +206,9 @@ public class Drone implements WorldObject, Callable<Void> {
 		this.setVelocity(nextState.getVelocity());
 		this.setOrientation(nextState.getOrientation());
 		this.setRotationVector(nextState.getRotation());
+		this.setPrevFrontTyreDelta(nextState.getFrontTyreDelta());
+		this.setPrevRearLeftTyreDelta(nextState.getRearLeftTyreDelta());
+		this.setPrevRearRightTyreDelta(nextState.getRearRightTyreDelta());
 
 	}
 
@@ -463,7 +466,7 @@ public class Drone implements WorldObject, Callable<Void> {
 		this.getPhysXEngine().setFlightRecorder(flightRecorder);
 	}
 
-	private float getPrevFrontTyreDelta() {
+	public float getPrevFrontTyreDelta() {
 		return prevFrontTyreDelta;
 	}
 
@@ -471,7 +474,7 @@ public class Drone implements WorldObject, Callable<Void> {
 		this.prevFrontTyreDelta = prevFrontTyreDelta;
 	}
 
-	private float getPrevRearLeftTyreDelta() {
+	public float getPrevRearLeftTyreDelta() {
 		return prevRearLeftTyreDelta;
 	}
 
@@ -479,7 +482,7 @@ public class Drone implements WorldObject, Callable<Void> {
 		this.prevRearLeftTyreDelta = prevRearLeftTyreDelta;
 	}
 
-	private float getPrevRearRightTyreDelta() {
+	public float getPrevRearRightTyreDelta() {
 		return prevRearRightTyreDelta;
 	}
 

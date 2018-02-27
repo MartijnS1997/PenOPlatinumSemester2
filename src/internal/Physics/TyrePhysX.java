@@ -70,6 +70,11 @@ public class TyrePhysX {
     public Vector getNetMomentTyre(DroneState state, Vector netForce){
         Vector orientation = state.getOrientation();
         Vector position = state.getPosition();
+        float groundDist = this.getTyreDistanceToGround(orientation, position);
+        //first check if we touch the ground, if not return null vector
+        if(groundDist >= this.getTyreRadius()){
+            return new Vector();
+        }
         //first calculate the force arm
         Vector relPosAxleDrone = this.getTyrePosition();
         float currentTyreRadius = this.getTyreRadius() - this.calcRadiusDelta(orientation, position);
@@ -173,7 +178,11 @@ public class TyrePhysX {
         float groundDist = this.getTyreDistanceToGround(orientation, position);
         float tyreRad = this.getTyreRadius();
 
-        return tyreRad - groundDist;
+        if(tyreRad - groundDist <= 0){
+            return 0f;
+        }else{
+            return tyreRad - groundDist;
+        }
     }
 
     /**

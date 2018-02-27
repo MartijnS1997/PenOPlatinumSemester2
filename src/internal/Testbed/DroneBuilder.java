@@ -41,7 +41,7 @@ public class DroneBuilder {
     public final static float ENGINE_MASS = 5.0f;
     public final static float MAX_THRUST = 250.0f;
     public final static float MAIN_WING_MASS = 2.5f;
-    public final static float STABILIZER_MASS = 1.25f;
+    public final static float STABILIZER_MASS = 1.25f*2f;
     public final static float MAINWING_START_INCL = (float) PI/12.0f;
     public final static float STABS_START_INCL = 0.0f;
     public final static float MAX_ANGLE_OF_ATTACK = (float) ( PI/2.0 - 0.001f);
@@ -80,7 +80,8 @@ public class DroneBuilder {
         // if the drone needs to be balanced, do so (balancing is the act of setting the vertical force to 0
         // and the Z value to 0
         if(this.isBalanced()){
-            //balanceDrone(drone);
+            PhysXEngine.PhysXOptimisations optim = drone.getPhysXEngine().createPhysXOptimisations();
+            drone.setVelocity(optim.balanceDrone(drone.getOrientation(), (float) (7*PI/180), 0.0f)[1]);
         }
 
         System.out.println("Drone velocity: " + drone.getVelocity());

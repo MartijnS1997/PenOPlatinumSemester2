@@ -8,6 +8,7 @@ import java.util.concurrent.ExecutorService;
 
 /**
  * Created by Martijn on 26/02/2018.
+ * A class that build a world with the desired parameters
  */
 public class WorldBuilder_v2 {
 

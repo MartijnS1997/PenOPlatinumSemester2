@@ -6,6 +6,7 @@ import internal.Helper.Vector;
 import internal.Physics.PhysXEngine;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -14,13 +15,19 @@ import static java.lang.Math.PI;
 
 /**
  * Created by Martijn on 26/02/2018.
+ * A second version of the drone builder class suited for the construction of drones on the ground and in the air
  */
 public class DroneBuilder_v2 {
     /**
      * Standard constructor for a drone builder
      */
     public DroneBuilder_v2(){
+        System.out.println(TYRE_SLOPE);
+    }
 
+    public Drone createGroundDrone(){
+        Map<Vector, Float> droneConfig = new HashMap<>();
+        droneConfig.put(new Vector(0f, STABLE_Y_POS, 0f), 0f);
     }
 
     /**
@@ -33,6 +40,7 @@ public class DroneBuilder_v2 {
        for(Vector position: droneState.keySet()){
            droneList.add(this.generateDrone(position, new Vector(droneState.get(position), 0f, 0f )));
        }
+       System.out.println("drone position: " + droneList.get(0).getPosition());
 
        //now that all the drones are created filter for drones touching the ground and not
         List<Drone> flyingDrones = droneList.stream()
@@ -42,6 +50,9 @@ public class DroneBuilder_v2 {
         List<Drone> dronesOnGround = droneList.stream().
                 filter(drone -> drone.getPhysXEngine().chassisTouchesGround(drone.getOrientation(), drone.getPosition()))
                 .collect(Collectors.toList());
+
+        System.out.println("ground drones: " + dronesOnGround);
+        System.out.println("flying drones: " + flyingDrones);
 
         configureGroundDrones(dronesOnGround);
         ConfigureAirborneDrones(flyingDrones);
@@ -55,6 +66,7 @@ public class DroneBuilder_v2 {
      */
     private void ConfigureAirborneDrones(List<Drone> flyingDrones) {
         //the drones that are located in the air need to be balanced out
+
         for(Drone drone: flyingDrones){
             drone.setAutopilotOutputs(getInitControlState());
             if(this.getFlyingDroneAbsVel() == 0f){
@@ -64,6 +76,7 @@ public class DroneBuilder_v2 {
             //use the found absolute velocity to calculate the true velocity of the drone
             //this is equal to the -z vector in the drone axis system
             Vector stableVelocity = PhysXEngine.droneOnWorld(new Vector(0, 0, -this.getFlyingDroneAbsVel()), drone.getOrientation());
+            drone.setVelocity(stableVelocity);
         }
     }
 
@@ -377,18 +390,17 @@ public class DroneBuilder_v2 {
     /*
     Constants and messages used for external communication
      */
+    private final static float INIT_COMPRESSION = 0.05f;
 
     //Todo find good values for the tyre and lift slope
     private final static float GRAVITY = 9.81f;
     private final static float MAIN_WING_X_POS = 4.2f;
     private final static float STABILIZER_POSITION = 4.2f;
-    private final static float WHEEL_Y_POS = 0f;
-    private final static float FRONT_WHEEL_Z_POS = 0f;
-    private final static float REAR_WHEEL_Z_POS = 0f;
-    private final static float REAR_WHEEL_X_POS = 0f;
-    private final static float TYRE_SLOPE = 0f;
-    private final static float DAMP_SLOPE = 0f;
-    private final static float TYRE_RADIUS = 0f;
+    private final static float WHEEL_Y_POS = 1f;
+    private final static float FRONT_WHEEL_Z_POS = 1f;
+    private final static float REAR_WHEEL_Z_POS = 0.5f;
+    private final static float REAR_WHEEL_X_POS = 0.5f;
+    private final static float TYRE_RADIUS = 0.20f;
     private final static float MAX_BRAKE_FORCE = 0f;
     private final static float MAX_FRICTION_COEFF = 0f;
     private final static float ENGINE_MASS = 180f;
@@ -399,14 +411,18 @@ public class DroneBuilder_v2 {
     private final static float MAIN_LIFT_SLOPE = 10f;
     private final static float HORIZONTAL_STABILIZER_LIFT_SLOPE = 5f;
     private final static float VERTICAL_STABILIZER_LIFT_SLOPE = 5f;
-    private final static float HORIZONTAL_ANGLE_OF_VIEW_CAMERA = 120f;
-    private final static float VERTICAL_ANGLE_OF_VIEW_CAMERA = 120f;
+    private final static float HORIZONTAL_ANGLE_OF_VIEW_CAMERA = (float) (120f*PI/180);
+    private final static float VERTICAL_ANGLE_OF_VIEW_CAMERA = (float) (120f*PI/180);
     private final static int   NUMBER_OF_COLUMN_PIXELS_CAMERA = 200;
     private final static int   NUMBER_OF_ROW_PIXELS_CAMERA = 200;
+    private final static float TYRE_SLOPE = (ENGINE_MASS+STABILIZER_MASS+MAIN_WING_MASS*2)*GRAVITY * 1/3f *1/INIT_COMPRESSION; // the slope of the tyre
+    private final static float DAMP_SLOPE = 0f;
 
-    private final static float   MAIN_STABLE_INCLINATION = (float) (5f*PI/180f);
-    private final static float   HOR_STABLE_INCLINATION = 0f;
-    private final static float   VER_STABLE_INCLINATION = 0f;
+    private final static float MAIN_STABLE_INCLINATION = (float) (5f*PI/180f);
+    private final static float HOR_STABLE_INCLINATION = 0f;
+    private final static float VER_STABLE_INCLINATION = 0f;
+    private final static float STABLE_COMPRESSION = 0.05f;
+    private final static float STABLE_Y_POS= TYRE_RADIUS - STABLE_COMPRESSION + WHEEL_Y_POS;
 
 
 }

@@ -2,10 +2,8 @@ import Autopilot.*;
 import gui.*;
 import internal.Exceptions.AngleOfAttackException;
 import internal.Exceptions.SimulationEndedException;
-import internal.Testbed.Drone;
-import internal.Testbed.FlightRecorder;
-import internal.Testbed.World;
-import internal.Testbed.WorldBuilder;
+import internal.Helper.Vector;
+import internal.Testbed.*;
 import math.Vector3f;
 
 
@@ -15,6 +13,8 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 //TODO implement in such a way that the testbed can support multiple drones (and thus multiple autopilots)
 //TODO also be able to handle crashes and correctly close the autopilots that are connected via the testbed (close the socket?)
@@ -109,7 +109,11 @@ public class TestbedMain implements Runnable{
                 Time.update();
 
                 AutopilotOutputs output = AutopilotOutputsReader.read(this.getInputStream());
-                AutopilotInputsWriter.write(this.getOutputStream(), this.testbedCycle(output));
+                AutopilotInputs autopilotInputs = this.testbedCycle(output);
+//                System.out.println("current Position: " + new Vector(autopilotInputs.getX(), autopilotInputs.getY(), autopilotInputs.getZ()));
+//                System.out.println("current Orientation: " + new Vector(autopilotInputs.getHeading(), autopilotInputs.getPitch(), autopilotInputs.getRoll()));
+//                System.out.println("front, rLeft and rRight tyre delta: " + drone.getPrevFrontTyreDelta() + "; " + drone.getPrevRearLeftTyreDelta() + "; " + drone.getPrevRearRightTyreDelta());
+                AutopilotInputsWriter.write(this.getOutputStream(), autopilotInputs);
                 //wait until frame is passed
                 framerateControl();
 
@@ -205,6 +209,7 @@ public class TestbedMain implements Runnable{
         //try if the world can be advanced to the next state
         // it is the first run, just skip the output (frame is not yet rendered)
         this.getDrone().setAutopilotOutputs(autopilotOutputs);
+        //System.out.println("all drones in world: " + this.getWorld().getDroneSet());
         this.getWorld().advanceWorldState(TIME_STEP, STEPS_PER_CYCLE);
 
         //update the simulation time for the outputs (elapsed time)
@@ -254,6 +259,16 @@ public class TestbedMain implements Runnable{
      * @throws IOException just java things
      */
     private void initWorld() throws IOException {
+//        WorldBuilder_v2 builder = new WorldBuilder_v2();
+//        Map<Vector, Float> droneConfig = new HashMap<>();
+//        droneConfig.put(new Vector(0, 0.20f-0.05f + 1f,0), 0f); //drone standing on ground with tyre compression 0.05
+//        World world = builder.createWorld(droneConfig);
+//        this.setWorld(world);
+//        Drone drone =(Drone)(world.getDroneSet().toArray())[0]; //only one drone is present
+//        //System.out.println("drone: " + drone);
+//        this.setDrone(drone);
+//        drone.addFlightRecorder(this.getFlightRecorder());
+
         // drone builder covers all the stuff involving building the drone, adjust parameters there
         WorldBuilder worldBuilder = new WorldBuilder();
 

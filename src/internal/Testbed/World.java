@@ -1,4 +1,5 @@
 package internal.Testbed;
+import internal.Exceptions.AngleOfAttackException;
 import internal.Exceptions.SimulationEndedException;
 import internal.Helper.Vector;
 
@@ -312,29 +313,61 @@ public class World {
 	 * @param droneSet the set of drones to be advanced
 	 * @param deltaTime the time for the next state step
 	 * @throws InterruptedException
-	 * @throws ExecutionException
 	 */
 	private void advanceAllDrones(Set<Drone> droneSet, float deltaTime) throws InterruptedException {
 		//first set the time interval for all the drones
 		for(Drone drone: droneSet){
 			drone.setDeltaTime(deltaTime);
 		}
-
 		//get the execution pool
 		ExecutorService droneThreads = this.getDroneThreads();
 		//first invoke all the next states
-		List<Future<Void>> droneFutures = droneThreads.invokeAll(droneSet);
+		List<Future<Void>> unfinishedThreads = droneThreads.invokeAll(droneSet);
+		List<Future<Void>> finishedThreads = new ArrayList<>();
 		//then wait for all the futures to finish
 		boolean allFinished = false;
 		//keeps looping until all drones are advanced to the next state
 		while(!allFinished){
-			droneFutures.get(0);
+			//first get the first thread
+			Future<Void> droneFuture = unfinishedThreads.get(0);
+
+			//wait until the first thread finishes
+			try {
+				droneFuture.get();
+				//check if there was an exception
+			} catch (ExecutionException e) {
+				if(e.getCause() instanceof AngleOfAttackException){
+					System.out.println("angle of attack exception");
+				}else{
+					System.out.println("An error occurred: " + e.getCause().toString());
+				}
+			}
+
+			//get all the finished elements
+			finishedThreads = unfinishedThreads.stream()
+							.filter(future -> future.isDone())
+							.collect(Collectors.toList());
+
+			//check if any of the finished threads got into trouble
+			for(Future<Void> finishedFuture: finishedThreads){
+				try {
+					finishedFuture.get();
+					//check if there occurred an error
+				} catch (ExecutionException e) {
+					if(e.getCause() instanceof AngleOfAttackException){
+						throw (AngleOfAttackException) e.getCause(); //rethrow, info for the main loop
+					}else{
+						e.printStackTrace();
+					}
+				}
+			}
+
 			//filter out all the elements that are finished
-			droneFutures = droneFutures.stream()
+			unfinishedThreads = unfinishedThreads.stream()
 						   .filter(future -> !future.isDone())
 						   .collect(Collectors.toList());
 			//check if drone futures is empty ot not
-			if(droneFutures.size() == 0){
+			if(unfinishedThreads.size() == 0){
 				allFinished = true;
 			}
 		}

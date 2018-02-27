@@ -8,6 +8,8 @@ import internal.Helper.Vector;
 
 import java.util.List;
 
+import static java.lang.Math.abs;
+
 /**
  * Created by Martijn on 14/02/2018.
  * A class used for simulating the behavior of the tyres of the drone
@@ -20,21 +22,21 @@ public class ChassisPhysX {
      */
     public ChassisPhysX(AutopilotConfig config){
         //extract the constants for the wheels
-        float tyreReadius = config.getTyreRadius();
+        float tyreRadius = config.getTyreRadius();
         float tyreSlope = config.getTyreSlope();
         float dampSlope = config.getDampSlope();
         float maxBrake = config.getRMax();
         float maxFricCoeff = config.getFcMax();
 
         // extract the positions of the wheels
-        Vector frontTyrePos = new Vector(0f, config.getWheelY(), config.getFrontWheelZ());
-        Vector rearLeftTyrePos = new Vector(-config.getRearWheelX(), config.getWheelY(), config.getRearWheelZ());
-        Vector rearRightTyrePos = new Vector(config.getRearWheelX(), config.getWheelY(), config.getRearWheelZ());
+        Vector frontTyrePos = new Vector(0f, -abs(config.getWheelY()), -abs(config.getFrontWheelZ()));
+        Vector rearLeftTyrePos = new Vector(-abs(config.getRearWheelX()), -abs(config.getWheelY()), abs(config.getRearWheelZ()));
+        Vector rearRightTyrePos = new Vector(abs(config.getRearWheelX()), -abs(config.getWheelY()), abs(config.getRearWheelZ()));
 
         //construct the wheels
-        this.frontTyre = new TyrePhysX(frontTyrePos, tyreReadius, tyreSlope, dampSlope, maxBrake, maxFricCoeff);
-        this.rearLeftTyre = new RearTyrePhysX(rearLeftTyrePos, tyreReadius, tyreSlope, dampSlope, maxBrake, maxFricCoeff);
-        this.rearRightTyre = new RearTyrePhysX(rearRightTyrePos, tyreReadius, tyreSlope, dampSlope, maxBrake, maxFricCoeff);
+        this.frontTyre = new TyrePhysX(frontTyrePos, tyreRadius, tyreSlope, dampSlope, maxBrake, maxFricCoeff);
+        this.rearLeftTyre = new RearTyrePhysX(rearLeftTyrePos, tyreRadius, tyreSlope, dampSlope, maxBrake, maxFricCoeff);
+        this.rearRightTyre = new RearTyrePhysX(rearRightTyrePos, tyreRadius, tyreSlope, dampSlope, maxBrake, maxFricCoeff);
 
 
     }
@@ -67,6 +69,8 @@ public class ChassisPhysX {
         Vector rearRightTyreForce = rearRightTyre.getNetForceTyre(state, inputs.getRightBrakeForce(), deltaTime, state.getPrevRearRightTyreDelta());
 
         Vector[] forces = {frontTyreForce, rearLeftTyreForce, rearRightTyreForce};
+
+        //System.out.println("Total chassis force: " + Vector.sumVectorArray(forces));
 
         return Vector.sumVectorArray(forces);
     }
@@ -113,6 +117,9 @@ public class ChassisPhysX {
         TyrePhysX rearLeftTyre = this.getRearLeftTyre();
         TyrePhysX rearRightTyre = this.getRearRightTyre();
 
+//        System.out.println("prev front delta: " + frontTyre.calcRadiusDelta(orientation, position));
+//        System.out.println("prev rear delta: " + rearLeftTyre.calcRadiusDelta(orientation, position));
+
         //then set the deltas
         drone.setPrevFrontTyreDelta(frontTyre.calcRadiusDelta(orientation, position));
         drone.setPrevRearLeftTyreDelta(rearLeftTyre.calcRadiusDelta(orientation, position));
@@ -138,15 +145,15 @@ public class ChassisPhysX {
     }
 
 
-    private TyrePhysX getFrontTyre() {
+    public TyrePhysX getFrontTyre() {
         return frontTyre;
     }
 
-    private TyrePhysX getRearLeftTyre() {
+    public TyrePhysX getRearLeftTyre() {
         return rearLeftTyre;
     }
 
-    private TyrePhysX getRearRightTyre() {
+    public TyrePhysX getRearRightTyre() {
         return rearRightTyre;
     }
 

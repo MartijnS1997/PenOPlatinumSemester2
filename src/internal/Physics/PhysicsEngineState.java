@@ -4,6 +4,7 @@ import internal.Helper.Vector;
 
 /**
  * Created by Martijn on 7/11/2017.
+ * A class of physics engine states, used for configuring the drone for the next state
  */
 public interface PhysicsEngineState {
 
@@ -31,4 +32,21 @@ public interface PhysicsEngineState {
      */
     Vector getRotation();
 
+    /**
+     * Getter for the front tyre delta of the associated chassis
+     * @return the front tyre delta
+     */
+    float getFrontTyreDelta();
+
+    /**
+     * getter for the rear left tyre delta of the associated chassis
+     * @return the rear left tyre delta
+     */
+    float getRearLeftTyreDelta();
+
+    /**
+     * Getter for the rear right tyre delta of the associated chassis
+     * @return the rear right tyre delta
+     */
+    float getRearRightTyreDelta();
 }
