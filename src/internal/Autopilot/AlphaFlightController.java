@@ -127,7 +127,7 @@ public class AlphaFlightController extends AutoPilotFlightController {
 //        Vector center = APCamera.getCenterOfNCubes(1);
         float xPosition = this.getxPID().getPIDOutput(-center.getxValue(), elapsedTime);
         float yPosition = this.getyPID().getPIDOutput(center.getyValue(), elapsedTime);
-
+        
         int cubeSize = Math.round(center.getzValue());
 
         //int threshold = Math.max(Math.round(THRESHOLD_PIXELS*NORMAL_CUBE_SIZE/cubeSize),1);
@@ -196,6 +196,14 @@ public class AlphaFlightController extends AutoPilotFlightController {
         this.angleOfAttackControl(controlOutputs, this.getPreviousInputs(), this.getCurrentInputs());
         //System.out.println("Controls delivered");
         //System.out.println(controlOutputs);
+        
+        // If all blocks were hit, start landingprocedure
+        APCamera.loadNewImage(currentInputs.getImage());
+        int amountOfCubesInSight = APCamera.getCubesInPicture().size();
+        
+        if (amountOfCubesInSight <= 0) {
+        	this.getAutopilot().setAPMode(3);
+        }
 
         return controlOutputs;
     }
@@ -229,8 +237,8 @@ public class AlphaFlightController extends AutoPilotFlightController {
         return yPID;
     }
 
-    private PIDController xPID = new PIDController(1.f, 0.2f, 0.2f);
-    private PIDController yPID = new PIDController(1.f, 0.2f, 0.2f);
+    private PIDController xPID = new PIDController(1.f, 0.0f, 0.0f);
+    private PIDController yPID = new PIDController(1.f, 0.0f, 0.0f);
 
     private static final float STANDARD_INCLINATION = (float) PI/12;
     public  static final float MAIN_STABLE_INCLINATION = (float) PI/12;

@@ -26,15 +26,22 @@ public class GammaFlightController extends AutoPilotFlightController {
      * @return an autopilot outputs object that contains the instructions for the testbed
      */
     @Override
-    public AutopilotOutputs getControlActions(AutopilotInputs inputs){
+    public AutopilotOutputs getControlActions(AutopilotInputs inputs) {
         this.setCurrentInputs(inputs);
         ControlOutputs outputs = new ControlOutputs();
-        AutoPilotCamera APCamera = this.getAutopilot().getAPCamera();
+    	// If all blocks were hit, start landingprocedure
+    	AutoPilotCamera APCamera = this.getAutopilot().getAPCamera();
+        APCamera.loadNewImage(inputs.getImage());
         AutopilotInputs currentInputs = this.getCurrentInputs();
         PIDController xPIDController = this.getxPID();
         PIDController yPIDController = this.getyPID();
 
-        APCamera.loadNewImage(currentInputs.getImage());
+        int amountOfCubesInSight = APCamera.getCubesInPicture().size();
+
+//        if (amountOfCubesInSight <= 0) {
+//        	this.getAutopilot().setAPMode(3);
+//        }
+
         float elapsedTime = this.getCurrentInputs().getElapsedTime();
 
         Vector center;
@@ -67,6 +74,47 @@ public class GammaFlightController extends AutoPilotFlightController {
 
         return outputs;
     }
+//    public AutopilotOutputs getControlActions(AutopilotInputs inputs){
+//        this.setCurrentInputs(inputs);
+//        ControlOutputs outputs = new ControlOutputs();
+//        AutoPilotCamera APCamera = this.getAutopilot().getAPCamera();
+//        AutopilotInputs currentInputs = this.getCurrentInputs();
+//        PIDController xPIDController = this.getxPID();
+//        PIDController yPIDController = this.getyPID();
+//
+//        APCamera.loadNewImage(currentInputs.getImage());
+//        float elapsedTime = this.getCurrentInputs().getElapsedTime();
+//
+//        Vector center;
+//
+//        try{
+//            center = APCamera.getCenterOfNCubes(1);
+//        }catch(NoCubeException e){
+//            center = new Vector(-10, 0, 4);
+//        }
+//
+//        //FOR DEBUGGING
+//        //System.out.println(center);
+//        //END FOR DEBUGGING
+//
+//        float xPosition = xPIDController.getPIDOutput(-center.getxValue(), elapsedTime);
+//        float yPosition = yPIDController.getPIDOutput(center.getyValue(), elapsedTime);
+//        int nbColumns = APCamera.getNbColumns();
+//        int nbRows = APCamera.getNbRows();
+//        float cubeCoeff = (float) min(MAX_CUBE_COEFF, sqrt(nbRows*nbColumns)/center.getzValue());
+//        //System.out.println("PID positions x= " + xPosition + " ; y= " + yPosition);
+//        //System.out.println("Cube coefficients: " + cubeCoeff);
+//        xControlActions(outputs, xPosition,cubeCoeff);
+//        yControlActions(outputs, yPosition, cubeCoeff, currentInputs.getPitch());
+//        setThrustOut(outputs, cubeCoeff);
+//
+//        //System.out.println("Outputs Horizontal: " + outputs.getHorStabInclination()*RAD2DEGREE + "; Vertical: " + outputs.getVerStabInclination()*RAD2DEGREE );
+//
+//        rollControl(outputs, this.getCurrentInputs());
+//        angleOfAttackControl(outputs, this.getPreviousInputs(), this.getCurrentInputs());
+//
+//        return outputs;
+//    }
 
     private void xControlActions(ControlOutputs outputs, float xPos, float cubeCoeff){
         float verticalStabIncl;

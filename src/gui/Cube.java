@@ -1,16 +1,17 @@
 package gui;
 
+import static org.lwjgl.glfw.GLFW.glfwMakeContextCurrent;
+import static org.lwjgl.system.MemoryUtil.NULL;
+
+import java.util.Arrays;
+
 import internal.Helper.HSVconverter;
 import internal.Helper.Vector;
 import math.Matrix3f;
 import math.Vector3f;
+import tests.VectorTest;
 
-import java.util.Arrays;
-
-import static org.lwjgl.glfw.GLFW.glfwMakeContextCurrent;
-import static org.lwjgl.system.MemoryUtil.NULL;
-
-public class Cube{
+public class Cube implements GraphicsObject {
 	
 	static float[] positions = new float[]{
 			// VO
@@ -67,7 +68,7 @@ public class Cube{
 			// V23
 			0.5f,  0.5f, -0.5f,
 	};
-	private float[] colours;
+	
 	static int[] indices = new int[]{
 			// Front face
 			0, 1, 3, 3, 1, 2,
@@ -83,53 +84,66 @@ public class Cube{
 			20, 21, 22, 20, 22, 23,
 	};
 	
+	private Vector3f relativePosition = new Vector3f();
+	private Vector3f orientation = new Vector3f();
+	
+	private float[] colours;
+
 	static Graphics g;
 	
 	private Mesh mesh;
 	private Vector3f position = new Vector3f();
 	private Vector3f size = new Vector3f(1f, 1f, 1f);
-	private Vector3f relativePosition = new Vector3f();
-	private Vector3f orientation = new Vector3f();
 	
 	static public void setGraphics(Graphics graphics) {
 		g = graphics;
 	}
 	
-	private Cube(Vector3f colour) {
-		setColours(colour);
-		
+	public Cube(Vector3f colour, boolean isGoalCube) {
+		if (isGoalCube)
+			setColoursGoalCubes(colour);
+		else
+			setColours(colour);
+
 		for (String key: g.windows.keySet()) {
 			glfwMakeContextCurrent(g.windows.get(key).getHandler());
-			mesh = new Mesh();
+			this.mesh = new Mesh();
 			mesh.init(positions, colours, indices);
 			glfwMakeContextCurrent(NULL);
 		}
 	}
 	
-	public Cube(Vector3f position, Vector3f colour) {
-		this(colour);
+	public Cube(Vector3f position, Vector3f colour, boolean isGoalCube) {
+		this(colour, isGoalCube);
 		
 		this.position = position;
 	}
 
-	public Cube(Vector3f relativePosition, Vector3f colour, Cube attachedCube) {
-		this(colour);
+	public Cube(Vector3f relativePosition, Vector3f colour, Cube attachedCube, boolean isGoalCube) {
+		this(attachedCube.getPos(), colour, isGoalCube);
 		
 		this.relativePosition = relativePosition;
-		this.position = attachedCube.getPos();
-	}
-
-	public void render() {
-		mesh.render();
-	}
-	
-	public void delete() {
-		mesh.delete();
 	}
 
 	public void update(Vector3f displacement, Vector3f orientation) {
 		this.orientation  = orientation.negate();
-		this.position = this.position.add(displacement);
+		position = position.add(displacement);
+	}
+	
+	public Vector3f getRelPos() {
+		Vector3f pos = this.position;
+		Matrix3f transformation = Matrix3f.transformationMatrix(this.orientation.negate()).transpose();
+		Vector3f difference = transformation.multiply(relativePosition);
+		pos = pos.add(difference);
+		return pos;
+	}
+	
+	public void render() {
+		this.mesh.render();
+	}
+	
+	public void delete() {
+		this.mesh.delete();
 	}
 
 	public Vector getPosition(){
@@ -144,14 +158,6 @@ public class Cube{
 		return this.position;
 	}
 	
-	public Vector3f getRelPos() {
-		Vector3f pos = this.position;
-		Matrix3f transformation = Matrix3f.transformationMatrix(this.orientation.negate()).transpose();
-		Vector3f difference = transformation.multiply(relativePosition);
-		pos = pos.add(difference);
-		return pos;
-	}
-	
 	public void setSize(float size) {
 		this.size = new Vector3f(size, size, size);
 	}
@@ -160,15 +166,60 @@ public class Cube{
 		this.size = size;
 	}
 	
-	private void setColours(Vector3f colour) {	
-		Vector3f posY = Vector3f.ArrayToVector3f(HSVconverter.HSVtoRGB2(colour.x, colour.y, 1.00f * colour.z));
-		Vector3f negY = Vector3f.ArrayToVector3f(HSVconverter.HSVtoRGB2(colour.x, colour.y, 0.15f * colour.z));
-		Vector3f posX = Vector3f.ArrayToVector3f(HSVconverter.HSVtoRGB2(colour.x, colour.y, 0.85f * colour.z));
-		Vector3f negX = Vector3f.ArrayToVector3f(HSVconverter.HSVtoRGB2(colour.x, colour.y, 0.30f * colour.z));
-		Vector3f posZ = Vector3f.ArrayToVector3f(HSVconverter.HSVtoRGB2(colour.x, colour.y, 0.70f * colour.z));
-		Vector3f negZ = Vector3f.ArrayToVector3f(HSVconverter.HSVtoRGB2(colour.x, colour.y, 0.45f * colour.z));
+	public void setSize(Vector vector) {
+		this.setSize(vector.convertToVector3f());
+	}
+	
+	public void setColoursGoalCubes(Vector3f colour) {	
+		Vector3f posY = Vector3f.ArrayToVector3f(HSVconverter.HSVtoRGB2(colour.x, colour.y, 0.45f * colour.z));
+		Vector3f negY = Vector3f.ArrayToVector3f(HSVconverter.HSVtoRGB2(colour.x, colour.y, 0.20f * colour.z));
+		Vector3f posX = Vector3f.ArrayToVector3f(HSVconverter.HSVtoRGB2(colour.x, colour.y, 0.40f * colour.z));
+		Vector3f negX = Vector3f.ArrayToVector3f(HSVconverter.HSVtoRGB2(colour.x, colour.y, 0.25f * colour.z));
+		Vector3f posZ = Vector3f.ArrayToVector3f(HSVconverter.HSVtoRGB2(colour.x, colour.y, 0.35f * colour.z));
+		Vector3f negZ = Vector3f.ArrayToVector3f(HSVconverter.HSVtoRGB2(colour.x, colour.y, 0.30f * colour.z));
 		
-		colours = new float[]{
+		this.colours = new float[]{
+				posZ.x, posZ.y, posZ.z,
+				posZ.x, posZ.y, posZ.z,
+				posZ.x, posZ.y, posZ.z,
+				posZ.x, posZ.y, posZ.z,
+				
+				posY.x, posY.y, posY.z,
+				posY.x, posY.y, posY.z,
+				posY.x, posY.y, posY.z,
+				posY.x, posY.y, posY.z,
+				
+				posX.x, posX.y, posX.z,
+				posX.x, posX.y, posX.z,
+				posX.x, posX.y, posX.z,
+				posX.x, posX.y, posX.z,
+				
+				negX.x, negX.y, negX.z,
+				negX.x, negX.y, negX.z,
+				negX.x, negX.y, negX.z,
+				negX.x, negX.y, negX.z,
+				
+				negY.x, negY.y, negY.z,
+				negY.x, negY.y, negY.z,
+				negY.x, negY.y, negY.z,
+				negY.x, negY.y, negY.z,
+				
+				negZ.x, negZ.y, negZ.z,
+				negZ.x, negZ.y, negZ.z,
+				negZ.x, negZ.y, negZ.z,
+				negZ.x, negZ.y, negZ.z,
+		};
+	}
+	
+	public void setColours(Vector3f colour) {	
+		Vector3f posY = Vector3f.ArrayToVector3f(HSVconverter.HSVtoRGB2(colour.x, colour.y, colour.z));
+		Vector3f negY = Vector3f.ArrayToVector3f(HSVconverter.HSVtoRGB2(colour.x, colour.y, colour.z));
+		Vector3f posX = Vector3f.ArrayToVector3f(HSVconverter.HSVtoRGB2(colour.x, colour.y, colour.z));
+		Vector3f negX = Vector3f.ArrayToVector3f(HSVconverter.HSVtoRGB2(colour.x, colour.y, colour.z));
+		Vector3f posZ = Vector3f.ArrayToVector3f(HSVconverter.HSVtoRGB2(colour.x, colour.y, colour.z));
+		Vector3f negZ = Vector3f.ArrayToVector3f(HSVconverter.HSVtoRGB2(colour.x, colour.y, colour.z));
+		
+		this.colours = new float[]{
 				posZ.x, posZ.y, posZ.z,
 				posZ.x, posZ.y, posZ.z,
 				posZ.x, posZ.y, posZ.z,
