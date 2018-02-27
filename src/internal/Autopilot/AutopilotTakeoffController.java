@@ -21,6 +21,7 @@ public class AutopilotTakeoffController extends Controller{
      * Generates the control actions for the autopilot
      * @param inputs the inputs of the autopilot
      * @return the control actions
+     * @author Anthony Rathe
      */
     @Override
     public AutopilotOutputs getControlActions(AutopilotInputs inputs){
@@ -47,10 +48,10 @@ public class AutopilotTakeoffController extends Controller{
     			
     			if (currentInputs.getPitch() <= TAKEOFF_PITCH) {
     				// Start ascending
-    				controlOutputs.setHorStabInclination(-STANDARD_INCLINATION);
+    				controlOutputs.setHorStabInclination(STANDARD_INCLINATION);
     			}else if(currentInputs.getPitch() >= MAX_PITCH){
     				// Start descending
-    				controlOutputs.setHorStabInclination(STANDARD_INCLINATION);
+    				controlOutputs.setHorStabInclination(-STANDARD_INCLINATION);
     			}else {
     				// Stop ascending/descending
     				controlOutputs.setHorStabInclination(0f);

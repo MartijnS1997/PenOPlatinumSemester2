@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import Autopilot.*;
 import internal.Testbed.FlightRecorder;
+import internal.Helper.Vector;
 import internal.Physics.PhysXEngine;
 
 //TODO: only recalculate after the new frame is rendered or make seperate controls for the case no new
@@ -39,7 +40,7 @@ public class AutoPilot implements Autopilot {
 		// and last, we need to land
 		this.setLandingController(new AutopilotLandingController(this));
 		//set AP mode 2 to make everything work again
-		this.setAPMode(2);
+		//this.setAPMode(2);
 
 	}
 
@@ -57,6 +58,12 @@ public class AutoPilot implements Autopilot {
     @Override
     public AutopilotOutputs simulationStarted(AutopilotConfig config, AutopilotInputs inputs) throws IOException {
             configureAutopilot(config, inputs);
+            if (this.getPhysXEngine().chassisTouchesGround(new Vector(inputs.getX(),inputs.getY(),inputs.getZ()), new Vector(inputs.getHeading(),inputs.getPitch(),inputs.getRoll()))) {
+            	this.setAPMode(1);
+            }else {
+            	this.setAPMode(2);
+            }
+            this.startPosition = new Vector(inputs.getX(),inputs.getY(),inputs.getZ());
         return getControlOutputs(inputs);
     }
 
@@ -118,6 +125,7 @@ public class AutoPilot implements Autopilot {
     	AutopilotTakeoffController takeoffController = this.getTakeoffController();
     	AutopilotLandingController landingController = this.getLandingController();
     	
+    	// getAPMode moet
     	
     	if (getAPMode() == 1) {
     		//takeoffController.setCurrentInputs(inputs);
@@ -365,7 +373,9 @@ public class AutoPilot implements Autopilot {
 	 * 3 = takeoff mode
 	 */
 	private int APMode;
-
+	
+	// Variable for storing the startPosition of the drone, which also serves as the destination position
+	private Vector startPosition;
 
 
     /*

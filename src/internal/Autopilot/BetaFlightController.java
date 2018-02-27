@@ -64,6 +64,14 @@ public class BetaFlightController extends AutoPilotFlightController {
         rollControl(outputs, this.getCurrentInputs());
         angleOfAttackControl(outputs, this.getPreviousInputs(), this.getCurrentInputs());
 
+        // If all blocks were hit, start landingprocedure
+        APCamera.loadNewImage(currentInputs.getImage());
+        int amountOfCubesInSight = APCamera.getCubesInPicture().size();
+        
+        if (amountOfCubesInSight <= 0) {
+        	this.getAutopilot().setAPMode(3);
+        }
+        
         return outputs;
     }
 

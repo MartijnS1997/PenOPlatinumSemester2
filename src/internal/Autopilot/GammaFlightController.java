@@ -16,6 +16,15 @@ public class GammaFlightController extends AutoPilotFlightController {
 
     @Override
     public AutopilotOutputs getControlActions(AutopilotInputs inputs) {
+    	
+    	// If all blocks were hit, start landingprocedure
+    	AutoPilotCamera APCamera = this.getAutopilot().getAPCamera();
+        APCamera.loadNewImage(inputs.getImage());
+        int amountOfCubesInSight = APCamera.getCubesInPicture().size();
+        
+        if (amountOfCubesInSight <= 0) {
+        	this.getAutopilot().setAPMode(3);
+        }
         return null;
     }
 

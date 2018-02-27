@@ -195,6 +195,14 @@ public class AlphaFlightController extends AutoPilotFlightController {
         this.angleOfAttackControl(controlOutputs, this.getPreviousInputs(), this.getCurrentInputs());
         //System.out.println("Controls delivered");
         //System.out.println(controlOutputs);
+        
+        // If all blocks were hit, start landingprocedure
+        APCamera.loadNewImage(currentInputs.getImage());
+        int amountOfCubesInSight = APCamera.getCubesInPicture().size();
+        
+        if (amountOfCubesInSight <= 0) {
+        	this.getAutopilot().setAPMode(3);
+        }
 
         return controlOutputs;
     }
