@@ -2,6 +2,7 @@ package gui;
 
 import internal.Testbed.Block;
 import internal.Testbed.Drone;
+import internal.Testbed.Floor;
 import internal.Testbed.World;
 import internal.Testbed.WorldObject;
 import math.Matrix3f;
@@ -190,12 +191,23 @@ public class Window {
         program.setUniform("viewMatrix", viewMatrix);
 
         for (WorldObject object: world.getObjectSet()) {
-        	for (Cube cube: object.getAssociatedCubes()) {
-	        	if (object.getClass() == Block.class)
-	        		program.setUniform("modelMatrix", getModelMatrix(cube.getRelPos(), cube.getSize()));
-	        	else 
-	        		program.setUniform("modelMatrix", getModelMatrix(((Drone) object).getOrientation().convertToVector3f(), cube.getRelPos(), cube.getSize()));
-	    		cube.render();
+        	if (object.getClass() == Block.class) {
+        		for (GraphicsObject cube: object.getAssociatedGraphicsObjects()) {
+        			program.setUniform("modelMatrix", getModelMatrix(((Cube) cube).getRelPos(), cube.getSize()));
+        			cube.render();
+        		}
+        	}
+        	else if(object.getClass() == Drone.class) {
+        		for (GraphicsObject polygon: object.getAssociatedGraphicsObjects()) {
+        			program.setUniform("modelMatrix", getModelMatrix(((Drone) object).getOrientation().convertToVector3f(), ((Cube) polygon).getRelPos(), polygon.getSize()));
+        			polygon.render();
+        		}
+        	}
+        	else if(object.getClass() == Floor.class) {
+        		for (GraphicsObject tile: object.getAssociatedGraphicsObjects()) {
+        			program.setUniform("modelMatrix", getModelMatrix(tile.getPos(), tile.getSize()));
+        			tile.render();
+        		}
         	}
     	}
 		
@@ -215,7 +227,7 @@ public class Window {
 	     * Releases in use OpenGL resources.
 	     */
 		for (WorldObject object: world.getObjectSet()) {
-			for (Cube cube: object.getAssociatedCubes())
+			for (GraphicsObject cube: ((WorldObject) object).getAssociatedGraphicsObjects())
 				cube.delete();
     	}
 		

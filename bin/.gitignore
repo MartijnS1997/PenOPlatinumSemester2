@@ -1,3 +1,9 @@
 /internal/
 /tests/
 /Autopilot/
+/datatypes/
+/gui/
+/math/
+/TestBedServer.class
+/TestbedConnection$TestbedOutputs.class
+/TestbedConnection.class

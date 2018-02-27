@@ -127,6 +127,8 @@ public class AlphaFlightController extends AutoPilotFlightController {
         float xPosition = this.getxPID().getPIDOutput(-center.getxValue(), elapsedTime);
         float yPosition = this.getyPID().getPIDOutput(center.getyValue(), elapsedTime);
 
+        System.out.println(xPosition + "            " + yPosition);
+        
         int cubeSize = Math.round(center.getzValue());
 
         //int threshold = Math.max(Math.round(THRESHOLD_PIXELS*NORMAL_CUBE_SIZE/cubeSize),1);
@@ -228,8 +230,8 @@ public class AlphaFlightController extends AutoPilotFlightController {
         return yPID;
     }
 
-    private PIDController xPID = new PIDController(1.f, 0.2f, 0.2f);
-    private PIDController yPID = new PIDController(1.f, 0.2f, 0.2f);
+    private PIDController xPID = new PIDController(1.f, 0.0f, 0.0f);
+    private PIDController yPID = new PIDController(1.f, 0.0f, 0.0f);
 
     private static final float STANDARD_INCLINATION = (float) PI/12;
     public  static final float MAIN_STABLE_INCLINATION = (float) PI/12;
