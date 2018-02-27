@@ -6,6 +6,7 @@ import Autopilot.AutopilotOutputs;
 import internal.Physics.PhysXEngine;
 import internal.Helper.Vector;
 
+import static java.lang.Math.PI;
 import static java.lang.Math.abs;
 import static java.lang.Math.signum;
 
@@ -119,6 +120,7 @@ public abstract class Controller {
      * @author Martijn Sauwens
      */
     private boolean AOAControlMainLeft(ControlOutputs controlOutputs, PhysXEngine.PhysXOptimisations optimisations, float angleOfAttack,  Vector orientation, Vector rotation, Vector velocity){
+        System.out.println("Left Main");
         float inclinationBorder1 = optimisations.getMaxLeftMainWingInclination(orientation, rotation, velocity, angleOfAttack);
         float inclinationBorder2 = optimisations.getMaxLeftMainWingInclination(orientation, rotation, velocity, -angleOfAttack);
 
@@ -144,6 +146,7 @@ public abstract class Controller {
      * @author Martijn Sauwens
      */
     private boolean AOAControlMainRight(ControlOutputs controlOutputs, PhysXEngine.PhysXOptimisations optimisations, float angleOfAttack, Vector orientation, Vector rotation, Vector velocity){
+        System.out.println("MainRight");
         float inclinationBorder1 = optimisations.getMaxRightMainWingInclination(orientation, rotation, velocity, angleOfAttack);
         float inclinationBorder2 = optimisations.getMaxRightMainWingInclination(orientation, rotation, velocity, -angleOfAttack);
 
@@ -169,7 +172,7 @@ public abstract class Controller {
      * @author Martijn Sauwens
      */
     private boolean AOAControlHorStabilizer(ControlOutputs controlOutputs, PhysXEngine.PhysXOptimisations optimisations, float angleOfAttack, Vector orientation, Vector rotation, Vector velocity){
-
+        System.out.println("Horizontal stabilizer");
         float inclinationBorder1 = optimisations.getMaxHorStabInclination(orientation, rotation, velocity, angleOfAttack);
         float inclinationBorder2 = optimisations.getMaxHorStabInclination(orientation, rotation, velocity, -angleOfAttack);
 
@@ -195,16 +198,17 @@ public abstract class Controller {
      * @author Martijn Sauwens
      */
     private boolean AOAControlVerStabilizer(ControlOutputs controlOutputs, PhysXEngine.PhysXOptimisations optimisations, float angleOfAttack, Vector orientation, Vector rotation, Vector velocity){
-
+        System.out.println("Vertical stabilizer");
         float inclinationBorder1 = optimisations.getMaxVerStabInclination(orientation, rotation, velocity, angleOfAttack);
         float inclinationBorder2 = optimisations.getMaxVerStabInclination(orientation, rotation, velocity, -angleOfAttack);
 
         float desiredInclination = controlOutputs.getVerStabInclination();
 
-        float realisableInclination = setBetween(desiredInclination, inclinationBorder1, inclinationBorder2, this.getInclinationAOAErrorMargin());
+        float realisableInclination = setBetween(desiredInclination, -inclinationBorder1, -inclinationBorder2, this.getInclinationAOAErrorMargin());
 
         controlOutputs.setVerStabInclination(realisableInclination);
 
+        System.out.println("\n");
         return desiredInclination == realisableInclination;
     }
 
@@ -218,15 +222,21 @@ public abstract class Controller {
         float[] borders = sortValue(border1, border2);
         float lowerBorder = borders[0];
         float upperBorder = borders[1];
+        System.out.println("Lower border: " + lowerBorder*RAD2DEGREE + "; Upper border: " + upperBorder*RAD2DEGREE + "; value: " + value*RAD2DEGREE);
         //check if it is already between the borders
-        if(value >= lowerBorder && value <= upperBorder)
+        if(value >= lowerBorder && value <= upperBorder) {
+            System.out.println("Selected value: " + value*RAD2DEGREE);
             return value;
+        }
+
 
         //if not so, set it between with a given error margin
         //check if the value is closest to the lower border
         if(abs(lowerBorder - value) <= abs(upperBorder - value)){
+            System.out.println("Selected value: " + (lowerBorder - signum(lowerBorder)*errorMargin)*RAD2DEGREE);
             return lowerBorder - signum(lowerBorder)*errorMargin;
         }else{
+            System.out.println("Selected value: " + (upperBorder - signum(upperBorder)*errorMargin)*RAD2DEGREE);
             return upperBorder - signum(upperBorder)*errorMargin;
         }
 
@@ -400,6 +410,8 @@ public abstract class Controller {
      */
     private AutopilotConfig config;
 
+
+    private static float RAD2DEGREE = (float) (180/PI);
 
     /**
      * An implementation of AutopilotOutputs used in the controller for cascading control (passes trough the basic

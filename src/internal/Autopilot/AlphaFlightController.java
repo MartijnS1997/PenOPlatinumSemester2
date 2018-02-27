@@ -19,6 +19,7 @@ public class AlphaFlightController extends AutoPilotFlightController {
 
     public AlphaFlightController(AutoPilot autoPilot){
         super(autoPilot);
+        System.out.println("Using alpha controller");
     }
 
 
