@@ -209,8 +209,8 @@ public class WorldGenerator {
 		}
 		
 		//cube can't go through the ground, so minY has to be >= 0.5m (+1m so they aren't on the ground)
-		if (y < getAdaptedMinY()){
-			y = getAdaptedMinY();
+		if (y < getMinY()){
+			y = getMinY();
 		}
 		if (z > getMaxZ()){ 
 			z = getMaxZ();
@@ -339,13 +339,23 @@ public class WorldGenerator {
 	 */
 	private float maxX = 10;
 	private float minX = -10;
-	private float maxY = 10;
-	private float minY = 0;
-	private float maxZ = -10;
-	private float minZ = -100;
+	//cube can't go through the ground, so minY has to be >= 2.5m (+2m so they aren't on the ground)
+	private float maxY = 14.5f;
+	private float minY = 4.5f;
+	private float maxZ = -40;
+	private float minZ = -400;
 	
-	//cube can't go through the ground, so minY has to be >= 0.5m (+1m so they aren't on the ground)
-	private float adaptedMinY = 1.5f;
+		
+	/**
+	 * the means and standard deviations
+	 */
+	private float meanX = 0;
+	private float stdDevX = 3;
+	private float meanY = 9.5f;
+	private float stdDevY = 1.5f;
+	private float meanZ = -220;
+	private float stdDevZ = 52;
+
 	
 	
 	/**
@@ -375,20 +385,7 @@ public class WorldGenerator {
 		return minZ;
 	}
 	
-	public float getAdaptedMinY() {
-		return adaptedMinY;
-	}
-	
-	
-	/**
-	 * the means and standard deviations
-	 */
-	private float meanX = 0;
-	private float stdDevX = 3;
-	private float meanY = 5;
-	private float stdDevY = 1.5f;
-	private float meanZ = -55;
-	private float stdDevZ = 13;
+		
 
 	/**
 	 * getters for the means and standard deviations
