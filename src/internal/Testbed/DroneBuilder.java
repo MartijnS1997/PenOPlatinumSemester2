@@ -98,6 +98,7 @@ public class DroneBuilder {
 
         switch(configMode) {
             case PhysXEngine.ALPHA_MODE:
+                System.out.println("Creating alpha drone");
                 drone = new Drone(ALPHA_STARTPOS, ALPHA_START_VEL, ALPHA_START_ORIENTATION, ALPHA_START_ROTATION, createConfig(configMode));
                 if(this.isBalanced()){
                     PhysXEngine.PhysXOptimisations optim = drone.getPhysXEngine().createPhysXOptimisations();
@@ -112,6 +113,7 @@ public class DroneBuilder {
                 }
                 break;
             case PhysXEngine.GAMMA_MODE:
+                System.out.println("creating gamma drone");
                 drone = new Drone(GAMMA_STARTPOS, GAMMA_START_VEL, GAMMA_START_ORIENTATION, GAMMA_START_ROTATION, createConfig(configMode));
                 if(this.isBalanced()){
                     PhysXEngine.PhysXOptimisations optim = drone.getPhysXEngine().createPhysXOptimisations();
@@ -126,7 +128,7 @@ public class DroneBuilder {
         // and the Z value to 0
 
         drone.setPosition(new Vector(0, 5f, 0));
-        System.out.println("Drone velocity: " + drone.getVelocity());
+        //System.out.println("Drone velocity: " + drone.getVelocity());
         //System.out.println("Drone thrust: " + drone.getThrust());
 
         return drone;

@@ -13,6 +13,7 @@ import java.io.*;
  */
 public class SocketMain {
     public static void main(String[] args) throws IOException, InterruptedException {
+        //System.out.println(PhysXEngine.GAMMA_MODE);
 
         MAIN_TESTBED.setFlightRecorder(FLIGHT_RECORDER);
         MAIN_AUTOPILOT.setFlightRecorder(FLIGHT_RECORDER);

@@ -106,7 +106,7 @@ public class AlphaFlightController extends AutoPilotFlightController {
     @Override
     public AutopilotOutputs getControlActions(AutopilotInputs inputs){
 
-        System.out.println("-------");
+        //System.out.println("-------");
         this.setCurrentInputs(inputs);
 
         ControlOutputs controlOutputs = new ControlOutputs();
