@@ -80,6 +80,7 @@ public class AutopilotMain implements Runnable {
 
         AutopilotInputs inputs = AutopilotInputsReader.read(inputStream);
         AutopilotOutputs outputs = this.getAutoPilot().timePassed(inputs);
+        System.out.println("outputs: " + outputs);
         AutopilotOutputsWriter.write(outputStream, outputs);
     }
 

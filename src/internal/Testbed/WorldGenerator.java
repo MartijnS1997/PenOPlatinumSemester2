@@ -278,7 +278,7 @@ public class WorldGenerator {
 			
 			Block block = new Block(pos);
 			Cube cube = new Cube(pos.convertToVector3f(), clr.convertToVector3f(), true);
-			cube.setSize(1f);
+			cube.setSize(5f);
 			block.setAssocatedCube(cube);
 			
 			world.addWorldObject(block);
@@ -316,7 +316,7 @@ public class WorldGenerator {
 			
 			Block block = new Block(pos);
 			Cube cube = new Cube(pos.convertToVector3f(), clr.convertToVector3f(), true);
-			cube.setSize(1f);
+			cube.setSize(5f);
 			block.setAssocatedCube(cube);
 			
 			world.addWorldObject(block);

@@ -20,69 +20,28 @@ public class GammaFlightController extends AutoPilotFlightController {
         System.out.println("using gamma controller");
     }
 
-    /**
-     * Generates the control actions of the autopilot that will be passed to the drone
-     * @param inputs the inputs of the autopilot
-     * @return an autopilot outputs object that contains the instructions for the testbed
-     */
-    @Override
-    public AutopilotOutputs getControlActions(AutopilotInputs inputs) {
-        this.setCurrentInputs(inputs);
-        ControlOutputs outputs = new ControlOutputs();
-    	// If all blocks were hit, start landingprocedure
-    	AutoPilotCamera APCamera = this.getAutopilot().getAPCamera();
-        APCamera.loadNewImage(inputs.getImage());
-        AutopilotInputs currentInputs = this.getCurrentInputs();
-        PIDController xPIDController = this.getxPID();
-        PIDController yPIDController = this.getyPID();
-
-        int amountOfCubesInSight = APCamera.getCubesInPicture().size();
-
-//        if (amountOfCubesInSight <= 0) {
-//        	this.getAutopilot().setAPMode(3);
-//        }
-
-        float elapsedTime = this.getCurrentInputs().getElapsedTime();
-
-        Vector center;
-
-        try{
-            center = APCamera.getCenterOfNCubes(1);
-        }catch(NoCubeException e){
-            center = new Vector(-10, 0, 4);
-        }
-
-        //FOR DEBUGGING
-        //System.out.println(center);
-        //END FOR DEBUGGING
-
-        float xPosition = xPIDController.getPIDOutput(-center.getxValue(), elapsedTime);
-        float yPosition = yPIDController.getPIDOutput(center.getyValue(), elapsedTime);
-        int nbColumns = APCamera.getNbColumns();
-        int nbRows = APCamera.getNbRows();
-        float cubeCoeff = (float) min(MAX_CUBE_COEFF, sqrt(nbRows*nbColumns)/center.getzValue());
-        //System.out.println("PID positions x= " + xPosition + " ; y= " + yPosition);
-        //System.out.println("Cube coefficients: " + cubeCoeff);
-        xControlActions(outputs, xPosition,cubeCoeff);
-        yControlActions(outputs, yPosition, cubeCoeff, currentInputs.getPitch());
-        setThrustOut(outputs, cubeCoeff);
-
-        //System.out.println("Outputs Horizontal: " + outputs.getHorStabInclination()*RAD2DEGREE + "; Vertical: " + outputs.getVerStabInclination()*RAD2DEGREE );
-
-        rollControl(outputs, this.getCurrentInputs());
-        angleOfAttackControl(outputs, this.getPreviousInputs(), this.getCurrentInputs());
-
-        return outputs;
-    }
-//    public AutopilotOutputs getControlActions(AutopilotInputs inputs){
+//    /**
+//     * Generates the control actions of the autopilot that will be passed to the drone
+//     * @param inputs the inputs of the autopilot
+//     * @return an autopilot outputs object that contains the instructions for the testbed
+//     */
+//    @Override
+//    public AutopilotOutputs getControlActions(AutopilotInputs inputs) {
 //        this.setCurrentInputs(inputs);
 //        ControlOutputs outputs = new ControlOutputs();
-//        AutoPilotCamera APCamera = this.getAutopilot().getAPCamera();
+//    	// If all blocks were hit, start landingprocedure
+//    	AutoPilotCamera APCamera = this.getAutopilot().getAPCamera();
+//        APCamera.loadNewImage(inputs.getImage());
 //        AutopilotInputs currentInputs = this.getCurrentInputs();
 //        PIDController xPIDController = this.getxPID();
 //        PIDController yPIDController = this.getyPID();
 //
-//        APCamera.loadNewImage(currentInputs.getImage());
+//        int amountOfCubesInSight = APCamera.getCubesInPicture().size();
+//
+////        if (amountOfCubesInSight <= 0) {
+////        	this.getAutopilot().setAPMode(3);
+////        }
+//
 //        float elapsedTime = this.getCurrentInputs().getElapsedTime();
 //
 //        Vector center;
@@ -115,6 +74,47 @@ public class GammaFlightController extends AutoPilotFlightController {
 //
 //        return outputs;
 //    }
+    public AutopilotOutputs getControlActions(AutopilotInputs inputs){
+        this.setCurrentInputs(inputs);
+        ControlOutputs outputs = new ControlOutputs();
+        AutoPilotCamera APCamera = this.getAutopilot().getAPCamera();
+        AutopilotInputs currentInputs = this.getCurrentInputs();
+        PIDController xPIDController = this.getxPID();
+        PIDController yPIDController = this.getyPID();
+
+        APCamera.loadNewImage(currentInputs.getImage());
+        float elapsedTime = this.getCurrentInputs().getElapsedTime();
+
+        Vector center;
+
+        try{
+            center = APCamera.getCenterOfNCubes(1);
+        }catch(NoCubeException e){
+            center = new Vector(-10, 0, 4);
+        }
+
+        //FOR DEBUGGING
+        //System.out.println(center);
+        //END FOR DEBUGGING
+
+        float xPosition = xPIDController.getPIDOutput(-center.getxValue(), elapsedTime);
+        float yPosition = yPIDController.getPIDOutput(center.getyValue(), elapsedTime);
+        int nbColumns = APCamera.getNbColumns();
+        int nbRows = APCamera.getNbRows();
+        float cubeCoeff = (float) min(MAX_CUBE_COEFF, sqrt(nbRows*nbColumns)/center.getzValue());
+        //System.out.println("PID positions x= " + xPosition + " ; y= " + yPosition);
+        //System.out.println("Cube coefficients: " + cubeCoeff);
+        xControlActions(outputs, xPosition,cubeCoeff);
+        yControlActions(outputs, yPosition, cubeCoeff, currentInputs.getPitch());
+        setThrustOut(outputs, cubeCoeff);
+
+        //System.out.println("Outputs Horizontal: " + outputs.getHorStabInclination()*RAD2DEGREE + "; Vertical: " + outputs.getVerStabInclination()*RAD2DEGREE );
+
+        rollControl(outputs, this.getCurrentInputs());
+        angleOfAttackControl(outputs, this.getPreviousInputs(), this.getCurrentInputs());
+
+        return outputs;
+    }
 
     private void xControlActions(ControlOutputs outputs, float xPos, float cubeCoeff){
         float verticalStabIncl;
@@ -210,7 +210,7 @@ public class GammaFlightController extends AutoPilotFlightController {
     //private static final float STANDARD_THRUST = 32.859283f*2;
     private static final float THRUST_FACTOR = 2.0f;
    // private static final float THRESHOLD_THRUST_ANGLE = (float)(PI/20);
-    private static final float MAX_CUBE_COEFF = 2f;
+    private static final float MAX_CUBE_COEFF = 3f;
     public  static final float STABILIZER_STABLE_INCLINATION = 0.0f;
     //private static final float GRAVITY = 9.81f;
     private static final float ROLL_THRESHOLD = (float) (PI * 5.0f/180.0f);
