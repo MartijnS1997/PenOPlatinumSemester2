@@ -45,6 +45,7 @@ public class Wheel implements Polygon{
 		this(colour, nbOfSides);
 		
 		this.position = position;
+		
 	}
 
 	public Wheel(Vector3f relativePosition, Vector3f colour, Cube attachedCube, int nbOfSides) {
@@ -103,14 +104,12 @@ public class Wheel implements Polygon{
 		
 		this.colours = new float[3*2*(nPolygon+1)];
 		for (int i = 0; i<3*2*(nPolygon+1); i++) {
-			switch(i%3) {
-			case 0:
+			if (i%3 == 0)
 				this.colours[i] = rgbColour.x;
-			case 1:
+			if (i%3 == 1)
 				this.colours[i] = rgbColour.y;
-			case 2:
+			if (i%3 == 2)
 				this.colours[i] = rgbColour.z;
-			}
 		}
 		
 		this.positions = new float[3*2*(nPolygon+1)];
@@ -124,25 +123,23 @@ public class Wheel implements Polygon{
 		this.positions[5] = 0.0f;
 		
 		for (int i = 6; i< 3*(nPolygon+1)+3; i++) {
-			switch(i%3) {
-			case 0:
+			if (i%3 == 0)
 				this.positions[i] = 0.5f;
-			case 1:
+			if (i%3 == 1)
 				this.positions[i] = (float) Math.cos(((i-6)/3)*2*Math.PI/nPolygon);
-			case 2:
+			if (i%3 == 2)
 				this.positions[i] = (float) Math.sin(((i-6)/3)*2*Math.PI/nPolygon);
-			}
 		}
 		
+		
+		
 		for (int i = 3*(nPolygon+1)+3; i< 6*(nPolygon+1); i++) {
-			switch(i%3) {
-			case 0:
+			if (i%3 == 0)
 				this.positions[i] = -0.5f;
-			case 1:
+			if (i%3 == 1)
 				this.positions[i] = (float) Math.cos(((i-6)/3)*2*Math.PI/nPolygon);
-			case 2:
+			if (i%3 == 2)
 				this.positions[i] = (float) Math.sin(((i-6)/3)*2*Math.PI/nPolygon);
-			}
 		}
 		
 		this.indices = new int[4*3*nPolygon];

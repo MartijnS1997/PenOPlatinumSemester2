@@ -205,9 +205,7 @@ public class Window {
         	}
         	else if(object.getClass() == Drone.class) {
         		for (GraphicsObject polygon: object.getAssociatedGraphicsObjects()) {
-        			System.out.println("testerino");
         			program.setUniform("modelMatrix", getModelMatrix(((Drone) object).getOrientation().convertToVector3f(), ((Polygon) polygon).getRelPos(), polygon.getSize()));
-        			System.out.println("tototo");
         			polygon.render();
         		}
         	}
@@ -320,6 +318,7 @@ public class Window {
         Vector3f right = transformationMatrix.multiply(new Vector3f(1,0,0));
         Vector3f up = transformationMatrix.multiply(new Vector3f(0,1,0));
         Vector3f look = transformationMatrix.multiply(new Vector3f(0,0,-1));
+        
         
         Vector3f position = dronePosition.add(look.scale(camPosition));
 
