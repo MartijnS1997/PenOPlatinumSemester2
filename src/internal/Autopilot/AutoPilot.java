@@ -40,7 +40,7 @@ public class AutoPilot implements Autopilot {
 		// and last, we need to land
 		this.setLandingController(new AutopilotLandingController(this));
 		//set AP mode 2 to make everything work again
-		this.setAPMode(2);
+		this.setAPMode(1);
 
 	}
 

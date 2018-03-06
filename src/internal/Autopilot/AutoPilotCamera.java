@@ -159,9 +159,9 @@ public class AutoPilotCamera {
     public internal.Helper.Vector getCenterOfNCubes(int nbOfCubes) throws NoCubeException {
         List<internal.Helper.Vector> cubesInPicture = this.getCubesInPicture();
 
-        if(cubesInPicture.size() == 0){
+        /*if(cubesInPicture.size() == 0){
             throw new NoCubeException();
-        }
+        }*/
 
         float xOffset = this.getNbColumns()/2.0f;
         float yOffset = this.getNbRows()/2.0f;

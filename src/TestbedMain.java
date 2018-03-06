@@ -110,6 +110,7 @@ public class TestbedMain implements Runnable{
 
                 AutopilotOutputs output = AutopilotOutputsReader.read(this.getInputStream());
                 AutopilotInputs autopilotInputs = this.testbedCycle(output);
+//                System.out.println("velocity: " + this.getDrone().getVelocity());
 //                System.out.println("current Position: " + new Vector(autopilotInputs.getX(), autopilotInputs.getY(), autopilotInputs.getZ()));
 //                System.out.println("current Orientation: " + new Vector(autopilotInputs.getHeading(), autopilotInputs.getPitch(), autopilotInputs.getRoll()));
 //                System.out.println("front, rLeft and rRight tyre delta: " + drone.getPrevFrontTyreDelta() + "; " + drone.getPrevRearLeftTyreDelta() + "; " + drone.getPrevRearRightTyreDelta());
@@ -219,7 +220,7 @@ public class TestbedMain implements Runnable{
 
         //create the output object
         autopilotInputs = new MainAutopilotInputs(this.getDrone(), cameraImage, this.getSimulationTime());
-
+        //System.out.println("Dronepos: " + this.getDrone().getPosition() + "; elapsed_time: " + this.getSimulationTime());
         return autopilotInputs;
     }
 
@@ -259,31 +260,32 @@ public class TestbedMain implements Runnable{
      * @throws IOException just java things
      */
     private void initWorld() throws IOException {
-//        WorldBuilder_v2 builder = new WorldBuilder_v2();
-//        Map<Vector, Float> droneConfig = new HashMap<>();
-//        droneConfig.put(new Vector(0, 0.20f-0.05f + 1f,0), 0f); //drone standing on ground with tyre compression 0.05
-//        World world = builder.createWorld(droneConfig);
-//        this.setWorld(world);
-//        Drone drone =(Drone)(world.getDroneSet().toArray())[0]; //only one drone is present
-//        //System.out.println("drone: " + drone);
-//        this.setDrone(drone);
-//        drone.addFlightRecorder(this.getFlightRecorder());
+        WorldBuilder_v2 builder = new WorldBuilder_v2();
+        Map<Vector, Float> droneConfig = new HashMap<>();
+        droneConfig.put(new Vector(0, 0.20f-0.01f + 1f,0), 0f); //drone standing on ground with tyre compression 0.05
+        World world =  builder.createWorld(); //builder.createWorld(droneConfig)
+        //World world = builder.createFlightTestWorld();
+        this.setWorld(world);
+        Drone drone =(Drone)(world.getDroneSet().toArray())[0]; //only one drone is present
+        //System.out.println("drone: " + drone);
+        this.setDrone(drone);
+        drone.addFlightRecorder(this.getFlightRecorder());
 
-        // drone builder covers all the stuff involving building the drone, adjust parameters there
-        WorldBuilder worldBuilder = new WorldBuilder();
-
-        // if the simulation is run in predefined mode
-        // generate the predefined world instead of the random one
-        if(this.isPredefMode()){
-            worldBuilder.setPredefWorld(true);
-            worldBuilder.setPredefDirectory(this.getPredefWorldDirect());
-        }
-
-        // configure the world note that the drone object is part of the world instance (and not a static as before)
-        this.setWorld(worldBuilder.createWorld(this.getControllerMode()));
-        this.setDrone(worldBuilder.getDrone());
-        // only in use for diagnostics
-        this.getDrone().addFlightRecorder(this.getFlightRecorder());
+//        // drone builder covers all the stuff involving building the drone, adjust parameters there
+//        WorldBuilder worldBuilder = new WorldBuilder();
+//
+//        // if the simulation is run in predefined mode
+//        // generate the predefined world instead of the random one
+//        if(this.isPredefMode()){
+//            worldBuilder.setPredefWorld(true);
+//            worldBuilder.setPredefDirectory(this.getPredefWorldDirect());
+//        }
+//
+//        // configure the world note that the drone object is part of the world instance (and not a static as before)
+//        this.setWorld(worldBuilder.createWorld(this.getControllerMode()));
+//        this.setDrone(worldBuilder.getDrone());
+//        // only in use for diagnostics
+//        this.getDrone().addFlightRecorder(this.getFlightRecorder());
     }
 
     /**

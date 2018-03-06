@@ -1,13 +1,14 @@
 package internal.Autopilot;
 
+import Autopilot.AutopilotConfig;
 import Autopilot.AutopilotInputs;
 import Autopilot.AutopilotOutputs;
 import internal.Exceptions.NoCubeException;
 import internal.Helper.Vector;
 
 import static java.lang.Math.*;
-import static java.lang.Math.PI;
 
+//TODO base the incrementation of the wings on the current outputs instead of the previous
 /**
  * Created by Martijn on 19/02/2018.
  * A flight controller made for the 15° AOA assignment
@@ -15,10 +16,11 @@ import static java.lang.Math.PI;
  */
 public class GammaFlightController extends AutoPilotFlightController {
 
-    public GammaFlightController(AutoPilot autoPilot){
+    public GammaFlightController(AutoPilot autoPilot) {
         super(autoPilot);
         System.out.println("using gamma controller");
     }
+
 
 //    /**
 //     * Generates the control actions of the autopilot that will be passed to the drone
@@ -74,6 +76,7 @@ public class GammaFlightController extends AutoPilotFlightController {
 //
 //        return outputs;
 //    }
+
     public AutopilotOutputs getControlActions(AutopilotInputs inputs){
         this.setCurrentInputs(inputs);
         ControlOutputs outputs = new ControlOutputs();
@@ -219,3 +222,401 @@ public class GammaFlightController extends AutoPilotFlightController {
     private static final float X_THRESHOLD = 0f;
     private static final float Y_THRESHOLD = 0f;
 }
+
+//    private void bankingTurnLeft(ControlOutputs outputs){
+//        //first get the previous turn values:
+//        ControlOutputs prevOutputs = this.getPreviousOutputs();
+//        float leftMainInclination = prevOutputs.getLeftWingInclination();
+//        float rightMainInclination = prevOutputs.getRightWingInclination();
+//        float horizontalInclination = prevOutputs.getHorStabInclination();
+//        float verticalInclination = prevOutputs.getVerStabInclination();
+//
+//
+//    }
+//
+//    private void bankingTurnRight(ControlOutputs outputs){
+//        //first get the previous turn values:
+//        ControlOutputs prevOutputs = this.getPreviousOutputs();
+//        float leftMainInclination = prevOutputs.getLeftWingInclination();
+//        float rightMainInclination = prevOutputs.getRightWingInclination();
+//        float horizontalInclination = prevOutputs.getHorStabInclination();
+//        float verticalInclination = prevOutputs.getVerStabInclination();
+//    }
+//
+//    private void descend(ControlOutputs outputs){
+//        //first get the previous turn values:
+//        ControlOutputs prevOutputs = this.getPreviousOutputs();
+//        float leftMainInclination = prevOutputs.getLeftWingInclination();
+//        float rightMainInclination = prevOutputs.getRightWingInclination();
+//        float horizontalInclination = prevOutputs.getHorStabInclination();
+//        float verticalInclination = prevOutputs.getVerStabInclination();
+//    }
+//
+//    private void ascend(ControlOutputs outputs){
+//        //first get the previous turn values:
+//        ControlOutputs prevOutputs = this.getPreviousOutputs();
+//        float leftMainInclination = prevOutputs.getLeftWingInclination();
+//        float rightMainInclination = prevOutputs.getRightWingInclination();
+//        float horizontalInclination = prevOutputs.getHorStabInclination();
+//        float verticalInclination = prevOutputs.getVerStabInclination();
+//    }
+//
+//    //TODO implement that steers to steady outputs (steady main wing inclination and such)
+//    private void steady(ControlOutputs outputs){
+//        //first get the previous turn values:
+//        ControlOutputs prevOutputs = this.getPreviousOutputs();
+//        float leftMainInclination = prevOutputs.getLeftWingInclination();
+//        float rightMainInclination = prevOutputs.getRightWingInclination();
+//        float horizontalInclination = prevOutputs.getHorStabInclination();
+//        float verticalInclination = prevOutputs.getVerStabInclination();
+//
+//        //for the right wing
+//        if(rightMainInclination > getMainStableInclination()){
+//            decrementMainRight(outputs, getMainStableInclination());
+//        }else{
+//            incrementMainRight(outputs, getMainStableInclination());
+//        }
+//
+//        //for the left wing
+//        if(leftMainInclination > getMainStableInclination()){
+//            decrementMainLeft(outputs, getMainStableInclination());
+//        }else{
+//            incrementMainLeft(outputs, getMainStableInclination());
+//        }
+//
+//        //for the horizontal wing
+//        if(horizontalInclination > getStabilizerStableInclination()){
+//            decrementHorizontalStabilizer(outputs, getStabilizerStableInclination());
+//        }else{
+//            incrementHorizontalStabilizer(outputs, getStabilizerStableInclination());
+//        }
+//    }
+//
+//    /**
+//     * Checks if there are control actions that need to be taken
+//     * @param PIDAdjustedCenters the center vector (adjusted by the PID) the x and y coordinates contain
+//     *                           the on screen coordinate of the cube
+//     *                           the z coordinate contains the size of the cube
+//     * @return true if control actions must be taken
+//     */
+//    private boolean needsActions(Vector PIDAdjustedCenters){
+//        //if we have to take control actions, the adjusted center modulus has to be located outside
+//        //the "idle" circle
+//        //the maximum size on screen:
+//        AutopilotConfig config = this.getAutopilot().getConfig();
+//        int maxSize = config.getNbColumns() * config.getNbRows();
+//
+//        //then get the relative difference in on screen size and max size
+//        // z-coordinate contains the on screen size of the cube
+//        float relDeltaSize = (maxSize - PIDAdjustedCenters.getzValue())/maxSize;
+//        float scaleConst = 0f;
+//
+//        //the rel deltaSize serves as a multiplier for the real length of the on screen vector
+//        //stating the fact that controls must be done earlier if the drone is faraway from the cube
+//        //and that we should refrain from control actions if the drone is already big on screen
+//
+//        //calculate the on screen size
+//        float xPos = PIDAdjustedCenters.getxValue();
+//        float yPos = PIDAdjustedCenters.getyValue();
+//        float xySize = (float) sqrt(xPos*xPos + yPos*yPos);
+//
+//        return xySize*( relDeltaSize*scaleConst + 1 ) >= getActionThreshold();
+//
+//    }
+//
+//    @Override
+//    public AutopilotOutputs getControlActions(AutopilotInputs inputs) {
+//        this.setCurrentInputs(inputs);
+//        ControlOutputs outputs = this.getPreviousOutputs().copy(); //get a copy from the previous outputs
+//        //get the middle of the cubes:
+//        AutoPilotCamera APCamera = this.getAutopilot().getAPCamera();
+//        APCamera.loadNewImage(getCurrentInputs().getImage());
+//
+//        //the elapsed time needed for the PID
+//        float elapsedTime = this.getCurrentInputs().getElapsedTime();
+//
+//        Vector onScreenCubeCenter = new Vector();
+//
+//        try {
+//            onScreenCubeCenter = APCamera.getCenterOfNCubes(1);
+//        } catch (NoCubeException e) {
+//            //e.printStackTrace();
+//            //do nothing, maybe a transition later
+//        }
+//
+//        float xPosition = this.getxPid().getPIDOutput(-onScreenCubeCenter.getxValue(), elapsedTime);
+//        float yPosition = this.getyPID().getPIDOutput(onScreenCubeCenter.getyValue(), elapsedTime);
+//
+//        Vector PIDAdjustedPos = new Vector(xPosition, yPosition, onScreenCubeCenter.getzValue());
+//        //now get the controls for each region of the cube position
+//        //first check if any controls are needed
+//        if(needsActions(PIDAdjustedPos)){
+//            //control actions are needed
+//            //do actions based on the angle
+//            float angle = (float) atan2(yPosition, xPosition);
+//
+//        }else{
+//            //no actions are needed, only assure that we remain steady
+//            steady(outputs);
+//        }
+//
+//        //save the previous outputs
+//        setPreviousOutputs(outputs);
+//        return outputs;
+//    }
+//
+//    /**
+//     * Controlling actions for the pitch, as long as the pitch exceeds the thresholds adjust the horizontal stabilizers
+//     * @param outputs
+//     */
+//    private void pitchControl(ControlOutputs outputs){
+//        AutopilotInputs inputs = this.getCurrentInputs();
+//        float pitch = inputs.getPitch();
+//        if(pitch > getPitchThreshold()){
+//            this.incrementHorizontalStabilizer(outputs);
+//        }else if(pitch < -getPitchThreshold()){
+//            this.decrementHorizontalStabilizer(outputs);
+//        }
+//        ///else do nothing
+//    }
+//
+//    private void rollControll(ControlOutputs outputs){
+//
+//    }
+//
+//    /**
+//     * Increments the current value of horizontal stabilizer in the outputs with a fixed amount, if the new inclination exceeds the max inclination
+//     * the value is set to this provided value
+//     * @param outputs the outputs of the controller
+//     * @param maxInclination the maximal inclination
+//     * note: the increment value is given by getStabilizerInclinationDelta();
+//     */
+//    private void incrementHorizontalStabilizer(ControlOutputs outputs, float maxInclination){
+//        //first get the previous value for the stabilizer
+//        float horStabInclination = outputs.getHorStabInclination();
+//        float newInclination = horStabInclination + getStabilizerInclinationDelta();
+//        if(newInclination > maxInclination){
+//            outputs.setHorStabInclination(maxInclination);
+//        }else{
+//            outputs.setHorStabInclination(newInclination);
+//        }
+//    }
+//
+//    private void incrementHorizontalStabilizer(ControlOutputs outputs){
+//        incrementHorizontalStabilizer(outputs, Float.MAX_VALUE);
+//    }
+//
+//    /**
+//     * Decrements the inclination of the horizontal stabilizer in the outputs
+//     * with a standard amount, if the minimal inclination is reached, no further decrement is done
+//     * @param outputs the outputs of the controller (here the value is modified)
+//     * @param minInclination the min cap for the decrement of the inclination
+//     * note: the decrement value is given by getStabilizerInclinationDelta();
+//     */
+//    private void decrementHorizontalStabilizer(ControlOutputs outputs, float minInclination){
+//        //first get the previous value for the stabilizer
+//        float horStabInclination = outputs.getHorStabInclination();
+//        float newInclination = horStabInclination - getStabilizerInclinationDelta();
+//        if(newInclination < minInclination){
+//            outputs.setHorStabInclination(minInclination);
+//        }else{
+//            outputs.setHorStabInclination(newInclination);
+//        }
+//    }
+//
+//    /**
+//     * Decrements the horizontal stabilizer inclination without any cap
+//     * @param outputs the outputs of the controller
+//     */
+//    private void decrementHorizontalStabilizer(ControlOutputs outputs){
+//        decrementHorizontalStabilizer(outputs, -Float.MAX_VALUE);
+//    }
+//
+//    /**
+//     * Increments the main left inclination of the current outputs with a fixed incrementation
+//     * if the inclination exceeds the max inclination, it is set to the max inclination
+//     * @param outputs the outputs for the controller (here the inclination is modified
+//     * @param maxInclination the maximal inclination
+//     */
+//    private void incrementMainLeft(ControlOutputs outputs, float maxInclination){
+//        float leftMainInclination = outputs.getLeftWingInclination();
+//        float newInclination = leftMainInclination + getMainInclinationDelta();
+//        if(newInclination > maxInclination){
+//            outputs.setLeftWingInclination(maxInclination);
+//        }else{
+//            outputs.setLeftWingInclination(newInclination);
+//        }
+//    }
+//
+//    private void incrementMainLeft(ControlOutputs outputs){
+//        incrementMainLeft(outputs, Float.MAX_VALUE);
+//    }
+//
+//    /**
+//     * Decrements the main left inclination in the given outputs, if the decrement exceeds the minimal
+//     * inclination, the inclination is set to this provided minimum
+//     * @param outputs the outputs of the autopilot
+//     * @param minInclination the minimal inclination
+//     * note: the decrement value is given by getMainInclinationDelta();
+//     */
+//    private void decrementMainLeft(ControlOutputs outputs, float minInclination){
+//        float rightMainInclination = outputs.getRightWingInclination();
+//        float newInclination = rightMainInclination - getMainInclinationDelta();
+//        if(newInclination < minInclination){
+//            outputs.setRightWingInclination(minInclination);
+//        }else{
+//            outputs.setRightWingInclination(newInclination);
+//        }
+//    }
+//
+//    private void decrementMainLeft(ControlOutputs outputs){
+//        decrementMainLeft(outputs, -Float.MAX_VALUE);
+//    }
+//
+//    /**
+//     * Increments the main right wing inclination in the given outputs, if this value exceeds the upper limit (maxIncl)
+//     * it is set to the maximal inclination allowed
+//     * @param outputs the outputs of the autopilot controller
+//     * @param maxInclination the maximal inclination of said wing
+//     */
+//    private void incrementMainRight(ControlOutputs outputs, float maxInclination){
+//        float rightMainInclination = outputs.getRightWingInclination();
+//        float newInclination = rightMainInclination + getMainInclinationDelta();
+//        if(newInclination > maxInclination){
+//            outputs.setRightWingInclination(maxInclination);
+//        }else{
+//            outputs.setRightWingInclination(newInclination);
+//        }
+//    }
+//
+//    private void incrementMainRight(ControlOutputs outputs){
+//        incrementMainRight(outputs, Float.MAX_VALUE);
+//    }
+//
+//    /**
+//     * Decrements the main right wing inclination in the given outputs, if this value exceeds the lower limit (minIncl)
+//     * it is set to the minimal inclination allowed
+//     * @param outputs the outputs of the autopilot controller
+//     * @param minInclination the minimal inclination of said wing
+//     */
+//    private void decrementMainRight(ControlOutputs outputs, float minInclination){
+//        float rightMainInclination = outputs.getRightWingInclination();
+//        float newInclination = rightMainInclination - getMainInclinationDelta();
+//        if(newInclination > minInclination){
+//            outputs.setRightWingInclination(minInclination);
+//        }else{
+//            outputs.setRightWingInclination(newInclination);
+//        }
+//    }
+//
+//    @Override
+//    protected float getMainStableInclination() {
+//        return MAIN_STABLE_INCLINATION;
+//    }
+//
+//    @Override
+//    protected float getStabilizerStableInclination() {
+//        return STABILIZER_STABLE_INCLINATION;
+//    }
+//
+//    @Override
+//    protected float getRollThreshold() {
+//        return ROLL_THRESHOLD;
+//    }
+//
+//    @Override
+//    protected float getInclinationAOAErrorMargin() {
+//        return this.getAutopilot().getConfig().getMaxAOA();
+//    }
+//
+//    @Override
+//    protected float getStandardThrust() {
+//        return STANDARD_THRUST;
+//    }
+//
+//    public static float getMainInclinationDelta() {
+//        return MAIN_INCLINATION_DELTA;
+//    }
+//
+//    public static float getMainMaxInclination() {
+//        return MAIN_MAX_INCLINATION;
+//    }
+//
+//    public static float getStabilizerInclinationDelta() {
+//        return STABILIZER_INCLINATION_DELTA;
+//    }
+//
+//    public static float getStabilizerMaxInclination() {
+//        return STABILIZER_MAX_INCLINATION;
+//    }
+//
+//    public static float getPitchThreshold() {
+//        return PITCH_THRESHOLD;
+//    }
+//
+//    public static float getActionThreshold() {
+//        return ACTION_THRESHOLD;
+//    }
+//
+//    /**
+//     * getter for the previous outputs of the controller
+//     * @return the pevious outputs of the controller
+//     */
+//    private ControlOutputs getPreviousOutputs() {
+//        return previousOutputs;
+//    }
+//
+//    /**
+//     * Setter for the previous outputs of the controller
+//     * @param previousOutputs the previous outputs of the controller
+//     */
+//    private void setPreviousOutputs(ControlOutputs previousOutputs) {
+//        this.previousOutputs = previousOutputs;
+//    }
+//
+//
+//    public PIDController getyPid() {
+//        return yPid;
+//    }
+//
+//    public void setyPid(PIDController yPid) {
+//        this.yPid = yPid;
+//    }
+//
+//    public PIDController getxPid() {
+//        return xPid;
+//    }
+//
+//    public void setxPid(PIDController xPid) {
+//        this.xPid = xPid;
+//    }
+//
+//    /**
+//     * Instance that holds the previous outputs of the drone
+//     */
+//    private ControlOutputs previousOutputs = new ControlOutputs();
+//
+//    /**
+//     * Instance that holds the PID controller for drone y axis image
+//     */
+//    private PIDController yPid = new PIDController(1.f, 0.f, 0.f);
+//
+//    /**
+//     * Instance that holds the PID controller for drone x axis image
+//     */
+//    private PIDController xPid = new PIDController(1.f, 0.f, 0.f);
+//
+//    public  final static float MAIN_STABLE_INCLINATION = (float) (5*PI/180);
+//    private final static float MAIN_INCLINATION_DELTA = (float) (1*PI/180);
+//    private final static float MAIN_MAX_INCLINATION = (float)(10*PI/180);
+//    public  final static float STABILIZER_STABLE_INCLINATION = 0f;
+//    private final static float STABILIZER_INCLINATION_DELTA = (float) (2*PI/180);
+//    private final static float STABILIZER_MAX_INCLINATION = (float)(5*PI/180);
+//    private final static float ROLL_THRESHOLD = (float) (15*PI/180);
+//    private final static float PITCH_THRESHOLD =(float) (10*PI/180);
+//    private final static float ACTION_THRESHOLD = 5;
+//    private final static float ACTIVATION_ANGLE =
+//
+//    //temporary constant, get more appropriate value
+//    private final static float STANDARD_THRUST = 500f;
+
