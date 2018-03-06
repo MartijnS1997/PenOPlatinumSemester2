@@ -193,6 +193,20 @@ public class Vector {
 		return new Vector(this.getxValue(),0f,this.getzValue());
 	}
 	
+	/**
+	 * Returns the vector, rotated by a given angle around the y-axis. Positive angles result in counterclockwise rotation.
+	 * @param angle
+	 * @return
+	 * @author Anthony Rathe
+	 */
+	public Vector rotateAroundYAxis(float angle) {
+		return new Vector((float)(Math.cos(angle)*this.getxValue()+Math.sin(angle)*this.getzValue()),this.getyValue(),(float)(-Math.sin(angle)*this.getxValue()+Math.cos(angle)*this.getzValue()));
+	}
+	
+	public boolean toTheRightOf(Vector other, Vector direction) {
+		Vector thisVector = this.makeHorizontal();
+		Vector otherVector = this.makeHorizontal();
+	}
 	
 	/**
 	 * calculates the cross product of two vectors and returns a new vector
