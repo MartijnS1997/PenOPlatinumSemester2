@@ -192,7 +192,7 @@ public class Window {
         program.setUniform("projectionMatrix", projectionMatrix);
         program.setUniform("viewMatrix", viewMatrix);
         
-        float viewingDistance = 230;
+        float viewingDistance = 250;
 
         for (WorldObject object: world.getObjectSet()) {
         	if (object.getClass() == Block.class) {
@@ -206,9 +206,12 @@ public class Window {
         	else if(object.getClass() == Drone.class) {
         		for (GraphicsObject polygon: object.getAssociatedGraphicsObjects()) {
         			program.setUniform("modelMatrix", getModelMatrix(((Drone) object).getOrientation().convertToVector3f(), ((Polygon) polygon).getRelPos(), polygon.getSize()));
-        			if (polygon.getPos().subtract(this.cameraposition).length() < viewingDistance) {
-        				polygon.render();
+        			if (polygon.getPos().subtract(this.cameraposition).length() > viewingDistance*0.75) {
+        				if (getSetting() != Settings.DRONE_CAM && getSetting() != Settings.DRONE_CHASE_CAM) {
+        					input.nextPosition(polygon.getPos());
+        				}
         			}
+        			polygon.render();
         		}
         	}
         	else if(object.getClass() == Floor.class) {
