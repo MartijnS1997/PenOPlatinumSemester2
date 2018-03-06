@@ -186,6 +186,15 @@ public class Vector {
 	}
 	
 	/**
+	 * Sets y-value of vector to zero
+	 * @author Anthony Rathe
+	 */
+	public Vector makeHorizontal() {
+		return new Vector(this.getxValue(),0f,this.getzValue());
+	}
+	
+	
+	/**
 	 * calculates the cross product of two vectors and returns a new vector
 	 * object containing the cross product results.
 	 * @param other
