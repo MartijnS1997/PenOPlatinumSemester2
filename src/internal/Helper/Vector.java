@@ -206,6 +206,8 @@ public class Vector {
 	public boolean toTheRightOf(Vector other, Vector direction) {
 		Vector thisVector = this.makeHorizontal();
 		Vector otherVector = this.makeHorizontal();
+		Vector normal = direction.rotateAroundYAxis((float)Math.PI/2);
+		return normal.getAngleBetween(thisVector.vectorDifference(otherVector)) >= Math.PI/2;
 	}
 	
 	/**

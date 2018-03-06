@@ -61,7 +61,7 @@ public class PathGenerator {
     		}
     		
     		// generate semi-circle
-    		float circleDiameter = parallelDistanceBetween(position, velocity, destination)
+    		float circleDiameter = parallelDistanceBetween(position, velocity, destination);
     		
     		// generate additional path
     		if (additionalDistance < 0) {
@@ -163,6 +163,7 @@ public class PathGenerator {
 	    	return distanceBetween.rotateAroundYAxis((float)Math.PI/2);
 	    	
 	    }
+	   
 	
 	private static final float DISTANCE_BETWEEN_LANDING_BLOCKS = 10f;
     private static final float LANDING_ANGLE = (float)Math.PI/12;
