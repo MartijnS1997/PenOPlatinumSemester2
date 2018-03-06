@@ -45,7 +45,7 @@ public class Floor implements WorldObject {
 	public void createFloor(int n, float nx, float nz) {
 		
         for (int i = 0; i < 2*n*n; i++) {
-        	Vector delta = new Vector(nx*(i%(n)), 0, nz*(i/(2*n)));
+        	Vector delta = new Vector(nx*(i%n), 0, nz*(i/n));
         	Vector position = delta.vectorSum(getPosition());
             Vector color = new Vector((float) (60.0+(i%2)*60), 1, 0.6f);
         	Tile tile = new Tile(position.convertToVector3f(), color.convertToVector3f());
