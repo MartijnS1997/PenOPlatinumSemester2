@@ -38,9 +38,9 @@ public class WorldBuilder {
                 world.addWorldObject(block);
     		}
             
-            int n = 25; // n moet oneven zijn
-            float nx = 15;
-            float nz = 15;
+            int n = 101; // n moet oneven zijn
+            float nx = 10;
+            float nz = 10;
             Floor floor = new Floor(new Vector(-n*nx/2, 0, -n*nz + 50f));
             for (int i = 0; i < n*n; i++) {
             	Vector delta = new Vector(nx*(i%n), 0, nz*(i/n));

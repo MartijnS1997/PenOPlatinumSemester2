@@ -1,10 +1,8 @@
 package gui;
 
 import internal.Block;
-import internal.CameraImage;
 import internal.Drone;
 import internal.Floor;
-import internal.Pixel;
 import internal.World;
 import internal.WorldObject;
 import math.Matrix3f;
@@ -16,13 +14,9 @@ import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.*;
 import org.lwjgl.system.*;
 
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.nio.*;
-import java.util.List;
 
 import static org.lwjgl.glfw.Callbacks.*;
 import static org.lwjgl.glfw.GLFW.*;
@@ -59,6 +53,8 @@ public class Window {
 	private boolean terminated = false;
 
 	private Settings setting;
+	
+	private Vector3f cameraposition;
 
 	/**
 	 * Creates a window.
@@ -195,24 +191,32 @@ public class Window {
 		program.bind();
         program.setUniform("projectionMatrix", projectionMatrix);
         program.setUniform("viewMatrix", viewMatrix);
+        
+        float viewingDistance = 230;
 
         for (WorldObject object: world.getObjectSet()) {
         	if (object.getClass() == Block.class) {
         		for (GraphicsObject cube: object.getAssociatedGraphicsObjects()) {
         			program.setUniform("modelMatrix", getModelMatrix(((Cube) cube).getRelPos(), cube.getSize()));
-        			cube.render();
+        			if (cube.getPos().subtract(this.cameraposition).length() < viewingDistance) {
+        				cube.render();
+        			}
         		}
         	}
         	else if(object.getClass() == Drone.class) {
         		for (GraphicsObject polygon: object.getAssociatedGraphicsObjects()) {
         			program.setUniform("modelMatrix", getModelMatrix(((Drone) object).getOrientation().convertToVector3f(), ((Polygon) polygon).getRelPos(), polygon.getSize()));
-        			polygon.render();
+        			if (polygon.getPos().subtract(this.cameraposition).length() < viewingDistance) {
+        				polygon.render();
+        			}
         		}
         	}
         	else if(object.getClass() == Floor.class) {
         		for (GraphicsObject tile: object.getAssociatedGraphicsObjects()) {
         			program.setUniform("modelMatrix", getModelMatrix(tile.getPos(), tile.getSize()));
-        			tile.render();
+        			if (tile.getPos().subtract(this.cameraposition).length() < viewingDistance) {
+        				tile.render();
+        			}
         		}
         	}
     	}
@@ -287,6 +291,7 @@ public class Window {
 			break;
 		default: 
 			this.viewMatrix = input.getViewMatrix(getSetting());
+			this.cameraposition = input.getPosition();
 			break;
 		}
 	}
@@ -301,6 +306,7 @@ public class Window {
 			break;
 		default: 
 			this.viewMatrix = input.getViewMatrix(setting);
+			this.cameraposition = input.getPosition();
 			break;
 		}
 	}
@@ -321,7 +327,7 @@ public class Window {
         
         
         Vector3f position = dronePosition.add(look.scale(camPosition));
-
+        this.cameraposition = position;
 		return Matrix4f.viewMatrix(right, up, look, position);
 	}
 	

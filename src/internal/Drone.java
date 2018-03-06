@@ -14,6 +14,9 @@ import gui.Cube;
 import gui.GraphicsObject;
 import gui.Polygon;
 import gui.Wheel;
+import internal.Vector;
+import internal.PhysXEngine;
+import internal.PhysicsEngineState;
 import math.Vector3f;
 
 import static java.lang.Math.PI;

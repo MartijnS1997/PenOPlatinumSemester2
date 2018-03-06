@@ -137,6 +137,10 @@ public Matrix4f getViewMatrix(Settings setting) {
 		
 		return Matrix4f.viewMatrix(right, up, look, position);
 	}
+
+	public Vector3f getPosition() {
+		return this.position;
+	}
 	
 	static boolean isKeyPressed(int keyCode) {
 		return glfwGetKey(GLFW.glfwGetCurrentContext(), keyCode) == GLFW_PRESS;
