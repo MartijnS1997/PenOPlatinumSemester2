@@ -327,7 +327,7 @@ public class WorldGenerator {
 			allColors.remove(index);
 
 			Block block = new Block(pos);
-			Cube cube = new Cube(pos.convertToVector3f(), clr.convertToVector3f());
+			Cube cube = new Cube(pos.convertToVector3f(), clr.convertToVector3f(), true);
 			cube.setSize(1f);
 			block.setAssocatedCube(cube);
 
@@ -490,8 +490,5 @@ public class WorldGenerator {
 			//	System.out.println(errorPosition.get(i));
 		}
 	}
-
-
-
 
 }
