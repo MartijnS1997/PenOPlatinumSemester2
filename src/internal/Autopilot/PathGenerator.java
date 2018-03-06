@@ -117,11 +117,11 @@ public class PathGenerator {
         			blockCoordinates.add(position.vectorSum(velocity.makeHorizontal().rotateAroundYAxis(ALIGNMENT_TURN_ANGLE).normalizeToLength(velocity.getSize()*ALIGNMENT_TURN_FACTOR)));
         		}
     		}else {
-    			// if distance between drone and destination is too small to allow for a proper turn, keep on flying away from destination
-    	    	
+    			// if distance between drone and destination is too small to allow for a proper turn, keep on flying away (horizontally) from destination
+    	    	blockCoordinates.add(position.vectorSum(velocity.makeHorizontal().scalarMult(ALIGNMENT_TURN_FACTOR)));
     		}
     		
-    		}
+    	}
     	
     	setPath(blockCoordinates);
         
@@ -170,7 +170,7 @@ public class PathGenerator {
     }
     
     /**
-     * Return the distance a vector "direction" should travel horizontally, starting from "destination", to arrive
+     * Return the distance a point moving in the direction "direction" should travel horizontally, starting from "destination", to arrive
      * in a parallel position, next to "position".
      * @param position
      * @param direction
