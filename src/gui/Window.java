@@ -53,6 +53,8 @@ public class Window {
 	private boolean terminated = false;
 
 	private Settings setting;
+	
+	private Vector3f cameraposition;
 
 	/**
 	 * Creates a window.
@@ -189,24 +191,35 @@ public class Window {
 		program.bind();
         program.setUniform("projectionMatrix", projectionMatrix);
         program.setUniform("viewMatrix", viewMatrix);
+        
+        float viewingDistance = 250;
 
         for (WorldObject object: world.getObjectSet()) {
         	if (object.getClass() == Block.class) {
         		for (GraphicsObject cube: object.getAssociatedGraphicsObjects()) {
         			program.setUniform("modelMatrix", getModelMatrix(((Cube) cube).getRelPos(), cube.getSize()));
-        			cube.render();
+        			if (cube.getPos().subtract(this.cameraposition).length() < viewingDistance) {
+        				cube.render();
+        			}
         		}
         	}
         	else if(object.getClass() == Drone.class) {
         		for (GraphicsObject polygon: object.getAssociatedGraphicsObjects()) {
-        			program.setUniform("modelMatrix", getModelMatrix(((Drone) object).getOrientation().convertToVector3f(), ((Cube) polygon).getRelPos(), polygon.getSize()));
+        			program.setUniform("modelMatrix", getModelMatrix(((Drone) object).getOrientation().convertToVector3f(), ((Polygon) polygon).getRelPos(), polygon.getSize()));
+        			if (polygon.getPos().subtract(this.cameraposition).length() > viewingDistance*0.8) {
+        				if (getSetting() != Settings.DRONE_CAM && getSetting() != Settings.DRONE_CHASE_CAM) {
+        					input.nextPosition(polygon.getPos());
+        				}
+        			}
         			polygon.render();
         		}
         	}
         	else if(object.getClass() == Floor.class) {
         		for (GraphicsObject tile: object.getAssociatedGraphicsObjects()) {
         			program.setUniform("modelMatrix", getModelMatrix(tile.getPos(), tile.getSize()));
-        			tile.render();
+        			if (tile.getPos().subtract(this.cameraposition).length() < viewingDistance) {
+        				tile.render();
+        			}
         		}
         	}
     	}
@@ -227,8 +240,8 @@ public class Window {
 	     * Releases in use OpenGL resources.
 	     */
 		for (WorldObject object: world.getObjectSet()) {
-			for (GraphicsObject cube: ((WorldObject) object).getAssociatedGraphicsObjects())
-				cube.delete();
+			for (GraphicsObject graphicsObject: object.getAssociatedGraphicsObjects())
+				graphicsObject.delete();
     	}
 		
 		terminated = true;
@@ -281,6 +294,7 @@ public class Window {
 			break;
 		default: 
 			this.viewMatrix = input.getViewMatrix(getSetting());
+			this.cameraposition = input.getPosition();
 			break;
 		}
 	}
@@ -295,6 +309,7 @@ public class Window {
 			break;
 		default: 
 			this.viewMatrix = input.getViewMatrix(setting);
+			this.cameraposition = input.getPosition();
 			break;
 		}
 	}
@@ -313,8 +328,9 @@ public class Window {
         Vector3f up = transformationMatrix.multiply(new Vector3f(0,1,0));
         Vector3f look = transformationMatrix.multiply(new Vector3f(0,0,-1));
         
+        
         Vector3f position = dronePosition.add(look.scale(camPosition));
-
+        this.cameraposition = position;
 		return Matrix4f.viewMatrix(right, up, look, position);
 	}
 	

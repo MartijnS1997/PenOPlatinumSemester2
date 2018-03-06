@@ -1,12 +1,9 @@
-/internal/
-<<<<<<< HEAD
-=======
-/tests/
 /Autopilot/
+/blockCoordinates.txt
+/blockDemoEasy.txt
+/blockDemoHard.txt
 /datatypes/
 /gui/
+/internal/
 /math/
-/TestBedServer.class
-/TestbedConnection$TestbedOutputs.class
-/TestbedConnection.class
->>>>>>> d38762db84f2573b4a2268f9210f9aaa5f9144d4
+/tests/

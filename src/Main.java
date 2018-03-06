@@ -5,6 +5,7 @@ import gui.Graphics;
 import gui.Settings;
 import gui.Tile;
 import gui.Time;
+import gui.Wheel;
 import gui.Window;
 import internal.Autopilot.AutoPilot;
 import internal.Exceptions.SimulationEndedException;
@@ -29,9 +30,10 @@ public class Main {
 		// initialize graphics capabilities
 		Graphics graphics = new Graphics();
 		
-		// Cube needs graphics to be able to initialize cubes
+		// GraphicsObjects needs graphics to be able to initialize cubes
 		Cube.setGraphics(graphics);
 		Tile.setGraphics(graphics);
+		Wheel.setGraphics(graphics);
 
 		// Construct the windows
 		Window droneCam = new Window(200, 200, 0.5f, 0.4f, "bytestream window", new Vector3f(1.0f, 1.0f, 1.0f), false);
