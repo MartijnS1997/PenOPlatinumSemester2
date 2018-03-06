@@ -47,10 +47,19 @@ public class Floor implements WorldObject {
         for (int i = 0; i < 2*n*n; i++) {
         	Vector delta = new Vector(nx*(i%n), 0, nz*(i/n));
         	Vector position = delta.vectorSum(getPosition());
-            Vector color = new Vector((float) (60.0+(i%2)*60), 1, 0.6f);
+            Vector color = new Vector((60.0f+(i%2)*60), 1, 0.6f);
         	Tile tile = new Tile(position.convertToVector3f(), color.convertToVector3f());
         	tile.setSize(new Vector(nx, 0, nz));
         	this.setAssociatedGraphicsObject(tile);
         }
+        
+//        Tile tile = new Tile(this.getPosition().convertToVector3f(), (new Vector(240, 1, 1f)).convertToVector3f());
+//    	tile.setSize(new Vector(20, 0, 20));
+//    	this.setAssociatedGraphicsObject(tile);
+//    	Vector position = getPosition();
+//        Vector color = new Vector((60.0f), 1, 0.6f);
+//    	Tile tile = new Tile(position.convertToVector3f(), color.convertToVector3f());
+//    	tile.setSize(new Vector(20, 0, 20));
+//    	this.setAssociatedGraphicsObject(tile);
 	}
 }
