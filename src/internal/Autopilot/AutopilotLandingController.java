@@ -2,6 +2,10 @@ package internal.Autopilot;
 
 import Autopilot.AutopilotInputs;
 import Autopilot.AutopilotOutputs;
+import internal.Helper.Vector;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Martijn on 18/02/2018.
@@ -49,4 +53,8 @@ public class AutopilotLandingController extends Controller{
     protected float getStandardThrust() {
         return 0;
     }
+
+
+    private List<Vector> path = new ArrayList<>();
+
 }
