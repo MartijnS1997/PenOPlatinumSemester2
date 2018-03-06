@@ -46,6 +46,9 @@ public class WorldBuilder {
         
         Floor floor = new Floor(new Vector());
         world.addWorldObject(floor);
+        
+        Airport airport = new Airport(new Vector(0, 0.01f, -0));
+        world.addWorldObject(airport);
 
         return world;
     }

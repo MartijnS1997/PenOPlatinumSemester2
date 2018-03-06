@@ -28,6 +28,8 @@ public class WorldBuilder_v2 {
         world.addDrones(droneList);
         Floor floor = new Floor(new Vector());
         world.addWorldObject(floor);
+        Airport airport = new Airport(new Vector(0, 0.01f, -0));
+        world.addWorldObject(airport);
         return world;
     }
 
@@ -43,6 +45,8 @@ public class WorldBuilder_v2 {
         world.addDrones(droneList);
         Floor floor = new Floor(new Vector());
         world.addWorldObject(floor);
+        Airport airport = new Airport(new Vector());
+        world.addWorldObject(airport);
         return world;
     }
 
@@ -58,11 +62,13 @@ public class WorldBuilder_v2 {
         world.addDrones(droneList);
         Floor floor = new Floor(new Vector());
         world.addWorldObject(floor);
+        Airport airport = new Airport(new Vector());
+        world.addWorldObject(airport);
         return world;
     }
 
     /**
-     * Creates an empty world with only one drone in it and no cubes (for testing takeoff and tyre physics)
+     * Creates an empty world with only one drone in it and no cubes (for testing takeoff and tire physics)
      * @return a world only containing a drone and a floor
      */
     public World createWorld(){
@@ -70,6 +76,8 @@ public class WorldBuilder_v2 {
         world.addWorldObject(this.getDroneBuilder_v2().createTestBounceDrone());
         Floor floor = new Floor(new Vector());
         world.addWorldObject(floor);
+//        Airport airport = new Airport(new Vector());
+//        world.addWorldObject(airport);
         return world;
     }
 
