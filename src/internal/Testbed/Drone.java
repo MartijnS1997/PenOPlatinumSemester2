@@ -202,6 +202,9 @@ public class Drone implements WorldObject, Callable<Void> {
 			//let it go
 		}
 
+//		System.out.println("prev left tyre delta: " + state.getPrevRearLeftTyreDelta());
+//		System.out.println("Rear left tyre delta: " + nextState.getRearLeftTyreDelta());
+//		System.out.println("----------------");
 
 		this.setPosition(nextState.getPosition());
 		this.setVelocity(nextState.getVelocity());

@@ -2,6 +2,7 @@ package internal.Physics;
 
 import Autopilot.AutopilotConfig;
 import Autopilot.AutopilotOutputs;
+import internal.Autopilot.GammaFlightController;
 import internal.Exceptions.AngleOfAttackException;
 import internal.Helper.SquareMatrix;
 import internal.Testbed.DroneState;
@@ -52,48 +53,48 @@ public class PhysXEngine {
      */
     public PhysicsEngineState getNextStatePhysXEngine(float deltaTime, DroneState state, AutopilotOutputs inputs, float INSIGNIFICANCE){
 
-        //todo comment later
-/*        inputs = new AutopilotOutputs() {
-            @Override
-            public float getThrust() {
-                return 0;
-            }
-
-            @Override
-            public float getLeftWingInclination() {
-                return 0;
-            }
-
-            @Override
-            public float getRightWingInclination() {
-                return 0;
-            }
-
-            @Override
-            public float getHorStabInclination() {
-                return 0;
-            }
-
-            @Override
-            public float getVerStabInclination() {
-                return 0;
-            }
-
-            @Override
-            public float getFrontBrakeForce() {
-                return 0;
-            }
-
-            @Override
-            public float getLeftBrakeForce() {
-                return 0;
-            }
-
-            @Override
-            public float getRightBrakeForce() {
-                return 0;
-            }
-        };*/
+//        //todo comment later
+//        inputs = new AutopilotOutputs() {
+//            @Override
+//            public float getThrust() {
+//                return 300;
+//            }
+//
+//            @Override
+//            public float getLeftWingInclination() {
+//                return (float) (GammaFlightController.MAIN_STABLE_INCLINATION);
+//            }
+//
+//            @Override
+//            public float getRightWingInclination() {
+//                return (float) (GammaFlightController.MAIN_STABLE_INCLINATION/*-2.5*PI/180*/);
+//            }
+//
+//            @Override
+//            public float getHorStabInclination() {
+//                return (float) (-3*PI/180);
+//            }
+//
+//            @Override
+//            public float getVerStabInclination() {
+//                return 0;//(float) (7*PI/180);
+//            }
+//
+//            @Override
+//            public float getFrontBrakeForce() {
+//                return 0;
+//            }
+//
+//            @Override
+//            public float getLeftBrakeForce() {
+//                return 0;
+//            }
+//
+//            @Override
+//            public float getRightBrakeForce() {
+//                return 0;
+//            }
+//        };
 
         Vector orientation = state.getOrientation();
         Vector rotation = state.getRotation();
@@ -121,9 +122,9 @@ public class PhysXEngine {
         Vector thrustVector = new Vector(0.f, 0.f, -inputs.getThrust());
         // calculate the next position & velocity
         Vector acceleration = this.calcAcceleration(thrustVector, state, inputs, deltaTime);
-
         Vector nextVelocity = this.getNextVelocity(deltaTime, acceleration, velocity);
         Vector nextPosition = this.getNextPosition(deltaTime, acceleration, position, velocity);
+
         Vector angularAcceleration = this.calcAngularAcceleration(state, inputs, deltaTime);
         Vector angularAccelerationWorld = droneOnWorld(angularAcceleration, orientation);
         Vector nextRotation = this.getNextRotationVector(deltaTime, angularAccelerationWorld, rotation);
@@ -155,17 +156,17 @@ public class PhysXEngine {
 
             @Override
             public float getFrontTyreDelta() {
-                return chassisPhysX.getFrontTyre().calcRadiusDelta(nextOrientation, nextPosition);
+                return chassisPhysX.getFrontTyre().calcRadiusDelta(orientation, position);
             }
 
             @Override
             public float getRearLeftTyreDelta() {
-                return chassisPhysX.getRearLeftTyre().calcRadiusDelta(nextOrientation, nextPosition);
+                return chassisPhysX.getRearLeftTyre().calcRadiusDelta(orientation, position);
             }
 
             @Override
             public float getRearRightTyreDelta() {
-                return chassisPhysX.getRearRightTyre().calcRadiusDelta(nextOrientation, nextPosition);
+                return chassisPhysX.getRearRightTyre().calcRadiusDelta(orientation, position);
             }
         };
 
@@ -173,6 +174,8 @@ public class PhysXEngine {
             this.recordEngineState(physicsEngineState);
         }
 
+//        System.out.println("current orientation: " + physicsEngineState.getOrientation().scalarMult((float) (180/PI)));
+//        System.out.println();
 
         return physicsEngineState;
     }
@@ -631,6 +634,7 @@ public class PhysXEngine {
         Vector rotationVector = state.getRotation();
         SquareMatrix inverseInertiaTensor = this.getInertiaTensor().invertDiagonal();
         Vector moment = this.getTotalMomentDrone(state, inputs, deltaTime);
+        //System.out.println("total moment drone: " + moment);
         Vector rotationDrone = worldOnDrone(rotationVector, orientation);
         Vector rotationXImpulseMoment = rotationDrone.crossProduct(this.getImpulseMoment(orientation, rotationVector));
 
@@ -720,16 +724,23 @@ public class PhysXEngine {
         int nbOfWings = wingArray.length;
         //the array containing the lift vectors projected on the drone axis
         Vector[] momentVectorsDrone = new Vector[nbOfWings];
-
+        Vector[] forceVectorsDrone = new Vector[nbOfWings];
         for (int index = 0; index != nbOfWings; index++) {
             WingPhysX currentWing = wingArray[index];
             Vector liftOnDrone = worldOnDrone(currentWing.getLift(orientation, rotation, velocity), orientation);
+            forceVectorsDrone[index] = liftOnDrone;
             Vector positionWing = currentWing.getRelativePosition();
             Vector momentOnDrone = positionWing.crossProduct(liftOnDrone);
             momentVectorsDrone[index] = momentOnDrone;
         }
-        Vector chassisMoment = this.getDroneChassis().netChassisMoment(state, inputs, deltaTime);
 
+//        System.out.println("Lift Right main: " + forceVectorsDrone[0]);
+//        System.out.println("Lift Left main: " +  forceVectorsDrone[1]);
+//        System.out.println("Lift Horizontal stabilizer: " + forceVectorsDrone[2]);
+//        System.out.println("Lift Vertical stabilizer: " + forceVectorsDrone[3]);
+
+
+        Vector chassisMoment = this.getDroneChassis().netChassisMoment(state, inputs, deltaTime);
         return (Vector.sumVectorArray(momentVectorsDrone)).vectorSum(chassisMoment);
     }
 

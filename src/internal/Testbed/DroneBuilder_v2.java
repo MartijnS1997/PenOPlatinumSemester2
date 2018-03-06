@@ -31,6 +31,47 @@ public class DroneBuilder_v2 {
         return null;
     }
 
+    public Drone createTestBounceDrone(){
+        DroneState state = new DroneState() {
+            @Override
+            public Vector getPosition() {
+                return new Vector(0f, WHEEL_Y_POS + TYRE_RADIUS, 0f);
+            }
+
+            @Override
+            public Vector getVelocity() {
+                return new Vector();
+            }
+
+            @Override
+            public Vector getOrientation() {
+                return new Vector();
+            }
+
+            @Override
+            public Vector getRotation() {
+                return new Vector();
+            }
+
+            @Override
+            public float getPrevFrontTyreDelta() {
+                return 0;
+            }
+
+            @Override
+            public float getPrevRearLeftTyreDelta() {
+                return 0;
+            }
+
+            @Override
+            public float getPrevRearRightTyreDelta() {
+                return 0;
+            }
+        };
+        return new Drone(state, this.createConfig());
+    }
+
+
     /**
      * Builds drones with the given orientation and rotation
      * @param droneState a map containing the position and the heading of the drone
@@ -417,13 +458,14 @@ public class DroneBuilder_v2 {
     private final static int   NUMBER_OF_COLUMN_PIXELS_CAMERA = 200;
     private final static int   NUMBER_OF_ROW_PIXELS_CAMERA = 200;
     private final static float TYRE_SLOPE = (ENGINE_MASS+STABILIZER_MASS+MAIN_WING_MASS*2)*GRAVITY * 1/3f *1/INIT_COMPRESSION; // the slope of the tyre
-    private final static float DAMP_SLOPE = 0f;
+    private final static float DAMP_SLOPE = 4000f;//4000f;
 
     private final static float MAIN_STABLE_INCLINATION = (float) (5f*PI/180f);
     private final static float HOR_STABLE_INCLINATION = 0f;
     private final static float VER_STABLE_INCLINATION = 0f;
     private final static float STABLE_COMPRESSION = 0.05f;
     private final static float STABLE_Y_POS= TYRE_RADIUS - STABLE_COMPRESSION + WHEEL_Y_POS;
+    public final static float START_Y = WHEEL_Y_POS + TYRE_RADIUS;
 
 
 }

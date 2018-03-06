@@ -36,25 +36,25 @@ public class HorizontalWingPhysX extends WingPhysX {
         return new Vector(x_part, y_part, z_part);
     }
 
-    /**
-     * See pitch transformation matrix
-     * @param vector
-     * @return
-     */
-    @Override
-    public Vector projectOnDrone(Vector vector){
-
-        float inclination = this.getWingInclination();
-
-        float x_part = vector.getxValue();
-        float y_part = (float) Math.cos(inclination) * vector.getyValue()
-                - (float)Math.sin(inclination)*vector.getzValue();
-        float z_part = (float)Math.sin(inclination)*vector.getyValue()
-                +(float)Math.cos(inclination)*vector.getzValue();
-
-        return new Vector(x_part, y_part, z_part);
-
-    }
+//    /**
+//     * See pitch transformation matrix
+//     * @param vector
+//     * @return
+//     */
+//    @Override
+//    public Vector projectOnDrone(Vector vector){
+//
+//        float inclination = this.getWingInclination();
+//
+//        float x_part = vector.getxValue();
+//        float y_part = (float) Math.cos(inclination) * vector.getyValue()
+//                - (float)Math.sin(inclination)*vector.getzValue();
+//        float z_part = (float)Math.sin(inclination)*vector.getyValue()
+//                +(float)Math.cos(inclination)*vector.getzValue();
+//
+//        return new Vector(x_part, y_part, z_part);
+//
+//    }
 
     @Override
     public Vector getAxisVector() {

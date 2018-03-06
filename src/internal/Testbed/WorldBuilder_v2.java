@@ -2,6 +2,7 @@ package internal.Testbed;
 
 import internal.Helper.Vector;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -25,6 +26,23 @@ public class WorldBuilder_v2 {
         List<Drone> droneList = this.getDroneBuilder_v2().createDrones(droneConfig);
         World world = new WorldGenerator(NB_OF_BLOCKS).createWorld();
         world.addDrones(droneList);
+        Floor floor = new Floor(new Vector());
+        world.addWorldObject(floor);
+        return world;
+    }
+
+    /**
+     * Generates a world with only one drone present, used for test flights
+     * @return a world only containing one drone
+     */
+    public World createFlightTestWorld(){
+        World world = new World(World.NO_OBJECTIVE);
+        Map<Vector, Float> droneConfig = new HashMap<>();
+        droneConfig.put(new Vector(0,20f,0), 0f); //drone at 5m height facing forward
+        List<Drone> droneList = this.getDroneBuilder_v2().createDrones(droneConfig);
+        world.addDrones(droneList);
+        Floor floor = new Floor(new Vector());
+        world.addWorldObject(floor);
         return world;
     }
 
@@ -38,6 +56,20 @@ public class WorldBuilder_v2 {
         List<Drone> droneList = this.getDroneBuilder_v2().createDrones(droneConfig);
         World world = new World(World.NO_OBJECTIVE, threads);
         world.addDrones(droneList);
+        Floor floor = new Floor(new Vector());
+        world.addWorldObject(floor);
+        return world;
+    }
+
+    /**
+     * Creates an empty world with only one drone in it and no cubes (for testing takeoff and tyre physics)
+     * @return a world only containing a drone and a floor
+     */
+    public World createWorld(){
+        World world = new World(World.NO_OBJECTIVE);
+        world.addWorldObject(this.getDroneBuilder_v2().createTestBounceDrone());
+        Floor floor = new Floor(new Vector());
+        world.addWorldObject(floor);
         return world;
     }
 

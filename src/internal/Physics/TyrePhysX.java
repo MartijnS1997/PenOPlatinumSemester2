@@ -72,7 +72,8 @@ public class TyrePhysX {
         Vector position = state.getPosition();
         float groundDist = this.getTyreDistanceToGround(orientation, position);
         //first check if we touch the ground, if not return null vector
-        if(groundDist >= this.getTyreRadius()){
+        if(groundDist > this.getTyreRadius()){
+            //System.out.println("not touching ground");
             return new Vector();
         }
         //first calculate the force arm
@@ -83,8 +84,8 @@ public class TyrePhysX {
         //all the forces apply to the bottom of the tyre
         //1. transform the net forces to the drone axis system
         Vector netForceDrone = PhysXEngine.worldOnDrone(netForce, orientation);
-
-        return netForceDrone.crossProduct(relPosTyreBottomDrone);
+        //System.out.println("Tyre position: " + relPosTyreBottomDrone);
+        return relPosTyreBottomDrone.crossProduct(netForce);
     }
 
     /**
@@ -147,6 +148,10 @@ public class TyrePhysX {
         float deltaTyreDelta = tyreDelta - prevTyreDelta;
         float deltaDiff = deltaTyreDelta/deltaTime;
         float dampSlopeForce = dampSlope*deltaDiff;
+//        System.out.println("Damp slope force: "  + dampSlopeForce);
+//        System.out.println("current TyreDelta: " + tyreDelta);
+//        System.out.println("prev tyre delta: " + prevTyreDelta);
+//        System.out.println("tyreSlope force: " + tyreSlopeForce);
 
         return new Vector(0f, tyreSlopeForce + dampSlopeForce, 0f);
     }

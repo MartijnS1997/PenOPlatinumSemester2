@@ -6,6 +6,7 @@ import Autopilot.AutopilotOutputs;
 import internal.Physics.PhysXEngine;
 import internal.Helper.Vector;
 import internal.Testbed.DroneBuilder;
+import internal.Testbed.DroneBuilder_v2;
 
 import static java.lang.Math.PI;
 import static java.lang.Math.abs;
@@ -98,7 +99,7 @@ public abstract class Controller {
         PhysXEngine.PhysXOptimisations optimisations = this.getAutopilot().getPhysXOptimisations();
         Vector orientation = extractOrientation(currentInputs);
         Vector velocity = this.getVelocityApprox(prevInputs, currentInputs);
-        System.out.println("Velocity: " + velocity);
+        //System.out.println("Velocity: " + velocity);
         Vector rotation = this.getRotationApprox(prevInputs, currentInputs);
         float angleOfAttack = this.getAutopilot().getConfig().getMaxAOA();
 
@@ -122,7 +123,7 @@ public abstract class Controller {
      * @author Martijn Sauwens
      */
     private boolean AOAControlMainLeft(ControlOutputs controlOutputs, PhysXEngine.PhysXOptimisations optimisations, float angleOfAttack,  Vector orientation, Vector rotation, Vector velocity){
-        System.out.println("Left Main");
+        //System.out.println("Left Main");
         float inclinationBorder1 = optimisations.getMaxLeftMainWingInclination(orientation, rotation, velocity, angleOfAttack);
         float inclinationBorder2 = optimisations.getMaxLeftMainWingInclination(orientation, rotation, velocity, -angleOfAttack);
 
@@ -148,7 +149,7 @@ public abstract class Controller {
      * @author Martijn Sauwens
      */
     private boolean AOAControlMainRight(ControlOutputs controlOutputs, PhysXEngine.PhysXOptimisations optimisations, float angleOfAttack, Vector orientation, Vector rotation, Vector velocity){
-        System.out.println("MainRight");
+        //System.out.println("MainRight");
         float inclinationBorder1 = optimisations.getMaxRightMainWingInclination(orientation, rotation, velocity, angleOfAttack);
         float inclinationBorder2 = optimisations.getMaxRightMainWingInclination(orientation, rotation, velocity, -angleOfAttack);
 
@@ -174,7 +175,7 @@ public abstract class Controller {
      * @author Martijn Sauwens
      */
     private boolean AOAControlHorStabilizer(ControlOutputs controlOutputs, PhysXEngine.PhysXOptimisations optimisations, float angleOfAttack, Vector orientation, Vector rotation, Vector velocity){
-        System.out.println("Horizontal stabilizer");
+        //System.out.println("Horizontal stabilizer");
         float inclinationBorder1 = optimisations.getMaxHorStabInclination(orientation, rotation, velocity, angleOfAttack);
         float inclinationBorder2 = optimisations.getMaxHorStabInclination(orientation, rotation, velocity, -angleOfAttack);
 
@@ -200,7 +201,7 @@ public abstract class Controller {
      * @author Martijn Sauwens
      */
     private boolean AOAControlVerStabilizer(ControlOutputs controlOutputs, PhysXEngine.PhysXOptimisations optimisations, float angleOfAttack, Vector orientation, Vector rotation, Vector velocity){
-        System.out.println("Vertical stabilizer");
+        //System.out.println("Vertical stabilizer");
         float inclinationBorder1 = optimisations.getMaxVerStabInclination(orientation, rotation, velocity, angleOfAttack);
         float inclinationBorder2 = optimisations.getMaxVerStabInclination(orientation, rotation, velocity, -angleOfAttack);
 
@@ -210,7 +211,7 @@ public abstract class Controller {
 
         controlOutputs.setVerStabInclination(realisableInclination);
 
-        System.out.println("\n");
+        //System.out.println("\n");
         return desiredInclination == realisableInclination;
     }
 
@@ -224,10 +225,10 @@ public abstract class Controller {
         float[] borders = sortValue(border1, border2);
         float lowerBorder = borders[0];
         float upperBorder = borders[1];
-        System.out.println("Lower border: " + lowerBorder*RAD2DEGREE + "; Upper border: " + upperBorder*RAD2DEGREE + "; value: " + value*RAD2DEGREE);
+        //System.out.println("Lower border: " + lowerBorder*RAD2DEGREE + "; Upper border: " + upperBorder*RAD2DEGREE + "; value: " + value*RAD2DEGREE);
         //check if it is already between the borders
         if(value >= lowerBorder && value <= upperBorder) {
-            System.out.println("Selected value: " + value*RAD2DEGREE);
+            //System.out.println("Selected value: " + value*RAD2DEGREE);
             return value;
         }
 
@@ -235,10 +236,10 @@ public abstract class Controller {
         //if not so, set it between with a given error margin
         //check if the value is closest to the lower border
         if(abs(lowerBorder - value) <= abs(upperBorder - value)){
-            System.out.println("Selected value: " + (lowerBorder - signum(lowerBorder)*errorMargin)*RAD2DEGREE);
+            //System.out.println("Selected value: " + (lowerBorder - signum(lowerBorder)*errorMargin)*RAD2DEGREE);
             return lowerBorder - signum(lowerBorder)*errorMargin;
         }else{
-            System.out.println("Selected value: " + (upperBorder - signum(upperBorder)*errorMargin)*RAD2DEGREE);
+            //System.out.println("Selected value: " + (upperBorder - signum(upperBorder)*errorMargin)*RAD2DEGREE);
             return upperBorder - signum(upperBorder)*errorMargin;
         }
 
@@ -325,7 +326,7 @@ public abstract class Controller {
      * @param inputs the autopilotInput object containing the current inputs
      * @return a vector containing the orientation of the drone in vector format
      */
-    private static Vector extractOrientation(AutopilotInputs inputs){
+    protected static Vector extractOrientation(AutopilotInputs inputs){
         return new Vector(inputs.getHeading(), inputs.getPitch(), inputs.getRoll());
     }
 
@@ -334,7 +335,7 @@ public abstract class Controller {
      * @param inputs the autopilotInput object containing the current inputs
      * @return a vector containing the position of the drone in vector format
      */
-    private static Vector extractPosition(AutopilotInputs inputs){
+    protected static Vector extractPosition(AutopilotInputs inputs){
         return new Vector(inputs.getX(), inputs.getY(), inputs.getZ());
     }
 
@@ -423,6 +424,21 @@ public abstract class Controller {
 
         ControlOutputs(){
             //do nothing, everything stays initialized on zero
+        }
+
+        /**
+         * gets a deep copy of the given output instance
+         * @return the copy
+         */
+        public ControlOutputs copy(){
+            ControlOutputs copy = new ControlOutputs();
+            copy.setRightWingInclination(this.getRightWingInclination());
+            copy.setLeftWingInclination(this.getLeftWingInclination());
+            copy.setHorStabInclination(this.getHorStabInclination());
+            copy.setVerStabInclination(this.getVerStabInclination());
+            copy.setThrust(this.getThrust());
+
+            return copy;
         }
 
         /**
@@ -529,10 +545,10 @@ public abstract class Controller {
         public String toString() {
             return "ControlOutputs{" +
                     "thrust=" + thrust +
-                    ", leftWingInclination=" + leftWingInclination +
-                    ", rightWingInclination=" + rightWingInclination +
-                    ", horStabInclination=" + horStabInclination +
-                    ", verStabInclination=" + verStabInclination +
+                    ", leftWingInclination=" + leftWingInclination*RAD2DEGREE +
+                    ", rightWingInclination=" + rightWingInclination*RAD2DEGREE +
+                    ", horStabInclination=" + horStabInclination*RAD2DEGREE +
+                    ", verStabInclination=" + verStabInclination*RAD2DEGREE +
                     '}';
         }
     }
@@ -553,7 +569,7 @@ public abstract class Controller {
 
         @Override
         public float getY() {
-            return DroneBuilder.GAMMA_STARTPOS.getyValue();
+            return DroneBuilder_v2.START_Y;//DroneBuilder.GAMMA_STARTPOS.getyValue();
         }
 
         @Override
@@ -581,4 +597,274 @@ public abstract class Controller {
             return 0;
         }
     };
+
+    class VectorPID{
+        VectorPID(float gainConstant, float integralConstant, float derivativeConstant){
+            // set the constants
+            this.gainConstant = gainConstant;
+            this.integralConstant = integralConstant;
+            this.derivativeConstant = derivativeConstant;
+        }
+
+        /**
+         * Calculates the output for the current inputs of the PID controller
+         * @param input the input signal of the controller (from the feedback loop)
+         * @param elapsedTime the elapsed time during the simulation
+         * @return the output of the PID controller for the given inputs
+         * note: algorithm comes from https://en.wikipedia.org/wiki/PID_controller
+         */
+        Vector getPIDOutput(Vector input, float elapsedTime){
+
+            // P part is proportional (set to 1)
+            // I part reduces overall error
+            // D part reduces the oscillation of the path
+            // variables needed for calculation
+            Vector setPoint = this.getSetPoint();
+            Vector prevError = this.getPreviousError();
+            Vector integral = this.getIntegral();
+            float Kp = this.getGainConstant();
+            float Ki = this.getIntegralConstant();
+            float Kd = this.getDerivativeConstant();
+            float deltaTime = elapsedTime - this.getPreviousTime();
+
+            //determine the PID control factors
+            Vector error = setPoint.vectorDifference(input);
+            Vector derivative = (error.vectorDifference(prevError)).scalarMult(1/deltaTime);
+            integral = (error.scalarMult(deltaTime)).vectorSum(integral);
+
+            // calculate the output
+            Vector[] outputArray = {error.scalarMult(Kp),integral.scalarMult(Ki), derivative.scalarMult(Kd)};
+            Vector output = Vector.sumVectorArray(outputArray);
+
+            // save the state
+            this.setIntegral(integral);
+            this.setPreviousError(error);
+            this.setPreviousTime(elapsedTime);
+
+            return output;
+        }
+
+        private Vector getIntegral() {
+            return integral;
+        }
+
+        private void setIntegral(Vector integral) {
+            this.integral = integral;
+        }
+
+        private Vector getPreviousError() {
+            return previousError;
+        }
+
+        private void setPreviousError(Vector previousError) {
+            this.previousError = previousError;
+        }
+
+        private Vector getSetPoint() {
+            return setPoint;
+        }
+
+        public void setSetPoint(Vector setPoint) {
+            this.setPoint = setPoint;
+        }
+
+        private float getPreviousTime() {
+            return previousTime;
+        }
+
+        private void setPreviousTime(float previousTime) {
+            this.previousTime = previousTime;
+        }
+
+        private float getGainConstant() {
+            return gainConstant;
+        }
+
+        private void setGainConstant(float gainConstant) {
+            this.gainConstant = gainConstant;
+        }
+
+        private float getIntegralConstant() {
+            return integralConstant;
+        }
+
+        private void setIntegralConstant(float integralConstant) {
+            this.integralConstant = integralConstant;
+        }
+
+        private float getDerivativeConstant() {
+            return derivativeConstant;
+        }
+
+        private void setDerivativeConstant(float derivativeConstant) {
+            this.derivativeConstant = derivativeConstant;
+        }
+
+        private Vector integral = new Vector();
+        private Vector previousError = new Vector();
+        private Vector setPoint =new Vector();
+        private float previousTime = 0.0f;
+        private float gainConstant;
+        private float integralConstant;
+        private float derivativeConstant;
+    }
+
+    class PIDController {
+        /**
+         * Constructor for a PID controller object
+         * @param gainConstant the constant for the gain of de PID controller (also denoted as Kp)
+         * @param integralConstant the constant for the integral of the PID controller (also denoted as Ki)
+         * @param derivativeConstant the constant for the derivative of the PID controller (also denoted as Kd)
+         */
+        PIDController(float gainConstant, float integralConstant, float derivativeConstant){
+            // set the constants
+            this.gainConstant = gainConstant;
+            this.integralConstant = integralConstant;
+            this.derivativeConstant = derivativeConstant;
+        }
+
+        /**
+         * Constructs a PID controller with the gain, integral and derivative parameters set to 1.0
+         */
+        private PIDController(){
+            this(1.0f, 1.0f, 1.0f);
+        }
+
+        /**
+         * Calculates the output for the current inputs of the PID controller
+         * @param input the input signal of the controller (from the feedback loop)
+         * @param elapsedTime the elapsed time during the simulation
+         * @return the output of the PID controller for the given inputs
+         * note: algorithm comes from https://en.wikipedia.org/wiki/PID_controller
+         */
+        float getPIDOutput(float input, float elapsedTime){
+
+            // P part is proportional (set to 1)
+            // I part reduces overall error
+            // D part reduces the oscillation of the path
+            // variables needed for calculation
+            float setPoint = this.getSetPoint();
+            float prevError = this.getPreviousError();
+            float integral = this.getIntegral();
+            float Kp = this.getGainConstant();
+            float Ki = this.getIntegralConstant();
+            float Kd = this.getDerivativeConstant();
+            float deltaTime = elapsedTime - this.getPreviousTime();
+
+            //determine the PID control factors
+            float error = setPoint - input;
+            float derivative = (error - prevError)/deltaTime;
+            integral = integral + error*deltaTime;
+
+            // calculate the output
+            float output = Kp * error + Ki*integral + Kd*derivative;
+
+            // save the state
+            this.setIntegral(integral);
+            this.setPreviousError(error);
+            this.setPreviousTime(elapsedTime);
+
+            return output;
+        }
+
+        /*
+        Getters and setters
+         */
+
+        /**
+         * get the integral part (saved over the course of the algorithm)
+         * @return the integral part of the PID
+         */
+        private float getIntegral() {
+            return integral;
+        }
+
+        /**
+         * set the integral part of the PID (saved over the course of the algorithm)
+         * @param integral
+         */
+        private void setIntegral(float integral) {
+            this.integral = integral;
+        }
+
+        /**
+         * get the error of the previous iteration
+         * @return the previous error
+         */
+        private float getPreviousError() {
+            return previousError;
+        }
+
+        /**
+         * Set the previous error (used when the new values for the error are loaded)
+         * @param previousError
+         */
+        private void setPreviousError(float previousError) {
+            this.previousError = previousError;
+        }
+
+        /**
+         * The set point is the desired value used for reference, in our case it is 0.0
+         * @return
+         */
+        private float getSetPoint() {
+            return setPoint;
+        }
+
+        /**
+         * Set the set point of the PID
+         * @param setPoint
+         */
+        protected void setSetPoint(float setPoint) {
+            this.setPoint = setPoint;
+        }
+
+        /**
+         * Get the previous time of the simulation (used for the diff part of the PID)
+         * @return
+         */
+        public float getPreviousTime() {
+            return previousTime;
+        }
+
+        /**
+         * Set the previous time of the simulation (used when setting the new values of the drone)
+         * @param previousTime
+         */
+        public void setPreviousTime(float previousTime) {
+            this.previousTime = previousTime;
+        }
+
+        /**
+         * Constant used for the gain (proportional) part of the PID
+         * @return
+         */
+        private float getGainConstant() {
+            return gainConstant;
+        }
+
+        /**
+         * Constant used for the integral part of the PID
+         * @return
+         */
+        private float getIntegralConstant() {
+            return integralConstant;
+        }
+
+        /**
+         * Constant used for the derivative part of the PID
+         * @return
+         */
+        public float getDerivativeConstant() {
+            return derivativeConstant;
+        }
+
+        private float integral = 0.0f;
+        private float previousError = 0.0f;
+        private float setPoint = 0.0f;
+        private float previousTime = 0.0f;
+        private float gainConstant;
+        private float integralConstant;
+        private float derivativeConstant;
+    }
 }

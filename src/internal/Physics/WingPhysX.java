@@ -127,21 +127,16 @@ public abstract class WingPhysX {
      */
     public abstract Vector getAttackVector();
 
-    /**
-     * projects the vector onto the axis of the drone
-     * @return
-     */
-    public abstract Vector projectOnDrone(Vector vector);
 
-    /**
-     * project the given vector on the world axis
-     * @param vector the vector to be projected onto the world
-     * @param orientation the orientation of the drone
-     */
-    public Vector projectOnWorld(Vector vector, Vector orientation){
-        Vector droneVector = this.projectOnDrone(vector);
-        return PhysXEngine.droneOnWorld(droneVector, orientation);
-    }
+//    /**
+//     * project the given vector on the world axis
+//     * @param vector the vector to be projected onto the world
+//     * @param orientation the orientation of the drone
+//     */
+//    public Vector projectOnWorld(Vector vector, Vector orientation){
+//        Vector droneVector = this.projectOnDrone(vector);
+//        return PhysXEngine.droneOnWorld(droneVector, orientation);
+//    }
 
     /**
      * Getter for the angle of attack
