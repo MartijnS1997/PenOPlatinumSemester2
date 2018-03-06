@@ -125,7 +125,6 @@ public class AutoPilot implements Autopilot {
     	AutopilotTakeoffController takeoffController = this.getTakeoffController();
     	AutopilotLandingController landingController = this.getLandingController();
     	
-    	// getAPMode moet
     	
     	if (getAPMode() == 1) {
     		//takeoffController.setCurrentInputs(inputs);
@@ -374,6 +373,10 @@ public class AutoPilot implements Autopilot {
 	 * 3 = takeoff mode
 	 */
 	private int APMode;
+	
+	public Vector getStartPosition() {
+		return this.startPosition;
+	}
 	
 	// Variable for storing the startPosition of the drone, which also serves as the destination position
 	private Vector startPosition;
