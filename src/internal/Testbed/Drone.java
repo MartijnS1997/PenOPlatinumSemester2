@@ -12,6 +12,7 @@ import Autopilot.AutopilotOutputs;
 import gui.Cube;
 import gui.GraphicsObject;
 import gui.Wheel;
+import gui.Polygon;
 import internal.Physics.PhysXEngine;
 import internal.Physics.PhysicsEngineState;
 import internal.Helper.Vector;
@@ -214,8 +215,8 @@ public class Drone implements WorldObject, Callable<Void> {
 		// move the cube representing the drone
 
 		try{
-			for (GraphicsObject cube: this.getAssociatedGraphicsObjects())
-				((Cube) cube).update(differencePos.convertToVector3f(), getOrientation().convertToVector3f());
+			for (GraphicsObject polygon: this.getAssociatedGraphicsObjects())
+				((Polygon) polygon).update(differencePos.convertToVector3f(), getOrientation().convertToVector3f());
 		}catch(NullPointerException e){
 
 			//let it go
