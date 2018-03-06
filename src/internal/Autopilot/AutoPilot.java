@@ -25,7 +25,7 @@ public class AutoPilot implements Autopilot {
 	public AutoPilot(String controllerConfig){
 		// first make sure we can takeoff
 		this.setTakeoffController(new AutopilotTakeoffController(this));
-
+		System.out.println(controllerConfig);
 		// then we mus assure our customers a smooth ride
 		switch(controllerConfig){
 			case PhysXEngine.ALPHA_MODE:
@@ -40,7 +40,7 @@ public class AutoPilot implements Autopilot {
 		// and last, we need to land
 		this.setLandingController(new AutopilotLandingController(this));
 		//set AP mode 2 to make everything work again
-		//this.setAPMode(2);
+		this.setAPMode(2);
 
 	}
 
@@ -58,12 +58,12 @@ public class AutoPilot implements Autopilot {
     @Override
     public AutopilotOutputs simulationStarted(AutopilotConfig config, AutopilotInputs inputs) throws IOException {
             configureAutopilot(config, inputs);
-            if (this.getPhysXEngine().chassisTouchesGround(new Vector(inputs.getX(),inputs.getY(),inputs.getZ()), new Vector(inputs.getHeading(),inputs.getPitch(),inputs.getRoll()))) {
-            	this.setAPMode(1);
-            }else {
-            	this.setAPMode(2);
-            }
-            this.startPosition = new Vector(inputs.getX(),inputs.getY(),inputs.getZ());
+//            if (this.getPhysXEngine().chassisTouchesGround(new Vector(inputs.getX(),inputs.getY(),inputs.getZ()), new Vector(inputs.getHeading(),inputs.getPitch(),inputs.getRoll()))) {
+//            	this.setAPMode(1);
+//            }else {
+//            	this.setAPMode(2);
+//            }
+//            this.startPosition = new Vector(inputs.getX(),inputs.getY(),inputs.getZ());
         return getControlOutputs(inputs);
     }
 
@@ -131,6 +131,7 @@ public class AutoPilot implements Autopilot {
     		return takeoffController.getControlActions(inputs);
     	}
     	else if (getAPMode() == 2){
+    		//System.out.println("using AP mode 2");
     		//controller.setCurrentInputs(inputs);
     		return controller.getControlActions(inputs);
     	}

@@ -19,6 +19,7 @@ public class AlphaFlightController extends AutoPilotFlightController {
 
     public AlphaFlightController(AutoPilot autoPilot){
         super(autoPilot);
+        System.out.println("Using alpha controller");
     }
 
 
@@ -105,6 +106,7 @@ public class AlphaFlightController extends AutoPilotFlightController {
     @Override
     public AutopilotOutputs getControlActions(AutopilotInputs inputs){
 
+        //System.out.println("-------");
         this.setCurrentInputs(inputs);
 
         ControlOutputs controlOutputs = new ControlOutputs();
@@ -200,9 +202,10 @@ public class AlphaFlightController extends AutoPilotFlightController {
         APCamera.loadNewImage(currentInputs.getImage());
         int amountOfCubesInSight = APCamera.getCubesInPicture().size();
         
-        if (amountOfCubesInSight <= 0) {
-        	this.getAutopilot().setAPMode(3);
-        }
+//        if (amountOfCubesInSight <= 0) {
+//        	this.getAutopilot().setAPMode(3);
+//        }
+
 
         return controlOutputs;
     }

@@ -34,7 +34,7 @@ public class WorldBuilder {
                 Vector color = data.get(i+1);
                 Block block = new Block(position);
                 Cube cube = new Cube(position.convertToVector3f(), color.convertToVector3f(), true);
-                cube.setSize(1f);
+                cube.setSize(5f);
                 block.setAssocatedCube(cube);
                 world.addWorldObject(block);
     		}
