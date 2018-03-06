@@ -1,9 +1,4 @@
 /Autopilot/
-/blockCoordinates.txt
-/blockDemoEasy.txt
-/blockDemoHard.txt
-/datatypes/
-/gui/
-/internal/
 /math/
 /tests/
+/internal/
