@@ -257,7 +257,13 @@ public class WorldGenerator {
 	 */
 	public float errorGen(){
 		Random r = new Random();
-		float val = (float) r.nextGaussian() *  getStdDevError() + getMeanError();
+		//float val = (float) r.nextGaussian() *  getStdDevError() + getMeanError();
+		float sgn = r.nextFloat();
+		float val = 0;
+		if (sgn > 0.5)
+			val = r.nextFloat() * getMaxError();
+		else
+			val = r.nextFloat() * getMinError();
 		return val;
 	}
 
@@ -442,9 +448,7 @@ public class WorldGenerator {
 	 * getters for the max/min/mean/std dev error applied to cube positions
 	 */
 
-	public float getMinError() {
-		return minError;
-	}
+	public float getMinError() { return minError; }
 
 	public float getMaxError() {
 		return maxError;
@@ -486,8 +490,23 @@ public class WorldGenerator {
 		ArrayList<Vector> errorPosition = generateErrorOnCubePositions(pos);
 
 		for (int i = 0; i < pos.size(); i++){
-			//	System.out.println(pos.get(i));
-			//	System.out.println(errorPosition.get(i));
+				//System.out.println(pos.get(i));
+				//System.out.println(errorPosition.get(i));
+			float diffX = pos.get(i).getxValue() - errorPosition.get(i).getxValue();
+			float diffY = pos.get(i).getyValue() - errorPosition.get(i).getyValue();
+			float diffZ = pos.get(i).getzValue() - errorPosition.get(i).getzValue();
+			if (diffX <= 5 && diffX >= -5)
+				System.out.println("diffX correct");
+			else
+				System.out.println("incorrect");
+			if (diffY <= 5 && diffY >= -5)
+				System.out.println("diffY correct");
+			else
+				System.out.println("incorrect");
+			if (diffZ <= 5 && diffZ >= -5)
+				System.out.println("difZ correct");
+			else
+				System.out.println("incorrect");
 		}
 	}
 

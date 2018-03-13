@@ -399,17 +399,17 @@ public class DroneBuilder_v2 {
 
             @Override
             public float getFrontBrakeForce() {
-                return 0;
+                return FRONT_BREAK_FORCE;
             }
 
             @Override
             public float getLeftBrakeForce() {
-                return 0;
+                return LEFT_BREAK_FORCE;
             }
 
             @Override
             public float getRightBrakeForce() {
-                return 0;
+                return RIGHT_BREAK_FORCE;
             }
         };
     }
@@ -443,7 +443,7 @@ public class DroneBuilder_v2 {
     private final static float REAR_WHEEL_Z_POS = 0.5f;
     private final static float REAR_WHEEL_X_POS = 0.5f;
     private final static float TYRE_RADIUS = 0.20f;
-    private final static float MAX_BRAKE_FORCE = 0f;
+    private final static float MAX_BRAKE_FORCE = 100f;
     private final static float MAX_FRICTION_COEFF = 0f;
     private final static float ENGINE_MASS = 180f;
     private final static float MAIN_WING_MASS = 100f;
@@ -466,6 +466,11 @@ public class DroneBuilder_v2 {
     private final static float STABLE_COMPRESSION = 0.05f;
     private final static float STABLE_Y_POS= TYRE_RADIUS - STABLE_COMPRESSION + WHEEL_Y_POS;
     public final static float START_Y = WHEEL_Y_POS + TYRE_RADIUS;
+
+    private final static float FRONT_BREAK_FORCE = 0f;
+    private final static float LEFT_BREAK_FORCE = 0f;
+    private final static float RIGHT_BREAK_FORCE = 0f;
+
 
 
 }
