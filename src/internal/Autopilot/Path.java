@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import internal.Helper.Vector;
 
-public class Path implements Autopilot.Path {
+public class Path implements AutopilotInterfaces.Path {
 
 	/**
 	 * Path that has to be followed by the drone in the given order

@@ -1,7 +1,7 @@
 package internal.Autopilot;
 
-import Autopilot.*;
-import Autopilot.Path;
+import AutopilotInterfaces.*;
+import AutopilotInterfaces.Path;
 
 /**
  * Created by Martijn on 8/03/2018.

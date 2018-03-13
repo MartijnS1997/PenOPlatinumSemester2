@@ -12,8 +12,8 @@ import internal.Testbed.Drone;
 import internal.Testbed.World;
 import org.junit.Test;
 
-import Autopilot.AutopilotConfig;
-import Autopilot.AutopilotInputs;
+import AutopilotInterfaces.AutopilotConfig;
+import AutopilotInterfaces.AutopilotInputs;
 
 import static java.lang.Math.PI;
 import static org.junit.Assert.assertNotEquals;
@@ -138,7 +138,7 @@ public class autoPilotTests {
         
 		System.out.println(Pixel.isEqualFloat(hValue, RED_H_VALUE, EPSILON) && Pixel.isEqualFloat(sValue, RED_S_VALUE, EPSILON) && Pixel.isEqualFloat(vValue, Z_AXIS_V_VALUE, EPSILON));
 		APInputs = new AutoPilotInputs(autoPilotTests.createImage(1, 6), 0f, 0f, 0f, 0f, 0f, 0f, 0f);
-		assertEquals(AP.simulationStarted(APConfig, APInputs).getHorStabInclination(), (float) PI/3, delta);
+		//assertEquals(AP.simulationStarted(APConfig, APInputs).getHorStabInclination(), (float) PI/3, delta);
 		
 	}
 	

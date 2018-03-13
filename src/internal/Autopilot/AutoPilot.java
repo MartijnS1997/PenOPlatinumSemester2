@@ -1,9 +1,8 @@
 package internal.Autopilot;
 
 
-import java.io.IOException;
-
-import Autopilot.*;
+import AutopilotInterfaces.*;
+import AutopilotInterfaces.Path;
 import internal.Testbed.FlightRecorder;
 import internal.Helper.Vector;
 import internal.Physics.PhysXEngine;
@@ -16,12 +15,12 @@ import internal.Physics.PhysXEngine;
  * Extended by Bart on 15/10/2017.
  * Extended by Anthony Rathé on 16/10/2017 and later
  */
-public class AutoPilot implements Autopilot{
+public class AutoPilot implements Autopilot_v2{
 
 
 	/**
-	 * Primary constructor for the Autopilot
-	 * @param controllerConfig
+	 * Primary constructor for the AutopilotInterfaces
+	 * @param controllerConfig the controller that will be used during the flight
 	 */
 	public AutoPilot(String controllerConfig){
 		// first make sure we can takeoff
@@ -57,25 +56,36 @@ public class AutoPilot implements Autopilot{
     	//this.attackController = new AutoPilotControllerNoAttack(this);
     }
 
-    @Override
-    public AutopilotOutputs simulationStarted(AutopilotConfig config, AutopilotInputs inputs) throws IOException {
-            configureAutopilot(config, inputs);
-//            if (this.getPhysXEngine().chassisTouchesGround(new Vector(inputs.getX(),inputs.getY(),inputs.getZ()), new Vector(inputs.getHeading(),inputs.getPitch(),inputs.getRoll()))) {
-//            	this.setAPMode(1);
-//            }else {
-//            	this.setAPMode(2);
-//            }
-//            this.startPosition = new Vector(inputs.getX(),inputs.getY(),inputs.getZ());
-        return getControlOutputs(inputs);
-    }
 
+	@Override
+	public AutopilotOutputs simulationStarted(AutopilotConfig config, AutopilotInputs_v2 inputs) {
+		configureAutopilot(config, inputs);
 
-    @Override
-    public AutopilotOutputs timePassed(AutopilotInputs inputs) throws IOException {
-        return getControlOutputs(inputs);
-    }
+		return getControlOutputs(inputs);
+	}
 
+	/**
+	 * generates control outputs destined for the drone (see the controller implementations for details
+	 * @param inputs the input data from the drone
+	 * @return the commands for the drone
+	 */
+	@Override
+	public AutopilotOutputs timePassed(AutopilotInputs_v2 inputs) {
+		return  getControlOutputs(inputs);
+	}
 
+	/**
+	 * sets the path that can be used for the autopilot
+	 * @param path the path to be followed
+	 */
+	@Override
+	public void setPath(Path path) {
+		this.path = path;
+	}
+
+	/**
+	 * Signals that the simulation has been started
+	 */
 	@Override
     public void simulationEnded() {
 
@@ -88,7 +98,7 @@ public class AutoPilot implements Autopilot{
      * @param inputs the inputs of the autopilot
      * @author Martijn Sauwens
      */
-    public void configureAutopilot(AutopilotConfig configuration, AutopilotInputs inputs) {
+    public void configureAutopilot(AutopilotConfig configuration, AutopilotInputs_v2 inputs) {
 
     	//save the configuration:
 		this.setConfig(configuration);
@@ -123,7 +133,7 @@ public class AutoPilot implements Autopilot{
 	 * @return control outputs for the drone
 	 */
 	//Todo implement the 3 stages of the flight: takeoff, flight and landing
-    private AutopilotOutputs getControlOutputs(AutopilotInputs inputs){
+    private AutopilotOutputs getControlOutputs(AutopilotInputs_v2 inputs){
     	
     	AutoPilotFlightController flightController = this.getFlightController();
     	AutopilotTakeoffController takeoffController = this.getTakeoffController();
@@ -259,11 +269,11 @@ public class AutoPilot implements Autopilot{
 	}
 
 
-	public AutopilotWayPointController getWayPointController() {
+	private AutopilotWayPointController getWayPointController() {
 		return wayPointController;
 	}
 
-	public void setWayPointController(AutopilotWayPointController wayPointController) {
+	private void setWayPointController(AutopilotWayPointController wayPointController) {
 		this.wayPointController = wayPointController;
 	}
 
@@ -374,9 +384,9 @@ public class AutoPilot implements Autopilot{
 	private PhysXEngine.PhysXOptimisations physXOptimisations;
 
 	/**
-	 * used for engine validation
+	 * Object that stores the current path to follow
 	 */
-	private AutoPilotControllerNoAttack attackController;
+	private Path path;
 	
 	/**
 	 * store current AutoPilot mode:

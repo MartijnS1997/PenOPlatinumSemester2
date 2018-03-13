@@ -1,4 +1,4 @@
-package Autopilot;
+package AutopilotInterfaces;
 
 /**
  * An interface of autopilot modules

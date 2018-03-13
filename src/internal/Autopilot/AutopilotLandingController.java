@@ -1,14 +1,16 @@
 
 package internal.Autopilot;
 
-import Autopilot.AutopilotInputs;
-import Autopilot.AutopilotOutputs;
+import AutopilotInterfaces.AutopilotInputs;
+import AutopilotInterfaces.AutopilotInputs_v2;
+import AutopilotInterfaces.AutopilotOutputs;
 import internal.Helper.Vector;
 import internal.Physics.PhysXEngine;
 
 
 import static java.lang.Math.*;
 
+import java.util.List;
 
 /**
  * Created by Martijn on 18/02/2018, extended by Jonathan on 12/3/2018
@@ -34,7 +36,7 @@ public class AutopilotLandingController extends Controller {
      * @return the control actions
      */
     @Override
-    public AutopilotOutputs getControlActions(AutopilotInputs inputs) {
+    public AutopilotOutputs getControlActions(AutopilotInputs_v2 inputs) {
         this.setCurrentInputs(inputs);
 
 

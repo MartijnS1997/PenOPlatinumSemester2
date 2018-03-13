@@ -1,10 +1,7 @@
 package internal.Physics;
 
-import Autopilot.AutopilotConfig;
-import Autopilot.AutopilotInputs;
-import Autopilot.AutopilotOutputs;
-import internal.Autopilot.GammaFlightController;
-import internal.Exceptions.AngleOfAttackException;
+import AutopilotInterfaces.AutopilotConfig;
+import AutopilotInterfaces.AutopilotOutputs;
 import internal.Helper.SquareMatrix;
 import internal.Testbed.DroneState;
 import internal.Testbed.FlightRecorder;

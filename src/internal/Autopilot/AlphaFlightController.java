@@ -1,7 +1,8 @@
 package internal.Autopilot;
 
-import Autopilot.AutopilotInputs;
-import Autopilot.AutopilotOutputs;
+import AutopilotInterfaces.AutopilotInputs;
+import AutopilotInterfaces.AutopilotInputs_v2;
+import AutopilotInterfaces.AutopilotOutputs;
 import internal.Exceptions.NoCubeException;
 import internal.Helper.Vector;
 
@@ -102,15 +103,16 @@ public class AlphaFlightController extends AutoPilotFlightController {
     /**
      * Generates the appropriate control actions for the drone
      * @return the outputs for the autopilot
+     * @param inputs
      */
     @Override
-    public AutopilotOutputs getControlActions(AutopilotInputs inputs){
+    public AutopilotOutputs getControlActions(AutopilotInputs_v2 inputs){
 
         //System.out.println("-------");
         this.setCurrentInputs(inputs);
 
         ControlOutputs controlOutputs = new ControlOutputs();
-        AutopilotInputs currentInputs = this.getCurrentInputs();
+        AutopilotInputs_v2 currentInputs = this.getCurrentInputs();
 
         //APCamera.loadNextImage(currentInputs.getImage());
         AutoPilotCamera APCamera = this.getAutopilot().getAPCamera();

@@ -1,12 +1,10 @@
 package internal.Physics;
 
-import Autopilot.AutopilotConfig;
-import Autopilot.AutopilotOutputs;
+import AutopilotInterfaces.AutopilotConfig;
+import AutopilotInterfaces.AutopilotOutputs;
 import internal.Testbed.Drone;
 import internal.Testbed.DroneState;
 import internal.Helper.Vector;
-
-import java.util.List;
 
 import static java.lang.Math.abs;
 
