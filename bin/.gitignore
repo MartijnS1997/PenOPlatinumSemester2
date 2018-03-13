@@ -19,3 +19,5 @@
 /internal/
 /math/
 /tests/
+/AutopilotConnection.class
+/AutopilotInitializer.class
