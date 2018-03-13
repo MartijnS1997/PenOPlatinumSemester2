@@ -1,9 +1,13 @@
 package internal.Testbed;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import gui.Cube;
 import internal.Autopilot.Path;
 import internal.Helper.Vector;
+import internal.Physics.PhysXEngine;
+
+import static java.lang.Math.*;
 
 /**
  * Generates a world with N cubes which all have a different HSV value
@@ -175,7 +179,7 @@ public class WorldGenerator {
 	 */
 	public float angleGen(){
 		Random r = new Random();
-		float val = r.nextFloat() * (float) (2*Math.PI);
+		float val = r.nextFloat() * (float) (2* PI);
 		return val;
 	}
 
@@ -305,6 +309,52 @@ public class WorldGenerator {
 	public World createWorld(){
 		int n = getNbOfCubes();
 		ArrayList<Vector> allPositions = allPositionsGenerator();
+		return createWorldWithPath(allPositions);
+	}
+
+	public List<Vector> createPath(){
+		return allPositionsGenerator();
+	}
+
+	private  AutopilotInterfaces.Path createPathObject(List<Vector> path){
+		int nbOfCubes = getNbOfCubes();
+		float xPos[] = new float[nbOfCubes];
+		float yPos[] = new float[nbOfCubes];
+		float zPos[] = new float[nbOfCubes];
+		int index = 0;
+		for(Vector vector: path){
+			xPos[index] = vector.getxValue();
+			yPos[index] = vector.getyValue();
+			zPos[index] = vector.getzValue();
+		}
+
+		return new AutopilotInterfaces.Path(){
+			@Override
+			public float[] getX() {
+				return xPos;
+			}
+
+			@Override
+			public float[] getY() {
+				return yPos;
+			}
+
+			@Override
+			public float[] getZ() {
+				return zPos;
+			}
+		};
+	}
+
+	/**
+	 * Creates a world on the given path, the path that is inputted is randomized
+	 * randomization means: placed within a probability sphere of 5m radius with a random heading and roll
+	 * @param path the path to be randomized
+	 * @return a world containing blocks that are placed random among the provided path
+	 */
+	public World createWorldWithPath(List<Vector> path){
+		int n = getNbOfCubes();
+		ArrayList<Vector> allPositions = pathRandomizer(path) ;
 		ArrayList<Vector> errorPosition = generateErrorOnCubePositions(allPositions);
 		setErroredPositions(errorPosition);
 
@@ -334,11 +384,46 @@ public class WorldGenerator {
 			world.addWorldObject(block);
 
 		}
-
+		AutopilotInterfaces.Path approxPath = this.createPathObject(path);
+		world.setApproxPath(approxPath);
 
 		return world;
 	}
 
+	/**
+	 * Randomizes the given path such that the cubes are within a 5m radius (gaussian distribution capped on 5)
+	 * @param path the path to be randomized
+	 * @return a list of path positions with each entry within a 5meter radius of the initial position
+	 */
+	public static ArrayList<Vector> pathRandomizer(List<Vector> path){
+		float maxRadius = 5f;
+		float maxAngle = (float) (2*PI);
+		float randomOffset = 0.5f;
+		//generate a vector with modulus 5 and a random pitch and heading
+		//transform it back to the world later
+		Random random = new Random(System.currentTimeMillis()%25785);
+		//initialize the return path
+		ArrayList<Vector> randomizedPath = new ArrayList<>();
+
+		for(Vector pathElem: path) {
+			//get the random variables
+			float modulus = (float) min(abs(maxRadius * (random.nextGaussian()-randomOffset)), 1.0f);
+			float heading = (float) ((random.nextFloat() - randomOffset) * maxAngle);
+			float pitch = (float) ((random.nextFloat() - randomOffset) * maxAngle);
+			//the modulus of the sphere
+			Vector modulusVector = new Vector(0, 0, modulus);
+			//get a random position within the sphere
+			Vector orientationVector = new Vector(heading, pitch, 0);
+			//create the random position by mapping the angle on the world
+			Vector randomPos = PhysXEngine.droneOnWorld(modulusVector, orientationVector);
+
+			randomizedPath.add(randomPos);
+
+		}
+
+		return randomizedPath;
+
+	}
 
 
 

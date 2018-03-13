@@ -1,11 +1,11 @@
 package internal.Autopilot;
 
 /**
- * Class for creating AutoPilotInputs objects, through which the inputs to the Autopilot will be passed
+ * Class for creating AutoPilotInputs objects, through which the inputs to the AutopilotInterfaces will be passed
  * @author Anthony Rathe
  *
  */
-public class AutoPilotInputs implements Autopilot.AutopilotInputs{
+public class AutoPilotInputs implements AutopilotInterfaces.AutopilotInputs{
 	public AutoPilotInputs(byte[] image, float xPosition, float yPosition, float zPosition, float heading, float pitch, float roll, float elapsedTime) {
 		this.image = image;
 		this.xPostion = xPosition;

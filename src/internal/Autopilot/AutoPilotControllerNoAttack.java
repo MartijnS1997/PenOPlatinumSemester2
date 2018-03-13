@@ -1,7 +1,7 @@
 package internal.Autopilot;
 
-import Autopilot.AutopilotInputs;
-import Autopilot.AutopilotOutputs;
+import AutopilotInterfaces.AutopilotInputs;
+import AutopilotInterfaces.AutopilotOutputs;
 import internal.Testbed.FlightRecorder;
 import internal.Exceptions.NoCubeException;
 import internal.Helper.Vector;
@@ -11,7 +11,7 @@ import static java.lang.Math.sin;
 /**
  * Created by Martijn on 30/10/2017.
  * Appended and edited by Anthony Rath� on 6/11/2017
- * A class of Autopilot Controllers
+ * A class of AutopilotInterfaces Controllers
  */
 public class AutoPilotControllerNoAttack {
 
@@ -210,7 +210,7 @@ public class AutoPilotControllerNoAttack {
     }
 
     /**
-     * getter for the associated Autopilot
+     * getter for the associated AutopilotInterfaces
      * @return the associated autopilot
      */
     public AutoPilot getAssociatedAutopilot() {

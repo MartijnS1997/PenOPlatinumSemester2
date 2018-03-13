@@ -1,9 +1,8 @@
 package internal.Autopilot;
 
-import Autopilot.AutopilotInputs;
-import Autopilot.AutopilotOutputs;
+import AutopilotInterfaces.AutopilotInputs_v2;
+import AutopilotInterfaces.AutopilotOutputs;
 import internal.Helper.Vector;
-import sun.security.krb5.internal.crypto.Des;
 
 import static java.lang.Math.*;
 
@@ -75,7 +74,7 @@ public class AutopilotTakeoffController extends Controller{
     }
 
     @Override
-    public AutopilotOutputs getControlActions(AutopilotInputs inputs) {
+    public AutopilotOutputs getControlActions(AutopilotInputs_v2 inputs) {
         this.setCurrentInputs(inputs);
         ControlOutputs outputs = new ControlOutputs();
         this.checkDesiredAltitude();

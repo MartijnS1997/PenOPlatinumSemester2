@@ -1,8 +1,8 @@
 package internal.Autopilot;
 
-import Autopilot.AutopilotConfig;
-import Autopilot.AutopilotInputs;
-import Autopilot.AutopilotOutputs;
+import AutopilotInterfaces.AutopilotInputs;
+import AutopilotInterfaces.AutopilotInputs_v2;
+import AutopilotInterfaces.AutopilotOutputs;
 import internal.Exceptions.NoCubeException;
 import internal.Helper.Vector;
 
@@ -77,11 +77,11 @@ public class GammaFlightController extends AutoPilotFlightController {
 //        return outputs;
 //    }
 
-    public AutopilotOutputs getControlActions(AutopilotInputs inputs){
+    public AutopilotOutputs getControlActions(AutopilotInputs_v2 inputs){
         this.setCurrentInputs(inputs);
         ControlOutputs outputs = new ControlOutputs();
         AutoPilotCamera APCamera = this.getAutopilot().getAPCamera();
-        AutopilotInputs currentInputs = this.getCurrentInputs();
+        AutopilotInputs_v2 currentInputs = this.getCurrentInputs();
         PIDController xPIDController = this.getxPID();
         PIDController yPIDController = this.getyPID();
 

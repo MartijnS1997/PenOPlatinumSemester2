@@ -1,4 +1,4 @@
-package Autopilot;
+package AutopilotInterfaces;
 
 public interface AutopilotOutputs {
     float getThrust();

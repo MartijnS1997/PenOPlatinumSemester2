@@ -1,6 +1,6 @@
-package Autopilot;
+package AutopilotInterfaces;
 
-public interface AutopilotInputs {
+public interface AutopilotInputs_v2 {
     byte[] getImage();
     float getX();
     float getY();

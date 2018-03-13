@@ -1,7 +1,7 @@
 package internal.Testbed;
 
 
-import Autopilot.AutopilotConfig;
+import AutopilotInterfaces.AutopilotConfig;
 import internal.Autopilot.AutoPilot;
 import internal.Physics.HorizontalWingPhysX;
 import internal.Physics.PhysXEngine;
@@ -147,7 +147,7 @@ public class DroneBuilder {
 
     /**
      * Pseudo constructor for a configuration of an autopilotConfig
-     * @return an Autopilot config
+     * @return an AutopilotInterfaces config
      */
     public AutopilotConfig createConfig(String configMode) {
         switch (configMode) {

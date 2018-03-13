@@ -1,4 +1,4 @@
-import Autopilot.*;
+import AutopilotInterfaces.*;
 import internal.Autopilot.Autopilot_v2Implementation;
 import internal.Exceptions.SimulationEndedException;
 
@@ -9,7 +9,7 @@ import java.net.Socket;
 
 /**
  * Created by Martijn on 8/03/2018.
- * A class of Autopilot connections
+ * A class of AutopilotInterfaces connections
  * Each connection is linked to a certain autopilot and will send and receive data for it
  */
 public class AutopilotConnection implements Runnable {
@@ -361,5 +361,5 @@ public class AutopilotConnection implements Runnable {
     /*
     Error messages
      */
-    public static final String AUTOPILOT_ALREADY_CONFIGURED = "Autopilot is already configured";
+    public static final String AUTOPILOT_ALREADY_CONFIGURED = "AutopilotInterfaces is already configured";
 }

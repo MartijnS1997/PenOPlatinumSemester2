@@ -1,10 +1,10 @@
 package internal.Autopilot;
 
-import Autopilot.AutopilotInputs;
-import Autopilot.AutopilotOutputs;
+import AutopilotInterfaces.AutopilotInputs;
+import AutopilotInterfaces.AutopilotInputs_v2;
+import AutopilotInterfaces.AutopilotOutputs;
 import internal.Helper.Vector;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -24,10 +24,10 @@ public class AutopilotLandingController extends Controller{
      * @return the control actions
      */
     @Override
-    public AutopilotOutputs getControlActions(AutopilotInputs inputs){
+    public AutopilotOutputs getControlActions(AutopilotInputs_v2 inputs){
     	
-    	AutopilotInputs currentInputs = getCurrentInputs();
-    	AutopilotInputs previousInputs = getPreviousInputs();
+    	AutopilotInputs_v2 currentInputs = getCurrentInputs();
+    	AutopilotInputs_v2 previousInputs = getPreviousInputs();
 
     	if (!getPathGenerator().hasPathLocked()) {
     		Vector position = new Vector(currentInputs.getX(),currentInputs.getY(),currentInputs.getZ());

@@ -1,8 +1,9 @@
 package internal.Autopilot;
 
-import Autopilot.AutopilotConfig;
-import Autopilot.AutopilotInputs;
-import Autopilot.AutopilotOutputs;
+import AutopilotInterfaces.AutopilotConfig;
+import AutopilotInterfaces.AutopilotInputs;
+import AutopilotInterfaces.AutopilotInputs_v2;
+import AutopilotInterfaces.AutopilotOutputs;
 import internal.Physics.PhysXEngine;
 import internal.Helper.Vector;
 
@@ -29,7 +30,7 @@ public abstract class Controller {
      * @param inputs the inputs of the autopilot
      * @return the control actions
      */
-    public abstract AutopilotOutputs getControlActions(AutopilotInputs inputs);
+    public abstract AutopilotOutputs getControlActions(AutopilotInputs_v2 inputs);
 
     /*
     Getters and setters
@@ -68,7 +69,7 @@ public abstract class Controller {
     /*
   * Supplementary control methods
   */
-    protected void rollControl(ControlOutputs outputs, AutopilotInputs currentInput){
+    protected void rollControl(ControlOutputs outputs, AutopilotInputs_v2 currentInput){
         float roll = currentInput.getRoll();
 
         if(roll >= this.getRollThreshold()){
@@ -85,8 +86,10 @@ public abstract class Controller {
      * Checks if the current control outputs are realisable under the angle of attack constraint provided
      * by the autopilot configuration. If not the controls are adjusted to fit the constraints
      * @param controlOutputs the control outputs to be checked
+     * @param prevInputs
+     * @param currentInputs
      */
-    protected void angleOfAttackControl(ControlOutputs controlOutputs,AutopilotInputs prevInputs, AutopilotInputs currentInputs){
+    protected void angleOfAttackControl(ControlOutputs controlOutputs, AutopilotInputs_v2 prevInputs, AutopilotInputs_v2 currentInputs){
 
         //first check if the current and the previous steps are initialized, if not so delete all control actions
         //and set to standard value
@@ -294,7 +297,7 @@ public abstract class Controller {
      * elaboration: see textbook numerical math for derivative methods, the
      * derivative of f(k+1) - f(k-1) / (2*timeStep) has O(h²) correctness
      */
-    protected Vector getVelocityApprox(AutopilotInputs prevInputs, AutopilotInputs currentInputs){
+    protected Vector getVelocityApprox(AutopilotInputs_v2 prevInputs, AutopilotInputs_v2 currentInputs){
         float prevTime = prevInputs.getElapsedTime();
         float currentTime = currentInputs.getElapsedTime();
 
@@ -314,7 +317,7 @@ public abstract class Controller {
      * @return an approx for the rotation (first calculate the rotation in heading pitch and roll components
      *         and transform them to the actual rotational components)
      */
-    public Vector getRotationApprox(AutopilotInputs prevInputs, AutopilotInputs currentInputs){
+    public Vector getRotationApprox(AutopilotInputs_v2 prevInputs, AutopilotInputs_v2 currentInputs){
 
         //get the passed time interval
         float prevTime = prevInputs.getElapsedTime();
@@ -338,7 +341,7 @@ public abstract class Controller {
      * @param inputs the autopilotInput object containing the current inputs
      * @return a vector containing the orientation of the drone in vector format
      */
-    protected static Vector extractOrientation(AutopilotInputs inputs){
+    protected static Vector extractOrientation(AutopilotInputs_v2 inputs){
         return new Vector(inputs.getHeading(), inputs.getPitch(), inputs.getRoll());
     }
 
@@ -347,7 +350,7 @@ public abstract class Controller {
      * @param inputs the autopilotInput object containing the current inputs
      * @return a vector containing the position of the drone in vector format
      */
-    protected static Vector extractPosition(AutopilotInputs inputs){
+    protected static Vector extractPosition(AutopilotInputs_v2 inputs){
         return new Vector(inputs.getX(), inputs.getY(), inputs.getZ());
     }
 
@@ -380,7 +383,7 @@ public abstract class Controller {
      * Getter for the current inputs (the autopilot inputs object)
      * @return the current outputs
      */
-    public AutopilotInputs getCurrentInputs() {
+    public AutopilotInputs_v2 getCurrentInputs() {
         return currentInputs;
     }
     
@@ -389,7 +392,7 @@ public abstract class Controller {
      * set previous inputs
      * @param currentInputs the current input for the autopilot
      */
-    protected void setCurrentInputs(AutopilotInputs currentInputs) {
+    protected void setCurrentInputs(AutopilotInputs_v2 currentInputs) {
         //first write to the previous outputs
         this.setPreviousInputs(this.getCurrentInputs());
 
@@ -398,9 +401,9 @@ public abstract class Controller {
     }
 
     /**
-     * Returns the previous Autopilot Inputs
+     * Returns the previous AutopilotInterfaces Inputs
      */
-    public AutopilotInputs getPreviousInputs() {
+    public AutopilotInputs_v2 getPreviousInputs() {
         return previousInputs;
     }
 
@@ -408,12 +411,12 @@ public abstract class Controller {
      * Setter for the autopilot inputs
      * @param previousInputs the pervious inputs
      */
-    protected void setPreviousInputs(AutopilotInputs previousInputs){
+    protected void setPreviousInputs(AutopilotInputs_v2 previousInputs){
         this.previousInputs = previousInputs;
     }
 
-    private AutopilotInputs currentInputs;
-    private AutopilotInputs previousInputs;
+    private AutopilotInputs_v2 currentInputs;
+    private AutopilotInputs_v2 previousInputs;
     
     protected PathGenerator getPathGenerator() {
     	return this.pathGenerator;
@@ -577,7 +580,7 @@ public abstract class Controller {
     /**
      * dummy data used for the initialization of the drone
      */
-    private  static AutopilotInputs dummyData = new AutopilotInputs() {
+    private  static AutopilotInputs_v2 dummyData = new AutopilotInputs_v2() {
         @Override
         public byte[] getImage() {
             return new byte[0];

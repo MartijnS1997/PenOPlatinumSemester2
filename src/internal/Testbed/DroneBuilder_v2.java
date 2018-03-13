@@ -1,7 +1,7 @@
 package internal.Testbed;
 
-import Autopilot.AutopilotConfig;
-import Autopilot.AutopilotOutputs;
+import AutopilotInterfaces.AutopilotConfig;
+import AutopilotInterfaces.AutopilotOutputs;
 import internal.Helper.Vector;
 import internal.Physics.PhysXEngine;
 
@@ -368,7 +368,7 @@ public class DroneBuilder_v2 {
 
     /**
      * Set the initial control state for the drone such that there are no issues for flying
-     * @return Autopilot outputs for steady flight (only main wings are used)
+     * @return AutopilotInterfaces outputs for steady flight (only main wings are used)
      */
     private static AutopilotOutputs getInitControlState(){
         return new AutopilotOutputs(){
