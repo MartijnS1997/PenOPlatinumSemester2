@@ -112,6 +112,7 @@ public class AutoPilot implements Autopilot{
         float verticViewAngle = configuration.getVerticalAngleOfView();
         this.setAPCamera(new AutoPilotCamera(inputImage, horizViewAngle, verticViewAngle, nbRows, nbColumns));
 
+        setStartPosition(new Vector(inputs.getX(), inputs.getY(), inputs.getZ()));
 
     }
 
@@ -387,6 +388,10 @@ public class AutoPilot implements Autopilot{
 	
 	public Vector getStartPosition() {
 		return this.startPosition;
+	}
+	
+	public void setStartPosition(Vector position) {
+		this.startPosition = position;
 	}
 	
 	// Variable for storing the startPosition of the drone, which also serves as the destination position
