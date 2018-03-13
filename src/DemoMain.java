@@ -17,7 +17,7 @@ public class DemoMain {
 
     public static void main(String args[]) {
         for (int i = 0; i != testDirectories.length; i++) {
-            TestbedMain testbed = new TestbedMain(CONNECTION_NAME, CONNECTION_PORT + i, true, MODE, true, testDirectories[i]);
+            TestbedMain testbed = new TestbedMain(CONNECTION_NAME, CONNECTION_PORT + i, false, MODE, true, testDirectories[i]);
             AutopilotMain autopilot = new AutopilotMain(CONNECTION_NAME, CONNECTION_PORT + i, new AutoPilot(MODE));
             ExecutorService executorTestbed = Executors.newSingleThreadExecutor();
             Future futureTest = executorTestbed.submit(testbed);

@@ -18,14 +18,19 @@ import static org.lwjgl.system.MemoryUtil.NULL;
 
 import org.lwjgl.glfw.GLFWErrorCallback;
 
+import internal.Testbed.World;
+
 import java.util.HashMap;
 
 public class Graphics {
 	
 	HashMap<String, Window> windows =  new HashMap<String, Window>();
 	private boolean terminated = false;
+	private World world;
+	private boolean textWindow = false;
 	
 	public Graphics() {	
+		
 		// Setup an error callback. The default implementation
 		// will print the error message in System.err.
 		GLFWErrorCallback.createPrint(System.err).set();
@@ -43,12 +48,21 @@ public class Graphics {
 		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); 
 	}
 	
+	public void setWorld(World world) {
+		this.world = world;
+	}
+	
 	public void addWindow(String key, Window window) {
 		windows.put(key, window);
 	}
 	
-	public void makeTextWindow() {
-		TextWindow.createAndShowWindow(this);
+	public void makeTextWindow(String title, int width, int height, int xPos, int yPos) {
+		TextWindow.createAndShowWindow(world, this, title, width, height, xPos, yPos);
+		this.textWindow = true;
+	}
+	
+	public void makeButtonWindow() {
+		ButtonWindow.createAndShowWindow(this);
 	}
 	
 	public void renderWindows() {
@@ -56,12 +70,15 @@ public class Graphics {
 		// invoked during this call.
 		glfwPollEvents();
 		
+		if (this.textWindow)
+			TextWindow.update(world);
+		
 		for (String key: windows.keySet()) {
 			Window window = windows.get(key);
 			
 			// Make the OpenGL context current
 			glfwMakeContextCurrent(window.getHandler());
-			window.render();
+			window.render(world);
 			if (window.isTerminated()) {
 				windows.remove(key);
 				break;
@@ -81,7 +98,7 @@ public class Graphics {
 		if (window != null) {
 			// Make the OpenGL context current
 			glfwMakeContextCurrent(window.getHandler());
-			window.render();
+			window.render(world);
 			if (window.isTerminated())
 				windows.remove(key);
 			glfwMakeContextCurrent(NULL);

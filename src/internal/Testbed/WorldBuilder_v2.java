@@ -34,8 +34,8 @@ public class WorldBuilder_v2 {
         List<Drone> droneList = this.getDroneBuilder_v2().createDrones(droneConfig);
         World world = new WorldGenerator(NB_OF_BLOCKS).createWorld();
         world.addDrones(droneList);
-//        Floor floor = new Floor(new Vector());
-//        world.addWorldObject(floor);
+        Floor floor = new Floor(new Vector());
+        world.addWorldObject(floor);
         Airport airport = new Airport(new Vector());
         world.addWorldObject(airport);
         return world;
@@ -51,8 +51,8 @@ public class WorldBuilder_v2 {
         droneConfig.put(new Vector(0,20f,0), 0f); //drone at 5m height facing forward
         List<Drone> droneList = this.getDroneBuilder_v2().createDrones(droneConfig);
         world.addDrones(droneList);
-//        Floor floor = new Floor(new Vector());
-//        world.addWorldObject(floor);
+        Floor floor = new Floor(new Vector());
+        world.addWorldObject(floor);
         Airport airport = new Airport(new Vector());
         world.addWorldObject(airport);
         int nbPoints = 50;
@@ -67,9 +67,6 @@ public class WorldBuilder_v2 {
             block.setAssocatedCube(cube);
             world.addWorldObject(block);
         }
-
-        Floor floor = new Floor(new Vector());
-        world.addWorldObject(floor);
         return world;
     }
 
@@ -83,8 +80,8 @@ public class WorldBuilder_v2 {
         List<Drone> droneList = this.getDroneBuilder_v2().createDrones(droneConfig);
         World world = new World(World.NO_OBJECTIVE, threads);
         world.addDrones(droneList);
-//        Floor floor = new Floor(new Vector());
-//        world.addWorldObject(floor);
+        Floor floor = new Floor(new Vector());
+        world.addWorldObject(floor);
         Airport airport = new Airport(new Vector());
         world.addWorldObject(airport);
         return world;
@@ -99,7 +96,7 @@ public class WorldBuilder_v2 {
         world.addWorldObject(this.getDroneBuilder_v2().createTestBounceDrone());
         Floor floor = new Floor(new Vector());
         world.addWorldObject(floor);
-        Airport airport = new Airport(new Vector());
+        Airport airport = new Airport(new Vector(0, 0.1f, 0));
         world.addWorldObject(airport);
         return world;
     }
