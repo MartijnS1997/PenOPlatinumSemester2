@@ -92,7 +92,8 @@ public abstract class WingPhysX {
             System.out.println("AOA exception thrown, AOA: " + angleOfAttack);
             System.out.println("Velocity: " + velocity);
             System.out.println("Lift: " + lift);
-            throw new AngleOfAttackException(this);
+            System.out.println("####################################################################################");
+            //throw new AngleOfAttackException(this);
         }
 
         return lift;

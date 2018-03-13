@@ -16,7 +16,8 @@ import internal.Physics.PhysXEngine;
  * Extended by Bart on 15/10/2017.
  * Extended by Anthony Rathé on 16/10/2017 and later
  */
-public class AutoPilot implements Autopilot {
+public class AutoPilot implements Autopilot{
+
 
 	/**
 	 * Primary constructor for the Autopilot
@@ -40,7 +41,7 @@ public class AutoPilot implements Autopilot {
 		// and last, we need to land
 		this.setLandingController(new AutopilotLandingController(this));
 		//set AP mode 2 to make everything work again
-		this.setAPMode(1);
+		this.setAPMode(3); //AP 3 to test the landing controller
 
 	}
 
@@ -73,7 +74,8 @@ public class AutoPilot implements Autopilot {
         return getControlOutputs(inputs);
     }
 
-    @Override
+
+	@Override
     public void simulationEnded() {
 
     }
@@ -295,7 +297,7 @@ public class AutoPilot implements Autopilot {
 		//this.attackController.setFlightRecorder(flightRecorder);
 	}
 
-	private PhysXEngine getPhysXEngine() {
+	public PhysXEngine getPhysXEngine() {
 		return physXEngine;
 	}
 

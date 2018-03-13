@@ -1,13 +1,5 @@
 /AccuracyMain.class
 /Autopilot/
-/blockCoordinates.txt
-/blockDemoEasy.txt
-/blockDemoHard.txt
-/datatypes/
-/gui/
-/internal/
-/math/
-/tests/
 /AutopilotMain.class
 /DemoMain.class
 /Main$MainAutopilotInputs.class
@@ -19,3 +11,11 @@
 /TestbedConnection.class
 /TestbedMain$MainAutopilotInputs.class
 /TestbedMain.class
+/blockCoordinates.txt
+/blockDemoEasy.txt
+/blockDemoHard.txt
+/datatypes/
+/gui/
+/internal/
+/math/
+/tests/

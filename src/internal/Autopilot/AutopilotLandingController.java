@@ -42,8 +42,8 @@ public class AutopilotLandingController extends Controller{
     	
     	return null;
     }
-    
- 
+
+
     //TODO implement these methods accordingly
     @Override
     protected float getMainStableInclination() {
