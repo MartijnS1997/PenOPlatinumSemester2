@@ -7,8 +7,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
-import Autopilot.AutopilotConfig;
-import Autopilot.AutopilotOutputs;
+import AutopilotInterfaces.AutopilotConfig;
+import AutopilotInterfaces.AutopilotOutputs;
 import gui.Cube;
 import gui.GraphicsObject;
 import gui.Wheel;
@@ -17,8 +17,6 @@ import internal.Physics.PhysXEngine;
 import internal.Physics.PhysicsEngineState;
 import internal.Helper.Vector;
 import math.Vector3f;
-
-import static java.lang.Math.PI;
 
 /**
  * @author Anthony Rathé & MartijnSauwens & Bart
@@ -1479,7 +1477,7 @@ public class Drone implements WorldObject, Callable<Void> {
 //
 //---- START OF STREAM STUFF ---//
 //	/**
-//	 * Creates an AutopilotConfig file which contains all values from the Autopilot config interface
+//	 * Creates an AutopilotConfig file which contains all values from the AutopilotInterfaces config interface
 //	 * @throws IOException
 //	 * @author Jonathan Craessaerts
 //	 */

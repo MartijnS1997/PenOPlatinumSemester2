@@ -1,4 +1,4 @@
-import Autopilot.*;
+import AutopilotInterfaces.*;
 import gui.*;
 import internal.Exceptions.AngleOfAttackException;
 import internal.Exceptions.SimulationEndedException;
@@ -98,7 +98,7 @@ public class TestbedMain implements Runnable{
         this.initTestbed();
         // then initialize the connectivity of the testbed
         this.initTestbedServer();
-        
+
         //write the configuration to the autopilot
         configAutopilot(this.getOutputStream());
 
@@ -109,12 +109,8 @@ public class TestbedMain implements Runnable{
                 Time.update();
 
                 AutopilotOutputs output = AutopilotOutputsReader.read(this.getInputStream());
-                AutopilotInputs autopilotInputs = this.testbedCycle(output);
-//                System.out.println("velocity: " + this.getDrone().getVelocity());
-//                System.out.println("current Position: " + new Vector(autopilotInputs.getX(), autopilotInputs.getY(), autopilotInputs.getZ()));
-//                System.out.println("current Orientation: " + new Vector(autopilotInputs.getHeading(), autopilotInputs.getPitch(), autopilotInputs.getRoll()));
-//                System.out.println("front, rLeft and rRight tyre delta: " + drone.getPrevFrontTyreDelta() + "; " + drone.getPrevRearLeftTyreDelta() + "; " + drone.getPrevRearRightTyreDelta());
-                AutopilotInputsWriter.write(this.getOutputStream(), autopilotInputs);
+                AutopilotInputs_v2 autopilotInputs = this.testbedCycle(output);
+                AutopilotInputs_v2Writer.write(this.getOutputStream(), autopilotInputs);
                 //wait until frame is passed
                 framerateControl();
 
@@ -153,7 +149,7 @@ public class TestbedMain implements Runnable{
         // set the streams
         this.setInputStream(inputStream);
         this.setOutputStream(outputStream);
-        
+
     }
 
     /**
@@ -169,16 +165,42 @@ public class TestbedMain implements Runnable{
 
 
     /**
-     * Write the configuration data to the autopilot
+     * Write the configuration data to the autopilot: first write the config, then the path and finally the inputs for
+     * the first step
      * @param outputStream the stream containing the config and the input for the autopilot
      * @throws IOException
      * @throws InterruptedException
      */
     private void configAutopilot(DataOutputStream outputStream) throws IOException, InterruptedException {
         AutopilotConfigWriter.write(outputStream, this.getConfig());
+        World world = this.getWorld();
+        AutopilotInterfaces.Path path = world.getApproxPath();
+        try{
+            PathWriter.write(outputStream, path);
+        //if we have a null pointer, this means that the world builder that we use does not have a path
+        //todo uncomment if fixed
+        }catch(NullPointerException e){
+            PathWriter.write(outputStream, new Path() {
+                @Override
+                public float[] getX() {
+                    return new float[0];
+                }
+
+                @Override
+                public float[] getY() {
+                    return new float[0];
+                }
+
+                @Override
+                public float[] getZ() {
+                    return new float[0];
+                }
+            });
+        }
+
         //instert a null pointer, will be ignored on the first step of the testbed step method
-        AutopilotInputs autopilotInputs = this.firstCycle();
-        AutopilotInputsWriter.write(outputStream, autopilotInputs);
+        AutopilotInputs_v2 autopilotInputs = this.firstCycle();
+        AutopilotInputs_v2Writer.write(outputStream, autopilotInputs);
     }
 
     /**
@@ -186,7 +208,7 @@ public class TestbedMain implements Runnable{
      * @return the autopilot inputs for the first Cycle
      * @throws IOException
      */
-    private AutopilotInputs firstCycle() throws IOException {
+    private AutopilotInputs_v2 firstCycle() throws IOException {
         byte[] image = this.generateImage();
         this.updateSimulationTime();
         return new MainAutopilotInputs(this.getDrone(), image, this.getSimulationTime());
@@ -201,8 +223,8 @@ public class TestbedMain implements Runnable{
      * @throws InterruptedException
      * @throws IOException
      */
-    public AutopilotInputs testbedCycle(AutopilotOutputs autopilotOutputs) throws InterruptedException, IOException, ExecutionException {
-        AutopilotInputs autopilotInputs;
+    public AutopilotInputs_v2 testbedCycle(AutopilotOutputs autopilotOutputs) throws InterruptedException, IOException, ExecutionException {
+        AutopilotInputs_v2 autopilotInputs;
         // update time
 
 
@@ -263,8 +285,8 @@ public class TestbedMain implements Runnable{
         WorldBuilder_v2 builder = new WorldBuilder_v2();
         Map<Vector, Float> droneConfig = new HashMap<>();
         droneConfig.put(new Vector(0, 0.20f-0.01f + 1f,0), 0f); //drone standing on ground with tyre compression 0.05
-        World world =  builder.createWorld(); //builder.createWorld(droneConfig)
-        //World world = builder.createFlightTestWorld();
+        //World world =  builder.createWorld(); //builder.createWorld(droneConfig)
+        World world = builder.createFlightTestWorld();
         this.setWorld(world);
         Drone drone =(Drone)(world.getDroneSet().toArray())[0]; //only one drone is present
         //System.out.println("drone: " + drone);
@@ -352,7 +374,7 @@ public class TestbedMain implements Runnable{
     /**
      * Class that contains the autopilotInputs implemented separately for cleaner code
      */
-    private static class MainAutopilotInputs implements AutopilotInputs {
+    private static class MainAutopilotInputs implements AutopilotInputs_v2 {
 
         /**
          * Constructor for the class

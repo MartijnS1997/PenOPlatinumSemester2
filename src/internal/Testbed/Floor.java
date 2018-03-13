@@ -56,10 +56,10 @@ public class Floor implements WorldObject {
 //        Tile tile = new Tile(this.getPosition().convertToVector3f(), (new Vector(240, 1, 1f)).convertToVector3f());
 //    	tile.setSize(new Vector(20, 0, 20));
 //    	this.setAssociatedGraphicsObject(tile);
-//    	Vector position = getPosition();
-//        Vector color = new Vector((60.0f), 1, 0.6f);
-//    	Tile tile = new Tile(position.convertToVector3f(), color.convertToVector3f());
-//    	tile.setSize(new Vector(20, 0, 20));
-//    	this.setAssociatedGraphicsObject(tile);
+        Vector position = getPosition();
+        Vector color = new Vector((60.0f), 1, 0.6f);
+        Tile tile = new Tile(position.convertToVector3f(), color.convertToVector3f());
+        tile.setSize(new Vector(20, 0, 20));
+        this.setAssociatedGraphicsObject(tile);
 	}
 }

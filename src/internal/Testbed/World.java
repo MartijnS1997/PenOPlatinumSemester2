@@ -1,4 +1,5 @@
 package internal.Testbed;
+import AutopilotInterfaces.Path;
 import internal.Exceptions.AngleOfAttackException;
 import internal.Exceptions.SimulationEndedException;
 import internal.Helper.Vector;
@@ -416,6 +417,23 @@ public class World {
 		return false;
 	}
 
+	/**
+	 * Getter for the approximated cube path, each cube lies within a probability sphere of
+	 * 5 meters from the indicated location
+	 * @return the path approximating the cube positions
+	 */
+	public Path getApproxPath() {
+		return approxPath;
+	}
+
+	/**
+	 * Setter for the approximated cube path (see getter for more info)
+	 * @param approxPath the approximated path
+	 */
+	protected void setApproxPath(Path approxPath) {
+		this.approxPath = approxPath;
+	}
+
 	public ExecutorService getDroneThreads() {
 		return droneThreads;
 	}
@@ -481,6 +499,11 @@ public class World {
 	private final int Zsize;
 
 	/**
+	 * The approximated path of the cubes
+	 */
+	private AutopilotInterfaces.Path approxPath;
+
+	/**
 	 * An execution pool created for faster simulation of the drones
 	 */
 	private ExecutorService droneThreads;
@@ -517,6 +540,7 @@ public class World {
 	 * Constants
 	 */
 	public final static float CRASH_DISTANCE = 5.0f;
+
 
 
 

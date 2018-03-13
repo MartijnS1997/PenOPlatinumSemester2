@@ -1,9 +1,6 @@
-/Autopilot/
-/blockCoordinates.txt
-/blockDemoEasy.txt
-/blockDemoHard.txt
 /datatypes/
-/math/
-/tests/
 /gui/
 /internal/
+/math/
+/tests/
+/TestBedServer.class

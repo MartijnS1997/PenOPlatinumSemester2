@@ -1,9 +1,8 @@
 package internal.Autopilot;
 
 
-import java.io.IOException;
-
-import Autopilot.*;
+import AutopilotInterfaces.*;
+import AutopilotInterfaces.Path;
 import internal.Testbed.FlightRecorder;
 import internal.Helper.Vector;
 import internal.Physics.PhysXEngine;
@@ -16,11 +15,12 @@ import internal.Physics.PhysXEngine;
  * Extended by Bart on 15/10/2017.
  * Extended by Anthony Rathé on 16/10/2017 and later
  */
-public class AutoPilot implements Autopilot {
+public class AutoPilot implements Autopilot_v2{
+
 
 	/**
-	 * Primary constructor for the Autopilot
-	 * @param controllerConfig
+	 * Primary constructor for the AutopilotInterfaces
+	 * @param controllerConfig the controller that will be used during the flight
 	 */
 	public AutoPilot(String controllerConfig){
 		// first make sure we can takeoff
@@ -39,8 +39,9 @@ public class AutoPilot implements Autopilot {
 		}
 		// and last, we need to land
 		this.setLandingController(new AutopilotLandingController(this));
+		this.setWayPointController(new AutopilotWayPointController(this));
 		//set AP mode 2 to make everything work again
-		this.setAPMode(1);
+		this.setAPMode(APModes.WAY_POINT); //AP 3 to test the landing controller
 
 	}
 
@@ -55,25 +56,37 @@ public class AutoPilot implements Autopilot {
     	//this.attackController = new AutoPilotControllerNoAttack(this);
     }
 
-    @Override
-    public AutopilotOutputs simulationStarted(AutopilotConfig config, AutopilotInputs inputs) throws IOException {
-            configureAutopilot(config, inputs);
-//            if (this.getPhysXEngine().chassisTouchesGround(new Vector(inputs.getX(),inputs.getY(),inputs.getZ()), new Vector(inputs.getHeading(),inputs.getPitch(),inputs.getRoll()))) {
-//            	this.setAPMode(1);
-//            }else {
-//            	this.setAPMode(2);
-//            }
-//            this.startPosition = new Vector(inputs.getX(),inputs.getY(),inputs.getZ());
-        return getControlOutputs(inputs);
-    }
 
+	@Override
+	public AutopilotOutputs simulationStarted(AutopilotConfig config, AutopilotInputs_v2 inputs) {
+		configureAutopilot(config, inputs);
 
-    @Override
-    public AutopilotOutputs timePassed(AutopilotInputs inputs) throws IOException {
-        return getControlOutputs(inputs);
-    }
+		return getControlOutputs(inputs);
+	}
 
-    @Override
+	/**
+	 * generates control outputs destined for the drone (see the controller implementations for details
+	 * @param inputs the input data from the drone
+	 * @return the commands for the drone
+	 */
+	@Override
+	public AutopilotOutputs timePassed(AutopilotInputs_v2 inputs) {
+		return  getControlOutputs(inputs);
+	}
+
+	/**
+	 * sets the path that can be used for the autopilot
+	 * @param path the path to be followed
+	 */
+	@Override
+	public void setPath(Path path) {
+		this.path = path;
+	}
+
+	/**
+	 * Signals that the simulation has been started
+	 */
+	@Override
     public void simulationEnded() {
 
     }
@@ -85,7 +98,7 @@ public class AutoPilot implements Autopilot {
      * @param inputs the inputs of the autopilot
      * @author Martijn Sauwens
      */
-    public void configureAutopilot(AutopilotConfig configuration, AutopilotInputs inputs) {
+    public void configureAutopilot(AutopilotConfig configuration, AutopilotInputs_v2 inputs) {
 
     	//save the configuration:
 		this.setConfig(configuration);
@@ -109,6 +122,7 @@ public class AutoPilot implements Autopilot {
         float verticViewAngle = configuration.getVerticalAngleOfView();
         this.setAPCamera(new AutoPilotCamera(inputImage, horizViewAngle, verticViewAngle, nbRows, nbColumns));
 
+        setStartPosition(new Vector(inputs.getX(), inputs.getY(), inputs.getZ()));
 
     }
 
@@ -119,32 +133,26 @@ public class AutoPilot implements Autopilot {
 	 * @return control outputs for the drone
 	 */
 	//Todo implement the 3 stages of the flight: takeoff, flight and landing
-    private AutopilotOutputs getControlOutputs(AutopilotInputs inputs){
+    private AutopilotOutputs getControlOutputs(AutopilotInputs_v2 inputs){
     	
-    	AutoPilotFlightController controller = this.getFlightController();
+    	AutoPilotFlightController flightController = this.getFlightController();
     	AutopilotTakeoffController takeoffController = this.getTakeoffController();
     	AutopilotLandingController landingController = this.getLandingController();
-    	
-    	
-    	if (getAPMode() == 1) {
-    		//takeoffController.setCurrentInputs(inputs);
-    		return takeoffController.getControlActions(inputs);
-    	}
-    	else if (getAPMode() == 2){
-    		//System.out.println("using AP mode 2");
-    		//controller.setCurrentInputs(inputs);
-    		return controller.getControlActions(inputs);
-    	}
-    	else if (getAPMode() == 3){
-    		//landingController.setCurrentInputs(inputs);
-    		return landingController.getControlActions(inputs);
-    	}
-    		
-    		
-    	
-		//AutoPilotControllerNoAttack flightController = this.attackController;
-		//attackController.setCurrentInputs(inputs);
-    	return controller.getControlActions(inputs);
+    	AutopilotWayPointController wayPointController = this.getWayPointController();
+
+    	switch (getAPMode()){
+			case TAKEOFF:
+				return takeoffController.getControlActions(inputs);
+			case FLYING_TO_BLOCKS:
+				return flightController.getControlActions(inputs);
+			case WAY_POINT:
+				return wayPointController.getControlActions(inputs);
+			case LANDING:
+				return landingController.getControlActions(inputs);
+			default:
+				throw new IllegalArgumentException("Invalid controller type");
+		}
+
 	}
 
 
@@ -261,6 +269,14 @@ public class AutoPilot implements Autopilot {
 	}
 
 
+	private AutopilotWayPointController getWayPointController() {
+		return wayPointController;
+	}
+
+	private void setWayPointController(AutopilotWayPointController wayPointController) {
+		this.wayPointController = wayPointController;
+	}
+
 	/**
 	 * Getter for the main wing mass of the drone
 	 * @return a floating point number containing the mass of the main wing
@@ -295,7 +311,7 @@ public class AutoPilot implements Autopilot {
 		//this.attackController.setFlightRecorder(flightRecorder);
 	}
 
-	private PhysXEngine getPhysXEngine() {
+	public PhysXEngine getPhysXEngine() {
 		return physXEngine;
 	}
 
@@ -319,11 +335,11 @@ public class AutoPilot implements Autopilot {
 		this.config = config;
 	}
 	
-	public int getAPMode() {
+	public APModes getAPMode() {
 		return this.APMode;
 	}
 	
-	protected void setAPMode(int newAPMode) {
+	protected void setAPMode(APModes newAPMode) {
 		this.APMode = newAPMode;
 	}
 
@@ -341,6 +357,12 @@ public class AutoPilot implements Autopilot {
 	 * Object that stores the autopilot takeoffController
 	 */
 	private AutopilotTakeoffController takeoffController;
+
+	/**
+	 * Object that stores the way point controller
+	 * for the return phase for the flight
+	 */
+	private AutopilotWayPointController wayPointController;
 
 	/**
 	 * Variable that stores the configuration of the autopilot
@@ -362,9 +384,9 @@ public class AutoPilot implements Autopilot {
 	private PhysXEngine.PhysXOptimisations physXOptimisations;
 
 	/**
-	 * used for engine validation
+	 * Object that stores the current path to follow
 	 */
-	private AutoPilotControllerNoAttack attackController;
+	private Path path;
 	
 	/**
 	 * store current AutoPilot mode:
@@ -372,10 +394,14 @@ public class AutoPilot implements Autopilot {
 	 * 2 = flight mode
 	 * 3 = takeoff mode
 	 */
-	private int APMode;
+	private APModes APMode;
 	
 	public Vector getStartPosition() {
 		return this.startPosition;
+	}
+	
+	public void setStartPosition(Vector position) {
+		this.startPosition = position;
 	}
 	
 	// Variable for storing the startPosition of the drone, which also serves as the destination position
@@ -388,5 +414,9 @@ public class AutoPilot implements Autopilot {
     public final static String INVALID_THRUST = "The supplied thrust is out of bounds";
 	public final static String INVALID_CONTROLLER = "The flightController is already initialized";
 
+}
+
+enum APModes{
+	TAKEOFF, FLYING_TO_BLOCKS, WAY_POINT, LANDING
 }
 

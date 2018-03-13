@@ -1,4 +1,4 @@
-import Autopilot.*;
+import AutopilotInterfaces.*;
 import internal.Testbed.Drone;
 
 import java.io.DataInputStream;
@@ -34,6 +34,7 @@ public class TestbedConnection implements Callable<Void> {
     /**
      * The run is only called after the main thread has calculated the next state
      * invocation at other moments may result in incorrect functioning
+     * note: upon init the testbed has not yet simulated a single step, it only sends the initial state of the world
      */
     @Override
     public Void call() {

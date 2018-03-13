@@ -19,12 +19,12 @@ public class PathGenerator {
 	public List<Vector> getPath(){
 		return this.path;
 	}
-	
+
 	private void setPath(List<Vector> path) {
 		this.path = path;
 	}
-	
-	
+
+
 	private void pathLock() {
 		pathLock = true;
 	}
@@ -38,18 +38,18 @@ public class PathGenerator {
 	}
 	
 	public void generateLandingPath(Vector position, Vector velocity, Vector destination){
-		
+
 		Vector landingVector = getLandingVector(position, velocity, destination);
-		
+
 		List<Vector> blockCoordinates = new ArrayList<Vector>();
-		
+
     	if (canMakeTurn(position, velocity, destination)) {
-    	
+
     		
     		// generate landing path
     		Vector lastBlock = destination;
     		while(lastBlock.getyValue() < (position.getyValue()-0.01)) {
-    			
+
     			lastBlock = lastBlock.vectorSum(landingVector);
     			if (lastBlock.getyValue() >= position.getyValue()) {
     				lastBlock = new Vector(lastBlock.getxValue(),position.getyValue(),lastBlock.getzValue());
@@ -76,7 +76,7 @@ public class PathGenerator {
     		if (lastBlock.toTheRightOf(position, velocity)) {
     			Vector circleCenter = lastBlock.vectorSum(prolongVector.rotateAroundYAxis((float)Math.PI/2f).normalizeToLength(circleDiameter/2f));
     			Vector radius = prolongVector.rotateAroundYAxis((float)Math.PI/2f).normalizeToLength(circleDiameter/2f).scalarMult(-1f);
-    			
+
     			for (int i = 0; i < numberOfSemiCircleWaypoints; i++) {
     				radius = radius.rotateAroundYAxis((float)(Math.PI)/numberOfSemiCircleWaypoints);
     				lastBlock = circleCenter.vectorSum(radius);
@@ -85,15 +85,15 @@ public class PathGenerator {
     		}else {
     			Vector circleCenter = lastBlock.vectorSum(prolongVector.rotateAroundYAxis(-(float)Math.PI/2f).normalizeToLength(circleDiameter/2f));
     			Vector radius = prolongVector.rotateAroundYAxis(-(float)Math.PI/2f).normalizeToLength(circleDiameter/2f).scalarMult(-1f);
-    		
+
     			for (int i = 0; i < numberOfSemiCircleWaypoints; i++) {
     				radius = radius.rotateAroundYAxis(-(float)(Math.PI)/numberOfSemiCircleWaypoints);
     				lastBlock = circleCenter.vectorSum(radius);
     				blockCoordinates.add(lastBlock);
     			}
     		}
-    		
-    		
+
+
     		// generate additional path
     		// path before start of semi-circle should be prolonged
 			while (prolongedDistance < Math.max(additionalDistance - DISTANCE_BETWEEN_LANDING_BLOCKS + RUN_DISTANCE, RUN_DISTANCE - DISTANCE_BETWEEN_LANDING_BLOCKS)) {
@@ -134,12 +134,12 @@ public class PathGenerator {
 	    }
 	    
     private boolean canMakeTurn(Vector position, Vector direction, Vector destination) {
-    	
+
     	return parallelDistanceBetween(position, direction, getLandingStartPosition(position, direction, destination)) >= STEEPEST_TURN_DIAMETER;
     }
 
     /**
-     * Returns the shortest distance between a vector with direction "direction", placed in 
+     * Returns the shortest distance between a vector with direction "direction", placed in
      * position, and a vector with direction "direction", placed in destination.
      * @param position
      * @param direction
@@ -151,14 +151,14 @@ public class PathGenerator {
     	Vector horizontalPosition = position.makeHorizontal();
     	Vector horizontalDestination = destination.makeHorizontal();
     	Vector dMinusP = horizontalDestination.vectorDifference(horizontalPosition);
-    	
+
     	// Formula: d = (destinationVector - positionVector).size()*cos(angleBetween(destinationVector - positionVector,directionVector)-PI/2)
     	return (float)(dMinusP.getSize()*Math.cos(dMinusP.getAngleBetween(horizontalDirection)-Math.PI/2f));
     }
-    
+
     private Vector getLandingStartPosition(Vector position, Vector direction, Vector destination) {
     	Vector landingVector = getLandingVector(position, direction, destination);
-    	
+
     	Vector lastBlock = destination;
 		while(lastBlock.getyValue() < position.getyValue()) {
 			lastBlock = lastBlock.vectorSum(landingVector);
@@ -168,7 +168,7 @@ public class PathGenerator {
 		}
 		return lastBlock;
     }
-    
+
     /**
      * Return the distance a point moving in the direction "direction" should travel horizontally, starting from "destination", to arrive
      * in a parallel position, next to "position".
@@ -182,23 +182,23 @@ public class PathGenerator {
     	Vector horizontalPosition = position.makeHorizontal();
     	Vector horizontalDestination = destination.makeHorizontal();
     	Vector dMinusP = horizontalDestination.vectorDifference(horizontalPosition);
-    	
+
     	// Formula: d = (destinationVector - positionVector).size()*cos(angleBetween(destinationVector - positionVector,directionVector)-PI/2)
     	float alfa = (float)(dMinusP.getAngleBetween(horizontalDirection)-Math.PI/2f);
     	float d = (float)(dMinusP.getSize()*Math.sin(alfa));
     	return Math.signum(alfa)*d;
-    	
+
     }
-    
+
     private static Vector parallelHorizontalVector(Vector position1, Vector position2) {
     	position1 = position1.makeHorizontal();
     	position2 = position2.makeHorizontal();
-    	
+
     	Vector distanceBetween = position1.vectorDifference(position2);
     	return distanceBetween.rotateAroundYAxis((float)Math.PI/2);
-    	
+
     }
-	   
+
 	
 	private static final float DISTANCE_BETWEEN_LANDING_BLOCKS = 20f;
     private static final float LANDING_ANGLE = (float)Math.PI/12;

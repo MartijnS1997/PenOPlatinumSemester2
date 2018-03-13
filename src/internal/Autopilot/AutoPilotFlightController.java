@@ -7,7 +7,7 @@ import static java.lang.Math.*;
 /**
  * Created by Martijn on 30/10/2017.
  * Appended and edited by Anthony Rath� on 6/11/2017
- * A class of Autopilot Controllers
+ * A class of AutopilotInterfaces Controllers
  */
 public abstract class AutoPilotFlightController extends Controller{
 

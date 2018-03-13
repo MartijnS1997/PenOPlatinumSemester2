@@ -1,12 +1,11 @@
 package internal.Autopilot;
 
-import Autopilot.AutopilotConfig;
-import Autopilot.AutopilotInputs;
-import Autopilot.AutopilotOutputs;
+import AutopilotInterfaces.AutopilotConfig;
+import AutopilotInterfaces.AutopilotInputs;
+import AutopilotInterfaces.AutopilotInputs_v2;
+import AutopilotInterfaces.AutopilotOutputs;
 import internal.Physics.PhysXEngine;
 import internal.Helper.Vector;
-import internal.Testbed.DroneBuilder;
-import internal.Testbed.DroneBuilder_v2;
 
 import static java.lang.Math.PI;
 import static java.lang.Math.abs;
@@ -23,6 +22,7 @@ public abstract class Controller {
         this.autopilot = autopilot;
         this.setPreviousInputs(dummyData);
         this.currentInputs = dummyData;
+        this.pathGenerator = new PathGenerator();
     }
 
     /**
@@ -30,7 +30,7 @@ public abstract class Controller {
      * @param inputs the inputs of the autopilot
      * @return the control actions
      */
-    public abstract AutopilotOutputs getControlActions(AutopilotInputs inputs);
+    public abstract AutopilotOutputs getControlActions(AutopilotInputs_v2 inputs);
 
     /*
     Getters and setters
@@ -69,7 +69,7 @@ public abstract class Controller {
     /*
   * Supplementary control methods
   */
-    protected void rollControl(ControlOutputs outputs, AutopilotInputs currentInput){
+    protected void rollControl(ControlOutputs outputs, AutopilotInputs_v2 currentInput){
         float roll = currentInput.getRoll();
 
         if(roll >= this.getRollThreshold()){
@@ -86,8 +86,10 @@ public abstract class Controller {
      * Checks if the current control outputs are realisable under the angle of attack constraint provided
      * by the autopilot configuration. If not the controls are adjusted to fit the constraints
      * @param controlOutputs the control outputs to be checked
+     * @param prevInputs
+     * @param currentInputs
      */
-    protected void angleOfAttackControl(ControlOutputs controlOutputs,AutopilotInputs prevInputs, AutopilotInputs currentInputs){
+    protected void angleOfAttackControl(ControlOutputs controlOutputs, AutopilotInputs_v2 prevInputs, AutopilotInputs_v2 currentInputs){
 
         //first check if the current and the previous steps are initialized, if not so delete all control actions
         //and set to standard value
@@ -275,6 +277,19 @@ public abstract class Controller {
     }
 
     /**
+     * Extracts the delta time between two steps (simulation time)
+     * @param previousInputs the previous inputs of the autopilot
+     * @param currentInputs the current inputs of the autopilot
+     * @return the time elapsed between the last two simulation steps
+     */
+    protected float getDeltaTime(AutopilotInputs previousInputs, AutopilotInputs currentInputs){
+        float prevTime = previousInputs.getElapsedTime();
+        float currTime = currentInputs.getElapsedTime();
+
+        return currTime - prevTime;
+    }
+
+    /**
      * Calculate an approximation of the velocity
      * @param prevInputs the autopilot inputs at moment k-1 needed for the derivative
      * @param currentInputs the autopilot inputs at moment k needed for the derivative
@@ -282,7 +297,7 @@ public abstract class Controller {
      * elaboration: see textbook numerical math for derivative methods, the
      * derivative of f(k+1) - f(k-1) / (2*timeStep) has O(h²) correctness
      */
-    protected Vector getVelocityApprox(AutopilotInputs prevInputs, AutopilotInputs currentInputs){
+    protected Vector getVelocityApprox(AutopilotInputs_v2 prevInputs, AutopilotInputs_v2 currentInputs){
         float prevTime = prevInputs.getElapsedTime();
         float currentTime = currentInputs.getElapsedTime();
 
@@ -302,7 +317,7 @@ public abstract class Controller {
      * @return an approx for the rotation (first calculate the rotation in heading pitch and roll components
      *         and transform them to the actual rotational components)
      */
-    private Vector getRotationApprox(AutopilotInputs prevInputs, AutopilotInputs currentInputs){
+    public Vector getRotationApprox(AutopilotInputs_v2 prevInputs, AutopilotInputs_v2 currentInputs){
 
         //get the passed time interval
         float prevTime = prevInputs.getElapsedTime();
@@ -326,7 +341,7 @@ public abstract class Controller {
      * @param inputs the autopilotInput object containing the current inputs
      * @return a vector containing the orientation of the drone in vector format
      */
-    protected static Vector extractOrientation(AutopilotInputs inputs){
+    protected static Vector extractOrientation(AutopilotInputs_v2 inputs){
         return new Vector(inputs.getHeading(), inputs.getPitch(), inputs.getRoll());
     }
 
@@ -335,7 +350,7 @@ public abstract class Controller {
      * @param inputs the autopilotInput object containing the current inputs
      * @return a vector containing the position of the drone in vector format
      */
-    protected static Vector extractPosition(AutopilotInputs inputs){
+    protected static Vector extractPosition(AutopilotInputs_v2 inputs){
         return new Vector(inputs.getX(), inputs.getY(), inputs.getZ());
     }
 
@@ -368,7 +383,7 @@ public abstract class Controller {
      * Getter for the current inputs (the autopilot inputs object)
      * @return the current outputs
      */
-    public AutopilotInputs getCurrentInputs() {
+    public AutopilotInputs_v2 getCurrentInputs() {
         return currentInputs;
     }
     
@@ -377,7 +392,7 @@ public abstract class Controller {
      * set previous inputs
      * @param currentInputs the current input for the autopilot
      */
-    protected void setCurrentInputs(AutopilotInputs currentInputs) {
+    protected void setCurrentInputs(AutopilotInputs_v2 currentInputs) {
         //first write to the previous outputs
         this.setPreviousInputs(this.getCurrentInputs());
 
@@ -386,9 +401,9 @@ public abstract class Controller {
     }
 
     /**
-     * Returns the previous Autopilot Inputs
+     * Returns the previous AutopilotInterfaces Inputs
      */
-    public AutopilotInputs getPreviousInputs() {
+    public AutopilotInputs_v2 getPreviousInputs() {
         return previousInputs;
     }
 
@@ -396,17 +411,26 @@ public abstract class Controller {
      * Setter for the autopilot inputs
      * @param previousInputs the pervious inputs
      */
-    protected void setPreviousInputs(AutopilotInputs previousInputs){
+    protected void setPreviousInputs(AutopilotInputs_v2 previousInputs){
         this.previousInputs = previousInputs;
     }
 
-    private AutopilotInputs currentInputs;
-    private AutopilotInputs previousInputs;
+    private AutopilotInputs_v2 currentInputs;
+    private AutopilotInputs_v2 previousInputs;
+    
+    protected PathGenerator getPathGenerator() {
+    	return this.pathGenerator;
+    }
 
     /**
      * Object that stores the autopilot of the drone
      */
     private AutoPilot autopilot;
+    
+    /**
+     * Object that stores the pathgenerator of the controller
+     */
+    private final PathGenerator pathGenerator;
 
     /**
      * Object that stores the configuration of the drone
@@ -437,6 +461,9 @@ public abstract class Controller {
             copy.setHorStabInclination(this.getHorStabInclination());
             copy.setVerStabInclination(this.getVerStabInclination());
             copy.setThrust(this.getThrust());
+            copy.setFrontBrakeForce(this.getFrontBrakeForce());
+            copy.setLeftBrakeForce(this.getLeftBrakeForce());
+            copy.setRightBrakeForce(this.getRightBrakeForce());
 
             return copy;
         }
@@ -451,7 +478,9 @@ public abstract class Controller {
             this.setLeftWingInclination(getMainStableInclination());
             this.setHorStabInclination(getStabilizerStableInclination());
             this.setVerStabInclination(getStabilizerStableInclination());
-
+            this.setFrontBrakeForce(this.getFrontBrakeForce());
+            this.setLeftBrakeForce(this.getLeftBrakeForce());
+            this.setRightBrakeForce(this.getRightBrakeForce());
         }
 
         @Override
@@ -481,17 +510,34 @@ public abstract class Controller {
 
         @Override
         public float getFrontBrakeForce() {
-            return 0;
+            return this.frontBrakeForce;
         }
 
         @Override
         public float getLeftBrakeForce() {
-            return 0;
+            return this.leftBrakeForce;
         }
 
         @Override
         public float getRightBrakeForce() {
-            return 0;
+            return this.rightBrakeForce;
+        }
+
+
+
+
+
+        public void setLeftBrakeForce(float leftBrakeForce) {
+            this.leftBrakeForce = leftBrakeForce;
+        }
+
+        public void setRightBrakeForce(float rightBrakeForce) {
+            this.rightBrakeForce = rightBrakeForce;
+        }
+
+
+        public void setFrontBrakeForce(float frontBrakeForce) {
+            this.frontBrakeForce = frontBrakeForce;
         }
 
         /**
@@ -541,6 +587,10 @@ public abstract class Controller {
         private float horStabInclination = getStabilizerStableInclination();
         private float verStabInclination = getStabilizerStableInclination();
 
+        private float leftBrakeForce = 0;
+        private float rightBrakeForce = 0;
+        private float frontBrakeForce = 0;
+
         @Override
         public String toString() {
             return "ControlOutputs{" +
@@ -556,7 +606,7 @@ public abstract class Controller {
     /**
      * dummy data used for the initialization of the drone
      */
-    private  static AutopilotInputs dummyData = new AutopilotInputs() {
+    private  static AutopilotInputs_v2 dummyData = new AutopilotInputs_v2() {
         @Override
         public byte[] getImage() {
             return new byte[0];
@@ -569,7 +619,7 @@ public abstract class Controller {
 
         @Override
         public float getY() {
-            return DroneBuilder_v2.START_Y;//DroneBuilder.GAMMA_STARTPOS.getyValue();
+            return 20f;//DroneBuilder_v2.START_Y;//DroneBuilder.GAMMA_STARTPOS.getyValue();
         }
 
         @Override
@@ -579,7 +629,7 @@ public abstract class Controller {
 
         @Override
         public float getHeading() {
-            return 0;
+            return (float) (0);
         }
 
         @Override
@@ -731,6 +781,21 @@ public abstract class Controller {
         }
 
         /**
+         *
+         * @param input
+         * @param elapsedTime
+         * @param setPoint
+         * @return
+         */
+        float getPIDOutputSetPoint(float input, float elapsedTime, float setPoint){
+            this.setSetPoint(setPoint);
+//            System.out.println("Controller input: " + input);
+//            System.out.println("Controller elapsedTime: " + elapsedTime);
+//            System.out.println("Controller setPoint: " + setPoint);
+            return getPIDOutput(input, elapsedTime);
+        }
+
+        /**
          * Calculates the output for the current inputs of the PID controller
          * @param input the input signal of the controller (from the feedback loop)
          * @param elapsedTime the elapsed time during the simulation
@@ -764,12 +829,29 @@ public abstract class Controller {
             this.setPreviousError(error);
             this.setPreviousTime(elapsedTime);
 
+            this.setPrevCalcOutput(output);
+
             return output;
         }
 
         /*
         Getters and setters
          */
+
+        /**
+         * getter for the previous calculated output of the PID controller
+         * @return the current output (the prev
+         */
+        public float getPrevCalcOutput() {
+            return prevCalcOutput;
+        }
+
+        /**
+         * Setter for the previous calculated output of the PID controller
+         */
+        private void setPrevCalcOutput(float prevCalcOutput) {
+            this.prevCalcOutput = prevCalcOutput;
+        }
 
         /**
          * get the integral part (saved over the course of the algorithm)
@@ -807,7 +889,7 @@ public abstract class Controller {
          * The set point is the desired value used for reference, in our case it is 0.0
          * @return
          */
-        private float getSetPoint() {
+        public float getSetPoint() {
             return setPoint;
         }
 
@@ -815,7 +897,7 @@ public abstract class Controller {
          * Set the set point of the PID
          * @param setPoint
          */
-        protected void setSetPoint(float setPoint) {
+        public void setSetPoint(float setPoint) {
             this.setPoint = setPoint;
         }
 
@@ -831,7 +913,7 @@ public abstract class Controller {
          * Set the previous time of the simulation (used when setting the new values of the drone)
          * @param previousTime
          */
-        public void setPreviousTime(float previousTime) {
+        private void setPreviousTime(float previousTime) {
             this.previousTime = previousTime;
         }
 
@@ -855,8 +937,20 @@ public abstract class Controller {
          * Constant used for the derivative part of the PID
          * @return
          */
-        public float getDerivativeConstant() {
+        private float getDerivativeConstant() {
             return derivativeConstant;
+        }
+
+        public void setGainConstant(float gainConstant) {
+            this.gainConstant = gainConstant;
+        }
+
+        public void setIntegralConstant(float integralConstant) {
+            this.integralConstant = integralConstant;
+        }
+
+        public void setDerivativeConstant(float derivativeConstant) {
+            this.derivativeConstant = derivativeConstant;
         }
 
         private float integral = 0.0f;
@@ -866,5 +960,6 @@ public abstract class Controller {
         private float gainConstant;
         private float integralConstant;
         private float derivativeConstant;
+        private float prevCalcOutput;
     }
 }
