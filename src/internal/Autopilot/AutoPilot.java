@@ -40,8 +40,9 @@ public class AutoPilot implements Autopilot{
 		}
 		// and last, we need to land
 		this.setLandingController(new AutopilotLandingController(this));
+		this.setWayPointController(new AutopilotWayPointController(this));
 		//set AP mode 2 to make everything work again
-		this.setAPMode(3); //AP 3 to test the landing controller
+		this.setAPMode(APModes.WAY_POINT); //AP 3 to test the landing controller
 
 	}
 
@@ -124,30 +125,24 @@ public class AutoPilot implements Autopilot{
 	//Todo implement the 3 stages of the flight: takeoff, flight and landing
     private AutopilotOutputs getControlOutputs(AutopilotInputs inputs){
     	
-    	AutoPilotFlightController controller = this.getFlightController();
+    	AutoPilotFlightController flightController = this.getFlightController();
     	AutopilotTakeoffController takeoffController = this.getTakeoffController();
     	AutopilotLandingController landingController = this.getLandingController();
-    	
-    	
-    	if (getAPMode() == 1) {
-    		//takeoffController.setCurrentInputs(inputs);
-    		return takeoffController.getControlActions(inputs);
-    	}
-    	else if (getAPMode() == 2){
-    		//System.out.println("using AP mode 2");
-    		//controller.setCurrentInputs(inputs);
-    		return controller.getControlActions(inputs);
-    	}
-    	else if (getAPMode() == 3){
-    		//landingController.setCurrentInputs(inputs);
-    		return landingController.getControlActions(inputs);
-    	}
-    		
-    		
-    	
-		//AutoPilotControllerNoAttack flightController = this.attackController;
-		//attackController.setCurrentInputs(inputs);
-    	return controller.getControlActions(inputs);
+    	AutopilotWayPointController wayPointController = this.getWayPointController();
+
+    	switch (getAPMode()){
+			case TAKEOFF:
+				return takeoffController.getControlActions(inputs);
+			case FLYING_TO_BLOCKS:
+				return flightController.getControlActions(inputs);
+			case WAY_POINT:
+				return wayPointController.getControlActions(inputs);
+			case LANDING:
+				return landingController.getControlActions(inputs);
+			default:
+				throw new IllegalArgumentException("Invalid controller type");
+		}
+
 	}
 
 
@@ -264,6 +259,14 @@ public class AutoPilot implements Autopilot{
 	}
 
 
+	public AutopilotWayPointController getWayPointController() {
+		return wayPointController;
+	}
+
+	public void setWayPointController(AutopilotWayPointController wayPointController) {
+		this.wayPointController = wayPointController;
+	}
+
 	/**
 	 * Getter for the main wing mass of the drone
 	 * @return a floating point number containing the mass of the main wing
@@ -322,11 +325,11 @@ public class AutoPilot implements Autopilot{
 		this.config = config;
 	}
 	
-	public int getAPMode() {
+	public APModes getAPMode() {
 		return this.APMode;
 	}
 	
-	protected void setAPMode(int newAPMode) {
+	protected void setAPMode(APModes newAPMode) {
 		this.APMode = newAPMode;
 	}
 
@@ -344,6 +347,12 @@ public class AutoPilot implements Autopilot{
 	 * Object that stores the autopilot takeoffController
 	 */
 	private AutopilotTakeoffController takeoffController;
+
+	/**
+	 * Object that stores the way point controller
+	 * for the return phase for the flight
+	 */
+	private AutopilotWayPointController wayPointController;
 
 	/**
 	 * Variable that stores the configuration of the autopilot
@@ -375,7 +384,7 @@ public class AutoPilot implements Autopilot{
 	 * 2 = flight mode
 	 * 3 = takeoff mode
 	 */
-	private int APMode;
+	private APModes APMode;
 	
 	public Vector getStartPosition() {
 		return this.startPosition;
@@ -395,5 +404,9 @@ public class AutoPilot implements Autopilot{
     public final static String INVALID_THRUST = "The supplied thrust is out of bounds";
 	public final static String INVALID_CONTROLLER = "The flightController is already initialized";
 
+}
+
+enum APModes{
+	TAKEOFF, FLYING_TO_BLOCKS, WAY_POINT, LANDING
 }
 

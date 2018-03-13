@@ -69,7 +69,7 @@ public class BetaFlightController extends AutoPilotFlightController {
         int amountOfCubesInSight = APCamera.getCubesInPicture().size();
         
         if (amountOfCubesInSight <= 0) {
-        	this.getAutopilot().setAPMode(3);
+        	this.getAutopilot().setAPMode(APModes.WAY_POINT);
         }
         
         return outputs;
