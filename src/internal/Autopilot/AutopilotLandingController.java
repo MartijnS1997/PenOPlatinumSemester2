@@ -28,6 +28,16 @@ public class AutopilotLandingController extends Controller {
 
     }
 
+    /**
+     * Returns true if the plane came to a standstill on the ground
+     * @param inputs the current inputs (this is the base of the check)
+     * @return true if the approximate velocity is below velocity threshold
+     */
+    @Override
+    public boolean hasReachedObjective(AutopilotInputs_v2 inputs) {
+        Vector velocityApprox = this.getVelocityApprox(this.getCurrentInputs(), inputs);
+        return velocityApprox.getSize() <= MAXIMUM_LANDING_VELOCITY;
+    }
 
     /**
      * Generates the control actions for the autopilot
@@ -76,7 +86,7 @@ public class AutopilotLandingController extends Controller {
     }
 
     private void loseAltitude(ControlOutputs outputs) {
-        float outputThrust  = this.getAutopilot().getMaxThrust();
+        float outputThrust  = this.getConfig().getMaxThrust();
         outputs.setThrust(outputThrust);
         outputs.setRightWingInclination(WING_INCL);
         outputs.setLeftWingInclination(WING_INCL);
@@ -84,7 +94,7 @@ public class AutopilotLandingController extends Controller {
     }
 
     private void stayDown(ControlOutputs outputs) {
-        float outputThrust  = this.getAutopilot().getMaxThrust();
+        float outputThrust  = this.getConfig().getMaxThrust();
         outputs.setThrust(outputThrust);
         outputs.setRightWingInclination(-WING_INCL);
         outputs.setLeftWingInclination(-WING_INCL);
@@ -147,6 +157,8 @@ public class AutopilotLandingController extends Controller {
     private final static float INCLINATION_AOA_ERROR_MARGIN = (float)(3*PI/180);
     private final static float HOR_STABILIZER_MAX = (float)(10*PI/180);
     private final static float PLANE_HEIGHT_FROM_GROUND = 1.2f;
+    private final static float MAXIMUM_LANDING_VELOCITY = 1f;
+
 
 
 

@@ -17,9 +17,20 @@ public class AutopilotTakeoffController extends Controller{
         super(autopilot);
         this.getVelocityPID().setSetPoint(this.referenceVelocity);
         this.getOrientationPID().setSetPoint(this.referenceOrientation);
-        this.getAltitudePID().setSetPoint(this.referenceAltitude);
+        this.getAltitudePID().setSetPoint(this.PIDReferenceAltitude);
     }
 
+
+    @Override
+    public boolean hasReachedObjective(AutopilotInputs_v2 inputs) {
+        Vector position = Controller.extractPosition(inputs);
+        return position.getyValue() > getPIDReferenceAltitude();
+    }
+
+    /**
+     * Controls the thrust of the takeoff controller
+     * @param outputs the outputs for the drone
+     */
     private void setThrust(ControlOutputs outputs){
         //get the maximal thrust
         float maxThrust = this.getAutopilot().getConfig().getMaxThrust();
@@ -37,6 +48,10 @@ public class AutopilotTakeoffController extends Controller{
 
     }
 
+    /**
+     * Determines the control outputs for the horizontal stabilizer
+     * @param outputs the outputs for the drone
+     */
     private void setHorizontalStabilizer(ControlOutputs outputs){
         //we want to go for zero (stable inclination of the horizontal stabilizer is zero), so the corrective action needs also to be zero
         Vector orientation = Controller.extractOrientation(this.getCurrentInputs());
@@ -50,6 +65,10 @@ public class AutopilotTakeoffController extends Controller{
         outputs.setHorStabInclination(outputInclination*signum(desiredAngle));
     }
 
+    /**
+     * Determines the control outputs for the main wings in takeoff
+     * @param outputs the outputs for the drone (are overwritten by this method)
+     */
     private void setMainWing(ControlOutputs outputs){
         //first get the PID value
         Vector position = Controller.extractPosition(this.getCurrentInputs());
@@ -57,21 +76,21 @@ public class AutopilotTakeoffController extends Controller{
         //if we are under the ideal velocity, we need to maintain a higher inclination
         float zVelocity = -this.getVelocityApprox(this.getPreviousInputs(), this.getCurrentInputs()).getzValue();
         //then get the inclination based on the PID
-        float outputInclination = (((getReferenceAltitude() + altitudeOutput)/getReferenceAltitude()  + 1/3f*DESIRED_VELOCITY/zVelocity) *MAIN_STABLE);
+        float outputInclination = (((getPIDReferenceAltitude() + altitudeOutput)/ getPIDReferenceAltitude()  + 1/3f*DESIRED_VELOCITY/zVelocity) *MAIN_STABLE);
         float selectedInclination = max(min(outputInclination, MAIN_MAX), 0f);
         outputs.setLeftWingInclination(selectedInclination);
         outputs.setRightWingInclination(selectedInclination);
     }
 
+    /**
+     * Checks if the desired altitude has been reached
+     */
     private void checkDesiredAltitude(){
-        if(this.getCurrentInputs().getY() >= DESIRED_ALTITUDE){
+        if(this.getCurrentInputs().getY() >= desiredAltitude){
             this.setReachedDesiredAltitude();
         }
     }
 
-    private boolean hasReachedDesiredVelocity(){
-        return this.getVelocityApprox(this.getPreviousInputs(), this.getCurrentInputs()).getSize() >= DESIRED_VELOCITY;
-    }
 
     @Override
     public AutopilotOutputs getControlActions(AutopilotInputs_v2 inputs) {
@@ -101,10 +120,10 @@ public class AutopilotTakeoffController extends Controller{
 
     /**
      * Sets the controls for the first part of the takeoff where the drone needs to get actually of the ground
-     * @param outputs
+     * @param outputs the outputs of the controller for the drone
      */
     private void simpleTakeoffControls(ControlOutputs outputs) {
-        float maxThrust = this.getAutopilot().getMaxThrust();
+        float maxThrust = this.getConfig().getMaxThrust();
         float outputThrust = maxThrust;
         outputs.setThrust(outputThrust);
         outputs.setRightWingInclination(MAIN_TAKEOFF);
@@ -144,28 +163,63 @@ public class AutopilotTakeoffController extends Controller{
         return STANDARD_THRUST;
     }
 
+    /**
+     * Checks if the desired altitude has been reached
+     * @return true if and only if the desired altitude has been reached
+     */
     private boolean isDesiredAltitude() {
         return hasReachedDesiredAltitude;
     }
 
+    /**
+     * Setter for the desired altitude flag
+     */
     private void setReachedDesiredAltitude() {
         this.hasReachedDesiredAltitude = true;
     }
 
-    public VectorPID getVelocityPID() {
+    /**
+     * Getter for the velocity PID of the controller
+     * @return the velocity controller
+     */
+    private VectorPID getVelocityPID() {
         return velocityPID;
     }
 
-    public VectorPID getOrientationPID() {
+    /**
+     * Getter for the orientation PID of the controller
+     * @return the controller for the orientation of the drone
+     */
+    private VectorPID getOrientationPID() {
         return orientationPID;
     }
 
-    public PIDController getAltitudePID() {
+    /**
+     * Getter for the altitude PID controller
+     * @return the PID controller that monitors the altitude
+     */
+    private PIDController getAltitudePID() {
         return altitudePID;
     }
 
-    public float getReferenceAltitude() {
-        return referenceAltitude;
+    /**
+     * Getter for the reference altitude of the drone
+     * @return the reference altitude as a float
+     */
+    public float getPIDReferenceAltitude() {
+        return PIDReferenceAltitude;
+    }
+
+    /**
+     * Setter for the reference altitude, the altitude used for reference by the altitude PID
+     * @param PIDReferenceAltitude the reference altitude
+     */
+    public void setPIDReferenceAltitude(float PIDReferenceAltitude) {
+        //don't forget to set the reference altitude
+        this.getAltitudePID().setSetPoint(this.PIDReferenceAltitude);
+        this.PIDReferenceAltitude = PIDReferenceAltitude;
+        this.desiredAltitude = PIDReferenceAltitude*0.95f; //set the desired altitude a little lower such that we start
+        //with some pitch upwards
     }
 
     /**
@@ -216,9 +270,9 @@ public class AutopilotTakeoffController extends Controller{
     private final static float STANDARD_THRUST = 128.41895f*3.5f;
 
     /**
-     * The desired altitude to reach with the drone
+     * The desired altitude to reach with the drone before starting the altitude control
      */
-    private final static float DESIRED_ALTITUDE = 8f;
+    private float desiredAltitude = 8f;
 
     /**
      * The desired velocity to reach with the drone
@@ -242,7 +296,7 @@ public class AutopilotTakeoffController extends Controller{
     /**
      * Reference for the entry of the height (needed for the PID)
      */
-    private float referenceAltitude = 10f;
+    private float PIDReferenceAltitude = 10f;
 
     /**
      * A pid controller for the velocity of the drone
@@ -254,89 +308,4 @@ public class AutopilotTakeoffController extends Controller{
     private VectorPID orientationPID = new VectorPID(1.0f, 0f, 0f);
 
     private PIDController altitudePID = new PIDController(1.0f, 0.1f,0.2f);
-
-
-
-
-    //    /**
-//     * Generates the control actions for the autopilot
-//     * @param inputs the inputs of the autopilot
-//     * @return the control actions
-//     * @author Anthony Rathe
-//     */
-//    @Override
-//    public AutopilotOutputs getControlActions(AutopilotInputs inputs){
-//
-//    	setCurrentInputs(inputs);
-//
-//    	ControlOutputs controlOutputs = new ControlOutputs();
-//
-//    	AutopilotInputs currentInputs = getCurrentInputs();
-//    	AutopilotInputs previousInputs = getPreviousInputs();
-//
-//    	float currentHeight = currentInputs.getY();
-//
-//    	Vector velocityApprox = this.getVelocityApprox(previousInputs, currentInputs);
-//
-//    	if (currentHeight < STOP_TAKEOFF_HEIGHT) {
-//    		// Still on the ground
-//
-//    		// Set max thrust
-//    		controlOutputs.setThrust(this.getAutopilot().getConfig().getMaxThrust());
-//
-//    		if (velocityApprox.getyValue() >= LIFTOFF_THRESHOLD ) {
-//    			// Drone is lifting off
-//
-//    			if (currentInputs.getPitch() <= TAKEOFF_PITCH) {
-//    				// Start ascending
-//    				controlOutputs.setHorStabInclination(STANDARD_INCLINATION);
-//    			}else if(currentInputs.getPitch() >= MAX_PITCH){
-//    				// Start descending
-//    				controlOutputs.setHorStabInclination(-STANDARD_INCLINATION);
-//    			}else {
-//    				// Stop ascending/descending
-//    				controlOutputs.setHorStabInclination(0f);
-//    			}
-//
-//    		}
-//
-//    	}else {
-//    		// In mid-air
-//    		// Turn to flight mode
-//    		this.getAutopilot().setAPMode(2);
-//
-//    	}
-//        return controlOutputs;
-//    }
-//
-//    @Override
-//    protected float getMainStableInclination() {
-//        return 0;
-//    }
-//
-//    @Override
-//    protected float getStabilizerStableInclination() {
-//        return 0;
-//    }
-//
-//    @Override
-//    protected float getRollThreshold() {
-//        return 0;
-//    }
-//
-//    @Override
-//    protected float getInclinationAOAErrorMargin() {
-//        return 0;
-//    }
-//
-//    @Override
-//    protected float getStandardThrust() {
-//        return 0;
-//    }
-//
-//    private static final float LIFTOFF_THRESHOLD = 1f;
-//    private static final float STOP_TAKEOFF_HEIGHT = 10f;
-//    private static final float TAKEOFF_PITCH = (float)Math.PI/18f;
-//    private static final float MAX_PITCH = (float)Math.PI/4f;
-//    private static final float STANDARD_INCLINATION = (float) PI/12;
 }

@@ -1,5 +1,7 @@
 package internal.Autopilot;
 
+import AutopilotInterfaces.*;
+import AutopilotInterfaces.Path;
 import internal.Testbed.FlightRecorder;
 
 import static java.lang.Math.*;
@@ -21,19 +23,51 @@ public abstract class AutoPilotFlightController extends Controller{
         
     }
 
-
-
-    private void logControlActions(ControlOutputs outputs, String controlString){
-
-        controlString += "Left wing inclination: "  + outputs.getLeftWingInclination()*RAD2DEGREE + "\n";
-        controlString += "Right wing inclination: " + outputs.getRightWingInclination()*RAD2DEGREE + "\n";
-        controlString += "Horizontal stabilizer inclination: " + outputs.getHorStabInclination()*RAD2DEGREE + "\n";
-        controlString += "Vertical wing inclination" + outputs.getVerStabInclination()*RAD2DEGREE + "\n";
-
-        // write the controls to the recorder
-        FlightRecorder recorder = this.getFlightRecorder();
-        recorder.appendControlLog(controlString);
+    @Override
+    public boolean hasReachedObjective(AutopilotInputs_v2 inputs) {
+        return false;
     }
+
+    /**
+     * Getter for the approximate flight path of the drone
+     * the path contains the positions of the cubes within a margin of 5 meters
+     * @return the flight path
+     */
+    private AutopilotInterfaces.Path getFlightPath() {
+        return flightPath;
+    }
+
+    /**
+     * Setter for the flight path of the drone for this flightcontroller
+     * @param flightPath the position of the cubes
+     */
+    public void setFlightPath(Path flightPath) {
+        if(!canHaveAsFlightPath(flightPath)){
+            throw new IllegalStateException("Path already configured");
+        }
+        this.flightPath = flightPath;
+    }
+
+    /**
+     * Checks if the provided path can be set as the approximate flight path for the controller
+     * @param flightPath the flight path that approximates the positions of the cubes to be tested
+     * @return true if the provided flight path is a non null and the current flight path is (uninitialized)
+     */
+    private boolean canHaveAsFlightPath(Path flightPath){
+        return flightPath!=null &&this.getFlightPath() == null;
+    }
+
+    //    private void logControlActions(ControlOutputs outputs, String controlString){
+//
+//        controlString += "Left wing inclination: "  + outputs.getLeftWingInclination()*RAD2DEGREE + "\n";
+//        controlString += "Right wing inclination: " + outputs.getRightWingInclination()*RAD2DEGREE + "\n";
+//        controlString += "Horizontal stabilizer inclination: " + outputs.getHorStabInclination()*RAD2DEGREE + "\n";
+//        controlString += "Vertical wing inclination" + outputs.getVerStabInclination()*RAD2DEGREE + "\n";
+//
+//        // write the controls to the recorder
+//        FlightRecorder recorder = this.getFlightRecorder();
+//        recorder.appendControlLog(controlString);
+//    }
 
     /**
      * determines the largest value of both entries, if both are negative an exception is thrown
@@ -74,21 +108,21 @@ public abstract class AutoPilotFlightController extends Controller{
      */
 
 
-    /**
-     * get the flight recorder of the drone
-     * @return
-     */
-    public FlightRecorder getFlightRecorder() {
-        return flightRecorder;
-    }
-
-    /**
-     * Setter for the flight recorder
-     * @param flightRecorder
-     */
-    public void setFlightRecorder(FlightRecorder flightRecorder) {
-        this.flightRecorder = flightRecorder;
-    }
+//    /**
+//     * get the flight recorder of the drone
+//     * @return
+//     */
+//    public FlightRecorder getFlightRecorder() {
+//        return flightRecorder;
+//    }
+//
+//    /**
+//     * Setter for the flight recorder
+//     * @param flightRecorder
+//     */
+//    public void setFlightRecorder(FlightRecorder flightRecorder) {
+//        this.flightRecorder = flightRecorder;
+//    }
 
     
 
@@ -126,14 +160,7 @@ public abstract class AutoPilotFlightController extends Controller{
     private static final float STANDARD_THRUST = 32.859283f *2;
     private static final float RAD2DEGREE = (float) (180f/ PI);
 
-
-    
-
-
-
-    /**
-     * A class of PID controllers
-     */
+    private AutopilotInterfaces.Path flightPath;
 
 
 }

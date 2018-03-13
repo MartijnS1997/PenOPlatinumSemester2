@@ -1,5 +1,6 @@
 package internal.Testbed;
 
+import AutopilotInterfaces.Path;
 import gui.Cube;
 import internal.Autopilot.AutopilotLandingController;
 import internal.Helper.Vector;
@@ -54,21 +55,6 @@ public class WorldBuilder_v2 {
 //        world.addWorldObject(floor);
         Airport airport = new Airport(new Vector());
         world.addWorldObject(airport);
-//        Vector pos1 = new Vector(0,25f, -60f);
-//        Vector pos2 = new Vector(0,30f, -120f);
-//        Vector pos3 = new Vector(0,20f, -180f);
-//        Cube cube1 = new Cube(pos1.convertToVector3f(), new Vector(	60.0f,  1.0f,  1.0f).convertToVector3f(), true );
-//        Cube cube2 = new Cube(pos2.convertToVector3f(), new Vector(60.0f, 1.0f, 1.0f).convertToVector3f(), true);
-//        Cube cube3 = new Cube(pos3.convertToVector3f(), new Vector(60f, 1.0f, 1.0f).convertToVector3f(), true);
-//        Block block1 = new Block(pos1);
-//        Block block2 = new Block(pos2);
-//        Block block3 = new Block(pos3);
-//        block1.setAssocatedCube(cube1);
-//        block2.setAssocatedCube(cube2);
-//        block3.setAssocatedCube(cube3);
-//        world.addWorldObject(block1);
-//        world.addWorldObject(block2);
-//        world.addWorldObject(block3);
         int nbPoints = 50;
         for(int i = 1; i<nbPoints; i++){
 //            float turningRadius = 1500;
@@ -116,6 +102,38 @@ public class WorldBuilder_v2 {
         Airport airport = new Airport(new Vector());
         world.addWorldObject(airport);
         return world;
+    }
+
+    /**
+     * Create a world to test the takeoff of a drone
+     * @return a world suited to test the takeoff of a drone
+     */
+    public World createTakeoffWorld(){
+        World world = new World(World.NO_OBJECTIVE);
+        world.addWorldObject(this.getDroneBuilder_v2().createTestBounceDrone());
+        Floor floor = new Floor(new Vector());
+        world.addWorldObject(floor);
+        Airport airport = new Airport(new Vector());
+        world.addWorldObject(airport);
+        world.setApproxPath(new Path() {
+            @Override
+            public float[] getX() {
+                return new float[]{0.f};
+            }
+
+            @Override
+            public float[] getY() {
+                return new float[]{20f};
+            }
+
+            @Override
+            public float[] getZ() {
+                return new float[]{-200f};
+            }
+        });
+
+        return world;
+
     }
 
     public DroneBuilder_v2 getDroneBuilder_v2() {

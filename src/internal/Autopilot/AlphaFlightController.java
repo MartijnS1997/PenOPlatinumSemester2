@@ -212,6 +212,11 @@ public class AlphaFlightController extends AutoPilotFlightController {
         return controlOutputs;
     }
 
+    @Override
+    public boolean hasReachedObjective(AutopilotInputs_v2 inputs) {
+        return false;
+    }
+
     /*
     Getters and setters
      */

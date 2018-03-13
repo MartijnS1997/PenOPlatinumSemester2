@@ -48,7 +48,7 @@ public class AutopilotMain implements Runnable {
     private void autopilotMainLoop() throws IOException, InterruptedException {
 
         //set the flight recorder
-        this.getAutoPilot().setFlightRecorder(this.getFlightRecorder());
+        //this.getAutoPilot().setFlightRecorder(this.getFlightRecorder());
 
         this.initConnection(this.getConnectionName(), this.getConnectionPort());
         this.configAutopilot();

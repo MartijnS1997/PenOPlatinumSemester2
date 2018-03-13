@@ -15,7 +15,7 @@ import static java.lang.Math.signum;
  * Created by Martijn on 18/02/2018.
  * A class of controllers
  */
-//Todo migrate the AOA physics to the controller or the PhysXEngine (will also be needed in the landing and takeoff)
+//Todo fix the init issue, create dummy controller with same position but at different elapased time (velocity zero)
 public abstract class Controller {
 
     public Controller(AutoPilot autopilot){
@@ -31,6 +31,13 @@ public abstract class Controller {
      * @return the control actions
      */
     public abstract AutopilotOutputs getControlActions(AutopilotInputs_v2 inputs);
+
+    /**
+     * Checks if the objective of the current controller has been reached
+     * @param inputs the current inputs (this is the base of the check)
+     * @return true if the controller is ready with its task
+     */
+    public abstract boolean hasReachedObjective(AutopilotInputs_v2 inputs);
 
     /*
     Getters and setters
@@ -67,8 +74,8 @@ public abstract class Controller {
     protected abstract float getStandardThrust();
 
     /*
-  * Supplementary control methods
-  */
+     * Supplementary control methods
+     */
     protected void rollControl(ControlOutputs outputs, AutopilotInputs_v2 currentInput){
         float roll = currentInput.getRoll();
 
@@ -103,7 +110,7 @@ public abstract class Controller {
         Vector velocity = this.getVelocityApprox(prevInputs, currentInputs);
         //System.out.println("Velocity: " + velocity);
         Vector rotation = this.getRotationApprox(prevInputs, currentInputs);
-        float angleOfAttack = this.getAutopilot().getConfig().getMaxAOA();
+        float angleOfAttack = this.getConfig().getMaxAOA();
 
         //change until the controls fit
         AOAControlMainLeft(controlOutputs, optimisations,angleOfAttack, orientation, rotation, velocity);
@@ -268,10 +275,10 @@ public abstract class Controller {
     }
 
     protected float getTotalMass(){
-        AutoPilot autopilot = this.getAutopilot();
-        float mainWings = autopilot.getMainWingMass()*2;
-        float stabilizers = autopilot.getStabilizerMass()*2;
-        float engine = autopilot.getEngineMass();
+        AutopilotConfig config = this.getConfig();
+        float mainWings = config.getWingMass()*2;
+        float stabilizers = config.getTailMass()*2;
+        float engine = config.getEngineMass();
 
         return mainWings + stabilizers + engine;
     }
@@ -368,7 +375,7 @@ public abstract class Controller {
      * Getter for the configuration of the drone
      * @return the configuration
      */
-    private AutopilotConfig getConfig() {
+    protected AutopilotConfig getConfig() {
         return config;
     }
 
