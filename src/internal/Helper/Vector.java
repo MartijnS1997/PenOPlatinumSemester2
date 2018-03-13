@@ -206,6 +206,8 @@ public class Vector {
 	public boolean toTheRightOf(Vector other, Vector direction) {
 		Vector thisVector = this.makeHorizontal();
 		Vector otherVector = this.makeHorizontal();
+
+		return true;
 	}
 	
 	/**

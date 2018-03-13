@@ -5,8 +5,6 @@ import Autopilot.AutopilotInputs;
 import Autopilot.AutopilotOutputs;
 import internal.Physics.PhysXEngine;
 import internal.Helper.Vector;
-import internal.Testbed.DroneBuilder;
-import internal.Testbed.DroneBuilder_v2;
 
 import static java.lang.Math.PI;
 import static java.lang.Math.abs;
@@ -275,6 +273,19 @@ public abstract class Controller {
     }
 
     /**
+     * Extracts the delta time between two steps (simulation time)
+     * @param previousInputs the previous inputs of the autopilot
+     * @param currentInputs the current inputs of the autopilot
+     * @return the time elapsed between the last two simulation steps
+     */
+    protected float getDeltaTime(AutopilotInputs previousInputs, AutopilotInputs currentInputs){
+        float prevTime = previousInputs.getElapsedTime();
+        float currTime = currentInputs.getElapsedTime();
+
+        return currTime - prevTime;
+    }
+
+    /**
      * Calculate an approximation of the velocity
      * @param prevInputs the autopilot inputs at moment k-1 needed for the derivative
      * @param currentInputs the autopilot inputs at moment k needed for the derivative
@@ -302,7 +313,7 @@ public abstract class Controller {
      * @return an approx for the rotation (first calculate the rotation in heading pitch and roll components
      *         and transform them to the actual rotational components)
      */
-    private Vector getRotationApprox(AutopilotInputs prevInputs, AutopilotInputs currentInputs){
+    public Vector getRotationApprox(AutopilotInputs prevInputs, AutopilotInputs currentInputs){
 
         //get the passed time interval
         float prevTime = prevInputs.getElapsedTime();
@@ -569,7 +580,7 @@ public abstract class Controller {
 
         @Override
         public float getY() {
-            return DroneBuilder_v2.START_Y;//DroneBuilder.GAMMA_STARTPOS.getyValue();
+            return 20f;//DroneBuilder_v2.START_Y;//DroneBuilder.GAMMA_STARTPOS.getyValue();
         }
 
         @Override
@@ -579,7 +590,7 @@ public abstract class Controller {
 
         @Override
         public float getHeading() {
-            return 0;
+            return (float) (0);
         }
 
         @Override
@@ -731,6 +742,21 @@ public abstract class Controller {
         }
 
         /**
+         *
+         * @param input
+         * @param elapsedTime
+         * @param setPoint
+         * @return
+         */
+        float getPIDOutputSetPoint(float input, float elapsedTime, float setPoint){
+            this.setSetPoint(setPoint);
+//            System.out.println("Controller input: " + input);
+//            System.out.println("Controller elapsedTime: " + elapsedTime);
+//            System.out.println("Controller setPoint: " + setPoint);
+            return getPIDOutput(input, elapsedTime);
+        }
+
+        /**
          * Calculates the output for the current inputs of the PID controller
          * @param input the input signal of the controller (from the feedback loop)
          * @param elapsedTime the elapsed time during the simulation
@@ -764,12 +790,29 @@ public abstract class Controller {
             this.setPreviousError(error);
             this.setPreviousTime(elapsedTime);
 
+            this.setPrevCalcOutput(output);
+
             return output;
         }
 
         /*
         Getters and setters
          */
+
+        /**
+         * getter for the previous calculated output of the PID controller
+         * @return the current output (the prev
+         */
+        public float getPrevCalcOutput() {
+            return prevCalcOutput;
+        }
+
+        /**
+         * Setter for the previous calculated output of the PID controller
+         */
+        private void setPrevCalcOutput(float prevCalcOutput) {
+            this.prevCalcOutput = prevCalcOutput;
+        }
 
         /**
          * get the integral part (saved over the course of the algorithm)
@@ -807,7 +850,7 @@ public abstract class Controller {
          * The set point is the desired value used for reference, in our case it is 0.0
          * @return
          */
-        private float getSetPoint() {
+        public float getSetPoint() {
             return setPoint;
         }
 
@@ -815,7 +858,7 @@ public abstract class Controller {
          * Set the set point of the PID
          * @param setPoint
          */
-        protected void setSetPoint(float setPoint) {
+        public void setSetPoint(float setPoint) {
             this.setPoint = setPoint;
         }
 
@@ -831,7 +874,7 @@ public abstract class Controller {
          * Set the previous time of the simulation (used when setting the new values of the drone)
          * @param previousTime
          */
-        public void setPreviousTime(float previousTime) {
+        private void setPreviousTime(float previousTime) {
             this.previousTime = previousTime;
         }
 
@@ -855,8 +898,20 @@ public abstract class Controller {
          * Constant used for the derivative part of the PID
          * @return
          */
-        public float getDerivativeConstant() {
+        private float getDerivativeConstant() {
             return derivativeConstant;
+        }
+
+        public void setGainConstant(float gainConstant) {
+            this.gainConstant = gainConstant;
+        }
+
+        public void setIntegralConstant(float integralConstant) {
+            this.integralConstant = integralConstant;
+        }
+
+        public void setDerivativeConstant(float derivativeConstant) {
+            this.derivativeConstant = derivativeConstant;
         }
 
         private float integral = 0.0f;
@@ -866,5 +921,6 @@ public abstract class Controller {
         private float gainConstant;
         private float integralConstant;
         private float derivativeConstant;
+        private float prevCalcOutput;
     }
 }

@@ -61,7 +61,7 @@ public class PathGenerator {
     		}
     		
     		// generate semi-circle
-    		float circleDiameter = parallelDistanceBetween(position, velocity, destination)
+    		float circleDiameter = parallelDistanceBetween(position, velocity, destination);
     		
     		// generate additional path
     		if (additionalDistance < 0) {
