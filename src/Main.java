@@ -93,13 +93,13 @@ public class Main {
         world.addWorldObject(blocks.get(1));
         */
         
-        
+        graphics.setWorld(world);
         // Initialize the windows
-        droneCam.initWindow(world, Settings.DRONE_CAM);
-        droneView.initWindow(world, Settings.DRONE_CAM);
-        topDownView.initWindow(world, Settings.DRONE_TOP_DOWN_CAM);
-        chaseView.initWindow(world, Settings.DRONE_CHASE_CAM);
-        sideView.initWindow(world, Settings.DRONE_SIDE_CAM);
+        droneCam.initWindow(Settings.DRONE_CAM);
+        droneView.initWindow(Settings.DRONE_CAM);
+        topDownView.initWindow(Settings.DRONE_TOP_DOWN_CAM);
+        chaseView.initWindow(Settings.DRONE_CHASE_CAM);
+        sideView.initWindow(Settings.DRONE_SIDE_CAM);
 //        independentView.initWindow(world, Settings.INDEPENDENT_CAM);
 //        textWindow.initWindow(droneCam);
 

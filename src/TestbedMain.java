@@ -309,7 +309,7 @@ public class TestbedMain implements Runnable{
             this.setSideView(new Window(960, 510, 1f, 1f, "Side view", new Vector3f(1.0f, 1.0f, 1.0f), true));
             this.setChaseView(new Window(960, 510, 0f, 1f, "Chase view", new Vector3f(1.0f, 1.0f, 1.0f), true));
         } else {
-            this.setDroneView(new Window(960, 510, 0.0f, 0.05f, "Drone view", new Vector3f(1.0f, 1.0f, 1.0f), true));
+            this.setDroneView(new Window(1920, 1080, 1.f, 1.f, "Drone view", new Vector3f(1.0f, 1.0f, 1.0f), true));
 
         }
 
@@ -329,19 +329,22 @@ public class TestbedMain implements Runnable{
      * Initialize the windows used in the simulation
      */
     private void initWindows(){
+    	this.getGraphics().setWorld(getWorld());
         // Initialize the windows
-        this.getDroneCam().initWindow(this.getWorld(), Settings.DRONE_CAM);
-        this.getDroneView().initWindow(this.getWorld(), Settings.DRONE_CAM);
+        this.getDroneCam().initWindow(Settings.DRONE_CAM);
+        this.getDroneView().initWindow(Settings.DRONE_CAM);
 
         if(this.getShowAllWindows()) {
-            this.getTopDownView().initWindow(this.getWorld(), Settings.DRONE_TOP_DOWN_CAM);
-            this.getChaseView().initWindow(this.getWorld(), Settings.DRONE_CHASE_CAM);
-            this.getSideView().initWindow(this.getWorld(), Settings.DRONE_SIDE_CAM);
+            this.getTopDownView().initWindow(Settings.DRONE_TOP_DOWN_CAM);
+            this.getChaseView().initWindow(Settings.DRONE_CHASE_CAM);
+            this.getSideView().initWindow(Settings.DRONE_SIDE_CAM);
         }
 
         // create the switch when in single window mode
-        if (!this.getShowAllWindows())
-            this.getGraphics().makeTextWindow();
+        if (!this.getShowAllWindows()) {
+            this.getGraphics().makeButtonWindow();
+            this.getGraphics().makeTextWindow("tietyel");
+        }
     }
 
 
