@@ -14,9 +14,9 @@ import static java.lang.Math.*;
 /**
  * Created by Martijn on 13/03/2018.
  */
-public class WayPointController extends Controller {
+public class AutopilotWayPointController extends Controller {
 
-    public WayPointController(AutoPilot autopilot){
+    public AutopilotWayPointController(AutoPilot autopilot){
         // implement constructor
         super(autopilot);
         //add some way points to test against
@@ -192,6 +192,8 @@ public class WayPointController extends Controller {
         bankControl(outputs);
         //roll control
         rollControl(outputs, inputs);
+
+        System.out.println("control outputs: " + outputs);
 
         //check if everything is within allowed parameters
         angleOfAttackControl(outputs, this.getPreviousInputs(), this.getCurrentInputs());System.out.println(outputs);
