@@ -56,8 +56,8 @@ public class Graphics {
 		windows.put(key, window);
 	}
 	
-	public void makeTextWindow(String title) {
-		TextWindow.createAndShowWindow(world, this, title, 500, 500);
+	public void makeTextWindow(String title, int width, int height, int xPos, int yPos) {
+		TextWindow.createAndShowWindow(world, this, title, width, height, xPos, yPos);
 		this.textWindow = true;
 	}
 	

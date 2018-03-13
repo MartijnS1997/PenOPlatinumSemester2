@@ -107,6 +107,7 @@ public class ButtonWindow extends JPanel
     	ButtonWindow.graphics = graphics;
     	
         JFrame frame = new JFrame("Drone command");
+        frame.setLocation(-10, 0);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
  
         ButtonWindow newContentPane = new ButtonWindow();

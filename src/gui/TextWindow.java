@@ -30,10 +30,12 @@ public class TextWindow extends JPanel{
     
     private static void addToContentPane(World world) {
     	Vector3f velocity = new Vector3f();
+    	Vector3f position = new Vector3f();
     	
         for (WorldObject object: world.getObjectSet()) {
         	if (object.getClass() == Drone.class) {
         		velocity = ((Drone) object).getVelocity().convertToVector3f();
+        		position = ((Drone) object).getPosition().convertToVector3f();
         	}
         }
         
@@ -44,6 +46,11 @@ public class TextWindow extends JPanel{
     	contentPane.add(velocityLabel);
     	contentPane.add(velocityField); 
     	
+    	JLabel positionLabel = new JLabel("Position: ");
+    	JTextField positionField = new JTextField(" ( " + position.x + ", " + position.y + ", " + position.z + " ) ");
+    	positionField.setEditable(false);
+    	contentPane.add(positionLabel);
+    	contentPane.add(positionField); 
     	
     	SpringLayout layout = new SpringLayout();
         contentPane.setLayout(layout);
@@ -51,13 +58,17 @@ public class TextWindow extends JPanel{
     	layout.putConstraint(SpringLayout.NORTH, velocityLabel, 5, SpringLayout.NORTH, contentPane);
     	layout.putConstraint(SpringLayout.WEST, velocityField, 5, SpringLayout.EAST, velocityLabel);
     	layout.putConstraint(SpringLayout.NORTH, velocityField, 5, SpringLayout.NORTH, contentPane);
+    	layout.putConstraint(SpringLayout.WEST, positionLabel, 5, SpringLayout.WEST, contentPane);
+    	layout.putConstraint(SpringLayout.NORTH, positionLabel, 30, SpringLayout.NORTH, contentPane);
+    	layout.putConstraint(SpringLayout.WEST, positionField, 5, SpringLayout.EAST, positionLabel);
+    	layout.putConstraint(SpringLayout.NORTH, positionField, 30, SpringLayout.NORTH, contentPane);
     }
 
-    public static void createAndShowWindow(World world, Graphics graphics, String title, int xDimension, int yDimension) {
+    public static void createAndShowWindow(World world, Graphics graphics, String title, int xDimension, int yDimension, int xPos, int yPos) {
     	
         frame = new JFrame(title);
         frame.setPreferredSize(new Dimension(xDimension, yDimension));
-        frame.setLocation(-10, 0);
+        frame.setLocation(xPos, yPos);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         
         contentPane = frame.getContentPane();

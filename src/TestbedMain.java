@@ -364,8 +364,8 @@ public class TestbedMain implements Runnable{
 
         // create the switch when in single window mode
         if (!this.getShowAllWindows()) {
+            this.getGraphics().makeTextWindow("Stats", 400, 120, -10, 970);
             this.getGraphics().makeButtonWindow();
-            this.getGraphics().makeTextWindow("tietyel");
         }
     }
 
