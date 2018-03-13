@@ -1,7 +1,6 @@
-<<<<<<< HEAD
-=======
-/Autopilot/
-/math/
-/tests/
->>>>>>> 2c47f6c0d9e0bb4bf0aa10058ccf6d4ca0e953ea
+/blockCoordinates.txt
+/blockDemoEasy.txt
+/blockDemoHard.txt
+/datatypes/
+/gui/
 /internal/
