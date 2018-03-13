@@ -461,6 +461,9 @@ public abstract class Controller {
             copy.setHorStabInclination(this.getHorStabInclination());
             copy.setVerStabInclination(this.getVerStabInclination());
             copy.setThrust(this.getThrust());
+            copy.setFrontBrakeForce(this.getFrontBrakeForce());
+            copy.setLeftBrakeForce(this.getLeftBrakeForce());
+            copy.setRightBrakeForce(this.getRightBrakeForce());
 
             return copy;
         }
@@ -475,7 +478,9 @@ public abstract class Controller {
             this.setLeftWingInclination(getMainStableInclination());
             this.setHorStabInclination(getStabilizerStableInclination());
             this.setVerStabInclination(getStabilizerStableInclination());
-
+            this.setFrontBrakeForce(this.getFrontBrakeForce());
+            this.setLeftBrakeForce(this.getLeftBrakeForce());
+            this.setRightBrakeForce(this.getRightBrakeForce());
         }
 
         @Override
@@ -505,17 +510,34 @@ public abstract class Controller {
 
         @Override
         public float getFrontBrakeForce() {
-            return 0;
+            return this.frontBrakeForce;
         }
 
         @Override
         public float getLeftBrakeForce() {
-            return 0;
+            return this.leftBrakeForce;
         }
 
         @Override
         public float getRightBrakeForce() {
-            return 0;
+            return this.rightBrakeForce;
+        }
+
+
+
+
+
+        public void setLeftBrakeForce(float leftBrakeForce) {
+            this.leftBrakeForce = leftBrakeForce;
+        }
+
+        public void setRightBrakeForce(float rightBrakeForce) {
+            this.rightBrakeForce = rightBrakeForce;
+        }
+
+
+        public void setFrontBrakeForce(float frontBrakeForce) {
+            this.frontBrakeForce = frontBrakeForce;
         }
 
         /**
@@ -564,6 +586,10 @@ public abstract class Controller {
         private float rightWingInclination = getMainStableInclination();
         private float horStabInclination = getStabilizerStableInclination();
         private float verStabInclination = getStabilizerStableInclination();
+
+        private float leftBrakeForce = 0;
+        private float rightBrakeForce = 0;
+        private float frontBrakeForce = 0;
 
         @Override
         public String toString() {

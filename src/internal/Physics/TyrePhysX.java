@@ -126,7 +126,7 @@ public class TyrePhysX {
      * note: may add interval
      */
     private boolean canExertBrakeForce(Vector velocityDrone){
-        return Math.abs(velocityDrone.getzValue()) > 0;
+        return Math.abs(velocityDrone.getzValue()) < 0;
     }
 
     /**
