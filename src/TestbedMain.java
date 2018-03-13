@@ -263,8 +263,8 @@ public class TestbedMain implements Runnable{
         WorldBuilder_v2 builder = new WorldBuilder_v2();
         Map<Vector, Float> droneConfig = new HashMap<>();
         droneConfig.put(new Vector(0, 0.20f-0.01f + 1f,0), 0f); //drone standing on ground with tyre compression 0.05
-        World world =  builder.createWorld(); //builder.createWorld(droneConfig)
-        //World world = builder.createFlightTestWorld();
+        //World world =  builder.createWorld(); //builder.createWorld(droneConfig)
+        World world = builder.createFlightTestWorld();
         this.setWorld(world);
         Drone drone =(Drone)(world.getDroneSet().toArray())[0]; //only one drone is present
         //System.out.println("drone: " + drone);
@@ -295,9 +295,10 @@ public class TestbedMain implements Runnable{
         // initialize graphics capabilities
         this.setGraphics(new Graphics());
 
-        // Cube needs graphics to be able to initialize cubes
+        // GraphicsObjects needs graphics to be able to initialize cubes
         Cube.setGraphics(this.getGraphics());
         Tile.setGraphics(this.getGraphics());
+		Wheel.setGraphics(this.getGraphics());
 
         this.setDroneCam(new Window(200, 200, 0.5f, 0.4f, "bytestream window", new Vector3f(1.0f, 1.0f, 1.0f), false));
 
