@@ -25,13 +25,19 @@ public class AutopilotLandingController extends Controller{
      */
     @Override
     public AutopilotOutputs getControlActions(AutopilotInputs inputs){
-    	// generate path
+    	
     	AutopilotInputs currentInputs = getCurrentInputs();
     	AutopilotInputs previousInputs = getPreviousInputs();
 
-    	Vector position = new Vector(currentInputs.getX(),currentInputs.getY(),currentInputs.getZ());
-    	Vector velocityApprox = this.getVelocityApprox(previousInputs, currentInputs);
-    	Vector destination = this.getAutopilot().getStartPosition();
+    	if (!getPathGenerator().hasPathLocked()) {
+    		Vector position = new Vector(currentInputs.getX(),currentInputs.getY(),currentInputs.getZ());
+        	Vector velocityApprox = this.getVelocityApprox(previousInputs, currentInputs);
+        	Vector destination = this.getAutopilot().getStartPosition();
+        	
+        	getPathGenerator().generateLandingPath(position, velocityApprox, destination);
+    	}
+    	
+    	List<Vector> path = getPathGenerator().getPath();
     	
     	
     	return null;

@@ -23,6 +23,7 @@ public abstract class Controller {
         this.autopilot = autopilot;
         this.setPreviousInputs(dummyData);
         this.currentInputs = dummyData;
+        this.pathGenerator = new PathGenerator();
     }
 
     /**
@@ -402,11 +403,20 @@ public abstract class Controller {
 
     private AutopilotInputs currentInputs;
     private AutopilotInputs previousInputs;
+    
+    protected PathGenerator getPathGenerator() {
+    	return this.pathGenerator;
+    }
 
     /**
      * Object that stores the autopilot of the drone
      */
     private AutoPilot autopilot;
+    
+    /**
+     * Object that stores the pathgenerator of the controller
+     */
+    private final PathGenerator pathGenerator;
 
     /**
      * Object that stores the configuration of the drone
