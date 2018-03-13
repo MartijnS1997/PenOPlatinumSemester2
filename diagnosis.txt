@@ -1,0 +1,23 @@
+############## Wing Diagnosis Space ##############
+
+Faulty wing: Right main wing
+5 last wing inclinations: [-0.99999994, -0.99999994, -0.99999994, -0.99999994, -0.99999994]
+5 last angles of attack: [9.737757, 9.745192, 9.752614, 9.760021, 9.767421]
+
+Faulty wing: Left main wing
+5 last wing inclinations: [-0.99999994, -0.99999994, -0.99999994, -0.99999994, -0.99999994]
+5 last angles of attack: [9.737757, 9.745192, 9.752614, 9.760021, 9.767421]
+
+Faulty wing: Horizontal Stabilizer
+5 last wing inclinations: [-4.819654, -4.819654, -4.819654, -4.819654, -5.2488565]
+5 last angles of attack: [14.634757, 14.638142, 14.641484, 14.644791, 15.077263]
+
+Faulty wing: Vertical Stabilizer
+5 last wing inclinations: [0.0, 0.0, 0.0, 0.0, 0.0]
+5 last angles of attack: [-0.0, -0.0, -0.0, -0.0, -0.0]
+
+5 last Positions: [Vector [xValue=0.0, yValue=0.9903718, zValue=-146.70143], Vector [xValue=0.0, yValue=0.99081933, zValue=-146.74896], Vector [xValue=0.0, yValue=0.9912624, zValue=-146.79645], Vector [xValue=0.0, yValue=0.991701, zValue=-146.8439], Vector [xValue=0.0, yValue=0.99213535, zValue=-146.89131]]
+5 last Velocities: [Vector [xValue=0.0, yValue=0.4497216, zValue=-47.54618], Vector [xValue=0.0, yValue=0.44526604, zValue=-47.505917], Vector [xValue=0.0, yValue=0.44085371, zValue=-47.465687], Vector [xValue=0.0, yValue=0.43648654, zValue=-47.425488], Vector [xValue=0.0, yValue=0.4321649, zValue=-47.385323]]
+5 last Orientations: [Vector [xValue=0.0, yValue=-0.1430443, zValue=0.0], Vector [xValue=0.0, yValue=-0.14325982, zValue=0.0], Vector [xValue=0.0, yValue=-0.14347436, zValue=0.0], Vector [xValue=0.0, yValue=-0.14368787, zValue=0.0], Vector [xValue=0.0, yValue=-0.1439004, zValue=0.0]]
+5 last Rotations: [Vector [xValue=-0.21602133, yValue=0.0, zValue=0.0], Vector [xValue=-0.21502885, yValue=0.0, zValue=0.0], Vector [xValue=-0.21403246, yValue=0.0, zValue=0.0], Vector [xValue=-0.21303254, yValue=0.0, zValue=0.0], Vector [xValue=-0.21202926, yValue=0.0, zValue=0.0]]
+5 last controls: []
