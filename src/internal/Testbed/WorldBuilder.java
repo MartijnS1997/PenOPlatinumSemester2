@@ -6,6 +6,7 @@ import java.util.List;
 
 import gui.Cube;
 import gui.Tile;
+import internal.Autopilot.PathGenerator;
 import internal.Helper.Parser;
 import internal.Helper.Vector;
 /*
@@ -46,6 +47,9 @@ public class WorldBuilder {
         
         Floor floor = new Floor(new Vector());
         world.addWorldObject(floor);
+        
+        Airport airport = new Airport(new Vector(0, 0.01f, -0));
+        world.addWorldObject(airport);
 
         return world;
     }

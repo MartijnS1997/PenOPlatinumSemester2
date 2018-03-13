@@ -32,6 +32,7 @@ public class Input {
     private Vector3f right = new Vector3f(1, 0, 0);
     private Vector3f up = new Vector3f(0, 1, 0);
     private Vector3f look = new Vector3f(0, 0, -1);
+	private float positionZ;
 
     Input(Settings setting) {
     	switch (setting) {
@@ -41,7 +42,7 @@ public class Input {
     		pitch = (float) -Math.PI/2;
     		break;
     	case DRONE_SIDE_CAM: 
-    		position = new Vector3f(150f, 1f, -0f);
+    		position = new Vector3f(150f, 5f, -0f);
     		yaw = (float) Math.PI/2;
     		pitch = 0;
     		break;
@@ -118,12 +119,12 @@ public Matrix4f getViewMatrix(Settings setting) {
 		
 		switch (setting) {
 		case DRONE_TOP_DOWN_CAM: 
-			position = new Vector3f(0f, 130f, -120f);
+			position = new Vector3f(0f, 150f, -120f + this.positionZ);
 			yaw = (float) Math.PI/2;
 			pitch = (float) -Math.PI/2;
 			break;
 		case DRONE_SIDE_CAM: 
-			position = new Vector3f(130f, 1f, -120f);
+			position = new Vector3f(130f, 5f, -120f + this.positionZ);
 			yaw = (float) Math.PI/2;	
 			pitch = 0;
 			break;
@@ -137,8 +138,16 @@ public Matrix4f getViewMatrix(Settings setting) {
 		
 		return Matrix4f.viewMatrix(right, up, look, position);
 	}
+
+	public Vector3f getPosition() {
+		return this.position;
+	}
 	
 	static boolean isKeyPressed(int keyCode) {
 		return glfwGetKey(GLFW.glfwGetCurrentContext(), keyCode) == GLFW_PRESS;
+	}
+
+	public void nextPosition(Vector3f position) {
+		this.positionZ = position.z;
 	}
 }
