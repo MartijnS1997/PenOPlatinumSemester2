@@ -610,7 +610,7 @@ public class Drone implements WorldObject, Callable<Void> {
 	/**
 	 * variable used for the size of the drone.
 	 */
-	private static final float scalingFactor = 1/4f;
+	private static final float scalingFactor = 1f;
 	    
 	/*
 	 * Error Messages:
