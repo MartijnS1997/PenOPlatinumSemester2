@@ -443,7 +443,7 @@ public class DroneBuilder_v2 {
     private final static float REAR_WHEEL_Z_POS = 0.5f;
     private final static float REAR_WHEEL_X_POS = 0.5f;
     private final static float TYRE_RADIUS = 0.20f;
-    private final static float MAX_BRAKE_FORCE = 750f;
+    private final static float MAX_BRAKE_FORCE = 1000f;
     private final static float MAX_FRICTION_COEFF = 0.9f;
     private final static float ENGINE_MASS = 180f;
     private final static float MAIN_WING_MASS = 100f;

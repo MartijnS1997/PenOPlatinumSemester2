@@ -9,6 +9,7 @@ import internal.Helper.Vector;
 
 import static java.lang.Math.*;
 
+
 /**
  * Created by Martijn on 18/02/2018, extended by Jonathan on 12/3/2018
  * A class of landing controllers, responsible for controlling the landing of the drone
@@ -376,8 +377,9 @@ public class AutopilotLandingController extends Controller {
 //    }
 
 
-
-    private VectorPID velocityPID = new VectorPID(1.0f, 0.1f, 0.1f);
+    /**
+     * Constants
+     */
     private final static float STOP_VELOCITY = 0.0f;
     private final static float STANDARD_THRUST = 128.41895f * 3.5f;
     private final static float WING_INCL = (float) (PI / 180);
