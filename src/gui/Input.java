@@ -28,21 +28,22 @@ public class Input {
 	
     private static final float SPEED = 0.01f;
     private static final float TURN_SPEED = 0.00003f;
+    private static final float camDistance = 130f;
     
     private Vector3f right = new Vector3f(1, 0, 0);
     private Vector3f up = new Vector3f(0, 1, 0);
     private Vector3f look = new Vector3f(0, 0, -1);
-	private float positionZ;
+	private Vector3f hop = new Vector3f();
 
     Input(Settings setting) {
     	switch (setting) {
     	case DRONE_TOP_DOWN_CAM: 
-    		position = new Vector3f(0f, 150f, -0f);
-    		yaw = (float) Math.PI/2;
-    		pitch = (float) -Math.PI/2;
-    		break;
-    	case DRONE_SIDE_CAM: 
-    		position = new Vector3f(150f, 5f, -0f);
+    		position = new Vector3f(hop.x, hop.y + camDistance, -120f + hop.z);
+			yaw = (float) Math.PI/2;
+			pitch = (float) -Math.PI/2;
+			break;
+		case DRONE_SIDE_CAM: 
+			position = new Vector3f(hop.x + camDistance, hop.y, -120f + hop.z);
     		yaw = (float) Math.PI/2;
     		pitch = 0;
     		break;
@@ -119,12 +120,12 @@ public Matrix4f getViewMatrix(Settings setting) {
 		
 		switch (setting) {
 		case DRONE_TOP_DOWN_CAM: 
-			position = new Vector3f(0f, 150f, -120f + this.positionZ);
+			position = new Vector3f(hop.x, hop.y + camDistance, -120f + hop.z);
 			yaw = (float) Math.PI/2;
 			pitch = (float) -Math.PI/2;
 			break;
 		case DRONE_SIDE_CAM: 
-			position = new Vector3f(130f, 5f, -120f + this.positionZ);
+			position = new Vector3f(hop.x + camDistance, hop.y, -120f + hop.z);
 			yaw = (float) Math.PI/2;	
 			pitch = 0;
 			break;
@@ -148,6 +149,6 @@ public Matrix4f getViewMatrix(Settings setting) {
 	}
 
 	public void nextPosition(Vector3f position) {
-		this.positionZ = position.z;
+		this.hop = new Vector3f(position.x, position.y, position.z - position.z%((int) (camDistance * Math.tan(Math.PI/3))));
 	}
 }
