@@ -413,6 +413,30 @@ public class Vector {
 	}
 
 
+	/**
+	 * Makes a deep copy of the vector currently selected and returns the copy
+	 * @return a deep copy of the current vector
+	 */
+	public Vector copy(){
+		return new Vector(this.getxValue(), this.getyValue(), this.getzValue());
+	}
+
+	/**
+	 * Projects the provided vector onto the instance against which it is invoked
+	 * @param other the vector to project
+	 * @return the other vector projected onto the vector which this method is invoked against
+	 */
+	public Vector projectOnVector(Vector other){
+		//first get the numerator
+		float numerator = this.scalarProduct(other);
+		float denominator = this.scalarProduct(this);
+		float coefficient = numerator/denominator;
+
+		//then get multiply with the vector instance
+		return this.scalarMult(coefficient);
+	}
+
+
 	/*
 	Static methods
 	 */

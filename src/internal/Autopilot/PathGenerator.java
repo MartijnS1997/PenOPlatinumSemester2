@@ -48,6 +48,7 @@ public class PathGenerator {
     		
     		// generate landing path
     		Vector lastBlock = destination;
+    		blockCoordinates.add(lastBlock);
     		while(lastBlock.getyValue() < (position.getyValue()-0.01)) {
 
     			lastBlock = lastBlock.vectorSum(landingVector);
@@ -121,6 +122,7 @@ public class PathGenerator {
     	    	blockCoordinates.add(position.vectorSum(velocity.makeHorizontal().scalarMult(ALIGNMENT_TURN_FACTOR)));
     		}
     		
+    		pathLock();
     	}
     	
     	setPath(blockCoordinates);
@@ -197,6 +199,21 @@ public class PathGenerator {
     	Vector distanceBetween = position1.vectorDifference(position2);
     	return distanceBetween.rotateAroundYAxis((float)Math.PI/2);
 
+    }
+    
+    public Vector getNextWaypoint(Vector position, Vector velocity, Vector destination) {
+    	if (!hasPathLocked())generateLandingPath(position, velocity, destination);
+    	return getPath().get(0);
+    }
+    
+    public Vector getNextWaypointSuccess(Vector position, Vector velocity, Vector destination) {
+    	if (!hasPathLocked() || getPath().size() == 1)generateLandingPath(position, velocity, destination);
+    	return getPath().get(Math.min(getPath().size(),1));
+    }
+    
+    public Vector getNextWaypointMissed(Vector position, Vector velocity, Vector destination) {
+    	generateLandingPath(position, velocity, destination);
+    	return getPath().get(Math.min(getPath().size(),1));
     }
 
 	

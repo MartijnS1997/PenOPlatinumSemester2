@@ -27,7 +27,7 @@ public class Graphics {
 	HashMap<String, Window> windows =  new HashMap<String, Window>();
 	private boolean terminated = false;
 	private World world;
-	private boolean textWindow = false;
+	private TextWindow textWindow = null;
 	
 	public Graphics() {	
 		
@@ -57,8 +57,8 @@ public class Graphics {
 	}
 	
 	public void makeTextWindow(String title, int width, int height, int xPos, int yPos) {
-		TextWindow.createAndShowWindow(world, this, title, width, height, xPos, yPos);
-		this.textWindow = true;
+		
+		this.textWindow = TextWindow.createAndShowWindow(world, this, title, width, height, xPos, yPos);
 	}
 	
 	public void makeButtonWindow() {
@@ -70,8 +70,8 @@ public class Graphics {
 		// invoked during this call.
 		glfwPollEvents();
 		
-		if (this.textWindow)
-			TextWindow.update(world);
+		if (this.textWindow != null)
+			this.textWindow.update(world);
 		
 		for (String key: windows.keySet()) {
 			Window window = windows.get(key);

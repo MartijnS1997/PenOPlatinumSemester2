@@ -190,7 +190,7 @@ public class Window {
         program.setUniform("projectionMatrix", projectionMatrix);
         program.setUniform("viewMatrix", viewMatrix);
         
-        float viewingDistance = 250;
+        float viewingDistance = 500;
 
         for (WorldObject object: world.getObjectSet()) {
         	if (object.getClass() == Block.class) {

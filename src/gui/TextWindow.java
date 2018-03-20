@@ -1,8 +1,12 @@
 package gui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 
 import javax.swing.JPanel;
 import javax.swing.JTextField;
@@ -13,22 +17,28 @@ import internal.Testbed.World;
 import internal.Testbed.WorldObject;
 import math.Vector3f;
 
+import javax.swing.AbstractButton;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
  
-public class TextWindow extends JPanel{
+public class TextWindow extends JPanel implements ActionListener{
 	private static final long serialVersionUID = 1L;
 	private static JFrame frame;
 	static Container contentPane;
+	protected JButton button1, button2, button3, button4;
+	SpringLayout layout;
+	private static Graphics graphics;
     
-    public static void update(World world) {
+    public void update(World world) {
     	contentPane.removeAll();
     	addToContentPane(world);
+    	addButtons();
     	contentPane.revalidate();
     	frame.repaint();
     }
     
-    private static void addToContentPane(World world) {
+    private void addToContentPane(World world) {
     	Vector3f velocity = new Vector3f();
     	Vector3f position = new Vector3f();
     	Vector3f orientation = new Vector3f();
@@ -78,7 +88,7 @@ public class TextWindow extends JPanel{
     	contentPane.add(rollLabel);
     	contentPane.add(rollField); 
     	
-    	SpringLayout layout = new SpringLayout();
+    	layout = new SpringLayout();
         contentPane.setLayout(layout);
         
     	layout.putConstraint(SpringLayout.WEST, velocityLabel, 5, SpringLayout.WEST, contentPane);
@@ -106,8 +116,67 @@ public class TextWindow extends JPanel{
     	layout.putConstraint(SpringLayout.WEST, rollField, 5, SpringLayout.EAST, rollLabel);
     	layout.putConstraint(SpringLayout.NORTH, rollField, 105, SpringLayout.NORTH, contentPane);
     }
+    
+    public void initButtons() {
+    	button1 = new JButton("drone view");
+        button1.setVerticalTextPosition(AbstractButton.CENTER);
+        button1.setHorizontalTextPosition(AbstractButton.LEADING);
+        button1.setMnemonic(KeyEvent.VK_1);
+        button1.setActionCommand("DRONE_CAM");
+ 
+        button2 = new JButton("chase view");
+        button2.setMnemonic(KeyEvent.VK_2);
+        button2.setActionCommand("DRONE_CHASE_CAM");
+        
+        button3 = new JButton("top down view");
+        button3.setMnemonic(KeyEvent.VK_3);
+        button3.setActionCommand("DRONE_TOP_DOWN_CAM");
+        
+        button4 = new JButton("side view");
+        button4.setMnemonic(KeyEvent.VK_4);
+        button4.setActionCommand("DRONE_SIDE_CAM");
+ 
+        button1.setBackground(Color.CYAN);
+        button2.setBackground(Color.lightGray);
+        button3.setBackground(Color.lightGray);
+        button4.setBackground(Color.lightGray);
+ 
+        button1.setToolTipText("Shows the drone from its perspective.");
+        button2.setToolTipText("Shows the drone from behind.");
+        button3.setToolTipText("Shows the drone from the top.");
+        button4.setToolTipText("Shows the drone from the side.");
+        
+        button1.addActionListener(this);
+        button2.addActionListener(this);
+        button3.addActionListener(this);
+        button4.addActionListener(this);
+ 
+        addButtons();
+    }
+    
+    public void addButtons() {
+    	 
+    	contentPane.add(button1);
+        contentPane.add(button2);
+        contentPane.add(button3);
+        contentPane.add(button4);
+        
+        layout.putConstraint(SpringLayout.WEST, button1, 10, SpringLayout.WEST, contentPane);
+    	layout.putConstraint(SpringLayout.NORTH, button1, 130, SpringLayout.NORTH, contentPane);
+    	
+    	layout.putConstraint(SpringLayout.WEST, button2, 10, SpringLayout.EAST, button1);
+    	layout.putConstraint(SpringLayout.NORTH, button2, 130, SpringLayout.NORTH, contentPane);
+    	
+    	layout.putConstraint(SpringLayout.WEST, button3, 10, SpringLayout.EAST, button2);
+    	layout.putConstraint(SpringLayout.NORTH, button3, 130, SpringLayout.NORTH, contentPane);
+    	
+    	layout.putConstraint(SpringLayout.WEST, button4, 10, SpringLayout.EAST, button3);
+    	layout.putConstraint(SpringLayout.NORTH, button4, 130, SpringLayout.NORTH, contentPane);
+    }
 
-    public static void createAndShowWindow(World world, Graphics graphics, String title, int xDimension, int yDimension, int xPos, int yPos) {
+    public static TextWindow createAndShowWindow(World world, Graphics graphics, String title, int xDimension, int yDimension, int xPos, int yPos) {
+    	
+    	TextWindow.graphics = graphics;
     	
         frame = new JFrame(title);
         frame.setPreferredSize(new Dimension(xDimension, yDimension));
@@ -115,11 +184,60 @@ public class TextWindow extends JPanel{
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         
         contentPane = frame.getContentPane();
-        addToContentPane(world);
+        TextWindow window = new TextWindow();
+        window.addToContentPane(world);
+        window.initButtons();
         frame.setContentPane(contentPane);
  
         frame.pack();
         frame.setVisible(true);
+        
+        return window;
     }
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		if ("DRONE_CAM".equals(e.getActionCommand())) {
+    		button1.setBackground(Color.CYAN);
+            button2.setBackground(Color.lightGray);
+            button3.setBackground(Color.lightGray);
+            button4.setBackground(Color.lightGray);
+        	for (String key: graphics.windows.keySet()) {
+    			Window window = graphics.windows.get(key);
+    			window.setSetting(Settings.DRONE_CAM);
+    			break;
+        	}
+        } else if ("DRONE_CHASE_CAM".equals(e.getActionCommand()))  {
+        	button1.setBackground(Color.lightGray);
+            button2.setBackground(Color.CYAN);
+            button3.setBackground(Color.lightGray);
+            button4.setBackground(Color.lightGray);
+        	for (String key: graphics.windows.keySet()) {
+    			Window window = graphics.windows.get(key);
+    			window.setSetting(Settings.DRONE_CHASE_CAM);
+    			break;
+        	}
+        } else if ("DRONE_TOP_DOWN_CAM".equals(e.getActionCommand()))  {
+        	button1.setBackground(Color.lightGray);
+            button2.setBackground(Color.lightGray);
+            button3.setBackground(Color.CYAN);
+            button4.setBackground(Color.lightGray);
+        	for (String key: graphics.windows.keySet()) {
+    			Window window = graphics.windows.get(key);
+    			window.setSetting(Settings.DRONE_TOP_DOWN_CAM);
+    			break;
+        	}
+        } else if ("DRONE_SIDE_CAM".equals(e.getActionCommand()))  {
+        	button1.setBackground(Color.lightGray);
+            button2.setBackground(Color.lightGray);
+            button3.setBackground(Color.lightGray);
+            button4.setBackground(Color.CYAN);
+        	for (String key: graphics.windows.keySet()) {
+    			Window window = graphics.windows.get(key);
+    			window.setSetting(Settings.DRONE_SIDE_CAM);
+    			break;
+        	}
+        }
+	}
 }
 

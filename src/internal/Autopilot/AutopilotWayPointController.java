@@ -8,6 +8,7 @@ import internal.Physics.PhysXEngine;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -28,16 +29,16 @@ public class AutopilotWayPointController extends Controller {
 //        wayPoints.add(new WayPoint(new Vector(5,20f, -60f), 20));
 //        wayPoints.add(new WayPoint(new Vector(10,20f, -120f), 20));
 //        wayPoints.add(new WayPoint(new Vector(15,20f, -180f), 20));
-        int nbwaypoints = 50;
-        for(int i = 1; i < nbwaypoints; i++){
-//            float turningRadius = 1500;
-//            float x = (float) (-turningRadius*cos(PI/nbwaypoints * i) + turningRadius);
-//            float z = (float) (-sin(PI/nbwaypoints*i)*turningRadius);
-
-            wayPoints.add(new WayPoint(new Vector(i*5, 20, -i*60), 40, 500));
-        }
-
-        this.setWayPointPath(wayPoints);
+//        int nbwaypoints = 50;
+//        for(int i = 1; i < nbwaypoints; i++){
+////            float turningRadius = 1500;
+////            float x = (float) (-turningRadius*cos(PI/nbwaypoints * i) + turningRadius);
+////            float z = (float) (-sin(PI/nbwaypoints*i)*turningRadius);
+//
+//            wayPoints.add(new WayPoint(new Vector(0, 30, -i*60), 30, 500));
+//        }
+//
+//        this.setWayPointPath(wayPoints);
 
     }
 
@@ -59,17 +60,19 @@ public class AutopilotWayPointController extends Controller {
         PathGenerator pathGen = new PathGenerator();
         pathGen.generateLandingPath(currentPos, currentVelocity, destination);
         List<Vector> path = pathGen.getPath();
+        //map the path elems to way points
+        List<WayPoint> wayPointPath = path.stream().map(pathElem -> new WayPoint(pathElem)).collect(Collectors.toList());
         //configure the resulting way points
         //get the average distance between the points to set an ignore radius
-        float avgDistance = (float) (IntStream.range(0, path.size()-1).asDoubleStream()
-                .map(i -> path.get((int) i).distanceBetween(path.get((int) (i+1))))
-                .sum())/path.size();
-        float acceptRatio = 0.15f; //15% of average distance for acceptance
-        float ignoreRatio = 3.f; //300% of average distance for ignore
-        //now convert to way points
-        List<WayPoint> wayPointPath = path.stream()
-                .map(p-> new WayPoint(p, avgDistance*acceptRatio, avgDistance*ignoreRatio))
-                .collect(Collectors.toList());
+//        float avgDistance = (float) (IntStream.range(0, path.size()-1).asDoubleStream()
+//                .map(i -> path.get((int) i).distanceBetween(path.get((int) (i+1))))
+//                .sum())/path.size();
+//        float acceptRatio = 0.15f; //15% of average distance for acceptance
+//        float ignoreRatio = 3.f; //300% of average distance for ignore
+//        //now convert to way points
+//        List<WayPoint> wayPointPath = path.stream()
+//                .map(p-> new WayPoint(p, avgDistance*acceptRatio, avgDistance*ignoreRatio))
+//                .collect(Collectors.toList());
         //assign the path
         this.setWayPointPath(wayPointPath);
 
@@ -105,16 +108,16 @@ public class AutopilotWayPointController extends Controller {
         //get the current way point
         WayPoint wayPoint = this.getCurrentWayPoint();
 
-        System.out.println("WayPoint: " + wayPoint);
+        //System.out.println("WayPoint: " + wayPoint);
         //get the pitch difference
-        float refPitch = wayPoint.referencePitch(inputs);
+        float refPitch = this.getPitchDifference();
 
         //get the distance to the target
         float refDist = wayPoint.distanceToWayPoint(position);
         float minRefDist = 20;
         //System.out.println("reference pitch" + refPitch);
         //the thrust should be stable if target is faraway, and higher if close
-        float outputThrust = (float) (BASE_THRUST + THRUST_COEFF*refPitch*refPitch*RAD2DEGREE + THRUST_COEFF/20*pow(orientation.getzValue()*RAD2DEGREE,1));
+        float outputThrust = (float) (BASE_THRUST + 10*THRUST_COEFF*refPitch*refPitch*RAD2DEGREE + THRUST_COEFF/20*pow(orientation.getzValue()*RAD2DEGREE,1));
 
         outputs.setThrust(max(min(outputThrust, maxThrust), 0));
         //System.out.println("thrust " + outputs.getThrust());
@@ -131,22 +134,26 @@ public class AutopilotWayPointController extends Controller {
         WayPoint wayPoint = this.getCurrentWayPoint();
 
         //we need the current inputs
-        AutopilotInputs_v2 inputs = this.getCurrentInputs();
+        AutopilotInputs_v2 currentInputs = this.getCurrentInputs();
+        AutopilotInputs_v2 prevInputs = this.getPreviousInputs();
         //calculate the elapsed time:
         //then calculate the ideal pitch
         //get the reference pitch:
-        float referencePitch = wayPoint.referencePitch(inputs);
+//        float referencePitch = wayPoint.referencePitch(inputs);
         //System.out.println("reference pitch: " + referencePitch);
         //then extract the current pitch
-        float currentPitch = Controller.extractOrientation(inputs).getyValue();
+//        float currentPitch = Controller.extractOrientation(inputs).getyValue();
         //System.out.println("current pitch: " + currentPitch);
         //then get the PID output for the given set point (the set point is calculated for every iteration)
+        float pidInput = this.getPitchDifference();
+        float deltaTime = Controller.getDeltaTime(prevInputs, currentInputs);
         Controller.PIDController pitchController = this.getPitchPID();
-        float pidResult = pitchController.getPIDOutputSetPoint(currentPitch, inputs.getElapsedTime(), referencePitch);
-        //System.out.println("PID horizontal output: " + pidResult);
+        float pidResult = pitchController.getPIDOutput(pidInput, deltaTime) /*pitchController.getPIDOutputSetPoint(currentPitch, inputs.getElapsedTime(), referencePitch)*/;
+        System.out.println("PID input: " + pidInput);
+        System.out.println("PID output: " + pidResult);
         //if the pid result is positive: the set point is larger than the input -> lower the pitch (pos inclination)
         //if the pid result is negative: the set point is smaller than the input -> increase the pitch (neg inclination)
-        float horizontalInclination = this.getStabilizerStableInclination() - pidResult; //todo change the constants for better result
+        float horizontalInclination = this.getStabilizerStableInclination() + pidResult; //todo change the constants for better result
         horizontalInclination = signum(horizontalInclination) * min(abs(horizontalInclination), HORIZONTAL_CAP_INCLINATION);
         outputs.setHorStabInclination(horizontalInclination);
     }
@@ -160,41 +167,27 @@ public class AutopilotWayPointController extends Controller {
         //get the current way point
         WayPoint wayPoint = this.getCurrentWayPoint();
         //then get the current inputs
-        AutopilotInputs_v2 inputs =  this.getCurrentInputs();
+        AutopilotInputs_v2 currentInputs =  this.getCurrentInputs();
+        AutopilotInputs_v2 prevInputs = this.getPreviousInputs();
         //extract the current orientation:
-        Vector orientation = Controller.extractOrientation(inputs);
+        Vector orientation = Controller.extractOrientation(currentInputs);
         //extract the position
-        Vector position = Controller.extractPosition(inputs);
+        Vector position = Controller.extractPosition(currentInputs);
 
-        //extract the current heading
-        float heading = orientation.getxValue();
         //extract the elapsed time
-        float elapsedTime = inputs.getElapsedTime();
-        //get the reference heading
-        float refHeading = wayPoint.referenceHeading(inputs);
-        //System.out.println("reference heading: " + refHeading*RAD2DEGREE);
-        //System.out.println("Orientation: " + orientation.scalarMult(RAD2DEGREE));
+        float deltaTime = Controller.getDeltaTime(prevInputs, currentInputs);
         //get the heading PID
         Controller.PIDController bankControl = this.getBankPID();
         //get the output from the PID
-        float pidInput = -signum(refHeading)*abs(refHeading-heading);
+        float pidInput = this.getHeadingDifference();
         //System.out.println(pidInput);
         //float pidOutput = bankControl.getPIDOutput(pidInput, elapsedTime);
-        float pidOutput = bankControl.getPIDOutput(-signum(refHeading)*this.getHeadingDifference(), elapsedTime);
+        float pidOutput = bankControl.getPIDOutput(pidInput, deltaTime);
 
-        //System.out.println("currentHeading Error: " + abs(refHeading-heading)*RAD2DEGREE);
-        //bankingError+= abs(refHeading-heading);
-        //System.out.println("accumulated Banking Error: " + bankingError);
-        //System.out.println("Current banking PID output: " + pidOutput);
-        //pidOutput*=sqrt(abs(wayPoint.distanceToWayPoint(position)));
-        //System.out.println("Current banking PID output: " + pidOutput);
-
-        //System.out.println("The heading difference calc with vectors: " + this.getHeadingDifference());
-        //now adjust the heading of the drone by banking
-        //banking is done by setting the horizontal stabilizer upward (may be done manually - or relied on by the pid controller)
+        //System.out.println( "input sign: " + pidInput);
         //and inclining the main wings
-        float mainLeftWingInclination = this.getMainStableInclination() - pidOutput;
-        float mainRightWingInclination = this.getMainStableInclination() + pidOutput;
+        float mainLeftWingInclination = this.getMainStableInclination() + pidOutput;
+        float mainRightWingInclination = this.getMainStableInclination() - pidOutput;
 
         //put some extra umpf into the horizontal stabilizer
         outputs.setHorStabInclination(outputs.getHorStabInclination() + BANK_HOR_STAB_EXTRA);
@@ -248,11 +241,8 @@ public class AutopilotWayPointController extends Controller {
         //roll control
         rollControl(outputs, inputs);
 
-        System.out.println("control outputs: " + outputs);
-
         //check if everything is within allowed parameters
-        angleOfAttackControl(outputs, this.getPreviousInputs(), this.getCurrentInputs());System.out.println(outputs);
-        System.out.println();
+        angleOfAttackControl(outputs, this.getPreviousInputs(), this.getCurrentInputs());
 
         return outputs;
     }
@@ -262,10 +252,12 @@ public class AutopilotWayPointController extends Controller {
      * @param inputs the inputs of the autopilot, generated by the drone
      */
     private void wayPointControl(AutopilotInputs_v2 inputs){
+
         WayPoint currentWayPoint = this.getCurrentWayPoint();
         //check if we've reached the currently active way point
         boolean currReached = currentWayPoint.isReached(inputs);
-        boolean currPassed = currentWayPoint.canBeIgnored(inputs);
+        //and check if we've not flown past it
+        boolean currPassed = !currentWayPoint.reachable(inputs);
         if(currReached||currPassed){
             //if so, activate the next way point
             this.toNextWayPoint();
@@ -288,6 +280,7 @@ public class AutopilotWayPointController extends Controller {
         else if(roll <= - this.getRollThreshold()&&isSteeringRight(outputs)){
             outputs.setLeftWingInclination(this.getMainStableInclination());
             outputs.setRightWingInclination(this.getMainStableInclination());
+
         }else{
             // change nothing
         }
@@ -313,8 +306,11 @@ public class AutopilotWayPointController extends Controller {
     }
 
     /**
-     * Calculates the angle between the heading vector and the vector between the drone and the next way point
-     * @return the heading difference
+     * Calculates the angle between the next way point and the current heading vector of the drone (0,0,-1) @drone axis
+     * and also indicates the relative direction in which the drone needs to fly (contained within the sign)
+     * @return the heading difference calculated as the angle between the orthogonal projection of the heading
+     * vector and the reference vector (vector between current position and the next way point) on the xz plane
+     * the direction sign is determined by the cross product of the heading vector with the reference (negative is right, positive is left)
      */
     private float getHeadingDifference(){
         AutopilotInputs_v2 inputs = this.getCurrentInputs();
@@ -328,7 +324,7 @@ public class AutopilotWayPointController extends Controller {
         //the normal unit vector
         Vector normal = new Vector(0, 1, 0);
         //project the heading vector onto the plane
-        Vector headingVectorProjection = headingVectorDrone.orthogonalProjection(normal);
+        Vector headingVectorProjection = headingVectorWorld.orthogonalProjection(normal);
 
         //get the current way point
         WayPoint currentWayPoint = this.getCurrentWayPoint();
@@ -337,8 +333,63 @@ public class AutopilotWayPointController extends Controller {
         //project it on the xz-plane
         Vector refHeadingProjection = refHeadingVector.orthogonalProjection(normal);
 
-        //then calculate the angle between the two vectors projected vectors
-        return refHeadingProjection.getAngleBetween(headingVectorProjection);
+        //do a cross product to figure out the direction in which to fly
+        Vector crossProduct = headingVectorProjection.crossProduct(refHeadingProjection);
+        //only keep the sign of the y-value
+        float direction = signum(crossProduct.getyValue());
+        float angleBetween = headingVectorProjection.getAngleBetween(refHeadingProjection);
+        float steeringAngle = direction*angleBetween;
+
+        //check if Nan (can happen if the steering angle is "perfect")
+        if(Float.isNaN(steeringAngle)){
+
+            return 0f;
+        }
+
+        return steeringAngle;
+
+    }
+
+    /**
+     * Calculates the pitch difference, the angle between the reference vector (the vector between
+     * the current way point and the position of the drone) transformed to the drone axis system and
+     * projected onto the yz plane in the drone axis system, and the heading vector (0,0,-1) in the drone axis system.
+     * The direction is determined by the cross product of the heading vector and the projected and transformed reference
+     * vector.
+     * @return returns a pos angle if the drone needs to go up, and a negative angle if the drone needs to go down
+     */
+    private float getPitchDifference(){
+        AutopilotInputs_v2 inputs = this.getCurrentInputs();
+        //get the difference vector
+        //first get the current way point
+        WayPoint currWayPoint = this.getCurrentWayPoint();
+        //get the position of the drone
+        Vector dronePos = Controller.extractPosition(inputs);
+        //get the position of the way point
+        Vector wayPointPos = currWayPoint.getPosition();
+        //get the ref vector
+        Vector ref = wayPointPos.vectorDifference(dronePos);
+        //transform it to the drone axis system
+        //first get the current orientation
+        Vector orientation = Controller.extractOrientation(inputs);
+        Vector refDrone = PhysXEngine.worldOnDrone(ref, orientation);
+        //then project it onto the yz plane: normal vector (1,0,0)
+        Vector normalYZ = new Vector(1,0,0);
+        Vector projRefDrone = refDrone.orthogonalProjection(normalYZ);
+        //calculate the angle between the heading vector (0,0,-1) and the reference
+        Vector headingVect = new Vector(0,0,-1);
+        float angle = abs(projRefDrone.getAngleBetween(headingVect));
+
+        //then get the vector product for the direction(the x-component)
+        float direction = headingVect.crossProduct(projRefDrone).getxValue();
+
+        float res = angle*signum(direction);
+        //check for NaN
+        if(Float.isNaN(res)){
+            return 0; // NaN comes from the angle
+        }
+        //else return the result
+        return res;
 
     }
 
@@ -453,15 +504,15 @@ public class AutopilotWayPointController extends Controller {
         return bankPID;
     }
 
-    private final static float PITCH_GAIN = .9f;
-    private final static float PITCH_DERIVATIVE = 0.f;
-    private final static float PITCH_INTEGRAL = 0.4f;
+    private final static float PITCH_GAIN = 1.0f;
+    private final static float PITCH_DERIVATIVE = 0.2f;
+    private final static float PITCH_INTEGRAL = 0.5f;
 
     private Controller.PIDController pitchPID = new Controller.PIDController(PITCH_GAIN,  PITCH_INTEGRAL, PITCH_DERIVATIVE);
 
-    private final static float BANK_GAIN = 0.5f;
-    private final static float BANK_DERIVATIVE = 1.5f ;
-    private final static float BANK_INTEGRAL = .2f ;
+    private final static float BANK_GAIN = 0.7f;
+    private final static float BANK_DERIVATIVE = 0.5f ;
+    private final static float BANK_INTEGRAL = 0.001f ;
     private final static float BANK_HOR_STAB_EXTRA = (float) (-3*PI/180);
 
     private Controller.PIDController bankPID = new Controller.PIDController(BANK_GAIN, BANK_INTEGRAL, BANK_DERIVATIVE);
@@ -499,67 +550,38 @@ public class AutopilotWayPointController extends Controller {
     private class WayPoint{
 
 
-        WayPoint(Vector position, float acceptanceRadius, float ignoreRadius){
+        WayPoint(Vector position, float acceptanceRadius){
             this.position = position;
             this.acceptanceRadius = acceptanceRadius;
-            this.ignoreRadius = ignoreRadius;
         }
-
-        /**
-         * Constructor for a way point with predefined acceptance radius
-         * @param position
-         * @param ignoreRadius
-         */
-        WayPoint(Vector position, float ignoreRadius){
-            this(position, STANDARD_ACCEPTANCE_RADIUS, ignoreRadius);
-        }
-
         /**
          * Constructor for a way point without the acceptance radius, the acceptance radius
          * is set to a default value STANDARD_ACCEPTANCE_RADIUS
          * @param position the position of the way point
          */
         WayPoint(Vector position){
-            this(position, STANDARD_ACCEPTANCE_RADIUS, STANDARD_IGNORE_RADIUS);
+            this(position, STANDARD_ACCEPTANCE_RADIUS);
         }
 
-        /**
-         * Calculates the pitch used as the reference for the autopilot
-         * @param inputs the inputs of the autopilot generated by the testbed (containing the necessary data)
-         * @return the pitch to the way point
-         */
-        private float referencePitch(AutopilotInputs_v2 inputs){
-            //first get the position of the drone
-            Vector dronePos = Controller.extractPosition(inputs);
-            //then get the distance between the drone and way point (used as the hypotenuse)
-            float hypotenuse = this.distanceToWayPoint(dronePos);
-            //then get the height difference (used for the opposite side)
-            float oppositeSide = this.getPosition().getyValue() - dronePos.getyValue();
-            //then get the reference pitch by arcSin(opposite/hypotenuse)
-            float pitch = (float) asin(oppositeSide/hypotenuse);
+//        /**
+//         * Calculates the pitch used as the reference for the autopilot
+//         * @param inputs the inputs of the autopilot generated by the testbed (containing the necessary data)
+//         * @return the pitch to the way point
+//         */
+//        private float referencePitch(AutopilotInputs_v2 inputs){
+//            //first get the position of the drone
+//            Vector dronePos = Controller.extractPosition(inputs);
+//            //then get the distance between the drone and way point (used as the hypotenuse)
+//            float hypotenuse = this.distanceToWayPoint(dronePos);
+//            //then get the height difference (used for the opposite side)
+//            float oppositeSide = this.getPosition().getyValue() - dronePos.getyValue();
+//            //then get the reference pitch by arcSin(opposite/hypotenuse)
+//            float pitch = (float) asin(oppositeSide/hypotenuse);
+//
+//            return pitch;
+//        }
 
-            return pitch;
-        }
 
-        /**
-         * Calculates the heading used as the reference for the autopilot
-         * @param inputs the inputs of the autopilot genereated by the testbed (containing the necessary data)
-         * @return the heading to the way point
-         */
-        private float referenceHeading(AutopilotInputs_v2 inputs){
-            //first get the position of the drone
-            Vector dronePos = Controller.extractPosition(inputs);
-            //then get the wayPoint position
-            Vector wayPointPos = this.getPosition();
-            //then take the x-difference for the tan
-            float deltaX = wayPointPos.getxValue() - dronePos.getxValue();
-            float deltaZ = wayPointPos.getzValue() - dronePos.getzValue();
-            //System.out.println("delta X: " + deltaX + "; drone pos: " + dronePos.getxValue() + "; way point pos: " + wayPointPos);
-            //System.out.println("delta Z: " + -deltaZ);
-            //now calculate the heading:
-            float heading = -(float) atan2(deltaX, -deltaZ);
-            return heading;
-        }
 
         /**
          * Calculates the vector that points from the drone to the selected way point
@@ -598,12 +620,25 @@ public class AutopilotWayPointController extends Controller {
         }
 
         /**
-         * Checks if the current way point can be ignored on the path of the drone
-         * @param inputs_v2 the inputs to calculate the distance from
-         * @return true if and only if the drone is located outside of the ignore radius
+         * Returns true if the way point is in front of the drone
+         * @param inputs the current autopilot inputs (needed for the orientation and the position)
+         * @return true the current way point is in front of the drone
          */
-        private boolean canBeIgnored(AutopilotInputs_v2 inputs_v2){
-            return getPosition().distanceBetween(Controller.extractPosition(inputs_v2)) > getIgnoreRadius();
+        private boolean reachable(AutopilotInputs_v2 inputs){
+
+            Vector dronePosition = Controller.extractPosition(inputs);
+            Vector droneOrientation = Controller.extractOrientation(inputs);
+
+            Vector wayPointPosition = this.getPosition();
+            // take the difference
+            Vector diffVectorWorld = wayPointPosition.vectorDifference(dronePosition);
+            //transform it onto the drone axis system
+            Vector diffVectorDrone = PhysXEngine.worldOnDrone(diffVectorWorld, droneOrientation);
+            //then project the difference vector on the heading vector
+            Vector headingVector = new Vector(0,0,-1);
+            Vector projectedDiff = headingVector.projectOnVector(diffVectorDrone);
+            //check the scalar product of the projection, if positive we're behind, if not we're ahead
+            return projectedDiff.scalarProduct(headingVector) > 0;
         }
 
         /**
@@ -623,14 +658,6 @@ public class AutopilotWayPointController extends Controller {
             return acceptanceRadius;
         }
 
-        /**
-         * Getter for the ignore radius of the way point
-         * if the drone flies out of the bounds of this radius the way point may be ignored
-         * @return the ignore radius of the way point
-         */
-        private float getIgnoreRadius() {
-            return ignoreRadius;
-        }
 
         /**
          * Setter for the position of the way point
@@ -650,11 +677,6 @@ public class AutopilotWayPointController extends Controller {
          * The radius which in the drone had to move to mark the way point as reached
          */
         private float acceptanceRadius;
-
-        /**
-         * The radius to pass to count a way point as unreachable/ignore able
-         */
-        private float ignoreRadius;
 
         private final static float STANDARD_ACCEPTANCE_RADIUS = 30f;
 

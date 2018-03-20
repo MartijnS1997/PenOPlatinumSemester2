@@ -1,10 +1,12 @@
 package internal.Autopilot;
 
-import AutopilotInterfaces.Autopilot;
 import AutopilotInterfaces.AutopilotConfig;
 import AutopilotInterfaces.AutopilotInputs_v2;
 import AutopilotInterfaces.AutopilotOutputs;
 import internal.Helper.Vector;
+
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Created by Martijn on 13/03/2018.
@@ -51,6 +53,9 @@ public class ControllerSelector {
             this.setFollowUpController(nextActiveController);
             //note: not checking if the second controller is also ready prevents issues with init
             //the next next controller will then be selected on the next invocation of the method
+            System.out.println("Switched controller");
+            System.out.println("Currently active controller: " + this.getActiveController());
+            System.out.println("Next active Controller: " + this.getNextController(activeController));
         }
 
         //set the current input for the next controller
@@ -107,9 +112,22 @@ public class ControllerSelector {
     private void configureTakeoffController(AutopilotTakeoffController takeoffController) {
         AutoPilot autopilot = this.getAutopilot();
         AutopilotInterfaces.Path path = autopilot.getPath();
-        Vector firstCubePos = new Vector(path.getX()[0], path.getY()[0], path.getZ()[0]);
-        float desiredHeight = firstCubePos.getyValue();
-        takeoffController.setPIDReferenceAltitude(desiredHeight);
+        List<Vector> pathList = Controller.extractPath(path);
+        System.out.println("The path: " + pathList);
+        //take the (0,0,0) as a reference
+        Vector startPos = autopilot.getStartPosition();
+        Optional<Vector> closestPos = pathList.stream().reduce((closest, next)-> closest.distanceBetween(startPos) < next.distanceBetween(startPos) ? closest : next);
+
+        if(!closestPos.isPresent()){
+            takeoffController.setTarget(new Vector(0,30,-500));
+        }
+        Vector target = closestPos.get();
+        System.out.println("Selected Target: "+ target);
+        takeoffController.setTarget(target);
+//        float desiredHeight = pathList.get(0).getyValue();
+//        System.out.println("desired heigth " + desiredHeight);
+//        System.out.println("total path: " + pathList);
+        //takeoffController.setReferenceAltitude(desiredHeight);
     }
 
     /**
@@ -141,14 +159,92 @@ public class ControllerSelector {
             return this.getFlightController();
         }
         if(activeController instanceof AutoPilotFlightController){
-            return this.getWayPointController();
+            //return this.getWayPointController();
+            return this.getLandingController();
         }
         if(activeController instanceof  AutopilotWayPointController) {
             return this.getLandingController();
         }
         if(activeController instanceof AutopilotLandingController){
             //no next controller is needed
-            return null;
+            //generate a generic controller that goes full brakes
+            return new Controller(this.getAutopilot()) {
+                @Override
+                public AutopilotOutputs getControlActions(AutopilotInputs_v2 inputs) {
+                    return new AutopilotOutputs() {
+                        @Override
+                        public float getThrust() {
+                            return 0;
+                        }
+
+                        @Override
+                        public float getLeftWingInclination() {
+                            return 0;
+                        }
+
+                        @Override
+                        public float getRightWingInclination() {
+                            return 0;
+                        }
+
+                        @Override
+                        public float getHorStabInclination() {
+                            return 0;
+                        }
+
+                        @Override
+                        public float getVerStabInclination() {
+                            return 0;
+                        }
+
+                        @Override
+                        public float getFrontBrakeForce() {
+                            return ControllerSelector.this.getAutopilot().getConfig().getRMax();
+                        }
+
+                        @Override
+                        public float getLeftBrakeForce() {
+                            return ControllerSelector.this.getAutopilot().getConfig().getRMax();
+                        }
+
+                        @Override
+                        public float getRightBrakeForce() {
+                            return ControllerSelector.this.getAutopilot().getConfig().getRMax();
+                        }
+                    };
+                }
+
+                @Override
+                public boolean hasReachedObjective(AutopilotInputs_v2 inputs) {
+                    return false;
+                }
+
+                @Override
+                protected float getMainStableInclination() {
+                    return 0;
+                }
+
+                @Override
+                protected float getStabilizerStableInclination() {
+                    return 0;
+                }
+
+                @Override
+                protected float getRollThreshold() {
+                    return 0;
+                }
+
+                @Override
+                protected float getInclinationAOAErrorMargin() {
+                    return 0;
+                }
+
+                @Override
+                protected float getStandardThrust() {
+                    return 0;
+                }
+            };
+
         }else{
             return null;
         }
@@ -293,4 +389,5 @@ public class ControllerSelector {
      * The autopilot connected with the controller selector
      */
     private AutoPilot autopilot;
+
 }
