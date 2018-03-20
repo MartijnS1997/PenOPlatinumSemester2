@@ -149,6 +149,10 @@ public class Cube implements Polygon {
 	public void delete() {
 		this.mesh.delete();
 	}
+	
+	public float getTotalDistance() {
+		return this.totalDistance;
+	}
 
 	public Vector getPosition(){
 		return Vector.vector3fToVector(this.getPos());

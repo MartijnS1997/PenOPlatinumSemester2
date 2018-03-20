@@ -7,6 +7,7 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.util.Set;
 
 import javax.swing.JPanel;
 import javax.swing.JTextField;
@@ -45,6 +46,7 @@ public class TextWindow extends JPanel implements ActionListener{
     	float heading = 0;
     	float pitch = 0;
     	float roll = 0;
+    	float totalDistance = 0;
     	
     	
         for (WorldObject object: world.getObjectSet()) {
@@ -54,7 +56,13 @@ public class TextWindow extends JPanel implements ActionListener{
         		heading = ((Drone) object).getHeading();
         		pitch = ((Drone) object).getPitch();
         		roll = ((Drone) object).getRoll();
-
+        		
+        		for (GraphicsObject gObject: object.getAssociatedGraphicsObjects()) {
+        			if (gObject.getClass() == Cube.class) {
+        				totalDistance = ((Cube) gObject).getTotalDistance();
+        				break;
+        			}
+        		}
         	}
         }
     	
@@ -92,29 +100,29 @@ public class TextWindow extends JPanel implements ActionListener{
         contentPane.setLayout(layout);
         
     	layout.putConstraint(SpringLayout.WEST, velocityLabel, 5, SpringLayout.WEST, contentPane);
-    	layout.putConstraint(SpringLayout.NORTH, velocityLabel, 5, SpringLayout.NORTH, contentPane);
+    	layout.putConstraint(SpringLayout.NORTH, velocityLabel, 45, SpringLayout.NORTH, contentPane);
     	layout.putConstraint(SpringLayout.WEST, velocityField, 5, SpringLayout.EAST, velocityLabel);
-    	layout.putConstraint(SpringLayout.NORTH, velocityField, 5, SpringLayout.NORTH, contentPane);
+    	layout.putConstraint(SpringLayout.NORTH, velocityField, 45, SpringLayout.NORTH, contentPane);
     	
     	layout.putConstraint(SpringLayout.WEST, positionLabel, 5, SpringLayout.WEST, contentPane);
-    	layout.putConstraint(SpringLayout.NORTH, positionLabel, 30, SpringLayout.NORTH, contentPane);
-    	layout.putConstraint(SpringLayout.WEST, positionField, 5, SpringLayout.EAST, positionLabel);
-    	layout.putConstraint(SpringLayout.NORTH, positionField, 30, SpringLayout.NORTH, contentPane);
+    	layout.putConstraint(SpringLayout.NORTH, positionLabel, 25, SpringLayout.NORTH, velocityField);
+    	layout.putConstraint(SpringLayout.WEST, positionField, 5, SpringLayout.EAST, velocityLabel);
+    	layout.putConstraint(SpringLayout.NORTH, positionField, 25, SpringLayout.NORTH, velocityField);
     	
     	layout.putConstraint(SpringLayout.WEST, headingLabel, 5, SpringLayout.WEST, contentPane);
-    	layout.putConstraint(SpringLayout.NORTH, headingLabel, 55, SpringLayout.NORTH, contentPane);
-    	layout.putConstraint(SpringLayout.WEST, headingField, 5, SpringLayout.EAST, headingLabel);
-    	layout.putConstraint(SpringLayout.NORTH, headingField, 55, SpringLayout.NORTH, contentPane);
+    	layout.putConstraint(SpringLayout.NORTH, headingLabel, 25, SpringLayout.NORTH, positionField);
+    	layout.putConstraint(SpringLayout.WEST, headingField, 5, SpringLayout.EAST, velocityLabel);
+    	layout.putConstraint(SpringLayout.NORTH, headingField, 25, SpringLayout.NORTH, positionField);
     	
     	layout.putConstraint(SpringLayout.WEST, pitchLabel, 5, SpringLayout.WEST, contentPane);
-    	layout.putConstraint(SpringLayout.NORTH, pitchLabel, 80, SpringLayout.NORTH, contentPane);
-    	layout.putConstraint(SpringLayout.WEST, pitchField, 5, SpringLayout.EAST, pitchLabel);
-    	layout.putConstraint(SpringLayout.NORTH, pitchField, 80, SpringLayout.NORTH, contentPane);
+    	layout.putConstraint(SpringLayout.NORTH, pitchLabel, 25, SpringLayout.NORTH, headingField);
+    	layout.putConstraint(SpringLayout.WEST, pitchField, 5, SpringLayout.EAST, velocityLabel);
+    	layout.putConstraint(SpringLayout.NORTH, pitchField, 25, SpringLayout.NORTH, headingField);
     	
     	layout.putConstraint(SpringLayout.WEST, rollLabel, 5, SpringLayout.WEST, contentPane);
-    	layout.putConstraint(SpringLayout.NORTH, rollLabel, 105, SpringLayout.NORTH, contentPane);
-    	layout.putConstraint(SpringLayout.WEST, rollField, 5, SpringLayout.EAST, rollLabel);
-    	layout.putConstraint(SpringLayout.NORTH, rollField, 105, SpringLayout.NORTH, contentPane);
+    	layout.putConstraint(SpringLayout.NORTH, rollLabel, 25, SpringLayout.NORTH, pitchField);
+    	layout.putConstraint(SpringLayout.WEST, rollField, 5, SpringLayout.EAST, velocityLabel);
+    	layout.putConstraint(SpringLayout.NORTH, rollField, 25, SpringLayout.NORTH, pitchField);
     }
     
     public void initButtons() {
@@ -162,16 +170,16 @@ public class TextWindow extends JPanel implements ActionListener{
         contentPane.add(button4);
         
         layout.putConstraint(SpringLayout.WEST, button1, 10, SpringLayout.WEST, contentPane);
-    	layout.putConstraint(SpringLayout.NORTH, button1, 130, SpringLayout.NORTH, contentPane);
+    	layout.putConstraint(SpringLayout.NORTH, button1, 10, SpringLayout.NORTH, contentPane);
     	
     	layout.putConstraint(SpringLayout.WEST, button2, 10, SpringLayout.EAST, button1);
-    	layout.putConstraint(SpringLayout.NORTH, button2, 130, SpringLayout.NORTH, contentPane);
+    	layout.putConstraint(SpringLayout.NORTH, button2, 10, SpringLayout.NORTH, contentPane);
     	
     	layout.putConstraint(SpringLayout.WEST, button3, 10, SpringLayout.EAST, button2);
-    	layout.putConstraint(SpringLayout.NORTH, button3, 130, SpringLayout.NORTH, contentPane);
+    	layout.putConstraint(SpringLayout.NORTH, button3, 10, SpringLayout.NORTH, contentPane);
     	
     	layout.putConstraint(SpringLayout.WEST, button4, 10, SpringLayout.EAST, button3);
-    	layout.putConstraint(SpringLayout.NORTH, button4, 130, SpringLayout.NORTH, contentPane);
+    	layout.putConstraint(SpringLayout.NORTH, button4, 10, SpringLayout.NORTH, contentPane);
     }
 
     public static TextWindow createAndShowWindow(World world, Graphics graphics, String title, int xDimension, int yDimension, int xPos, int yPos) {
