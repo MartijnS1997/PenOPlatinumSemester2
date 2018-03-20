@@ -1,6 +1,7 @@
 
 package internal.Autopilot;
 
+import AutopilotInterfaces.AutopilotConfig;
 import AutopilotInterfaces.AutopilotInputs_v2;
 import AutopilotInterfaces.AutopilotOutputs;
 import internal.Helper.Vector;
@@ -50,55 +51,176 @@ public class AutopilotLandingController extends Controller {
             this.setFirstControlCall();
         }
 
-        // generate path
-/*        AutopilotInputs currentInputs = getCurrentInputs();
-        AutopilotInputs previousInputs = getPreviousInputs();*/
+        LandingPhases landingPhase = this.getCurrentLandingPhase();
         ControlOutputs outputs = new ControlOutputs();
 
-        //TODO check if stable flight
-        if(!this.isStartedDescend()){
-            //check if the flight is stable
-            if(!mayInitializeLanding(inputs)){
+        AutopilotInputs_v2 prevInputs = this.getPreviousInputs();
 
+        System.out.println("Current velocity: " + this.getVelocityApprox(prevInputs, getCurrentInputs()));
+
+        switch (landingPhase){
+            case STABILIZE:
                 this.stabilizeFlight(outputs);
-                return outputs;
-            }
-            System.out.println("Drone is stabilized");
-            this.setStartedDescend();
-        }else {
-
-/*        Vector position = new Vector(currentInputs.getX(), currentInputs.getY(), currentInputs.getZ());
-        Vector velocityApprox = this.getVelocityApprox(previousInputs, currentInputs);
-        Vector destination = this.getAutopilot().getStartPosition();*/
-
-            //start going down
-            loseAltitude(outputs);
-
-            pitchControl(outputs);
-
-            //under INIT_LANDING_HEIGHT start stabilizing the plane
-            if (Controller.extractPosition(inputs).getyValue() <= INIT_LANDING_HEIGHT) {
-                //activate the breaks on the wheels when plane hits the ground
-                if (Controller.extractPosition(inputs).getyValue() <= PLANE_HEIGHT_FROM_GROUND) {
-                    outputs.setRightBrakeForce(100);
-                    outputs.setLeftBrakeForce(100);
-                    outputs.setFrontBrakeForce(100);
-                    System.out.println(Controller.extractPosition(inputs).getzValue());
-                }
-                this.stayDown(outputs);
-                this.setThrust(outputs);
-                this.setHorizontalStabilizer(outputs);
-
-            }
+                break;
+            case RAPID_DESCEND:
+                this.getRapidDescendControls(outputs);
+                System.out.println("rapidDescend");
+                break;
+            case SOFT_DESCEND:
+                System.out.println("soft descend");
+                this.getSoftDescendControls(outputs);
+                break;
         }
 
         AutopilotInputs_v2 previousInputs = getPreviousInputs();
         angleOfAttackControl(outputs, previousInputs, inputs);
-     // System.out.println(Controller.extractPosition(inputs).getyValue());
+        // System.out.println(Controller.extractPosition(inputs).getyValue());
 
-
+        //System.out.println(outputs);
         return outputs;
+
+//        // generate path
+///*        AutopilotInputs currentInputs = getCurrentInputs();
+//        AutopilotInputs previousInputs = getPreviousInputs();*/
+//        ControlOutputs outputs = new ControlOutputs();
+//
+//        //TODO check if stable flight
+//        if(!this.isStartedDescend()){
+//            //check if the flight is stable
+//            if(!mayInitializeLanding(inputs)){
+//
+//                this.stabilizeFlight(outputs);
+//                return outputs;
+//            }
+//            System.out.println("Drone is stabilized");
+//            this.setStartedDescend();
+//        }else {
+//
+///*        Vector position = new Vector(currentInputs.getX(), currentInputs.getY(), currentInputs.getZ());
+//        Vector velocityApprox = this.getVelocityApprox(previousInputs, currentInputs);
+//        Vector destination = this.getAutopilot().getStartPosition();*/
+//
+//            //start going down
+//            loseAltitude(outputs);
+//
+//            pitchControl(outputs);
+//
+//            //under INIT_LANDING_HEIGHT start stabilizing the plane
+//            if (Controller.extractPosition(inputs).getyValue() <= INIT_LANDING_HEIGHT) {
+//                //activate the breaks on the wheels when plane hits the ground
+//                if (Controller.extractPosition(inputs).getyValue() <= PLANE_HEIGHT_FROM_GROUND) {
+//                    outputs.setRightBrakeForce(100);
+//                    outputs.setLeftBrakeForce(100);
+//                    outputs.setFrontBrakeForce(100);
+//                    System.out.println(Controller.extractPosition(inputs).getzValue());
+//                }
+//                this.stayDown(outputs);
+//                this.setThrust(outputs);
+//                this.setHorizontalStabilizer(outputs);
+//
+//            }
+//        }
+
+
     }
+
+    private LandingPhases getCurrentLandingPhase(){
+        AutopilotInputs_v2 currentInputs = this.getCurrentInputs();
+        //check if the rapid descend phase was started
+        if(!this.isHasStartedRapidDescend()){
+            //check if the flight is stable
+            if(!mayInitializeLanding(currentInputs)){
+                //if not, stabilize
+                return LandingPhases.STABILIZE;
+            }
+            //System.out.println("Drone is stabilized");
+            this.setHasStartedRapidDescend();
+            this.configureSoftDescendHeight(currentInputs);
+            return LandingPhases.RAPID_DESCEND;
+
+
+        //check if the soft landing phase was started
+        }else if(!this.isHasStartedSoftDescend()){
+            Vector position = Controller.extractPosition(currentInputs);
+            //check if we are low enough to initiate the soft descend
+            System.out.println("Current y:" + position.getyValue());
+            System.out.println("transition: " + getStartSoftDescendPhaseHeight());
+            if(position.getyValue() > this.getStartSoftDescendPhaseHeight()){
+                //if not continue rapid descend
+
+                return LandingPhases.RAPID_DESCEND;
+            }
+            //if not start the soft descend
+            this.setHasStartedSoftDescend();
+            System.out.println("Soft Started: " + currentInputs.getY());
+
+            return LandingPhases.SOFT_DESCEND;
+        }else{
+            System.out.println("Soft Started: " + currentInputs.getY());
+            return LandingPhases.SOFT_DESCEND;
+        }
+    }
+
+    /**
+     * Configures the soft descend height of the soft landing phase of the landing controller
+     * only call after leaving the stabilizer stage and before the first call of rapid descend controls
+     * @param inputs the inputs to infer the height from
+     */
+    private void configureSoftDescendHeight(AutopilotInputs_v2 inputs){
+        //get the current height
+        float height = inputs.getY();
+        //then set the soft descend phase height
+        float softStartHeight = SOFT_DESCEND_MIN_START_HEIGHT;
+        this.setStartSoftDescendPhaseHeight(softStartHeight);
+
+    }
+
+    /**
+     * Generates the outputs for the rapid descend phase of the landing
+     * @param outputs the outputs to write to
+     */
+    private void getRapidDescendControls(ControlOutputs outputs){
+        AutopilotInputs_v2 currentInputs = this.getCurrentInputs();
+        AutopilotInputs_v2 prevInputs = this.getPreviousInputs();
+        //set the setpoint
+        PIDController pitchPID = this.getPitchPIDController();
+        pitchPID.setSetPoint(RAPID_DESCEND_PHASE_REF_PITCH);
+        //call the pitch and roll PID
+        this.pitchStabilizer(outputs, currentInputs, prevInputs);
+        this.rollStabilizer(outputs, currentInputs, prevInputs);
+        //set the thrust
+        outputs.setThrust(RAPID_DESCEND_THRUST);
+        //we are finished here
+    }
+
+    /**
+     * Generates the control outputs for the soft landing phase
+     * @param outputs the soft landing phase
+     */
+    private void getSoftDescendControls(ControlOutputs outputs){
+        System.out.println("querying soft descend");
+        AutopilotInputs_v2 currentInputs = this.getCurrentInputs();
+        AutopilotInputs_v2 prevInputs = this.getPreviousInputs();
+        AutopilotConfig config = this.getConfig();
+        //set the setPoint
+        PIDController pitchPID = this.getPitchPIDController();
+        pitchPID.setSetPoint(SOFT_DESCEND_PHASE_REF_PITCH);
+        //call the pitch and roll PID
+        this.pitchStabilizer(outputs, currentInputs, prevInputs);
+        this.rollStabilizer(outputs, currentInputs, prevInputs);
+        //change the main wing inclination
+        outputs.setRightWingInclination(outputs.getRightWingInclination() - SOFT_DESCEND_PHASE_MAIN_WING_INCLINATION_DELTA);
+        outputs.setLeftWingInclination(outputs.getLeftWingInclination() - SOFT_DESCEND_PHASE_MAIN_WING_INCLINATION_DELTA);
+        outputs.setThrust(SOFT_DESCEND_THRUST);
+        outputs.setRightBrakeForce(config.getRMax());
+        outputs.setLeftBrakeForce(config.getRMax());
+        outputs.setFrontBrakeForce(config.getRMax());
+
+
+
+    }
+
+
 
     /**
      * Checks if the drone may initialize landing
@@ -109,36 +231,36 @@ public class AutopilotLandingController extends Controller {
         return (this.getCurrentInputs().getElapsedTime() - this.getStartElapsedTime()) > MINIMAL_STABILIZING_TIME && this.isStabilized(inputs);
     }
 
-    private void loseAltitude(ControlOutputs outputs) {
-        float outputThrust  = this.getConfig().getMaxThrust();
-        outputs.setThrust(outputThrust);
-        outputs.setRightWingInclination(WING_INCL);
-        outputs.setLeftWingInclination(WING_INCL);
-        outputs.setHorStabInclination(HORIZONTAL_STABILIZER);
-    }
-
-    private void stayDown(ControlOutputs outputs) {
-        float outputThrust  = this.getConfig().getMaxThrust();
-        outputs.setThrust(outputThrust);
-        outputs.setRightWingInclination(-WING_INCL);
-        outputs.setLeftWingInclination(-WING_INCL);
-        outputs.setHorStabInclination(HORIZONTAL_STABILIZER/2);
-    }
-
-
-    private void pitchControl(ControlOutputs outputs) {
-        float pitch = Controller.extractOrientation(this.getCurrentInputs()).getyValue();
-        if (abs(pitch) >= PITCH_THRESHOLD) {
-            outputs.setHorStabInclination(0f);
-        }
-    }
-
-
-    private void setThrust(ControlOutputs outputs) {
-
-        outputs.setThrust(0f);
-
-    }
+//    private void loseAltitude(ControlOutputs outputs) {
+//        float outputThrust  = this.getConfig().getMaxThrust();
+//        outputs.setThrust(outputThrust);
+//        outputs.setRightWingInclination(WING_INCL);
+//        outputs.setLeftWingInclination(WING_INCL);
+//        outputs.setHorStabInclination(HORIZONTAL_STABILIZER);
+//    }
+//
+//    private void stayDown(ControlOutputs outputs) {
+//        float outputThrust  = this.getConfig().getMaxThrust();
+//        outputs.setThrust(outputThrust);
+//        outputs.setRightWingInclination(-WING_INCL);
+//        outputs.setLeftWingInclination(-WING_INCL);
+//        outputs.setHorStabInclination(HORIZONTAL_STABILIZER/2);
+//    }
+//
+//
+//    private void pitchControl(ControlOutputs outputs) {
+//        float pitch = Controller.extractOrientation(this.getCurrentInputs()).getyValue();
+//        if (abs(pitch) >= PITCH_THRESHOLD) {
+//            outputs.setHorStabInclination(0f);
+//        }
+//    }
+//
+//
+//    private void setThrust(ControlOutputs outputs) {
+//
+//        outputs.setThrust(0f);
+//
+//    }
 
     /**
      * Stabilizes the flight before commencing the landing sequence
@@ -156,11 +278,18 @@ public class AutopilotLandingController extends Controller {
         outputs.setThrust(STABILIZING_THURST);
     }
 
+    /**
+     * Stabilizes the pitch of the drone
+     * @param outputs the outputs to write to
+     * @param currentInputs the current inputs to extract the flight data from
+     * @param prevInputs the previous inputs to extract the flight data from
+     */
     private void pitchStabilizer(ControlOutputs outputs, AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 prevInputs) {
         //stabilize the pitch
         //extract the current orientation
         Vector orientation = Controller.extractOrientation(currentInputs);
         float pitch = orientation.getyValue();
+        System.out.println(pitch);
         PIDController pitchPid =this.getPitchPIDController();
         float deltaTime = Controller.getDeltaTime(prevInputs, currentInputs);
         float PIDControlActions =  pitchPid.getPIDOutput(pitch, deltaTime);
@@ -171,6 +300,12 @@ public class AutopilotLandingController extends Controller {
         outputs.setHorStabInclination(horizontalInclination);
     }
 
+    /**
+     * Stabilizer for the roll of the drone
+     * @param outputs the outputs to write to
+     * @param currentInputs the current inputs to extract the flight data from
+     * @param prevInputs the previous inputs to extract the flight data from
+     */
     private void rollStabilizer(ControlOutputs outputs, AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 prevInputs){
         Vector orientation = Controller.extractOrientation(currentInputs);
         float roll = orientation.getzValue();
@@ -227,20 +362,18 @@ public class AutopilotLandingController extends Controller {
     }
 
 
-
-
-    private void setHorizontalStabilizer(ControlOutputs outputs){
-        //we want to go for zero (stable inclination of the horizontal stabilizer is zero), so the corrective action needs also to be zero
-        Vector orientation = Controller.extractOrientation(this.getCurrentInputs());
-        Vector orientationPID = this.getOrientationPID().getPIDOutput(orientation, this.getCurrentInputs().getElapsedTime());
-        //extract the pitch (positive is upward looking, negative is downward looking)
-        float pitch = orientationPID.getyValue();
-        float pitchConstant = 2;
-        //calculate the desired action of the stabilizer(negative is upward movement, positive downward)
-        float desiredAngle = (float) (-pitch/PI*pitchConstant);//the pitch/PI is to get a % of the pitch that we're off
-        float outputInclination = min(abs(HOR_STABILIZER_MAX), abs(desiredAngle));
-        outputs.setHorStabInclination(outputInclination*signum(desiredAngle));
-    }
+//    private void setHorizontalStabilizer(ControlOutputs outputs){
+//        //we want to go for zero (stable inclination of the horizontal stabilizer is zero), so the corrective action needs also to be zero
+//        Vector orientation = Controller.extractOrientation(this.getCurrentInputs());
+//        Vector orientationPID = this.getOrientationPID().getPIDOutput(orientation, this.getCurrentInputs().getElapsedTime());
+//        //extract the pitch (positive is upward looking, negative is downward looking)
+//        float pitch = orientationPID.getyValue();
+//        float pitchConstant = 2;
+//        //calculate the desired action of the stabilizer(negative is upward movement, positive downward)
+//        float desiredAngle = (float) (-pitch/PI*pitchConstant);//the pitch/PI is to get a % of the pitch that we're off
+//        float outputInclination = min(abs(HOR_STABILIZER_MAX), abs(desiredAngle));
+//        outputs.setHorStabInclination(outputInclination*signum(desiredAngle));
+//    }
 
 
 
@@ -251,21 +384,74 @@ public class AutopilotLandingController extends Controller {
     private final static float HORIZONTAL_STABILIZER = (float) (PI / (180));
     private final static float PITCH_THRESHOLD = (float) (5 * PI / 180);
     private static final float INIT_LANDING_HEIGHT = 8f;
-    private final static float MAIN_STABLE = (float) (5*PI/180);
+    private final static float MAIN_STABLE = (float) (7*PI/180);
     private final static float STABILIZER_STABLE = 0;
     private final static float ROLL_THRESHOLD = (float)(3*PI/180);
     private final static float INCLINATION_AOA_ERROR_MARGIN = (float)(3*PI/180);
-    private final static float HOR_STABILIZER_MAX = (float)(10*PI/180);
+    private final static float HOR_STABILIZER_MAX = (float)(7*PI/180);
     private final static float PLANE_HEIGHT_FROM_GROUND = 1.2f;
     private final static float MAXIMUM_LANDING_VELOCITY = 1f;
 
-    //stabilizing constants
+    //stabilizing constants &instances
     private final static float STABILIZING_THURST = 550f;
     private final static float ROLL_STABILIZING_MARGIN = (float) (1*PI/180);
-    private final static float PITCH_STABILIZING_MARGIN = (float) (1*PI/180);
+    private final static float PITCH_STABILIZING_MARGIN = (float) (2*PI/180);
     private final static float MAIN_CAP_DELTA_INCLINATION = (float) (3*PI/180);
     private final static float MINIMAL_STABILIZING_TIME = 2f;
+    private final static float STABILIZING_PHASE_REF_PICTCH = 0f;
 
+    //the pitch controller used in all stages of the flight but with different set points
+    private static float PITCH_GAIN = 1;
+    private static float PITCH_INTEGRAL = 0.2f;
+    private static float PITCH_DERIVATIVE = 0.0f;
+    private PIDController pitchPIDController = new PIDController(PITCH_GAIN, PITCH_INTEGRAL, PITCH_DERIVATIVE);
+
+    //the roll PID controller and its constants, used in all phases of the flight
+    private static float ROLL_GAIN = 1;
+    private static float ROLL_INTEGRAL = 0.2f;
+    private static float ROLL_DERIVATIVE = 0;
+    private PIDController rollPIDController = new PIDController(ROLL_GAIN, ROLL_INTEGRAL, ROLL_DERIVATIVE);
+
+    /**
+     * Flag to indicate if the first control action was called
+     */
+    private boolean firstControlCall = true;
+
+    /**
+     * The elapsed time at the start of the simulation
+     */
+    private float startElapsedTime;
+
+    /**
+     * Flag to indicate if the rapid landing was initialized
+     */
+    private boolean hasStartedRapidDescend = false;
+
+    /**
+     * Flag to indicate if the soft landing was initialized
+     */
+    private boolean hasStartedSoftDescend = false;
+
+    //rapid descend phase constants and controllers
+    private final static float RAPID_DESCEND_PHASE_REF_PITCH = (float) (-10*PI/180);
+    private final static float RAPID_DESCEND_THRUST = 0f;
+
+    //soft descend constants
+    private final static float SOFT_DESCEND_PHASE_REF_PITCH = (float) (0.01*PI/180);
+    private final static float SOFT_DESCEND_PHASE_MAIN_WING_INCLINATION_DELTA = (float)(1*PI/180);
+    private final static float SOFT_DESCEND_THRUST = 0f;
+    private final static float SOFT_DESCEND_MIN_START_HEIGHT = 5f;
+    //Bartje was hier :)
+
+    /**
+     * The height at the start at the descend
+     */
+    private float heightAtStartOfDescend;
+
+    /**
+     * The height to reach before we initiate the soft landing phase
+     */
+    private float startSoftDescendPhaseHeight;
 
 
     private Vector referenceVelocity = new Vector(0,0,-STOP_VELOCITY);
@@ -274,21 +460,6 @@ public class AutopilotLandingController extends Controller {
     private PIDController altitudePID = new PIDController(1.0f, 0.1f,0.2f);
     private float referenceAltitude = 10f;
     private boolean startedDescend = false;
-
-    private static float PITCH_GAIN = 1;
-    private static float PITCH_INTEGRAL = 0.2f;
-    private static float PITCH_DERIVATIVE = 0;
-    private PIDController pitchPIDController = new PIDController(PITCH_GAIN, PITCH_INTEGRAL, PITCH_DERIVATIVE);
-
-    private static float ROLL_GAIN = 1;
-    private static float ROLL_INTEGRAL = 0.2f;
-    private static float ROLL_DERIVATIVE = 0;
-    private PIDController rollPIDController = new PIDController(ROLL_GAIN, ROLL_INTEGRAL, ROLL_DERIVATIVE);
-
-    private boolean firstControlCall = true;
-
-    private float startElapsedTime;
-
     /**
      * true if the controller is called for control actions for the first time
      * @return true if and only if the controller is queried for the first time
@@ -320,6 +491,68 @@ public class AutopilotLandingController extends Controller {
         if(!this.isFirstControlCall())
             throw new IllegalArgumentException("not first call");
         this.startElapsedTime = inputs.getElapsedTime();
+    }
+
+    /**
+     * Getter for the rapid descend flag
+     * @return true if the controller has initiated the rapid descend phase
+     */
+    public boolean isHasStartedRapidDescend() {
+        return hasStartedRapidDescend;
+    }
+
+    /**
+     * Setter for the rapid descend phase flag
+     */
+    public void setHasStartedRapidDescend() {
+        this.hasStartedRapidDescend = true;
+    }
+
+    /**
+     * Getter for the soft descend phase flag
+     * @return true if the controller has initiated the soft descend phase
+     */
+    public boolean isHasStartedSoftDescend() {
+        return hasStartedSoftDescend;
+    }
+
+    /**
+     * Setter for the soft descend phase flag
+     */
+    private void setHasStartedSoftDescend() {
+        this.hasStartedSoftDescend = true;
+    }
+
+    /**
+     * Getter for the height that the drone was at when initiating the rapid descend
+     * @return a float corresponding to the height of the start of the rapid descend
+     */
+    private float getHeightAtStartOfDescend() {
+        return heightAtStartOfDescend;
+    }
+
+    /**
+     * setter for the height when the drone started the rapid descend
+     * @param inputs the inputs to infer the height from
+     */
+    private void setHeightAtStartOfDescend(AutopilotInputs_v2 inputs) {
+        this.heightAtStartOfDescend = inputs.getY();
+    }
+
+    /**
+     * Getter for the height where the controller should start the soft landing phase
+     * @return a float corresponding to the height of the start of the soft landing phase
+     */
+    private float getStartSoftDescendPhaseHeight() {
+        return startSoftDescendPhaseHeight;
+    }
+
+    /**
+     * Setter for the the height at which to initialize the soft landing
+     * @param startSoftDescendPhaseHeight the soft landing height
+     */
+    private void setStartSoftDescendPhaseHeight(float startSoftDescendPhaseHeight) {
+        this.startSoftDescendPhaseHeight = startSoftDescendPhaseHeight;
     }
 
     private VectorPID getVelocityPID() {
@@ -381,6 +614,13 @@ public class AutopilotLandingController extends Controller {
     @Override
     protected float getStandardThrust() {
         return STANDARD_THRUST;
+    }
+
+    /**
+     * Enumerations for the landing phases
+     */
+    private enum LandingPhases {
+        STABILIZE,RAPID_DESCEND, SOFT_DESCEND;
     }
 }
 
