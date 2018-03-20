@@ -20,9 +20,9 @@ public class AutopilotLandingController extends Controller {
     public AutopilotLandingController(AutoPilot autopilot) {
         // implement constructor
         super(autopilot);
-        this.getVelocityPID().setSetPoint(this.referenceVelocity);
-        this.getOrientationPID().setSetPoint(this.referenceOrientation);
-        this.getAltitudePID().setSetPoint(this.referenceAltitude);
+//        this.getVelocityPID().setSetPoint(this.referenceVelocity);
+//        this.getOrientationPID().setSetPoint(this.referenceOrientation);
+//        this.getAltitudePID().setSetPoint(this.referenceAltitude);
 
     }
 
@@ -557,9 +557,9 @@ public class AutopilotLandingController extends Controller {
         this.startSoftDescendPhaseHeight = startSoftDescendPhaseHeight;
     }
 
-    private VectorPID getVelocityPID() {
-        return this.velocityPID;
-    }
+//    private VectorPID getVelocityPID() {
+//        return this.velocityPID;
+//    }
 
     private VectorPID getOrientationPID() {
         return orientationPID;
