@@ -7,6 +7,11 @@ import AutopilotInterfaces.AutopilotOutputs;
 import internal.Physics.PhysXEngine;
 import internal.Helper.Vector;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 import static java.lang.Math.PI;
 import static java.lang.Math.abs;
 import static java.lang.Math.signum;
@@ -15,7 +20,7 @@ import static java.lang.Math.signum;
  * Created by Martijn on 18/02/2018.
  * A class of controllers
  */
-//Todo migrate the AOA physics to the controller or the PhysXEngine (will also be needed in the landing and takeoff)
+//Todo fix the init issue, create dummy controller with same position but at different elapased time (velocity zero)
 public abstract class Controller {
 
     public Controller(AutoPilot autopilot){
@@ -31,6 +36,13 @@ public abstract class Controller {
      * @return the control actions
      */
     public abstract AutopilotOutputs getControlActions(AutopilotInputs_v2 inputs);
+
+    /**
+     * Checks if the objective of the current controller has been reached
+     * @param inputs the current inputs (this is the base of the check)
+     * @return true if the controller is ready with its task
+     */
+    public abstract boolean hasReachedObjective(AutopilotInputs_v2 inputs);
 
     /*
     Getters and setters
@@ -67,8 +79,8 @@ public abstract class Controller {
     protected abstract float getStandardThrust();
 
     /*
-  * Supplementary control methods
-  */
+     * Supplementary control methods
+     */
     protected void rollControl(ControlOutputs outputs, AutopilotInputs_v2 currentInput){
         float roll = currentInput.getRoll();
 
@@ -103,7 +115,7 @@ public abstract class Controller {
         Vector velocity = this.getVelocityApprox(prevInputs, currentInputs);
         //System.out.println("Velocity: " + velocity);
         Vector rotation = this.getRotationApprox(prevInputs, currentInputs);
-        float angleOfAttack = this.getAutopilot().getConfig().getMaxAOA();
+        float angleOfAttack = this.getConfig().getMaxAOA();
 
         //change until the controls fit
         AOAControlMainLeft(controlOutputs, optimisations,angleOfAttack, orientation, rotation, velocity);
@@ -268,10 +280,10 @@ public abstract class Controller {
     }
 
     protected float getTotalMass(){
-        AutoPilot autopilot = this.getAutopilot();
-        float mainWings = autopilot.getMainWingMass()*2;
-        float stabilizers = autopilot.getStabilizerMass()*2;
-        float engine = autopilot.getEngineMass();
+        AutopilotConfig config = this.getConfig();
+        float mainWings = config.getWingMass()*2;
+        float stabilizers = config.getTailMass()*2;
+        float engine = config.getEngineMass();
 
         return mainWings + stabilizers + engine;
     }
@@ -282,7 +294,7 @@ public abstract class Controller {
      * @param currentInputs the current inputs of the autopilot
      * @return the time elapsed between the last two simulation steps
      */
-    protected float getDeltaTime(AutopilotInputs previousInputs, AutopilotInputs currentInputs){
+    protected static float getDeltaTime(AutopilotInputs_v2 previousInputs, AutopilotInputs_v2 currentInputs){
         float prevTime = previousInputs.getElapsedTime();
         float currTime = currentInputs.getElapsedTime();
 
@@ -354,6 +366,20 @@ public abstract class Controller {
         return new Vector(inputs.getX(), inputs.getY(), inputs.getZ());
     }
 
+    protected static List<Vector> extractPath(AutopilotInterfaces.Path path){
+
+        float xPath[] = path.getX();
+        float yPath[] = path.getY();
+        float zPath[] = path.getZ();
+
+        // map the path to a list
+        List<Vector> pathList = IntStream.range(0, xPath.length)
+                .mapToObj(i -> new Vector(xPath[i], yPath[i], zPath[i]))
+                .collect(Collectors.toList());
+
+        return pathList;
+    }
+
 
     /**
      * Getter for the autopilot of the drone
@@ -368,7 +394,7 @@ public abstract class Controller {
      * Getter for the configuration of the drone
      * @return the configuration
      */
-    private AutopilotConfig getConfig() {
+    protected AutopilotConfig getConfig() {
         return config;
     }
 
@@ -780,29 +806,15 @@ public abstract class Controller {
             this(1.0f, 1.0f, 1.0f);
         }
 
-        /**
-         *
-         * @param input
-         * @param elapsedTime
-         * @param setPoint
-         * @return
-         */
-        float getPIDOutputSetPoint(float input, float elapsedTime, float setPoint){
-            this.setSetPoint(setPoint);
-//            System.out.println("Controller input: " + input);
-//            System.out.println("Controller elapsedTime: " + elapsedTime);
-//            System.out.println("Controller setPoint: " + setPoint);
-            return getPIDOutput(input, elapsedTime);
-        }
 
         /**
          * Calculates the output for the current inputs of the PID controller
          * @param input the input signal of the controller (from the feedback loop)
-         * @param elapsedTime the elapsed time during the simulation
+         * @param deltaTime the time step between two PID entries
          * @return the output of the PID controller for the given inputs
          * note: algorithm comes from https://en.wikipedia.org/wiki/PID_controller
          */
-        float getPIDOutput(float input, float elapsedTime){
+        float getPIDOutput(float input, float deltaTime){
 
             // P part is proportional (set to 1)
             // I part reduces overall error
@@ -814,7 +826,6 @@ public abstract class Controller {
             float Kp = this.getGainConstant();
             float Ki = this.getIntegralConstant();
             float Kd = this.getDerivativeConstant();
-            float deltaTime = elapsedTime - this.getPreviousTime();
 
             //determine the PID control factors
             float error = setPoint - input;
@@ -827,9 +838,6 @@ public abstract class Controller {
             // save the state
             this.setIntegral(integral);
             this.setPreviousError(error);
-            this.setPreviousTime(elapsedTime);
-
-            this.setPrevCalcOutput(output);
 
             return output;
         }
@@ -837,21 +845,6 @@ public abstract class Controller {
         /*
         Getters and setters
          */
-
-        /**
-         * getter for the previous calculated output of the PID controller
-         * @return the current output (the prev
-         */
-        public float getPrevCalcOutput() {
-            return prevCalcOutput;
-        }
-
-        /**
-         * Setter for the previous calculated output of the PID controller
-         */
-        private void setPrevCalcOutput(float prevCalcOutput) {
-            this.prevCalcOutput = prevCalcOutput;
-        }
 
         /**
          * get the integral part (saved over the course of the algorithm)
@@ -902,22 +895,6 @@ public abstract class Controller {
         }
 
         /**
-         * Get the previous time of the simulation (used for the diff part of the PID)
-         * @return
-         */
-        public float getPreviousTime() {
-            return previousTime;
-        }
-
-        /**
-         * Set the previous time of the simulation (used when setting the new values of the drone)
-         * @param previousTime
-         */
-        private void setPreviousTime(float previousTime) {
-            this.previousTime = previousTime;
-        }
-
-        /**
          * Constant used for the gain (proportional) part of the PID
          * @return
          */
@@ -956,7 +933,6 @@ public abstract class Controller {
         private float integral = 0.0f;
         private float previousError = 0.0f;
         private float setPoint = 0.0f;
-        private float previousTime = 0.0f;
         private float gainConstant;
         private float integralConstant;
         private float derivativeConstant;

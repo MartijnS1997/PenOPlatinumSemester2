@@ -6,18 +6,188 @@
     </artifacts-to-build>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d323ea48-d204-4a33-8b2f-5ef56461506e" name="Default" comment="start of implementation multi-drone server-side">
-      <change beforePath="" afterPath="$PROJECT_DIR$/src/internal/Autopilot/AutopilotTaxiingController.java" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+    <list default="true" id="d323ea48-d204-4a33-8b2f-5ef56461506e" name="Default" comment="">
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/.gitignore" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/AccuracyMain.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/AutopilotConnection.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/AutopilotInitializer.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/AutopilotInterfaces/Autopilot.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/AutopilotInterfaces/AutopilotConfig.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/AutopilotInterfaces/AutopilotConfigReader$1.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/AutopilotInterfaces/AutopilotConfigReader.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/AutopilotInterfaces/AutopilotConfigWriter.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/AutopilotInterfaces/AutopilotInputs.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/AutopilotInterfaces/AutopilotInputsReader$1.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/AutopilotInterfaces/AutopilotInputsReader.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/AutopilotInterfaces/AutopilotInputsWriter.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/AutopilotInterfaces/AutopilotInputs_v2.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/AutopilotInterfaces/AutopilotInputs_v2Reader$1.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/AutopilotInterfaces/AutopilotInputs_v2Reader.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/AutopilotInterfaces/AutopilotInputs_v2Writer.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/AutopilotInterfaces/AutopilotModule.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/AutopilotInterfaces/AutopilotOutputs.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/AutopilotInterfaces/AutopilotOutputsReader$1.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/AutopilotInterfaces/AutopilotOutputsReader.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/AutopilotInterfaces/AutopilotOutputsWriter.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/AutopilotInterfaces/Autopilot_v2.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/AutopilotInterfaces/Path.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/AutopilotInterfaces/PathReader$1.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/AutopilotInterfaces/PathReader.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/AutopilotInterfaces/PathWriter.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/DemoMain.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/SocketMain$1.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/SocketMain.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/TestBedServer.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/TestbedMain$1.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/blockCoordinates.txt" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/blockDemoEasy.txt" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/blockDemoHard.txt" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/datatypes/CodeGenerator.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/datatypes/CompilationUnit.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/datatypes/Datatype.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/datatypes/Field.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/datatypes/FieldType$1.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/datatypes/FieldType.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/datatypes/Parser.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/datatypes/ParserException.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/datatypes/Util.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/gui/Cube.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/gui/Graphics.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/gui/GraphicsObject.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/gui/Input.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/gui/Mesh.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/gui/Mouse.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/gui/Polygon.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/gui/Settings.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/gui/ShaderProgram.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/gui/TextWindow.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/gui/Tile.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/gui/Time.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/gui/Wheel.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/gui/Window.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Autopilot/APModes.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Autopilot/AlphaFlightController.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Autopilot/AutoPilot.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Autopilot/AutoPilotCamera$1.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Autopilot/AutoPilotCamera$Coordinates.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Autopilot/AutoPilotCamera.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Autopilot/AutoPilotControllerNoAttack$ControlOutputs.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Autopilot/AutoPilotControllerNoAttack.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Autopilot/AutoPilotFlightController.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Autopilot/AutoPilotInputs.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Autopilot/AutopilotLandingController.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Autopilot/AutopilotTakeoffController.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Autopilot/AutopilotWayPointController$WayPoint.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Autopilot/AutopilotWayPointController.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Autopilot/Autopilot_v2Implementation.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Autopilot/BetaFlightController.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Autopilot/Controller$1.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Autopilot/Controller$ControlOutputs.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Autopilot/Controller$PIDController.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Autopilot/Controller$VectorPID.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Autopilot/Controller.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Autopilot/GammaFlightController.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Autopilot/Path.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Autopilot/PathGenerator.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Autopilot/Pathfinding$1.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Autopilot/Pathfinding$N.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Autopilot/Pathfinding.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Exceptions/AngleOfAttackException.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Exceptions/NoCubeException.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Exceptions/SimulationEndedException.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Helper/Array2D.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Helper/CameraImage.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Helper/HSVconverter.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Helper/Matrix.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Helper/Parser.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Helper/Pixel.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Helper/SquareMatrix.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Helper/Vector.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Physics/ChassisPhysX.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Physics/HorizontalWingPhysX.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Physics/PhysXEngine$1.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Physics/PhysXEngine$2.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Physics/PhysXEngine$3.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Physics/PhysXEngine$PhysXOptimisations$1.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Physics/PhysXEngine$PhysXOptimisations$2.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Physics/PhysXEngine$PhysXOptimisations$3.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Physics/PhysXEngine$PhysXOptimisations$4.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Physics/PhysXEngine$PhysXOptimisations$5.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Physics/PhysXEngine$PhysXOptimisations.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Physics/PhysXEngine.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Physics/PhysicsEngineState.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Physics/RearTyrePhysX.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Physics/TyrePhysX.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Physics/VerticalWingPhysX.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Physics/WingPhysX.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Testbed/Airport.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Testbed/Block.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Testbed/Drone$1.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Testbed/Drone.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Testbed/DroneBuilder$1.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Testbed/DroneBuilder$2.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Testbed/DroneBuilder$3.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Testbed/DroneBuilder.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Testbed/DroneBuilder_v2$1.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Testbed/DroneBuilder_v2$2.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Testbed/DroneBuilder_v2$3.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Testbed/DroneBuilder_v2$4.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Testbed/DroneBuilder_v2.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Testbed/DroneState.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Testbed/FlightRecorder.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Testbed/Floor.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Testbed/World.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Testbed/WorldBuilder.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Testbed/WorldBuilder_v2.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Testbed/WorldGenerator$1.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Testbed/WorldGenerator.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/internal/Testbed/WorldObject.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/math/Matrix2f.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/math/Matrix3f.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/math/Matrix4f.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/math/Vector2f.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/math/Vector3f.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/math/Vector4f.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/tests/Array2Dtests.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/tests/DifferentiationTest$1.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/tests/DifferentiationTest$2.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/tests/DifferentiationTest.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/tests/ParserTests.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/tests/SquareMatrixTest.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/tests/VectorTest.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/tests/autoPilotTests.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/tests/hsvConvertTest.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/tests/pathTest.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/bin/tests/worldGenTest.class" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/src/gui/ButtonWindow.java" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/src/internal/Autopilot/ControllerSelector.java" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/src/internal/Autopilot/FlightState.java" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/src/tests/streamtests.java" />
+      <change beforePath="$PROJECT_DIR$/bin/AutopilotMain.class" afterPath="$PROJECT_DIR$/bin/AutopilotMain.class" />
+      <change beforePath="$PROJECT_DIR$/bin/TestbedConnection$TestbedOutputs.class" afterPath="$PROJECT_DIR$/bin/TestbedConnection$TestbedOutputs.class" />
+      <change beforePath="$PROJECT_DIR$/bin/TestbedConnection.class" afterPath="$PROJECT_DIR$/bin/TestbedConnection.class" />
       <change beforePath="$PROJECT_DIR$/bin/TestbedMain$MainAutopilotInputs.class" afterPath="$PROJECT_DIR$/bin/TestbedMain$MainAutopilotInputs.class" />
       <change beforePath="$PROJECT_DIR$/bin/TestbedMain.class" afterPath="$PROJECT_DIR$/bin/TestbedMain.class" />
-      <change beforePath="$PROJECT_DIR$/diagnosis.txt" afterPath="$PROJECT_DIR$/diagnosis.txt" />
+      <change beforePath="$PROJECT_DIR$/src/AutopilotMain.java" afterPath="$PROJECT_DIR$/src/AutopilotMain.java" />
+      <change beforePath="$PROJECT_DIR$/src/DemoMain.java" afterPath="$PROJECT_DIR$/src/DemoMain.java" />
+      <change beforePath="$PROJECT_DIR$/src/TestBedServer.java" afterPath="$PROJECT_DIR$/src/TestBedServer.java" />
       <change beforePath="$PROJECT_DIR$/src/TestbedMain.java" afterPath="$PROJECT_DIR$/src/TestbedMain.java" />
+      <change beforePath="$PROJECT_DIR$/src/gui/Graphics.java" afterPath="$PROJECT_DIR$/src/gui/Graphics.java" />
+      <change beforePath="$PROJECT_DIR$/src/gui/TextWindow.java" afterPath="$PROJECT_DIR$/src/gui/TextWindow.java" />
+      <change beforePath="$PROJECT_DIR$/src/gui/Window.java" afterPath="$PROJECT_DIR$/src/gui/Window.java" />
+      <change beforePath="$PROJECT_DIR$/src/internal/Autopilot/AlphaFlightController.java" afterPath="$PROJECT_DIR$/src/internal/Autopilot/AlphaFlightController.java" />
       <change beforePath="$PROJECT_DIR$/src/internal/Autopilot/AutoPilot.java" afterPath="$PROJECT_DIR$/src/internal/Autopilot/AutoPilot.java" />
+      <change beforePath="$PROJECT_DIR$/src/internal/Autopilot/AutoPilotControllerNoAttack.java" afterPath="$PROJECT_DIR$/src/internal/Autopilot/AutoPilotControllerNoAttack.java" />
+      <change beforePath="$PROJECT_DIR$/src/internal/Autopilot/AutoPilotFlightController.java" afterPath="$PROJECT_DIR$/src/internal/Autopilot/AutoPilotFlightController.java" />
       <change beforePath="$PROJECT_DIR$/src/internal/Autopilot/AutopilotLandingController.java" afterPath="$PROJECT_DIR$/src/internal/Autopilot/AutopilotLandingController.java" />
-      <change beforePath="$PROJECT_DIR$/src/internal/Physics/RearTyrePhysX.java" afterPath="$PROJECT_DIR$/src/internal/Physics/RearTyrePhysX.java" />
-      <change beforePath="$PROJECT_DIR$/src/internal/Testbed/DroneBuilder_v2.java" afterPath="$PROJECT_DIR$/src/internal/Testbed/DroneBuilder_v2.java" />
+      <change beforePath="$PROJECT_DIR$/src/internal/Autopilot/AutopilotTakeoffController.java" afterPath="$PROJECT_DIR$/src/internal/Autopilot/AutopilotTakeoffController.java" />
+      <change beforePath="$PROJECT_DIR$/src/internal/Autopilot/AutopilotWayPointController.java" afterPath="$PROJECT_DIR$/src/internal/Autopilot/AutopilotWayPointController.java" />
+      <change beforePath="$PROJECT_DIR$/src/internal/Autopilot/Controller.java" afterPath="$PROJECT_DIR$/src/internal/Autopilot/Controller.java" />
+      <change beforePath="$PROJECT_DIR$/src/internal/Autopilot/GammaFlightController.java" afterPath="$PROJECT_DIR$/src/internal/Autopilot/GammaFlightController.java" />
+      <change beforePath="$PROJECT_DIR$/src/internal/Helper/Vector.java" afterPath="$PROJECT_DIR$/src/internal/Helper/Vector.java" />
+      <change beforePath="$PROJECT_DIR$/src/internal/Testbed/World.java" afterPath="$PROJECT_DIR$/src/internal/Testbed/World.java" />
       <change beforePath="$PROJECT_DIR$/src/internal/Testbed/WorldBuilder_v2.java" afterPath="$PROJECT_DIR$/src/internal/Testbed/WorldBuilder_v2.java" />
+      <change beforePath="$PROJECT_DIR$/src/internal/Testbed/WorldGenerator.java" afterPath="$PROJECT_DIR$/src/internal/Testbed/WorldGenerator.java" />
     </list>
     <ignored path="$PROJECT_DIR$/bin/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -36,108 +206,101 @@
         <entry file="file://$PROJECT_DIR$/src/TestbedMain.java">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="4956">
-              <caret line="397" column="0" lean-forward="false" selection-start-line="397" selection-start-column="0" selection-end-line="397" selection-end-column="0" />
+              <caret line="404" column="0" lean-forward="false" selection-start-line="404" selection-start-column="0" selection-end-line="404" selection-end-column="0" />
               <folding>
                 <element signature="imports" expanded="true" />
-                <element signature="class#7507:7906" expanded="false" />
-                <element signature="e#7580#7581#0" expanded="true" />
-                <element signature="e#7639#7640#0" expanded="true" />
-                <element signature="e#7706#7707#0" expanded="true" />
-                <element signature="e#7765#7766#0" expanded="true" />
-                <element signature="e#7832#7833#0" expanded="true" />
-                <element signature="e#7891#7892#0" expanded="true" />
-                <element signature="e#15940#15941#0" expanded="true" />
-                <element signature="e#15982#15983#0" expanded="true" />
-                <element signature="e#16031#16032#0" expanded="true" />
-                <element signature="e#16093#16094#0" expanded="true" />
-                <element signature="e#16142#16143#0" expanded="true" />
-                <element signature="e#16204#16205#0" expanded="true" />
-                <element signature="e#16253#16254#0" expanded="true" />
-                <element signature="e#16315#16316#0" expanded="true" />
-                <element signature="e#16370#16371#0" expanded="true" />
-                <element signature="e#16419#16420#0" expanded="true" />
-                <element signature="e#16472#16473#0" expanded="true" />
-                <element signature="e#16519#16520#0" expanded="true" />
-                <element signature="e#16571#16572#0" expanded="true" />
-                <element signature="e#16617#16618#0" expanded="true" />
-                <element signature="e#16676#16677#0" expanded="true" />
-                <element signature="e#16718#16719#0" expanded="true" />
-                <element signature="e#16860#16861#0" expanded="true" />
-                <element signature="e#16888#16889#0" expanded="true" />
-                <element signature="e#16930#16931#0" expanded="true" />
-                <element signature="e#16964#16965#0" expanded="true" />
-                <element signature="e#17006#17007#0" expanded="true" />
-                <element signature="e#17055#17056#0" expanded="true" />
-                <element signature="e#17093#17094#0" expanded="true" />
-                <element signature="e#17124#17125#0" expanded="true" />
-                <element signature="e#17175#17176#0" expanded="true" />
-                <element signature="e#17215#17216#0" expanded="true" />
-                <element signature="e#17247#17248#0" expanded="true" />
-                <element signature="e#17275#17276#0" expanded="true" />
-                <element signature="e#17317#17318#0" expanded="true" />
-                <element signature="e#17351#17352#0" expanded="true" />
-                <element signature="e#17393#17394#0" expanded="true" />
-                <element signature="e#17430#17431#0" expanded="true" />
-                <element signature="e#17491#17492#0" expanded="true" />
-                <element signature="e#17543#17544#0" expanded="true" />
-                <element signature="e#17582#17583#0" expanded="true" />
-                <element signature="e#17619#17620#0" expanded="true" />
-                <element signature="e#17677#17678#0" expanded="true" />
-                <element signature="e#17729#17730#0" expanded="true" />
-                <element signature="e#17765#17766#0" expanded="true" />
-                <element signature="e#17796#17797#0" expanded="true" />
-                <element signature="e#17845#17846#0" expanded="true" />
-                <element signature="e#17885#17886#0" expanded="true" />
-                <element signature="e#17922#17923#0" expanded="true" />
-                <element signature="e#17954#17955#0" expanded="true" />
-                <element signature="e#18005#18006#0" expanded="true" />
-                <element signature="e#18047#18048#0" expanded="true" />
-                <element signature="e#18086#18087#0" expanded="true" />
-                <element signature="e#18120#18121#0" expanded="true" />
-                <element signature="e#18175#18176#0" expanded="true" />
-                <element signature="e#18221#18222#0" expanded="true" />
-                <element signature="e#18258#18259#0" expanded="true" />
-                <element signature="e#18290#18291#0" expanded="true" />
-                <element signature="e#18341#18342#0" expanded="true" />
-                <element signature="e#18383#18384#0" expanded="true" />
-                <element signature="e#18419#18420#0" expanded="true" />
-                <element signature="e#18450#18451#0" expanded="true" />
-                <element signature="e#18499#18500#0" expanded="true" />
-                <element signature="e#18539#18540#0" expanded="true" />
-                <element signature="e#18582#18583#0" expanded="true" />
-                <element signature="e#18619#18620#0" expanded="true" />
-                <element signature="e#18669#18670#0" expanded="true" />
-                <element signature="e#18706#18707#0" expanded="true" />
-                <element signature="e#18977#18978#0" expanded="true" />
-                <element signature="e#19014#19015#0" expanded="true" />
-                <element signature="e#19075#19076#0" expanded="true" />
-                <element signature="e#19127#19128#0" expanded="true" />
-                <element signature="e#19165#19166#0" expanded="true" />
-                <element signature="e#19198#19199#0" expanded="true" />
-                <element signature="e#19252#19253#0" expanded="true" />
-                <element signature="e#19296#19297#0" expanded="true" />
-                <element signature="e#19341#19342#0" expanded="true" />
-                <element signature="e#19381#19382#0" expanded="true" />
-                <element signature="e#19448#19449#0" expanded="true" />
-                <element signature="e#19506#19507#0" expanded="true" />
-                <element signature="e#19547#19548#0" expanded="true" />
-                <element signature="e#19584#19585#0" expanded="true" />
-                <element signature="e#19644#19645#0" expanded="true" />
-                <element signature="e#19696#19697#0" expanded="true" />
-                <element signature="e#19749#19750#0" expanded="true" />
-                <element signature="e#19791#19792#0" expanded="true" />
-                <element signature="e#19977#19978#0" expanded="true" />
-                <element signature="e#20019#20020#0" expanded="true" />
-                <element signature="e#20090#20091#0" expanded="true" />
-                <element signature="e#20152#20153#0" expanded="true" />
-                <element signature="e#20200#20201#0" expanded="true" />
-                <element signature="e#20234#20235#0" expanded="true" />
-                <element signature="e#20298#20299#0" expanded="true" />
-                <element signature="e#20344#20345#0" expanded="true" />
-                <element signature="e#20394#20395#0" expanded="true" />
-                <element signature="e#20429#20430#0" expanded="true" />
-                <element signature="e#20496#20497#0" expanded="true" />
-                <element signature="e#20544#20545#0" expanded="true" />
+                <element signature="e#16220#16221#0" expanded="true" />
+                <element signature="e#16262#16263#0" expanded="true" />
+                <element signature="e#16311#16312#0" expanded="true" />
+                <element signature="e#16373#16374#0" expanded="true" />
+                <element signature="e#16422#16423#0" expanded="true" />
+                <element signature="e#16484#16485#0" expanded="true" />
+                <element signature="e#16533#16534#0" expanded="true" />
+                <element signature="e#16595#16596#0" expanded="true" />
+                <element signature="e#16650#16651#0" expanded="true" />
+                <element signature="e#16699#16700#0" expanded="true" />
+                <element signature="e#16752#16753#0" expanded="true" />
+                <element signature="e#16799#16800#0" expanded="true" />
+                <element signature="e#16851#16852#0" expanded="true" />
+                <element signature="e#16897#16898#0" expanded="true" />
+                <element signature="e#16956#16957#0" expanded="true" />
+                <element signature="e#16998#16999#0" expanded="true" />
+                <element signature="e#17140#17141#0" expanded="true" />
+                <element signature="e#17168#17169#0" expanded="true" />
+                <element signature="e#17210#17211#0" expanded="true" />
+                <element signature="e#17244#17245#0" expanded="true" />
+                <element signature="e#17286#17287#0" expanded="true" />
+                <element signature="e#17335#17336#0" expanded="true" />
+                <element signature="e#17373#17374#0" expanded="true" />
+                <element signature="e#17404#17405#0" expanded="true" />
+                <element signature="e#17455#17456#0" expanded="true" />
+                <element signature="e#17495#17496#0" expanded="true" />
+                <element signature="e#17527#17528#0" expanded="true" />
+                <element signature="e#17555#17556#0" expanded="true" />
+                <element signature="e#17597#17598#0" expanded="true" />
+                <element signature="e#17631#17632#0" expanded="true" />
+                <element signature="e#17673#17674#0" expanded="true" />
+                <element signature="e#17710#17711#0" expanded="true" />
+                <element signature="e#17771#17772#0" expanded="true" />
+                <element signature="e#17823#17824#0" expanded="true" />
+                <element signature="e#17862#17863#0" expanded="true" />
+                <element signature="e#17899#17900#0" expanded="true" />
+                <element signature="e#17957#17958#0" expanded="true" />
+                <element signature="e#18009#18010#0" expanded="true" />
+                <element signature="e#18045#18046#0" expanded="true" />
+                <element signature="e#18076#18077#0" expanded="true" />
+                <element signature="e#18125#18126#0" expanded="true" />
+                <element signature="e#18165#18166#0" expanded="true" />
+                <element signature="e#18202#18203#0" expanded="true" />
+                <element signature="e#18234#18235#0" expanded="true" />
+                <element signature="e#18285#18286#0" expanded="true" />
+                <element signature="e#18327#18328#0" expanded="true" />
+                <element signature="e#18366#18367#0" expanded="true" />
+                <element signature="e#18400#18401#0" expanded="true" />
+                <element signature="e#18455#18456#0" expanded="true" />
+                <element signature="e#18501#18502#0" expanded="true" />
+                <element signature="e#18538#18539#0" expanded="true" />
+                <element signature="e#18570#18571#0" expanded="true" />
+                <element signature="e#18621#18622#0" expanded="true" />
+                <element signature="e#18663#18664#0" expanded="true" />
+                <element signature="e#18699#18700#0" expanded="true" />
+                <element signature="e#18730#18731#0" expanded="true" />
+                <element signature="e#18779#18780#0" expanded="true" />
+                <element signature="e#18819#18820#0" expanded="true" />
+                <element signature="e#18862#18863#0" expanded="true" />
+                <element signature="e#18899#18900#0" expanded="true" />
+                <element signature="e#18949#18950#0" expanded="true" />
+                <element signature="e#18986#18987#0" expanded="true" />
+                <element signature="e#19257#19258#0" expanded="true" />
+                <element signature="e#19294#19295#0" expanded="true" />
+                <element signature="e#19355#19356#0" expanded="true" />
+                <element signature="e#19407#19408#0" expanded="true" />
+                <element signature="e#19445#19446#0" expanded="true" />
+                <element signature="e#19478#19479#0" expanded="true" />
+                <element signature="e#19532#19533#0" expanded="true" />
+                <element signature="e#19576#19577#0" expanded="true" />
+                <element signature="e#19621#19622#0" expanded="true" />
+                <element signature="e#19661#19662#0" expanded="true" />
+                <element signature="e#19728#19729#0" expanded="true" />
+                <element signature="e#19786#19787#0" expanded="true" />
+                <element signature="e#19827#19828#0" expanded="true" />
+                <element signature="e#19864#19865#0" expanded="true" />
+                <element signature="e#19924#19925#0" expanded="true" />
+                <element signature="e#19976#19977#0" expanded="true" />
+                <element signature="e#20029#20030#0" expanded="true" />
+                <element signature="e#20071#20072#0" expanded="true" />
+                <element signature="e#20257#20258#0" expanded="true" />
+                <element signature="e#20299#20300#0" expanded="true" />
+                <element signature="e#20370#20371#0" expanded="true" />
+                <element signature="e#20432#20433#0" expanded="true" />
+                <element signature="e#20480#20481#0" expanded="true" />
+                <element signature="e#20514#20515#0" expanded="true" />
+                <element signature="e#20578#20579#0" expanded="true" />
+                <element signature="e#20624#20625#0" expanded="true" />
+                <element signature="e#20674#20675#0" expanded="true" />
+                <element signature="e#20709#20710#0" expanded="true" />
+                <element signature="e#20776#20777#0" expanded="true" />
+                <element signature="e#20824#20825#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -157,7 +320,7 @@
         <entry file="file://$PROJECT_DIR$/src/internal/Physics/RearTyrePhysX.java">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="398">
-              <caret line="47" column="5" lean-forward="true" selection-start-line="47" selection-start-column="5" selection-end-line="47" selection-end-column="5" />
+              <caret line="47" column="5" lean-forward="false" selection-start-line="47" selection-start-column="5" selection-end-line="47" selection-end-column="5" />
               <folding />
             </state>
           </provider>
@@ -166,11 +329,9 @@
       <file leaf-file-name="WorldBuilder_v2.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/internal/Testbed/WorldBuilder_v2.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="148">
-              <caret line="97" column="48" lean-forward="false" selection-start-line="97" selection-start-column="48" selection-end-line="97" selection-end-column="48" />
-              <folding>
-                <element signature="imports" expanded="true" />
-              </folding>
+            <state relative-caret-position="-56">
+              <caret line="83" column="48" lean-forward="false" selection-start-line="83" selection-start-column="48" selection-end-line="83" selection-end-column="48" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -178,8 +339,8 @@
       <file leaf-file-name="AutopilotTaxiingController.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/internal/Autopilot/AutopilotTaxiingController.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="17">
-              <caret line="53" column="0" lean-forward="true" selection-start-line="53" selection-start-column="0" selection-end-line="53" selection-end-column="0" />
+            <state relative-caret-position="357">
+              <caret line="73" column="48" lean-forward="false" selection-start-line="73" selection-start-column="48" selection-end-line="73" selection-end-column="48" />
               <folding>
                 <element signature="e#510#511#0" expanded="true" />
                 <element signature="e#542#543#0" expanded="true" />
@@ -203,17 +364,10 @@
       <file leaf-file-name="Controller.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/internal/Autopilot/Controller.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="163">
-              <caret line="578" column="20" lean-forward="false" selection-start-line="578" selection-start-column="20" selection-end-line="578" selection-end-column="20" />
+            <state relative-caret-position="1217">
+              <caret line="604" column="20" lean-forward="false" selection-start-line="604" selection-start-column="20" selection-end-line="604" selection-end-column="20" />
               <folding>
-                <element signature="e#16573#16574#0" expanded="true" />
-                <element signature="e#16609#16610#0" expanded="true" />
-                <element signature="e#16783#16784#0" expanded="true" />
-                <element signature="e#16819#16820#0" expanded="true" />
-                <element signature="e#22301#22302#0" expanded="true" />
-                <element signature="e#22369#22370#0" expanded="true" />
-                <element signature="e#22603#22604#0" expanded="true" />
-                <element signature="e#22671#22672#0" expanded="true" />
+                <marker date="1521560201276" expanded="true" signature="34112:34282" ph="{...}" />
               </folding>
             </state>
           </provider>
@@ -222,27 +376,19 @@
       <file leaf-file-name="AutopilotLandingController.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/internal/Autopilot/AutopilotLandingController.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="456">
-              <caret line="141" column="0" lean-forward="true" selection-start-line="141" selection-start-column="0" selection-end-line="141" selection-end-column="0" />
+            <state relative-caret-position="677">
+              <caret line="276" column="0" lean-forward="false" selection-start-line="276" selection-start-column="0" selection-end-line="276" selection-end-column="0" />
               <folding>
-                <element signature="e#3659#3660#0" expanded="true" />
-                <element signature="e#3696#3697#0" expanded="true" />
-                <element signature="e#6062#6063#0" expanded="true" />
-                <element signature="e#6101#6102#0" expanded="true" />
-                <element signature="e#6145#6146#0" expanded="true" />
-                <element signature="e#6182#6183#0" expanded="true" />
-                <element signature="e#6227#6228#0" expanded="true" />
-                <element signature="e#6261#6262#0" expanded="true" />
-                <element signature="e#6373#6374#0" expanded="true" />
-                <element signature="e#6407#6408#0" expanded="true" />
-                <element signature="e#6477#6478#0" expanded="true" />
-                <element signature="e#6517#6518#0" expanded="true" />
-                <element signature="e#6573#6574#0" expanded="true" />
-                <element signature="e#6610#6611#0" expanded="true" />
-                <element signature="e#6678#6679#0" expanded="true" />
-                <element signature="e#6729#6730#0" expanded="true" />
-                <element signature="e#6786#6787#0" expanded="true" />
-                <element signature="e#6824#6825#0" expanded="true" />
+                <element signature="e#14708#14709#0" expanded="true" />
+                <element signature="e#14742#14743#0" expanded="true" />
+                <element signature="e#14812#14813#0" expanded="true" />
+                <element signature="e#14852#14853#0" expanded="true" />
+                <element signature="e#14908#14909#0" expanded="true" />
+                <element signature="e#14945#14946#0" expanded="true" />
+                <element signature="e#15013#15014#0" expanded="true" />
+                <element signature="e#15064#15065#0" expanded="true" />
+                <element signature="e#15121#15122#0" expanded="true" />
+                <element signature="e#15159#15160#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -812,13 +958,6 @@
       <option name="presentableId" value="Default" />
       <updated>1507557670691</updated>
     </task>
-    <task id="LOCAL-00053" summary="System does recognise the correct onscreen position of the different cubes but the control takes no action">
-      <created>1510862632846</created>
-      <option name="number" value="00053" />
-      <option name="presentableId" value="LOCAL-00053" />
-      <option name="project" value="LOCAL" />
-      <updated>1510862632846</updated>
-    </task>
     <task id="LOCAL-00054" summary="Problems with the AOA, the control actions are to harsh">
       <created>1511090399657</created>
       <option name="number" value="00054" />
@@ -1155,7 +1294,14 @@
       <option name="project" value="LOCAL" />
       <updated>1520955406213</updated>
     </task>
-    <option name="localTasksCounter" value="102" />
+    <task id="LOCAL-00102" summary="taiing changes">
+      <created>1521560059309</created>
+      <option name="number" value="00102" />
+      <option name="presentableId" value="LOCAL-00102" />
+      <option name="project" value="LOCAL" />
+      <updated>1521560059309</updated>
+    </task>
+    <option name="localTasksCounter" value="103" />
     <servers />
   </component>
   <component name="TestHistory">
@@ -1208,10 +1354,10 @@
       <window_info id="Palette&#9;" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Image Layers" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32842582" sideWeight="0.5107411" order="1" side_tool="true" content_ui="tabs" />
+      <window_info id="Event Log" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.2621232" sideWeight="0.506875" order="1" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32975295" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.2948886" sideWeight="0.48925886" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.2621232" sideWeight="0.49570355" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.29357797" sideWeight="0.486875" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.2621232" sideWeight="0.493125" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32930845" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
@@ -1246,7 +1392,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="CHECK_NEW_TODO" value="false" />
-    <MESSAGE value="added adaptive delay for real time experience" />
     <MESSAGE value="physics engine extracted" />
     <MESSAGE value="sockets somewhat integrated" />
     <MESSAGE value="JVM crashes (Literally, no exception thrown, just crashes)" />
@@ -1271,7 +1416,8 @@
     <MESSAGE value="drones are now advanced multi-threaded, graphics and controllers not yet (next on the list, graphics need to be revisited together with the graphics team for multiple input)" />
     <MESSAGE value="start of implementation multi-drone server-side" />
     <MESSAGE value="refactored project for autopilotInputs_v2 and added the set path functionality" />
-    <option name="LAST_COMMIT_MESSAGE" value="refactored project for autopilotInputs_v2 and added the set path functionality" />
+    <MESSAGE value="taiing changes" />
+    <option name="LAST_COMMIT_MESSAGE" value="taiing changes" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1439,8 +1585,8 @@
         <state relative-caret-position="378">
           <caret line="101" column="5" lean-forward="true" selection-start-line="101" selection-start-column="5" selection-end-line="101" selection-end-column="5" />
           <folding>
-            <element signature="e#2891#2892#0" expanded="false" />
-            <element signature="e#2929#2930#0" expanded="false" />
+            <element signature="e#8594#8595#0" expanded="false" />
+            <element signature="e#8632#8633#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -1508,10 +1654,10 @@
         <state relative-caret-position="976">
           <caret line="429" column="39" lean-forward="false" selection-start-line="429" selection-start-column="39" selection-end-line="429" selection-end-column="39" />
           <folding>
-            <element signature="e#12591#12592#0" expanded="false" />
-            <element signature="e#12615#12616#0" expanded="false" />
-            <element signature="e#12788#12789#0" expanded="false" />
-            <element signature="e#12823#12824#0" expanded="false" />
+            <element signature="e#14507#14508#0" expanded="false" />
+            <element signature="e#14531#14532#0" expanded="false" />
+            <element signature="e#14704#14705#0" expanded="false" />
+            <element signature="e#14739#14740#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -1553,8 +1699,8 @@
         <state relative-caret-position="357">
           <caret line="42" column="69" lean-forward="false" selection-start-line="42" selection-start-column="69" selection-end-line="42" selection-end-column="69" />
           <folding>
-            <element signature="e#10847#10848#0" expanded="false" />
-            <element signature="e#10877#10878#0" expanded="false" />
+            <element signature="e#8127#8128#0" expanded="false" />
+            <element signature="e#8157#8158#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -1631,108 +1777,101 @@
     <entry file="file://$PROJECT_DIR$/src/TestbedMain.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="4956">
-          <caret line="397" column="0" lean-forward="false" selection-start-line="397" selection-start-column="0" selection-end-line="397" selection-end-column="0" />
+          <caret line="404" column="0" lean-forward="false" selection-start-line="404" selection-start-column="0" selection-end-line="404" selection-end-column="0" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="class#7507:7906" expanded="false" />
-            <element signature="e#7580#7581#0" expanded="true" />
-            <element signature="e#7639#7640#0" expanded="true" />
-            <element signature="e#7706#7707#0" expanded="true" />
-            <element signature="e#7765#7766#0" expanded="true" />
-            <element signature="e#7832#7833#0" expanded="true" />
-            <element signature="e#7891#7892#0" expanded="true" />
-            <element signature="e#15940#15941#0" expanded="true" />
-            <element signature="e#15982#15983#0" expanded="true" />
-            <element signature="e#16031#16032#0" expanded="true" />
-            <element signature="e#16093#16094#0" expanded="true" />
-            <element signature="e#16142#16143#0" expanded="true" />
-            <element signature="e#16204#16205#0" expanded="true" />
-            <element signature="e#16253#16254#0" expanded="true" />
-            <element signature="e#16315#16316#0" expanded="true" />
-            <element signature="e#16370#16371#0" expanded="true" />
-            <element signature="e#16419#16420#0" expanded="true" />
-            <element signature="e#16472#16473#0" expanded="true" />
-            <element signature="e#16519#16520#0" expanded="true" />
-            <element signature="e#16571#16572#0" expanded="true" />
-            <element signature="e#16617#16618#0" expanded="true" />
-            <element signature="e#16676#16677#0" expanded="true" />
-            <element signature="e#16718#16719#0" expanded="true" />
-            <element signature="e#16860#16861#0" expanded="true" />
-            <element signature="e#16888#16889#0" expanded="true" />
-            <element signature="e#16930#16931#0" expanded="true" />
-            <element signature="e#16964#16965#0" expanded="true" />
-            <element signature="e#17006#17007#0" expanded="true" />
-            <element signature="e#17055#17056#0" expanded="true" />
-            <element signature="e#17093#17094#0" expanded="true" />
-            <element signature="e#17124#17125#0" expanded="true" />
-            <element signature="e#17175#17176#0" expanded="true" />
-            <element signature="e#17215#17216#0" expanded="true" />
-            <element signature="e#17247#17248#0" expanded="true" />
-            <element signature="e#17275#17276#0" expanded="true" />
-            <element signature="e#17317#17318#0" expanded="true" />
-            <element signature="e#17351#17352#0" expanded="true" />
-            <element signature="e#17393#17394#0" expanded="true" />
-            <element signature="e#17430#17431#0" expanded="true" />
-            <element signature="e#17491#17492#0" expanded="true" />
-            <element signature="e#17543#17544#0" expanded="true" />
-            <element signature="e#17582#17583#0" expanded="true" />
-            <element signature="e#17619#17620#0" expanded="true" />
-            <element signature="e#17677#17678#0" expanded="true" />
-            <element signature="e#17729#17730#0" expanded="true" />
-            <element signature="e#17765#17766#0" expanded="true" />
-            <element signature="e#17796#17797#0" expanded="true" />
-            <element signature="e#17845#17846#0" expanded="true" />
-            <element signature="e#17885#17886#0" expanded="true" />
-            <element signature="e#17922#17923#0" expanded="true" />
-            <element signature="e#17954#17955#0" expanded="true" />
-            <element signature="e#18005#18006#0" expanded="true" />
-            <element signature="e#18047#18048#0" expanded="true" />
-            <element signature="e#18086#18087#0" expanded="true" />
-            <element signature="e#18120#18121#0" expanded="true" />
-            <element signature="e#18175#18176#0" expanded="true" />
-            <element signature="e#18221#18222#0" expanded="true" />
-            <element signature="e#18258#18259#0" expanded="true" />
-            <element signature="e#18290#18291#0" expanded="true" />
-            <element signature="e#18341#18342#0" expanded="true" />
-            <element signature="e#18383#18384#0" expanded="true" />
-            <element signature="e#18419#18420#0" expanded="true" />
-            <element signature="e#18450#18451#0" expanded="true" />
-            <element signature="e#18499#18500#0" expanded="true" />
-            <element signature="e#18539#18540#0" expanded="true" />
-            <element signature="e#18582#18583#0" expanded="true" />
-            <element signature="e#18619#18620#0" expanded="true" />
-            <element signature="e#18669#18670#0" expanded="true" />
-            <element signature="e#18706#18707#0" expanded="true" />
-            <element signature="e#18977#18978#0" expanded="true" />
-            <element signature="e#19014#19015#0" expanded="true" />
-            <element signature="e#19075#19076#0" expanded="true" />
-            <element signature="e#19127#19128#0" expanded="true" />
-            <element signature="e#19165#19166#0" expanded="true" />
-            <element signature="e#19198#19199#0" expanded="true" />
-            <element signature="e#19252#19253#0" expanded="true" />
-            <element signature="e#19296#19297#0" expanded="true" />
-            <element signature="e#19341#19342#0" expanded="true" />
-            <element signature="e#19381#19382#0" expanded="true" />
-            <element signature="e#19448#19449#0" expanded="true" />
-            <element signature="e#19506#19507#0" expanded="true" />
-            <element signature="e#19547#19548#0" expanded="true" />
-            <element signature="e#19584#19585#0" expanded="true" />
-            <element signature="e#19644#19645#0" expanded="true" />
-            <element signature="e#19696#19697#0" expanded="true" />
-            <element signature="e#19749#19750#0" expanded="true" />
-            <element signature="e#19791#19792#0" expanded="true" />
-            <element signature="e#19977#19978#0" expanded="true" />
-            <element signature="e#20019#20020#0" expanded="true" />
-            <element signature="e#20090#20091#0" expanded="true" />
-            <element signature="e#20152#20153#0" expanded="true" />
-            <element signature="e#20200#20201#0" expanded="true" />
-            <element signature="e#20234#20235#0" expanded="true" />
-            <element signature="e#20298#20299#0" expanded="true" />
-            <element signature="e#20344#20345#0" expanded="true" />
-            <element signature="e#20394#20395#0" expanded="true" />
-            <element signature="e#20429#20430#0" expanded="true" />
-            <element signature="e#20496#20497#0" expanded="true" />
-            <element signature="e#20544#20545#0" expanded="true" />
+            <element signature="e#16220#16221#0" expanded="true" />
+            <element signature="e#16262#16263#0" expanded="true" />
+            <element signature="e#16311#16312#0" expanded="true" />
+            <element signature="e#16373#16374#0" expanded="true" />
+            <element signature="e#16422#16423#0" expanded="true" />
+            <element signature="e#16484#16485#0" expanded="true" />
+            <element signature="e#16533#16534#0" expanded="true" />
+            <element signature="e#16595#16596#0" expanded="true" />
+            <element signature="e#16650#16651#0" expanded="true" />
+            <element signature="e#16699#16700#0" expanded="true" />
+            <element signature="e#16752#16753#0" expanded="true" />
+            <element signature="e#16799#16800#0" expanded="true" />
+            <element signature="e#16851#16852#0" expanded="true" />
+            <element signature="e#16897#16898#0" expanded="true" />
+            <element signature="e#16956#16957#0" expanded="true" />
+            <element signature="e#16998#16999#0" expanded="true" />
+            <element signature="e#17140#17141#0" expanded="true" />
+            <element signature="e#17168#17169#0" expanded="true" />
+            <element signature="e#17210#17211#0" expanded="true" />
+            <element signature="e#17244#17245#0" expanded="true" />
+            <element signature="e#17286#17287#0" expanded="true" />
+            <element signature="e#17335#17336#0" expanded="true" />
+            <element signature="e#17373#17374#0" expanded="true" />
+            <element signature="e#17404#17405#0" expanded="true" />
+            <element signature="e#17455#17456#0" expanded="true" />
+            <element signature="e#17495#17496#0" expanded="true" />
+            <element signature="e#17527#17528#0" expanded="true" />
+            <element signature="e#17555#17556#0" expanded="true" />
+            <element signature="e#17597#17598#0" expanded="true" />
+            <element signature="e#17631#17632#0" expanded="true" />
+            <element signature="e#17673#17674#0" expanded="true" />
+            <element signature="e#17710#17711#0" expanded="true" />
+            <element signature="e#17771#17772#0" expanded="true" />
+            <element signature="e#17823#17824#0" expanded="true" />
+            <element signature="e#17862#17863#0" expanded="true" />
+            <element signature="e#17899#17900#0" expanded="true" />
+            <element signature="e#17957#17958#0" expanded="true" />
+            <element signature="e#18009#18010#0" expanded="true" />
+            <element signature="e#18045#18046#0" expanded="true" />
+            <element signature="e#18076#18077#0" expanded="true" />
+            <element signature="e#18125#18126#0" expanded="true" />
+            <element signature="e#18165#18166#0" expanded="true" />
+            <element signature="e#18202#18203#0" expanded="true" />
+            <element signature="e#18234#18235#0" expanded="true" />
+            <element signature="e#18285#18286#0" expanded="true" />
+            <element signature="e#18327#18328#0" expanded="true" />
+            <element signature="e#18366#18367#0" expanded="true" />
+            <element signature="e#18400#18401#0" expanded="true" />
+            <element signature="e#18455#18456#0" expanded="true" />
+            <element signature="e#18501#18502#0" expanded="true" />
+            <element signature="e#18538#18539#0" expanded="true" />
+            <element signature="e#18570#18571#0" expanded="true" />
+            <element signature="e#18621#18622#0" expanded="true" />
+            <element signature="e#18663#18664#0" expanded="true" />
+            <element signature="e#18699#18700#0" expanded="true" />
+            <element signature="e#18730#18731#0" expanded="true" />
+            <element signature="e#18779#18780#0" expanded="true" />
+            <element signature="e#18819#18820#0" expanded="true" />
+            <element signature="e#18862#18863#0" expanded="true" />
+            <element signature="e#18899#18900#0" expanded="true" />
+            <element signature="e#18949#18950#0" expanded="true" />
+            <element signature="e#18986#18987#0" expanded="true" />
+            <element signature="e#19257#19258#0" expanded="true" />
+            <element signature="e#19294#19295#0" expanded="true" />
+            <element signature="e#19355#19356#0" expanded="true" />
+            <element signature="e#19407#19408#0" expanded="true" />
+            <element signature="e#19445#19446#0" expanded="true" />
+            <element signature="e#19478#19479#0" expanded="true" />
+            <element signature="e#19532#19533#0" expanded="true" />
+            <element signature="e#19576#19577#0" expanded="true" />
+            <element signature="e#19621#19622#0" expanded="true" />
+            <element signature="e#19661#19662#0" expanded="true" />
+            <element signature="e#19728#19729#0" expanded="true" />
+            <element signature="e#19786#19787#0" expanded="true" />
+            <element signature="e#19827#19828#0" expanded="true" />
+            <element signature="e#19864#19865#0" expanded="true" />
+            <element signature="e#19924#19925#0" expanded="true" />
+            <element signature="e#19976#19977#0" expanded="true" />
+            <element signature="e#20029#20030#0" expanded="true" />
+            <element signature="e#20071#20072#0" expanded="true" />
+            <element signature="e#20257#20258#0" expanded="true" />
+            <element signature="e#20299#20300#0" expanded="true" />
+            <element signature="e#20370#20371#0" expanded="true" />
+            <element signature="e#20432#20433#0" expanded="true" />
+            <element signature="e#20480#20481#0" expanded="true" />
+            <element signature="e#20514#20515#0" expanded="true" />
+            <element signature="e#20578#20579#0" expanded="true" />
+            <element signature="e#20624#20625#0" expanded="true" />
+            <element signature="e#20674#20675#0" expanded="true" />
+            <element signature="e#20709#20710#0" expanded="true" />
+            <element signature="e#20776#20777#0" expanded="true" />
+            <element signature="e#20824#20825#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1747,54 +1886,37 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/internal/Autopilot/Controller.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="163">
-          <caret line="578" column="20" lean-forward="false" selection-start-line="578" selection-start-column="20" selection-end-line="578" selection-end-column="20" />
+        <state relative-caret-position="1217">
+          <caret line="604" column="20" lean-forward="false" selection-start-line="604" selection-start-column="20" selection-end-line="604" selection-end-column="20" />
           <folding>
-            <element signature="e#16573#16574#0" expanded="true" />
-            <element signature="e#16609#16610#0" expanded="true" />
-            <element signature="e#16783#16784#0" expanded="true" />
-            <element signature="e#16819#16820#0" expanded="true" />
-            <element signature="e#22301#22302#0" expanded="true" />
-            <element signature="e#22369#22370#0" expanded="true" />
-            <element signature="e#22603#22604#0" expanded="true" />
-            <element signature="e#22671#22672#0" expanded="true" />
+            <marker date="1521560201276" expanded="true" signature="34112:34282" ph="{...}" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/internal/Testbed/WorldBuilder_v2.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="148">
-          <caret line="97" column="48" lean-forward="false" selection-start-line="97" selection-start-column="48" selection-end-line="97" selection-end-column="48" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
+        <state relative-caret-position="-56">
+          <caret line="83" column="48" lean-forward="false" selection-start-line="83" selection-start-column="48" selection-end-line="83" selection-end-column="48" />
+          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/internal/Autopilot/AutopilotLandingController.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="456">
-          <caret line="141" column="0" lean-forward="true" selection-start-line="141" selection-start-column="0" selection-end-line="141" selection-end-column="0" />
+        <state relative-caret-position="677">
+          <caret line="276" column="0" lean-forward="false" selection-start-line="276" selection-start-column="0" selection-end-line="276" selection-end-column="0" />
           <folding>
-            <element signature="e#3659#3660#0" expanded="true" />
-            <element signature="e#3696#3697#0" expanded="true" />
-            <element signature="e#6062#6063#0" expanded="true" />
-            <element signature="e#6101#6102#0" expanded="true" />
-            <element signature="e#6145#6146#0" expanded="true" />
-            <element signature="e#6182#6183#0" expanded="true" />
-            <element signature="e#6227#6228#0" expanded="true" />
-            <element signature="e#6261#6262#0" expanded="true" />
-            <element signature="e#6373#6374#0" expanded="true" />
-            <element signature="e#6407#6408#0" expanded="true" />
-            <element signature="e#6477#6478#0" expanded="true" />
-            <element signature="e#6517#6518#0" expanded="true" />
-            <element signature="e#6573#6574#0" expanded="true" />
-            <element signature="e#6610#6611#0" expanded="true" />
-            <element signature="e#6678#6679#0" expanded="true" />
-            <element signature="e#6729#6730#0" expanded="true" />
-            <element signature="e#6786#6787#0" expanded="true" />
-            <element signature="e#6824#6825#0" expanded="true" />
+            <element signature="e#14708#14709#0" expanded="true" />
+            <element signature="e#14742#14743#0" expanded="true" />
+            <element signature="e#14812#14813#0" expanded="true" />
+            <element signature="e#14852#14853#0" expanded="true" />
+            <element signature="e#14908#14909#0" expanded="true" />
+            <element signature="e#14945#14946#0" expanded="true" />
+            <element signature="e#15013#15014#0" expanded="true" />
+            <element signature="e#15064#15065#0" expanded="true" />
+            <element signature="e#15121#15122#0" expanded="true" />
+            <element signature="e#15159#15160#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1818,7 +1940,7 @@
     <entry file="file://$PROJECT_DIR$/src/internal/Physics/RearTyrePhysX.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="398">
-          <caret line="47" column="5" lean-forward="true" selection-start-line="47" selection-start-column="5" selection-end-line="47" selection-end-column="5" />
+          <caret line="47" column="5" lean-forward="false" selection-start-line="47" selection-start-column="5" selection-end-line="47" selection-end-column="5" />
           <folding />
         </state>
       </provider>
@@ -1836,8 +1958,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/internal/Autopilot/AutopilotTaxiingController.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="17">
-          <caret line="53" column="0" lean-forward="true" selection-start-line="53" selection-start-column="0" selection-end-line="53" selection-end-column="0" />
+        <state relative-caret-position="357">
+          <caret line="73" column="48" lean-forward="false" selection-start-line="73" selection-start-column="48" selection-end-line="73" selection-end-column="48" />
           <folding>
             <element signature="e#510#511#0" expanded="true" />
             <element signature="e#542#543#0" expanded="true" />

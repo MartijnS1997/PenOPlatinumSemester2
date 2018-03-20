@@ -230,10 +230,11 @@ public class TestBedServer implements Runnable {
      * Initializer for the windows
      */
     private void initWindows(){
-        this.getDroneView().initWindow(this.getWorld(), Settings.DRONE_CAM);
-        this.getTopDownView().initWindow(this.getWorld(), Settings.DRONE_TOP_DOWN_CAM);
-        this.getChaseView().initWindow(this.getWorld(), Settings.DRONE_CHASE_CAM);
-        this.getSideView().initWindow(this.getWorld(), Settings.DRONE_SIDE_CAM);
+    	this.getGraphics().setWorld(getWorld());
+        this.getDroneView().initWindow(Settings.DRONE_CAM);
+        this.getTopDownView().initWindow(Settings.DRONE_TOP_DOWN_CAM);
+        this.getChaseView().initWindow(Settings.DRONE_CHASE_CAM);
+        this.getSideView().initWindow(Settings.DRONE_SIDE_CAM);
     }
 
     /**

@@ -49,8 +49,6 @@ public class Window {
 
 	private Matrix4f projectionMatrix;
 
-	private World world;
-
 	private boolean terminated = false;
 
 	private Settings setting;
@@ -128,9 +126,8 @@ public class Window {
 		glfwMakeContextCurrent(NULL);
 	}
 	
-	public void initWindow(World world, Settings setting) {
+	public void initWindow(Settings setting) {
 		this.setting = setting;
-		this.world = world;
 //		if (setting == Settings.DRONE_CAM)
 //			this.FOV = (float) Math.toRadians(120.0f);
 //		else
@@ -171,29 +168,29 @@ public class Window {
 		glfwMakeContextCurrent(NULL);
 	}
 
-	public void render() {
-		renderFrame();
+	public void render(World world) {
+		renderFrame(world);
 
 		// Return false if the user has attempted to close
 		// the window or has pressed the ESCAPE key.
 		if (glfwWindowShouldClose(getHandler())) {
-			terminate();
+			terminate(world);
 		}
 //		checkError();
 	}
 	
-	private void renderFrame() {
+	private void renderFrame(World world) {
 		GL.setCapabilities(capabilities);
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the buffers
 
-		updateMatrices();
+		updateMatrices(world);
 	
 		program.bind();
         program.setUniform("projectionMatrix", projectionMatrix);
         program.setUniform("viewMatrix", viewMatrix);
         
-        float viewingDistance = 250;
+        float viewingDistance = 500;
 
         for (WorldObject object: world.getObjectSet()) {
         	if (object.getClass() == Block.class) {
@@ -237,7 +234,7 @@ public class Window {
 	}
 	
 	// Free the window callbacks and destroy the window
-	public void terminate() {
+	public void terminate(World world) {
 		program.delete();
 		
 		glfwFreeCallbacks(getHandler());
@@ -262,7 +259,7 @@ public class Window {
 		return windowHandle;
 	}
 	
-	public void updateMatrices() {
+	public void updateMatrices(World world) {
 		if (Input.isKeyPressed(GLFW_KEY_R))
 			this.setting = Settings.DRONE_CAM;
 		else if (Input.isKeyPressed(GLFW_KEY_T))
@@ -278,7 +275,7 @@ public class Window {
 		
 		if (getSetting() == Settings.INDEPENDENT_CAM)
 			input.processInput();
-		updateViewMatrix(setting);
+		updateViewMatrix(setting, world);
 		
 		projectionMatrix = getProjectionMatrix();
 	}
@@ -291,13 +288,13 @@ public class Window {
 		return Matrix4f.translate(position).multiply(Matrix4f.rotate(orientation)).multiply(Matrix4f.scale(size));
 	}
 	
-	public void updateViewMatrix() {
+	public void updateViewMatrix(World world) {
 		switch (getSetting()) {
 		case DRONE_CAM: 
-			this.viewMatrix = getView(new Vector3f(1f, 1f, 1f), new Vector3f(1f, 1f, 1f).scale(3f));
+			this.viewMatrix = getView(world, new Vector3f(1f, 1f, 1f), new Vector3f(1f, 1f, 1f).scale(3f));
 			break;
 		case DRONE_CHASE_CAM: 
-			this.viewMatrix = getView(new Vector3f(1f, 0f, 0f), new Vector3f(-1f, 0f, -1f).scale(10f));
+			this.viewMatrix = getView(world, new Vector3f(1f, 0f, 0f), new Vector3f(-1f, 0f, -1f).scale(10f));
 			break;
 		default: 
 			this.viewMatrix = input.getViewMatrix(getSetting());
@@ -306,13 +303,13 @@ public class Window {
 		}
 	}
 	
-	public void updateViewMatrix(Settings setting) {
+	public void updateViewMatrix(Settings setting, World world) {
 		switch (setting) {
 		case DRONE_CAM: 
-			this.viewMatrix = getView(new Vector3f(1f, 1f, 1f), new Vector3f(1f, 1f, 1f).scale(3f));
+			this.viewMatrix = getView(world, new Vector3f(1f, 1f, 1f), new Vector3f(1f, 1f, 1f).scale(3f));
 			break;
 		case DRONE_CHASE_CAM: 
-			this.viewMatrix = getView(new Vector3f(1f, 0f, 0f), new Vector3f(-1f, 0f, -1f).scale(13f));
+			this.viewMatrix = getView(world, new Vector3f(1f, 0f, 0f), new Vector3f(-1f, 0f, -1f).scale(13f));
 			break;
 		default: 
 			this.viewMatrix = input.getViewMatrix(setting);
@@ -321,7 +318,7 @@ public class Window {
 		}
 	}
 	
-	public Matrix4f getView(Vector3f camOrientation, Vector3f camPosition) {   
+	public Matrix4f getView(World world, Vector3f camOrientation, Vector3f camPosition) {   
 		Vector3f orientation = new Vector3f();
 		Vector3f dronePosition = new Vector3f();
         for (Drone drone: world.getDroneSet()) {

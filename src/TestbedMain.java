@@ -284,10 +284,14 @@ public class TestbedMain implements Runnable{
      */
     private void initWorld() throws IOException {
         WorldBuilder_v2 builder = new WorldBuilder_v2();
-        Map<Vector, Float> droneConfig = new HashMap<>();
-        droneConfig.put(new Vector(0, 0.20f-0.01f + 1f,0), 0f); //drone standing on ground with tyre compression 0.05
+        //Map<Vector, Float> droneConfig = new HashMap<>();
+        //droneConfig.put(new Vector(0, 0.20f-0.01f + 1f,0), 0f); //drone standing on ground with tyre compression 0.05
         //World world =  builder.createWorld(); //builder.createWorld(droneConfig)
         World world = builder.createGroundDroneTestWorld();
+        //World world = builder.createFlightTestWorld();
+        //World world = builder.createTakeoffWorld();
+        //World world = builder.createTotalFlightWorld();
+        //World world  = builder.createLandingWorld();
         this.setWorld(world);
         Drone drone =(Drone)(world.getDroneSet().toArray())[0]; //only one drone is present
         //System.out.println("drone: " + drone);
@@ -332,7 +336,7 @@ public class TestbedMain implements Runnable{
             this.setSideView(new Window(960, 510, 1f, 1f, "Side view", new Vector3f(1.0f, 1.0f, 1.0f), true));
             this.setChaseView(new Window(960, 510, 0f, 1f, "Chase view", new Vector3f(1.0f, 1.0f, 1.0f), true));
         } else {
-            this.setDroneView(new Window(960, 510, 0.0f, 0.05f, "Drone view", new Vector3f(1.0f, 1.0f, 1.0f), true));
+            this.setDroneView(new Window(1920, 1080, 1.f, 1.f, "Drone view", new Vector3f(1.0f, 1.0f, 1.0f), true));
 
         }
 
@@ -352,19 +356,22 @@ public class TestbedMain implements Runnable{
      * Initialize the windows used in the simulation
      */
     private void initWindows(){
+    	this.getGraphics().setWorld(getWorld());
         // Initialize the windows
-        this.getDroneCam().initWindow(this.getWorld(), Settings.DRONE_CAM);
-        this.getDroneView().initWindow(this.getWorld(), Settings.DRONE_CAM);
+        this.getDroneCam().initWindow(Settings.DRONE_CAM);
+        this.getDroneView().initWindow(Settings.DRONE_CAM);
 
         if(this.getShowAllWindows()) {
-            this.getTopDownView().initWindow(this.getWorld(), Settings.DRONE_TOP_DOWN_CAM);
-            this.getChaseView().initWindow(this.getWorld(), Settings.DRONE_CHASE_CAM);
-            this.getSideView().initWindow(this.getWorld(), Settings.DRONE_SIDE_CAM);
+            this.getTopDownView().initWindow(Settings.DRONE_TOP_DOWN_CAM);
+            this.getChaseView().initWindow(Settings.DRONE_CHASE_CAM);
+            this.getSideView().initWindow(Settings.DRONE_SIDE_CAM);
         }
 
         // create the switch when in single window mode
-        if (!this.getShowAllWindows())
-            this.getGraphics().makeTextWindow();
+        if (!this.getShowAllWindows()) {
+            this.getGraphics().makeTextWindow("Stats", 500, 300, -10, 790);
+//            this.getGraphics().makeButtonWindow();
+        }
     }
 
 

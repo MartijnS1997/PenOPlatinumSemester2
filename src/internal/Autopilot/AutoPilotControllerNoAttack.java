@@ -13,6 +13,7 @@ import static java.lang.Math.sin;
  * Appended and edited by Anthony Rath� on 6/11/2017
  * A class of AutopilotInterfaces Controllers
  */
+@Deprecated
 public class AutoPilotControllerNoAttack {
 
     /**
@@ -190,9 +191,9 @@ public class AutoPilotControllerNoAttack {
      */
     private float getTotalMass(){
         AutoPilot autopilot = this.getAssociatedAutopilot();
-        float mainWings = autopilot.getMainWingMass()*2;
-        float stabilizers = autopilot.getStabilizerMass()*2;
-        float engine = autopilot.getEngineMass();
+        float mainWings = autopilot.getConfig().getWingMass()*2;
+        float stabilizers = autopilot.getConfig().getTailMass()*2;
+        float engine = autopilot.getConfig().getEngineMass();
 
         return mainWings + stabilizers + engine;
     }
