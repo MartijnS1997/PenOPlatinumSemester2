@@ -1,11 +1,7 @@
 ############## Wing Diagnosis Space ##############
 
-Faulty wing: Vertical Stabilizer
-5 last wing inclinations: [0.0, 0.0, 0.0, 0.0, 0.0]
-5 last angles of attack: [46.090256, 46.090473, 46.090694, 46.090908, 46.091125]
-
-5 last Positions: [Vector [xValue=1.2381891, yValue=1.1499766, zValue=-17.101454], Vector [xValue=1.2383915, yValue=1.1499766, zValue=-17.102314], Vector [xValue=1.2385939, yValue=1.1499766, zValue=-17.103174], Vector [xValue=1.2387964, yValue=1.1499766, zValue=-17.104034], Vector [xValue=1.2389989, yValue=1.1499766, zValue=-17.104895]]
-5 last Velocities: [Vector [xValue=0.20241795, yValue=-5.8869035E-5, zValue=-0.860328], Vector [xValue=0.20244116, yValue=-5.7879246E-5, zValue=-0.86033577], Vector [xValue=0.20246436, yValue=-5.8008438E-5, zValue=-0.8603435], Vector [xValue=0.20248756, yValue=-5.8008438E-5, zValue=-0.86035126], Vector [xValue=0.20251076, yValue=-5.7512018E-5, zValue=-0.860359]]
-5 last Orientations: [Vector [xValue=-0.8972118, yValue=-0.001578388, zValue=-0.005866134], Vector [xValue=-0.89725363, yValue=-0.001578388, zValue=-0.0058663297], Vector [xValue=-0.8972955, yValue=-0.001578388, zValue=-0.005866525], Vector [xValue=-0.8973373, yValue=-0.001578288, zValue=-0.005866721], Vector [xValue=-0.89737916, yValue=-0.0015781879, zValue=-0.0058669164]]
-5 last Rotations: [Vector [xValue=2.1524758E-4, yValue=-0.0418314, zValue=-4.3907487E-5], Vector [xValue=2.1512745E-4, yValue=-0.04182782, zValue=-4.4019533E-5], Vector [xValue=2.1512745E-4, yValue=-0.041824244, zValue=-4.384483E-5], Vector [xValue=2.1512745E-4, yValue=-0.041820668, zValue=-4.3682718E-5], Vector [xValue=2.1512745E-4, yValue=-0.041817088, zValue=-4.3574848E-5]]
+No diagnosis was found, was the angle of attack valid?5 last Positions: []
+5 last Velocities: []
+5 last Orientations: []
+5 last Rotations: []
 5 last controls: []

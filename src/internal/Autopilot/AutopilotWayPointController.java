@@ -1,16 +1,11 @@
 package internal.Autopilot;
 
-import AutopilotInterfaces.AutopilotInputs;
 import AutopilotInterfaces.AutopilotInputs_v2;
 import AutopilotInterfaces.AutopilotOutputs;
 import internal.Helper.Vector;
 import internal.Physics.PhysXEngine;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import static java.lang.Math.*;
 
@@ -25,7 +20,7 @@ public class AutopilotWayPointController extends Controller {
         // implement constructor
         super(autopilot);
         //add some way points to test against
-        List<WayPoint> wayPoints = this.getWayPointPath();
+//        List<WayPoint> wayPoints = this.getWayPointPath();
 //        wayPoints.add(new WayPoint(new Vector(5,20f, -60f), 20));
 //        wayPoints.add(new WayPoint(new Vector(10,20f, -120f), 20));
 //        wayPoints.add(new WayPoint(new Vector(15,20f, -180f), 20));
@@ -42,42 +37,42 @@ public class AutopilotWayPointController extends Controller {
 
     }
 
-    public void setLandingPath(Vector destination){
-        //System.out.println("Setting destination: ################################################################################");
-        //get the current inputs
-        AutopilotInputs_v2 currentInputs = this.getCurrentInputs();
-        AutopilotInputs_v2 prevInputs = this.getPreviousInputs();
-
-        //get the position and the velocity
-        Vector currentPos = Controller.extractPosition(currentInputs);
-        Vector currentVelocity =this.getVelocityApprox(prevInputs, currentInputs);
-
-        //check if the current velocity is zero (means we have init on dummy)
-        currentVelocity = currentVelocity.getSize() == 0 ?
-                PhysXEngine.droneOnWorld(new Vector(0,0, -DUMMY_APPROX_VEL), Controller.extractOrientation(currentInputs)) //if so, set to balance velocity
-                : currentVelocity; //if not, keep the approx
-        //generate the path
-        PathGenerator pathGen = new PathGenerator();
-        pathGen.generateLandingPath(currentPos, currentVelocity, destination);
-        List<Vector> path = pathGen.getPath();
-        //map the path elems to way points
-        List<WayPoint> wayPointPath = path.stream().map(pathElem -> new WayPoint(pathElem)).collect(Collectors.toList());
-        //configure the resulting way points
-        //get the average distance between the points to set an ignore radius
-//        float avgDistance = (float) (IntStream.range(0, path.size()-1).asDoubleStream()
-//                .map(i -> path.get((int) i).distanceBetween(path.get((int) (i+1))))
-//                .sum())/path.size();
-//        float acceptRatio = 0.15f; //15% of average distance for acceptance
-//        float ignoreRatio = 3.f; //300% of average distance for ignore
-//        //now convert to way points
-//        List<WayPoint> wayPointPath = path.stream()
-//                .map(p-> new WayPoint(p, avgDistance*acceptRatio, avgDistance*ignoreRatio))
-//                .collect(Collectors.toList());
-        //assign the path
-        this.setWayPointPath(wayPointPath);
-
-    }
-
+//    public void setLandingPath(Vector destination){
+//        //System.out.println("Setting destination: ################################################################################");
+//        //get the current inputs
+//        AutopilotInputs_v2 currentInputs = this.getCurrentInputs();
+//        AutopilotInputs_v2 prevInputs = this.getPreviousInputs();
+//
+//        //get the position and the velocity
+//        Vector currentPos = Controller.extractPosition(currentInputs);
+//        Vector currentVelocity =this.getVelocityApprox(prevInputs, currentInputs);
+//
+//        //check if the current velocity is zero (means we have init on dummy)
+//        currentVelocity = currentVelocity.getSize() == 0 ?
+//                PhysXEngine.droneOnWorld(new Vector(0,0, -DUMMY_APPROX_VEL), Controller.extractOrientation(currentInputs)) //if so, set to balance velocity
+//                : currentVelocity; //if not, keep the approx
+//        //generate the path
+//        PathGenerator pathGen = new PathGenerator();
+//        pathGen.generateLandingPath(currentPos, currentVelocity, destination);
+//        List<Vector> path = pathGen.getPath();
+//        //map the path elems to way points
+//        List<WayPoint> wayPointPath = path.stream().map(pathElem -> new WayPoint(pathElem)).collect(Collectors.toList());
+//        //configure the resulting way points
+//        //get the average distance between the points to set an ignore radius
+////        float avgDistance = (float) (IntStream.range(0, path.size()-1).asDoubleStream()
+////                .map(i -> path.get((int) i).distanceBetween(path.get((int) (i+1))))
+////                .sum())/path.size();
+////        float acceptRatio = 0.15f; //15% of average distance for acceptance
+////        float ignoreRatio = 3.f; //300% of average distance for ignore
+////        //now convert to way points
+////        List<WayPoint> wayPointPath = path.stream()
+////                .map(p-> new WayPoint(p, avgDistance*acceptRatio, avgDistance*ignoreRatio))
+////                .collect(Collectors.toList());
+//        //assign the path
+//        this.setWayPointPath(wayPointPath);
+//
+//    }
+//
 
     /**
      * The controller has reached its objective if all the way points are passed
@@ -229,7 +224,7 @@ public class AutopilotWayPointController extends Controller {
         this.setCurrentInputs(inputs);
         //create a new output object
         Controller.ControlOutputs outputs = new Controller.ControlOutputs();
-        this.wayPointControl(inputs);
+        this.wayPointControl();
         //System.out.println("Current way point: " + this.getCurrentWayPoint());
         //then issue control actions
         //get the control actions for the thrust
@@ -249,26 +244,68 @@ public class AutopilotWayPointController extends Controller {
 
     /**
      * Checks if the current way point has been reached, if so increments the way point index
-     * @param inputs the inputs of the autopilot, generated by the drone
      */
-    private void wayPointControl(AutopilotInputs_v2 inputs){
+    private void wayPointControl(){
 
+        PathGenerator pathGenerator = this.getPathGenerator();
         WayPoint currentWayPoint = this.getCurrentWayPoint();
-        //check if we've reached the currently active way point
-        boolean currReached = currentWayPoint.isReached(inputs);
-        //and check if we've not flown past it
-        boolean currPassed = !currentWayPoint.reachable(inputs);
-        if(currReached||currPassed){
-            //if so, activate the next way point
-            this.toNextWayPoint();
-            currentWayPoint = this.getCurrentWayPoint();
-            //check if we've reached the final way point
-            if(currentWayPoint == null){
-                //if so, throw simulation ended
-                this.setHasReachedFinalWayPoint();
-            }
+        AutopilotInputs_v2 currentInputs = this.getCurrentInputs();
+        AutopilotInputs_v2 prevInputs = this.getPreviousInputs();
+
+        if(currentWayPoint == null){
+            initWayPoint(pathGenerator, currentInputs, prevInputs);
+            //we're finished for now
+            return;
         }
+
+        //check if we've reached the current way point
+        if(currentWayPoint.isReached(currentInputs)){
+            configureNextWayPointSuccess(pathGenerator, currentInputs, prevInputs);
+        //otherwise check if we have passed the current way point
+        }else if(!currentWayPoint.reachable(currentInputs)){
+            configureNextWayPointMissed(pathGenerator, currentInputs, prevInputs);
+        }
+        //fall of the edge if not valid
     }
+//        if(currReached||currPassed){
+//            //if so, activate the next way point
+//            this.toNextWayPoint();
+//            currentWayPoint = this.getCurrentWayPoint();
+//            //check if we've reached the final way point
+//            if(currentWayPoint == null){
+//                //if so, throw simulation ended
+//                this.setHasReachedFinalWayPoint();
+//            }
+//        }
+
+
+    private void configureNextWayPointMissed(PathGenerator pathGenerator, AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 prevInputs) {
+        Vector velocityApprox = this.getVelocityApprox(prevInputs, currentInputs);
+        Vector position = Controller.extractPosition(currentInputs);
+        Vector destination = this.getDestination();
+        Vector nextWayPointPos = pathGenerator.getNextWaypointMissed(position, velocityApprox, destination);
+        WayPoint nextWayPoint = new WayPoint(nextWayPointPos);
+        this.setCurrentWayPoint(nextWayPoint);
+    }
+
+    private void configureNextWayPointSuccess(PathGenerator pathGenerator, AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 prevInputs) {
+        Vector velocityApprox = this.getVelocityApprox(prevInputs, currentInputs);
+        Vector position = Controller.extractPosition(currentInputs);
+        Vector destination = this.getDestination();
+        Vector nextWayPointPos = pathGenerator.getNextWaypointSuccess(position, velocityApprox, destination);
+        WayPoint nextWayPoint = new WayPoint(nextWayPointPos);
+        this.setCurrentWayPoint(nextWayPoint);
+    }
+
+    private void initWayPoint(PathGenerator pathGenerator, AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 prevInputs) {
+        //get the velocity approx
+        Vector velocityApprox = this.getVelocityApprox(prevInputs, currentInputs);
+        Vector position = Controller.extractPosition(currentInputs);
+        Vector wayPointPos =  pathGenerator.getNextWaypoint(position, velocityApprox, this.getDestination());
+        WayPoint nextWayPoint = new WayPoint(wayPointPos);
+        this.setCurrentWayPoint(nextWayPoint);
+    }
+
     @Override
     protected void rollControl(ControlOutputs outputs, AutopilotInputs_v2 currentInput){
         float roll = currentInput.getRoll();
@@ -419,23 +456,23 @@ public class AutopilotWayPointController extends Controller {
         return 0;
     }
 
-    /**
-     * getter for the current way point
-     * @return the current way point
-     */
-    private WayPoint getCurrentWayPoint(){
-        int index = this.getCurrentWayPointIndex();
-        //get the wayPointPath
-        List<WayPoint> path = this.getWayPointPath();
-
-        //check if the wayPointPath size is equal to the index
-        if(path.size() == index){
-            //if so return null
-            return null;
-        }
-        // otherwise return the element at the current index
-        return path.get(index);
-    }
+//    /**
+//     * getter for the current way point
+//     * @return the current way point
+//     */
+//    private WayPoint getCurrentWayPoint(){
+//        int index = this.getCurrentWayPointIndex();
+//        //get the wayPointPath
+//        List<WayPoint> path = this.getWayPointPath();
+//
+//        //check if the wayPointPath size is equal to the index
+//        if(path.size() == index){
+//            //if so return null
+//            return null;
+//        }
+//        // otherwise return the element at the current index
+//        return path.get(index);
+//    }
 
     /**
      * Getter for the final way point flag, the flag indicates if we've reached the final way point in the list
@@ -453,39 +490,78 @@ public class AutopilotWayPointController extends Controller {
         this.hasReachedFinalWayPoint = true;
     }
 
+//
+//    /**
+//     * increments the way point index
+//     */
+//    private void toNextWayPoint(){
+//        this.currentWayPointIndex ++;
+//    }
+
+//    /**
+//     * Getter for the current way point index, the index that indicates which way point
+//     * we need to reach in the waypoint list
+//     * @return the index of the current way point
+//     */
+//    private int getCurrentWayPointIndex() {
+//        return currentWayPointIndex;
+//    }
+
+//    /**
+//     * Getter for the WayPointPath, the path containing all the way points to follow
+//     * @return a list containing all the way points to pass during a flight
+//     */
+//    private List<WayPoint> getWayPointPath() {
+//        return wayPointPath;
+//    }
+
+//    /**
+//     * Setter for the wayPointPath
+//     * @param wayPointPath the path of way points to follow
+//     */
+//    private void setWayPointPath(List<WayPoint> wayPointPath){
+//        this.wayPointPath = wayPointPath;
+//    }
 
     /**
-     * increments the way point index
+     * Getter for the currently active waypoint
+     * @return
      */
-    private void toNextWayPoint(){
-        this.currentWayPointIndex ++;
+    private WayPoint getCurrentWayPoint(){
+        return this.currentWayPoint;
     }
 
     /**
-     * Getter for the current way point index, the index that indicates which way point
-     * we need to reach in the waypoint list
-     * @return the index of the current way point
+     * Setter for the current way point
+     * @param currentWayPoint the current way point to reach
      */
-    private int getCurrentWayPointIndex() {
-        return currentWayPointIndex;
+    private void setCurrentWayPoint(WayPoint currentWayPoint) {
+        this.currentWayPoint = currentWayPoint;
     }
 
     /**
-     * Getter for the WayPointPath, the path containing all the way points to follow
-     * @return a list containing all the way points to pass during a flight
+     * The generator used to generate the path to follow
+     * @return the generator
      */
-    private List<WayPoint> getWayPointPath() {
-        return wayPointPath;
+    private PathGenerator getPathGenerator() {
+        return pathGenerator;
     }
 
     /**
-     * Setter for the wayPointPath
-     * @param wayPointPath the path of way points to follow
+     * Getter for the destination of the autopilot
+     * @return the destination for the wayPoint controller
      */
-    private void setWayPointPath(List<WayPoint> wayPointPath){
-        this.wayPointPath = wayPointPath;
+    public Vector getDestination() {
+        return destination;
     }
 
+    /**
+     * Setter for the destination of the way point controller
+     * @param destination the destination of the way point controller
+     */
+    public void setDestination(Vector destination) {
+        this.destination = destination;
+    }
 
     /**
      * Getter for the PID controller that controls the pitch of the drone
@@ -521,14 +597,29 @@ public class AutopilotWayPointController extends Controller {
     private final static float THRUST_COEFF = 50;
 
     /**
-     * List that stores the current wayPointPath
+     * The way point the autopilot is currently navigating to
      */
-    private List<WayPoint> wayPointPath = new ArrayList<>();
+    private WayPoint currentWayPoint = null;
 
     /**
-     * The current index for the way point
+     * The path generator used to generate the path the controller needs to follow
      */
-    private int currentWayPointIndex = 0;
+    private PathGenerator pathGenerator;
+
+    /**
+     * The variable that stores the destination
+     */
+    private Vector destination;
+
+//    /**
+//     * List that stores the current wayPointPath
+//     */
+//    private List<WayPoint> wayPointPath = new ArrayList<>();
+//
+//    /**
+//     * The current index for the way point
+//     */
+//    private int currentWayPointIndex = 0;
 
     /**
      * Flag that indicates if the final way point has been reached

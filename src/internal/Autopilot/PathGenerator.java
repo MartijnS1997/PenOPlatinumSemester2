@@ -48,6 +48,7 @@ public class PathGenerator {
     		
     		// generate landing path
     		Vector lastBlock = destination;
+    		blockCoordinates.add(lastBlock);
     		while(lastBlock.getyValue() < (position.getyValue()-0.01)) {
 
     			lastBlock = lastBlock.vectorSum(landingVector);
@@ -121,6 +122,7 @@ public class PathGenerator {
     	    	blockCoordinates.add(position.vectorSum(velocity.makeHorizontal().scalarMult(ALIGNMENT_TURN_FACTOR)));
     		}
     		
+    		pathLock();
     	}
     	
     	setPath(blockCoordinates);
@@ -190,6 +192,13 @@ public class PathGenerator {
 
     }
 
+    /**
+     * Generates a vector that is oriented perpendicularly on the horizontal cord between the two given points.
+     * Points to the left when standing in position2, looking towards position1
+     * @param position1
+     * @param position2
+     * @return
+     */
     private static Vector parallelHorizontalVector(Vector position1, Vector position2) {
     	position1 = position1.makeHorizontal();
     	position2 = position2.makeHorizontal();
@@ -197,6 +206,58 @@ public class PathGenerator {
     	Vector distanceBetween = position1.vectorDifference(position2);
     	return distanceBetween.rotateAroundYAxis((float)Math.PI/2);
 
+    }
+    
+    /**
+     * Method for retrieving the next waypoint we should reach
+     * @param position
+     * @param velocity
+     * @param destination
+     * @return
+     */
+    public Vector getNextWaypoint(Vector position, Vector velocity, Vector destination) {
+    	if (!hasPathLocked())generateLandingPath(position, velocity, destination);
+    	return getPath().get(0);
+    }
+    
+    /**
+     * Method for retrieving the next waypoint we should reach, after having just reached one
+     * @param position
+     * @param velocity
+     * @param destination
+     * @return
+     */
+    public Vector getNextWaypointSuccess(Vector position, Vector velocity, Vector destination) {
+    	if (!hasPathLocked()) {
+    		// Generate a path if none was generated
+    		generateLandingPath(position, velocity, destination);
+    	}else {
+    		if (getPath().size() <= 1) {
+    			// If path contains only one element, generate a new path
+    			generateLandingPath(position, velocity, destination);
+    		}else {
+    			// If path is long enough, erase first element
+    			List<Vector> newPath = getPath();
+            	newPath.remove(0);
+            	setPath(newPath);
+    		}
+    	}
+    	return getPath().get(0);
+    	
+    }
+    
+    /**
+     * Method for retrieving the next waypoint we should reach, after having missed one.
+     * Always regenerates the path.
+     * @param position
+     * @param velocity
+     * @param destination
+     * @return
+     */
+    public Vector getNextWaypointMissed(Vector position, Vector velocity, Vector destination) {
+    	// Always generate a new path
+    	generateLandingPath(position, velocity, destination);
+    	return getPath().get(0);
     }
 
 	

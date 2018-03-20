@@ -36,7 +36,7 @@ public class WorldBuilder_v2 {
         world.addDrones(droneList);
         Floor floor = new Floor(new Vector());
         world.addWorldObject(floor);
-        Airport airport = new Airport(new Vector());
+        Airport airport = new Airport(new Vector(0, 0.5f, 0));
         world.addWorldObject(airport);
         return world;
     }
@@ -53,7 +53,7 @@ public class WorldBuilder_v2 {
         world.addDrones(droneList);
         Floor floor = new Floor(new Vector());
         world.addWorldObject(floor);
-        Airport airport = new Airport(new Vector());
+        Airport airport = new Airport(new Vector(0, 0.5f, 0));
         world.addWorldObject(airport);
         int nbPoints = 50;
         Random random = new Random(1);
@@ -138,7 +138,7 @@ public class WorldBuilder_v2 {
         world.addDrones(droneList);
         Floor floor = new Floor(new Vector());
         world.addWorldObject(floor);
-        Airport airport = new Airport(new Vector());
+        Airport airport = new Airport(new Vector(0, 0.5f, 0));
         world.addWorldObject(airport);
         return world;
     }
@@ -152,7 +152,7 @@ public class WorldBuilder_v2 {
         world.addWorldObject(this.getDroneBuilder_v2().createTestBounceDrone());
         Floor floor = new Floor(new Vector());
         world.addWorldObject(floor);
-        Airport airport = new Airport(new Vector(0, 0.1f, 0));
+        Airport airport = new Airport(new Vector(0, 0.5f, 0));
         world.addWorldObject(airport);
         return world;
     }
@@ -166,7 +166,7 @@ public class WorldBuilder_v2 {
         world.addWorldObject(this.getDroneBuilder_v2().createTestBounceDrone());
         Floor floor = new Floor(new Vector());
         world.addWorldObject(floor);
-        Airport airport = new Airport(new Vector());
+        Airport airport = new Airport(new Vector(0, 0.5f, 0));
         world.addWorldObject(airport);
         world.setApproxPath(new Path() {
             @Override
@@ -222,7 +222,7 @@ public class WorldBuilder_v2 {
     private static void initSurroundings(World world){
         Floor floor = new Floor(new Vector());
         world.addWorldObject(floor);
-        Airport airport = new Airport(new Vector());
+        Airport airport = new Airport(new Vector(0, 10f, 0));
         world.addWorldObject(airport);
     }
 

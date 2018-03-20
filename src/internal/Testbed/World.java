@@ -225,6 +225,7 @@ public class World {
 					}
 				}
 			}
+			
 
 			//advance all the drones:
 			this.advanceAllDrones(droneSet, timeInterval);
@@ -233,6 +234,24 @@ public class World {
 			//checkForCrashes(droneSet);
 		}
 
+	}
+	
+	private List<Drone> displayDronePathsList = new ArrayList<Drone>();
+	
+	private List<Drone> getDisplayDronePathsList(){
+		return this.displayDronePathsList;
+	}
+	
+	private boolean displayDronePathsListContains(Drone drone) {
+		return getDisplayDronePathsList().contains(drone);
+	}
+	
+	private void addToDisplayDronePathsList(Drone drone) {
+		this.displayDronePathsList.add(drone);
+	}
+	
+	private void removeFromoDisplayDronePathsList(Drone drone) {
+		this.displayDronePathsList.remove(drone);
 	}
 
 	private void checkForCrashes(Set<Drone> droneSet){

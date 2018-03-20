@@ -96,6 +96,8 @@ public class Cube implements Polygon {
 	private Vector3f position = new Vector3f();
 	private Vector3f size = new Vector3f(1f, 1f, 1f);
 	
+	private float totalDistance = 0;
+	
 	static public void setGraphics(Graphics graphics) {
 		g = graphics;
 	}
@@ -129,6 +131,7 @@ public class Cube implements Polygon {
 	public void update(Vector3f displacement, Vector3f orientation) {
 		this.orientation  = orientation.negate();
 		position = position.add(displacement);
+		totalDistance += displacement.length();
 	}
 	
 	public Vector3f getRelPos() {
@@ -145,6 +148,10 @@ public class Cube implements Polygon {
 	
 	public void delete() {
 		this.mesh.delete();
+	}
+	
+	public float getTotalDistance() {
+		return this.totalDistance;
 	}
 
 	public Vector getPosition(){
