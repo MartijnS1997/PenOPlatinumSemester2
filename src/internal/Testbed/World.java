@@ -1,4 +1,5 @@
 package internal.Testbed;
+import AutopilotInterfaces.AutopilotConfig;
 import AutopilotInterfaces.Path;
 import internal.Exceptions.AngleOfAttackException;
 import internal.Exceptions.SimulationEndedException;
@@ -413,8 +414,63 @@ public class World {
 				return true;
 			case NO_OBJECTIVE:
 				return false; // no objective was set
+			case FLIGHT_OBJECTIVE:
+				return flightObjectiveReached(block, drone);
 		}
 		return false;
+	}
+
+	private boolean flightObjectiveReached(Block block, Drone drone) {
+		boolean withinFourMeters = block.getPosition().distanceBetween(drone.getPosition()) <=4.0f;
+		if(!withinFourMeters)
+            return false;
+
+		block.setVisited();
+
+		for(Block block1: this.getBlockSet()){
+            if(block1.isVisited()) {
+                this.removeWorldObject(block1);
+                this.getBlockSet().remove(block);
+                //System.out.print("Visited block: " + block1);
+            }
+        }
+
+		//check if all the cubes are visited
+		for(Block currentBlock: this.getBlockSet()){
+            // if not return false
+            if(!currentBlock.isVisited())
+                return false;
+        }
+
+        return droneVisitedAllCubesAndOnGround(drone);
+	}
+
+	/**
+	 * Checks if the drone is on the ground, has reached all the cubes and came to a standstill
+	 * @param drone the drone to check
+	 * @return true if the drone is on the ground, had visited all the cubes and has velocity < 1m/s
+	 */
+	private boolean droneVisitedAllCubesAndOnGround(Drone drone){
+		//first check if all the blocks are visited
+		boolean ready = this.getBlockSet().size() == 0;
+		//check if more or les on the ground
+		ready = ready && (drone.getPosition().getyValue() <= landedDroneYPos(drone));
+		//check if moving fast
+		ready = ready && drone.getVelocity().getSize() < MAX_LANDING_VELOCITY;
+		return ready;
+
+	}
+
+	/**
+	 * Calculates the height of the drone when landed
+	 * @param drone the drone to calculate for
+	 * @return the height of the tyre  + the height of the chassis
+	 */
+	private float landedDroneYPos(Drone drone){
+		AutopilotConfig config = drone.getAutopilotConfig();
+		float tryeHeight = config.getTyreRadius();
+		float chassisHeight = config.getWheelY();
+		return tryeHeight + chassisHeight;
 	}
 
 	/**
@@ -470,6 +526,8 @@ public class World {
 			case VISIT_ALL_OBJECTIVE:
 				return true;
 			case NO_OBJECTIVE:
+				return true;
+			case FLIGHT_OBJECTIVE:
 				return true;
 			default:
 				return false;
@@ -535,12 +593,13 @@ public class World {
 	public final static String REACH_CUBE_OBJECTIVE = "reach cube";
 	public final static String VISIT_ALL_OBJECTIVE = "visit all the cubes";
 	public final static String NO_OBJECTIVE = "no objective";
+	public final static String FLIGHT_OBJECTIVE = "do a complete flight";
 
 	/**
 	 * Constants
 	 */
 	public final static float CRASH_DISTANCE = 5.0f;
-
+	public final static float MAX_LANDING_VELOCITY = 1.0f;
 
 
 
