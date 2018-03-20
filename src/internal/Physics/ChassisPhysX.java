@@ -66,10 +66,10 @@ public class ChassisPhysX {
         TyrePhysX rearRightTyre = this.getRearRightTyre();
         Vector rearRightTyreForce = rearRightTyre.getNetForceTyre(state, inputs.getRightBrakeForce(), deltaTime, state.getPrevRearRightTyreDelta());
 
-        System.out.println("front tyre"+ frontTyreForce);
-        System.out.println("left tyre"+ rearLeftTyreForce);
+   //     System.out.println("front tyre"+ frontTyreForce);
+    //    System.out.println("left tyre"+ rearLeftTyreForce);
 
-        System.out.println("right tyre"+ rearRightTyreForce);
+    //    System.out.println("right tyre"+ rearRightTyreForce);
 
 
 
