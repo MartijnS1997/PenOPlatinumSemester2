@@ -2,7 +2,11 @@ package internal.Autopilot;
 
 import AutopilotInterfaces.*;
 import AutopilotInterfaces.Path;
+import internal.Helper.Vector;
+import internal.Physics.PhysXEngine;
 import internal.Testbed.FlightRecorder;
+
+import java.util.List;
 
 import static java.lang.Math.*;
 
@@ -25,7 +29,53 @@ public abstract class AutoPilotFlightController extends Controller{
 
     @Override
     public boolean hasReachedObjective(AutopilotInputs_v2 inputs) {
+        //if there are no cubes visible, we have lost visual contact, we start our landing sequence
+        //first do the simple check
+        //if it fails, we'll do some more calculations
+        if(this.cubeVisibleOnCamera()){
+            return false;
+        }
+        //there was no drone visible on the camera, see if there are cubes in front of the drone
+        return cubeInFrontOfDrone(inputs);
+    }
+
+    /**
+     * Checks if there are any cubes that can be reached in front of the drone (checks if there are in front of it)
+     * @param inputs the current autopilot inputs
+     * @return true if and only if there at least one cube in front of the drone
+     */
+    private boolean cubeInFrontOfDrone(AutopilotInputs_v2 inputs){
+        Path path = this.getAutopilot().getPath();
+        List<Vector> cubePositions = Controller.extractPath(path);
+        Vector dronePosition = Controller.extractPosition(inputs);
+        Vector droneOrientation = Controller.extractOrientation(inputs);
+        for(Vector cubePosition: cubePositions){
+            if(inFrontOfDrone(cubePosition, dronePosition, droneOrientation )){
+                return true;
+            }
+        }
+
         return false;
+
+    }
+
+    /**
+     * Checks if the provided cube position is in front of the drone or not
+     * @param cubePosition the position of the cube
+     * @param dronePosition the position of the drone
+     * @param droneOrientation the orientation of the drone
+     * @return true if and only if the cube is in front of the drone
+     */
+    private static boolean inFrontOfDrone(Vector cubePosition, Vector dronePosition, Vector droneOrientation){
+        // take the difference
+        Vector diffVectorWorld = cubePosition.vectorDifference(dronePosition);
+        //transform it onto the drone axis system
+        Vector diffVectorDrone = PhysXEngine.worldOnDrone(diffVectorWorld, droneOrientation);
+        //then project the difference vector on the heading vector
+        Vector headingVector = new Vector(0,0,-1);
+        Vector projectedDiff = headingVector.projectOnVector(diffVectorDrone);
+        //check the scalar product of the projection, if positive we're behind, if not we're ahead
+        return projectedDiff.scalarProduct(headingVector) > 0;
     }
 
     /**
@@ -124,10 +174,70 @@ public abstract class AutoPilotFlightController extends Controller{
 //        this.flightRecorder = flightRecorder;
 //    }
 
+    /**
+     * Determines the cube that is located the furthest from the initial position of the drone
+     * this will be the final cube to be reached before we initialize the landing sequence
+     */
+    public void determineFurthestPathObject(){
+        //check if already configured, if so, we may leave
+        if(hasAlreadySetFurthestCube()){
+            return;
+        }
+        //get the start position
+        Vector startPos = this.getAutopilot().getStartPosition();
+        //get the furthest element of the path
+        Path flightPath = this.getFlightPath();
+        List<Vector> flightPathList = Controller.extractPath(flightPath);
+        //find the one the furthest away
+        //compare the accumulator to the sta
+        Vector destination = flightPathList.stream().reduce(startPos.copy(), (v1, v2) -> startPos.distanceBetween(v1) > startPos.distanceBetween(v2) ? v1 : v2);
+
+        this.setFurthestCube(destination);
+    }
+
+    /**
+     * Getter the object furthest from the start position of the drone
+     * @return the path object the furthest from the initial position of the drone
+     */
+    private Vector getFurthestCube() {
+        return furthestCube;
+    }
+
+    /**
+     * Setter for the furthest path object (see getter for more info)
+     * @param furthestCube the furthest path object to be set
+     */
+    private void setFurthestCube(Vector furthestCube) {
+        if(hasAlreadySetFurthestCube()){
+            //ignore the request
+            return;
+        }
+        this.furthestCube = furthestCube;
+    }
+
+    /**
+     * Checks if the furthest path object is already set
+     * @return returns true if so
+     */
+    private boolean hasAlreadySetFurthestCube(){
+        return this.getFlightPath() != null;
+    }
+
+    /**
+     * Checks if there are any cubes visible on the camera
+     * @return true if there are any cubes visible
+     */
+    private boolean cubeVisibleOnCamera(){
+        AutoPilotCamera camera = this.getAutopilot().getAPCamera();
+        return camera.getAllCubeCenters().size()>0;
+    }
+
     
 
     /*
     Getters and setters
+
+
      */
 
     @Override
@@ -159,8 +269,20 @@ public abstract class AutoPilotFlightController extends Controller{
 
     private static final float STANDARD_THRUST = 32.859283f *2;
     private static final float RAD2DEGREE = (float) (180f/ PI);
+    /**
+     * The distance between the drone and the closest cube to call the objective reached
+     */
+    private static final float OBJECTTIVE_REACHED_DISTANCE = 10.0f;
 
+    /**
+     * The flight path to be approximately taken by the drone
+     */
     private AutopilotInterfaces.Path flightPath;
+
+    /**
+     * The position of the cube that is located the furthest from the drone
+     */
+    private Vector furthestCube;
 
 
 }
