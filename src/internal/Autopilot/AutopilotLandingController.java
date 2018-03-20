@@ -5,12 +5,8 @@ import AutopilotInterfaces.AutopilotInputs;
 import AutopilotInterfaces.AutopilotInputs_v2;
 import AutopilotInterfaces.AutopilotOutputs;
 import internal.Helper.Vector;
-import internal.Physics.PhysXEngine;
-
-
 import static java.lang.Math.*;
 
-import java.util.List;
 
 /**
  * Created by Martijn on 18/02/2018, extended by Jonathan on 12/3/2018
@@ -39,10 +35,6 @@ public class AutopilotLandingController extends Controller {
     public AutopilotOutputs getControlActions(AutopilotInputs_v2 inputs) {
         this.setCurrentInputs(inputs);
 
-
-        // generate path
-/*        AutopilotInputs currentInputs = getCurrentInputs();
-        AutopilotInputs previousInputs = getPreviousInputs();*/
         ControlOutputs outputs = new ControlOutputs();
 
 
@@ -52,12 +44,12 @@ public class AutopilotLandingController extends Controller {
 
         //start going down
         loseAltitude(outputs);
-
+        //make sure the pitch stays ok
         pitchControl(outputs);
 
         //under INIT_LANDING_HEIGHT start stabilizing the plane
         if (Controller.extractPosition(inputs).getyValue() <= INIT_LANDING_HEIGHT) {
-            //activate the breaks on the wheels when plane hits the ground
+            //activate the breaks on the wheels when plane hits the ground (1.2m)
             if (Controller.extractPosition(inputs).getyValue() <= PLANE_HEIGHT_FROM_GROUND) {
                 outputs.setRightBrakeForce(100);
                 outputs.setLeftBrakeForce(100);
@@ -75,6 +67,9 @@ public class AutopilotLandingController extends Controller {
         return outputs;
     }
 
+    /**
+     * Makes the Drone lose altitude so it can start landing
+     */
     private void loseAltitude(ControlOutputs outputs) {
         float outputThrust  = this.getAutopilot().getMaxThrust();
         outputs.setThrust(outputThrust);
@@ -83,6 +78,9 @@ public class AutopilotLandingController extends Controller {
         outputs.setHorStabInclination(HORIZONTAL_STABILIZER);
     }
 
+    /**
+     *  Makes sure the Drone stays on the ground and doesn't take off again after landing
+     */
     private void stayDown(ControlOutputs outputs) {
         float outputThrust  = this.getAutopilot().getMaxThrust();
         outputs.setThrust(outputThrust);
@@ -91,7 +89,9 @@ public class AutopilotLandingController extends Controller {
         outputs.setHorStabInclination(HORIZONTAL_STABILIZER/2);
     }
 
-
+    /**
+     * Controls the pitch, makes sure it doesn't get out of its range (PITCH_THRESHOLD)
+     */
     private void pitchControl(ControlOutputs outputs) {
         float pitch = Controller.extractOrientation(this.getCurrentInputs()).getyValue();
         if (abs(pitch) >= PITCH_THRESHOLD) {
@@ -99,26 +99,16 @@ public class AutopilotLandingController extends Controller {
         }
     }
 
-
+    /**
+     *  Set the thrust to 0
+     */
     private void setThrust(ControlOutputs outputs) {
- /*       //get the maximal thrust
-        float maxThrust = this.getAutopilot().getConfig().getMaxThrust();
-        //elapsed time:
-        float elapsedTime = this.getCurrentInputs().getElapsedTime();
-        //first get an approx of the current velocity
-        Vector velocity = this.getVelocityApprox(this.getPreviousInputs(), this.getCurrentInputs());
-        //then get a response from the PID
-        Vector velocityPID = this.getVelocityPID().getPIDOutput(velocity, elapsedTime);
-        //use the PID output for the corrective action (gives the error on the velocity)
-        //we we take the desired output thrust (for stable config) if the velocity is too high, pull back, to low go faster
-        //System.out.println("velocityPID: " + velocityPID);
-        float outputThrust = (2 - (STOP_VELOCITY + velocityPID.getzValue()) / STOP_VELOCITY) * STANDARD_THRUST;
-        outputs.setThrust(max(min(outputThrust, maxThrust), 0f));*/
         outputs.setThrust(0f);
-
     }
 
-
+    /**
+     *  Stabilize the horizontal stabilizer of the Drone (makes it easier for the Drone to make a stable landing)
+     */
     private void setHorizontalStabilizer(ControlOutputs outputs){
         //we want to go for zero (stable inclination of the horizontal stabilizer is zero), so the corrective action needs also to be zero
         Vector orientation = Controller.extractOrientation(this.getCurrentInputs());
@@ -133,8 +123,9 @@ public class AutopilotLandingController extends Controller {
     }
 
 
-
-    private VectorPID velocityPID = new VectorPID(1.0f, 0.1f, 0.1f);
+    /**
+     * Constants
+     */
     private final static float STOP_VELOCITY = 0.0f;
     private final static float STANDARD_THRUST = 128.41895f * 3.5f;
     private final static float WING_INCL = (float) (PI / 180);
@@ -149,7 +140,7 @@ public class AutopilotLandingController extends Controller {
     private final static float PLANE_HEIGHT_FROM_GROUND = 1.2f;
 
 
-
+    private VectorPID velocityPID = new VectorPID(1.0f, 0.1f, 0.1f);
     private Vector referenceVelocity = new Vector(0,0,-STOP_VELOCITY);
     private VectorPID orientationPID = new VectorPID(1.0f, 0f, 0f);
     private Vector referenceOrientation = new Vector();

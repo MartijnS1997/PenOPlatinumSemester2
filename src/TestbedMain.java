@@ -1,5 +1,6 @@
 import AutopilotInterfaces.*;
 import gui.*;
+import internal.Autopilot.Controller;
 import internal.Exceptions.AngleOfAttackException;
 import internal.Exceptions.SimulationEndedException;
 import internal.Helper.Vector;
@@ -286,7 +287,7 @@ public class TestbedMain implements Runnable{
         Map<Vector, Float> droneConfig = new HashMap<>();
         droneConfig.put(new Vector(0, 0.20f-0.01f + 1f,0), 0f); //drone standing on ground with tyre compression 0.05
         //World world =  builder.createWorld(); //builder.createWorld(droneConfig)
-        World world = builder.createFlightTestWorld();
+        World world = builder.createGroundDroneTestWorld();
         this.setWorld(world);
         Drone drone =(Drone)(world.getDroneSet().toArray())[0]; //only one drone is present
         //System.out.println("drone: " + drone);

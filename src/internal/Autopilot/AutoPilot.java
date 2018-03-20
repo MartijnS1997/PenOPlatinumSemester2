@@ -41,7 +41,7 @@ public class AutoPilot implements Autopilot_v2{
 		this.setLandingController(new AutopilotLandingController(this));
 		this.setWayPointController(new AutopilotWayPointController(this));
 		//set AP mode 2 to make everything work again
-		this.setAPMode(APModes.WAY_POINT); //AP 3 to test the landing controller
+		this.setAPMode(APModes.TAXIING); //AP 3 to test the landing controller
 
 	}
 
@@ -277,6 +277,17 @@ public class AutoPilot implements Autopilot_v2{
 		this.wayPointController = wayPointController;
 	}
 
+	private AutopilotTaxiingController getTaxiingController() { return taxiingController; }
+	private void setTaxiingController(AutopilotTaxiingController taxiingController){
+		this.taxiingController = taxiingController;
+	}
+
+	private boolean canHaveAsTaxiingController(AutopilotTaxiingController controller){
+
+		return controller != null && controller.getAutopilot() == this && this.taxiingController == null;
+	}
+
+
 	/**
 	 * Getter for the main wing mass of the drone
 	 * @return a floating point number containing the mass of the main wing
@@ -364,6 +375,9 @@ public class AutoPilot implements Autopilot_v2{
 	 */
 	private AutopilotWayPointController wayPointController;
 
+
+	private AutopilotTaxiingController taxiingController;
+
 	/**
 	 * Variable that stores the configuration of the autopilot
 	 */
@@ -417,6 +431,6 @@ public class AutoPilot implements Autopilot_v2{
 }
 
 enum APModes{
-	TAKEOFF, FLYING_TO_BLOCKS, WAY_POINT, LANDING
+	TAKEOFF, FLYING_TO_BLOCKS, WAY_POINT, LANDING, TAXIING
 }
 
