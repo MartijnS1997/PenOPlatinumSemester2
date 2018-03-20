@@ -136,7 +136,6 @@ public class PathGenerator {
 	    }
 	    
     private boolean canMakeTurn(Vector position, Vector direction, Vector destination) {
-
     	return parallelDistanceBetween(position, direction, getLandingStartPosition(position, direction, destination)) >= STEEPEST_TURN_DIAMETER;
     }
 
