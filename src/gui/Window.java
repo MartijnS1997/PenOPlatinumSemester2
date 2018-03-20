@@ -204,11 +204,7 @@ public class Window {
         	else if(object.getClass() == Drone.class) {
         		for (GraphicsObject polygon: object.getAssociatedGraphicsObjects()) {
         			program.setUniform("modelMatrix", getModelMatrix(((Drone) object).getOrientation().convertToVector3f(), ((Polygon) polygon).getRelPos(), polygon.getSize()));
-        			if (polygon.getPos().subtract(this.cameraposition).length() > viewingDistance*0.8) {
-        				if (getSetting() != Settings.DRONE_CAM && getSetting() != Settings.DRONE_CHASE_CAM) {
-        					input.nextPosition(polygon.getPos());
-        				}
-        			}
+        			input.nextPosition(polygon.getPos());
         			polygon.render();
         		}
         	}

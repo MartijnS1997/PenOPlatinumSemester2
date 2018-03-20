@@ -99,7 +99,7 @@ public class WorldBuilder_v2 {
         world.addWorldObject(this.getDroneBuilder_v2().createTestBounceDrone());
         Floor floor = new Floor(new Vector());
         world.addWorldObject(floor);
-        Airport airport = new Airport(new Vector(0, 0.1f, 0));
+        Airport airport = new Airport(new Vector(0, 0.5f, 0));
         world.addWorldObject(airport);
         return world;
     }
