@@ -201,19 +201,56 @@ public class PathGenerator {
 
     }
     
+    /**
+     * Method for retrieving the next waypoint we should reach
+     * @param position
+     * @param velocity
+     * @param destination
+     * @return
+     */
     public Vector getNextWaypoint(Vector position, Vector velocity, Vector destination) {
     	if (!hasPathLocked())generateLandingPath(position, velocity, destination);
     	return getPath().get(0);
     }
     
+    /**
+     * Method for retrieving the next waypoint we should reach, after having just reached one
+     * @param position
+     * @param velocity
+     * @param destination
+     * @return
+     */
     public Vector getNextWaypointSuccess(Vector position, Vector velocity, Vector destination) {
-    	if (!hasPathLocked() || getPath().size() == 1)generateLandingPath(position, velocity, destination);
-    	return getPath().get(Math.min(getPath().size(),1));
+    	if (!hasPathLocked()) {
+    		// Generate a path if none was generated
+    		generateLandingPath(position, velocity, destination);
+    	}else {
+    		if (getPath().size() <= 1) {
+    			// If path contains only one element, generate a new path
+    			generateLandingPath(position, velocity, destination);
+    		}else {
+    			// If path is long enough, erase first element
+    			List<Vector> newPath = getPath();
+            	newPath.remove(0);
+            	setPath(newPath);
+    		}
+    	}
+    	return getPath().get(0);
+    	
     }
     
+    /**
+     * Method for retrieving the next waypoint we should reach, after having missed one.
+     * Always regenerates the path.
+     * @param position
+     * @param velocity
+     * @param destination
+     * @return
+     */
     public Vector getNextWaypointMissed(Vector position, Vector velocity, Vector destination) {
+    	// Always generate a new path
     	generateLandingPath(position, velocity, destination);
-    	return getPath().get(Math.min(getPath().size(),1));
+    	return getPath().get(0);
     }
 
 	
