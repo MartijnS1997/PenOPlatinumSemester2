@@ -443,10 +443,6 @@ public abstract class Controller {
 
     private AutopilotInputs_v2 currentInputs;
     private AutopilotInputs_v2 previousInputs;
-    
-    protected PathGenerator getPathGenerator() {
-    	return this.pathGenerator;
-    }
 
     /**
      * Object that stores the autopilot of the drone

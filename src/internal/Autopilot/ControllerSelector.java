@@ -137,7 +137,7 @@ public class ControllerSelector {
      */
     private void configureWayPointController(AutopilotWayPointController wayPointController){
         Vector startPos = this.getAutopilot().getStartPosition();
-        wayPointController.setLandingPath(startPos);
+        wayPointController.setDestination(startPos);
     }
 
     /**
