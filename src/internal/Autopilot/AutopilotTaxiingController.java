@@ -35,7 +35,7 @@ public class AutopilotTaxiingController extends Controller {
      //   goForward(velocity, outputs);
 
 
-        float desiredZValue = -10;
+        float desiredZValue = 30;
         float desiredXValue = 20;
 
         if (desiredZValue < 0) {
@@ -53,10 +53,6 @@ public class AutopilotTaxiingController extends Controller {
                 System.out.println("a");
 
             }
-            else if (Controller.extractOrientation(inputs).getxValue() > -PI){
-                System.out.println("d");
-                turnSouth(outputs);
-            }
             else if (Math.abs(desiredZValue) - Math.abs(Controller.extractPosition(inputs).getzValue()) < Math.abs(velocity.getzValue())) {
                 setBrakeForce(outputs, 100);
                 outputs.setThrust(0);
@@ -64,15 +60,10 @@ public class AutopilotTaxiingController extends Controller {
 
             }
             else{
-                goForward(velocity,outputs);
+            //    goForward(velocity,outputs);
                 System.out.println("c");
-                /*outputs.setThrust(0);
-                outputs.setVerStabInclination(0);
-                outputs.setHorStabInclination(0);
-                outputs.setLeftBrakeForce(0);
-                outputs.setRightBrakeForce(100);
-                outputs.setFrontBrakeForce(100);
-*/
+
+                stabillizeOrientation(outputs,(float)-PI,Controller.extractOrientation(inputs));
             }
 
         }
@@ -105,17 +96,41 @@ public class AutopilotTaxiingController extends Controller {
 
 
       //  System.out.println("x: "+Controller.extractPosition(inputs).getxValue());
-        System.out.println("z: "+Controller.extractPosition(inputs).getzValue());
+        //System.out.println("z: "+Controller.extractPosition(inputs).getzValue());
 
         //System.out.println(velocity);
-        System.out.println("velocity " + velocity);
-    //    System.out.println("orientation " + Controller.extractOrientation(inputs));
+        //System.out.println("velocity " + velocity);
+        System.out.println("orientation " + Controller.extractOrientation(inputs));
 
 
         return outputs;
     }
 
+    @Override
+    public boolean hasReachedObjective(AutopilotInputs_v2 inputs) {
+        return false;
+    }
 
+    private void stabillizeOrientation(ControlOutputs outputs, float stabilizeAround, Vector orientation){
+        if (stabilizeAround > orientation.getxValue()){
+            outputs.setFrontBrakeForce(0);
+            outputs.setLeftBrakeForce(100);
+            outputs.setRightBrakeForce(0);
+            outputs.setVerStabInclination(0);
+            outputs.setThrust(200);
+            System.out.println("l");
+
+        }
+        if (stabilizeAround < orientation.getxValue()){
+            outputs.setFrontBrakeForce(0);
+            outputs.setLeftBrakeForce(0);
+            outputs.setRightBrakeForce(100);
+            outputs.setVerStabInclination(0);
+            outputs.setThrust(200);
+            System.out.println("r");
+
+        }
+    }
 
     private void setBrakeForce(ControlOutputs outputs, float brakeForce){
         outputs.setFrontBrakeForce(brakeForce);
