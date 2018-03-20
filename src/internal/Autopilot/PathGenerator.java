@@ -192,6 +192,13 @@ public class PathGenerator {
 
     }
 
+    /**
+     * Generates a vector that is oriented perpendicularly on the horizontal cord between the two given points.
+     * Points to the left when standing in position2, looking towards position1
+     * @param position1
+     * @param position2
+     * @return
+     */
     private static Vector parallelHorizontalVector(Vector position1, Vector position2) {
     	position1 = position1.makeHorizontal();
     	position2 = position2.makeHorizontal();
