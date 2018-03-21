@@ -13,6 +13,7 @@ import java.util.Optional;
  * A class of controller selectors
  * selects the controller that is currently used by the autopilot
  */
+//TODO: add the stabilizer controller in between the flight and way point phase and (another, or the same one) between the way point and the landing
 public class ControllerSelector {
 
     /**

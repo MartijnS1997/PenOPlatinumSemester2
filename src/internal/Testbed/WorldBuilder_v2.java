@@ -48,22 +48,25 @@ public class WorldBuilder_v2 {
     public World createFlightTestWorld(){
         World world = new World(World.NO_OBJECTIVE);
         Map<Vector, Float> droneConfig = new HashMap<>();
-        droneConfig.put(new Vector(0,20f,0), 0f); //drone at 5m height facing forward
+        droneConfig.put(new Vector(0,30f,0), 0f); //drone at 5m height facing forward
         List<Drone> droneList = this.getDroneBuilder_v2().createDrones(droneConfig);
         world.addDrones(droneList);
-        Floor floor = new Floor(new Vector());
-        world.addWorldObject(floor);
+        //Floor floor = new Floor(new Vector());
+        //world.addWorldObject(floor);
         Airport airport = new Airport(new Vector(0, 0.5f, 0));
         world.addWorldObject(airport);
-        int nbPoints = 50;
+        int nbPoints = 100;
         Random random = new Random(1);
         for(int i = 1; i<nbPoints; i++){
-//            float turningRadius = 1500;
-//            float x = (float) (-turningRadius*cos(PI/nbPoints * i) + turningRadius);
-//            float z = (float) (-sin(PI/nbPoints*i)*turningRadius);
+            float turningRadius = 1200;
+            float pathLen = (float) (turningRadius*PI);
+            float totalAscend = 0.1f*pathLen;
+            float ascendPerBlock = totalAscend/nbPoints;
+            float x = (float) (-turningRadius*cos(PI/nbPoints * i) + turningRadius);
+            float z = (float) (-sin(PI/nbPoints*i)*turningRadius);
 
 
-            Vector pos = new Vector(0, 30, -i*60);
+            Vector pos = new Vector(x, 30 + ascendPerBlock*i, z);
             Cube cube = new Cube(pos.convertToVector3f(), new Vector(	60.0f,  1.0f,  1.0f).convertToVector3f(), true );
             cube.setSize(5f);
             Block block = new Block(pos);

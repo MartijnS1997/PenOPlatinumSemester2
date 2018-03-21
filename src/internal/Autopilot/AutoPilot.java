@@ -27,28 +27,10 @@ public class AutoPilot implements Autopilot_v2{
 		this.setSelector(new ControllerSelector(this));
 
 		//may be out commented if the transitions are smooth
-		//this.getSelector().forceActiveController(FlightState.LANDING);
+		//this.getSelector().forceActiveController(FlightState.WAY_POINT);
 
 	}
-//// first make sure we can takeoff
-//		this.setTakeoffController(new AutopilotTakeoffController(this));
-//		System.out.println(controllerConfig);
-//	// then we mus assure our customers a smooth ride
-//		switch(controllerConfig){
-//		case PhysXEngine.ALPHA_MODE:
-//			this.setFlightController(new AlphaFlightController(this));
-//			break;
-//		case PhysXEngine.BETA_MODE:
-//			this.setFlightController(new BetaFlightController(this));
-//			break;
-//		case PhysXEngine.GAMMA_MODE:
-//			this.setFlightController(new GammaFlightController(this));
-//	}
-//	// and last, we need to land
-//		this.setLandingController(new AutopilotLandingController(this));
-//		this.setWayPointController(new AutopilotWayPointController(this));
-//	//set AP mode 2 to make everything work again
-//		this.setAPMode(APModes.WAY_POINT); //AP 3 to test the landing controller
+
 	/**
 	 * Default constructor for the autopilot
 	 */
