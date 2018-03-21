@@ -157,7 +157,7 @@ public class AutopilotLandingController extends Controller {
 
             return LandingPhases.SOFT_DESCEND;
         }else{
-            System.out.println("Soft Started: " + currentInputs.getY());
+            System.out.println("CurrentS y: " + currentInputs.getY());
             return LandingPhases.SOFT_DESCEND;
         }
     }
@@ -204,8 +204,8 @@ public class AutopilotLandingController extends Controller {
         AutopilotInputs_v2 prevInputs = this.getPreviousInputs();
         AutopilotConfig config = this.getConfig();
         //set the setPoint
-        PIDController pitchPID = this.getPitchPIDController();
-        pitchPID.setSetPoint(SOFT_DESCEND_PHASE_REF_PITCH);
+//        PIDController pitchPID = this.getPitchPIDController();
+//        pitchPID.setSetPoint(SOFT_DESCEND_PHASE_REF_PITCH);
         //call the pitch and roll PID
         this.pitchStabilizer(outputs, currentInputs, prevInputs);
         this.rollStabilizer(outputs, currentInputs, prevInputs);
@@ -213,16 +213,14 @@ public class AutopilotLandingController extends Controller {
         outputs.setRightWingInclination(outputs.getRightWingInclination() - SOFT_DESCEND_PHASE_MAIN_WING_INCLINATION_DELTA);
         outputs.setLeftWingInclination(outputs.getLeftWingInclination() - SOFT_DESCEND_PHASE_MAIN_WING_INCLINATION_DELTA);
         outputs.setThrust(SOFT_DESCEND_THRUST);
-        outputs.setRightBrakeForce(config.getRMax());
-        outputs.setLeftBrakeForce(config.getRMax());
-        outputs.setFrontBrakeForce(config.getRMax());
-
-
-
+        outputs.setRightBrakeForce(config.getRMax()/8);
+        outputs.setLeftBrakeForce(config.getRMax()/8);
+        outputs.setFrontBrakeForce(config.getRMax()/8);
     }
 
 
 
+    
     /**
      * Checks if the drone may initialize landing
      * @param inputs the current inputs of the autopilot
@@ -439,8 +437,8 @@ public class AutopilotLandingController extends Controller {
     private final static float RAPID_DESCEND_THRUST = 0f;
 
     //soft descend constants
-    private final static float SOFT_DESCEND_PHASE_REF_PITCH = (float) (0.01*PI/180);
-    private final static float SOFT_DESCEND_PHASE_MAIN_WING_INCLINATION_DELTA = (float)(1*PI/180);
+    private final static float SOFT_DESCEND_PHASE_REF_PITCH = (float) (-2*PI/180);
+    private final static float SOFT_DESCEND_PHASE_MAIN_WING_INCLINATION_DELTA = (float)(-4*PI/180);
     private final static float SOFT_DESCEND_THRUST = 0f;
     private final static float SOFT_DESCEND_MIN_START_HEIGHT = 5f;
     //Bartje was hier :)
