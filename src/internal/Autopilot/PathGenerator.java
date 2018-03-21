@@ -1,6 +1,7 @@
 package internal.Autopilot;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import internal.Helper.Vector;
@@ -102,6 +103,8 @@ public class PathGenerator {
 				lastBlock = lastBlock.vectorSum(prolongVector.scalarMult(-1));
 				blockCoordinates.add(lastBlock);
 			}
+			
+			Collections.reverse(blockCoordinates);
     		
     		pathLock();
     		
@@ -136,7 +139,6 @@ public class PathGenerator {
 	    }
 	    
     private boolean canMakeTurn(Vector position, Vector direction, Vector destination) {
-
     	return parallelDistanceBetween(position, direction, getLandingStartPosition(position, direction, destination)) >= STEEPEST_TURN_DIAMETER;
     }
 

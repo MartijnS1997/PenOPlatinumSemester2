@@ -29,32 +29,63 @@ public class AutopilotTaxiingController extends Controller {
         AutopilotInputs_v2 previousInputs = getPreviousInputs();
         ControlOutputs outputs = new ControlOutputs();
         Vector velocity = getVelocityApprox(previousInputs,currentInputs);
+        Vector orientation = Controller.extractOrientation(inputs);
+        Vector position = Controller.extractPosition(inputs);
         float velocity1D = (float) Math.sqrt(pow(velocity.getzValue(),2)+pow(velocity.getxValue(),2));
 
 
-     //   goForward(velocity, outputs);
 
-
+        //the z coordinate of the location the drone has to go to (has to be changed to something with the path)
         float desiredZValue = 30;
-        float desiredXValue = 20;
+        //the x coordinate of the location the drone has to go to
+        float desiredXValue = 0;
 
-        if (desiredZValue < 0) {
-
-             if (Math.abs(desiredZValue) - Math.abs(Controller.extractPosition(inputs).getzValue()) < Math.abs(velocity.getzValue())) {
-                    setBrakeForce(outputs, 1000);
-                    outputs.setThrust(0);
-            }
+        if (!hasToTurn(desiredXValue,desiredZValue,orientation,position)){
+                goForward(velocity, outputs);
+        }
+        else{
+            uTurn(outputs);
+        }
+        //check if the drone has reached the desired Z position and break if he has
+        if (Math.abs(desiredZValue) - Math.abs(position.getzValue()) < Math.abs(velocity.getzValue())) {
+            setBrakeForce(outputs, 800,800,800);
+            outputs.setThrust(0);
         }
 
 
+
+        //graveyard of things that didn't work either
+      /*  if (desiredZValue < 0) {
+
+            if (Math.abs(desiredZValue) - Math.abs(position.getzValue()) < Math.abs(velocity.getzValue())) {
+                if (Controller.extractOrientation(inputs).getxValue() > 0) {
+                    UTurn(outputs);
+                    System.out.println("a");
+
+                } else if (Math.abs(desiredZValue) - Math.abs(Controller.extractPosition(inputs).getzValue()) < Math.abs(velocity.getzValue())) {
+                //    setBrakeForce(outputs, 1000);
+                    outputs.setThrust(0);
+                    System.out.println("b");
+
+                } else {
+                    goForward(velocity,outputs);
+                    System.out.println("c");
+
+//                    stabillizeOrientation(outputs, (float) -PI, Controller.extractOrientation(inputs));
+                }
+
+            }
+        }
+
         if (desiredZValue > 0) {
             if (Controller.extractOrientation(inputs).getxValue() > -PI) {
-                UTurn(outputs);
+              //  UTurn(outputs);
                 System.out.println("a");
+                turnSouth(outputs);
 
             }
             else if (Math.abs(desiredZValue) - Math.abs(Controller.extractPosition(inputs).getzValue()) < Math.abs(velocity.getzValue())) {
-                setBrakeForce(outputs, 100);
+               // setBrakeForce(outputs, 1000);
                 outputs.setThrust(0);
                 System.out.println("b");
 
@@ -67,38 +98,12 @@ public class AutopilotTaxiingController extends Controller {
             }
 
         }
-      //  if (desiredZValue )
-
-/*        boolean intervaal = Controller.extractOrientation(inputs).getxValue() < -1.46f &&
-                Controller.extractOrientation(inputs).getxValue() > -1.6f;
-        if (desiredXValue > Controller.extractPosition(inputs).getxValue() && intervaal){
-                System.out.println(outputs.getThrust());
-                if (Controller.extractOrientation(inputs).getxValue() < -PI/2){
-             //       turnSouth(outputs);
-                  goForward(velocity,outputs);
-
-                    System.out.println("a");
-                }
-
-                if (Controller.extractOrientation(inputs).getxValue() > -PI/2) {
-                  //  turnNorth(outputs);
-                    goForward(velocity,outputs);
-                    System.out.println("b");
-
-                }
-            }
-               // goForward(velocity, outputs);
-        else {
-            turnNorth(outputs);
-            System.out.println("c");
-
-        }*/
+*/
 
 
       //  System.out.println("x: "+Controller.extractPosition(inputs).getxValue());
         //System.out.println("z: "+Controller.extractPosition(inputs).getzValue());
 
-        //System.out.println(velocity);
         //System.out.println("velocity " + velocity);
         System.out.println("orientation " + Controller.extractOrientation(inputs));
 
@@ -111,20 +116,56 @@ public class AutopilotTaxiingController extends Controller {
         return false;
     }
 
+    /**
+     * Check if the drone has to turn to reach his destination
+     * @param desiredXValue
+     * @param desiredZValue
+     * @param orientation
+     * @param currPos
+     * @return
+     */
+    private boolean hasToTurn(float desiredXValue, float desiredZValue, Vector orientation, Vector currPos){
+        //error allowed on the orientation
+        float delta = 0.25f;
+        //error allowed on the x position
+        float delta2 = 0.5f;
+
+        //if the current x position is (almost) correct the drone doesn't have to turn
+        if (desiredXValue > currPos.getxValue()-delta2 && desiredXValue < currPos.getxValue()+delta2) {
+            //if the the desired z position is smaller than the current and the x orientation is (almost) 0, the drone just has to drive straight forward
+            if (desiredZValue < currPos.getzValue()) {
+                if (orientation.getxValue() > 0 - delta && orientation.getxValue() < 0 + delta) {
+                    return false;
+                }
+            }
+            //if the the desired z position is bigger than the current and the x orientation is (almost) PI, the drone just has to drive straight forward
+            if (desiredZValue < currPos.getzValue()) {
+                if (Math.abs(orientation.getxValue()) > PI - delta && Math.abs(orientation.getxValue()) < PI + delta) {
+                    return false;
+                }
+            }
+        }
+
+
+        return true;
+    }
+
+    /**
+     * try to stabilize around an orientation
+     * @param outputs
+     * @param stabilizeAround
+     * @param orientation
+     */
     private void stabillizeOrientation(ControlOutputs outputs, float stabilizeAround, Vector orientation){
         if (stabilizeAround > orientation.getxValue()){
-            outputs.setFrontBrakeForce(0);
-            outputs.setLeftBrakeForce(100);
-            outputs.setRightBrakeForce(0);
+            setBrakeForce(outputs,0,100,0);
             outputs.setVerStabInclination(0);
             outputs.setThrust(200);
             System.out.println("l");
 
         }
         if (stabilizeAround < orientation.getxValue()){
-            outputs.setFrontBrakeForce(0);
-            outputs.setLeftBrakeForce(0);
-            outputs.setRightBrakeForce(100);
+            setBrakeForce(outputs,0,0,100);
             outputs.setVerStabInclination(0);
             outputs.setThrust(200);
             System.out.println("r");
@@ -132,38 +173,53 @@ public class AutopilotTaxiingController extends Controller {
         }
     }
 
-    private void setBrakeForce(ControlOutputs outputs, float brakeForce){
-        outputs.setFrontBrakeForce(brakeForce);
-        outputs.setLeftBrakeForce(brakeForce);
-        outputs.setRightBrakeForce(brakeForce);
+    /**
+     * set the force on all 3 breaks (front, left, right)
+     * @param outputs
+     * @param front
+     * @param left
+     * @param right
+     */
+    private void setBrakeForce(ControlOutputs outputs, float front, float left, float right){
+        outputs.setFrontBrakeForce(front);
+        outputs.setLeftBrakeForce(left);
+        outputs.setRightBrakeForce(right);
     }
 
 
-    private void turnNorth(ControlOutputs outputs){
-        outputs.setFrontBrakeForce(0);
-        outputs.setLeftBrakeForce(0);
-        outputs.setRightBrakeForce(100);
-        outputs.setVerStabInclination( (float) PI/3);
-        outputs.setThrust(500);
-    }
-
-
-    private void turnSouth(ControlOutputs outputs){
-        outputs.setFrontBrakeForce(0);
-        outputs.setLeftBrakeForce(300);
-        outputs.setRightBrakeForce(0);
-        outputs.setVerStabInclination( (float) PI/3);
-        outputs.setThrust(500);
-    }
-
-    private void UTurn(ControlOutputs outputs){
+/*    private void turnNorth(ControlOutputs outputs){
         outputs.setFrontBrakeForce(0);
         outputs.setLeftBrakeForce(0);
         outputs.setRightBrakeForce(300);
         outputs.setVerStabInclination( (float) PI/3);
         outputs.setThrust(400);
+    }*/
+
+
+/*    private void turnSouth(ControlOutputs outputs){
+        outputs.setFrontBrakeForce(0);
+        outputs.setLeftBrakeForce(300);
+        outputs.setRightBrakeForce(0);
+        outputs.setVerStabInclination( (float) PI/3);
+        outputs.setThrust(400);
+    }*/
+
+    /**
+        turn 180°
+     */
+    private void uTurn(ControlOutputs outputs){
+        setBrakeForce(outputs,0,0,300);
+        outputs.setVerStabInclination( (float) PI/3);
+        float maxThrust = this.getAutopilot().getConfig().getMaxThrust();
+        outputs.setThrust(maxThrust/3);
     }
 
+
+    /**
+     * go forward at a max speed of 10m/s
+     * @param velocity
+     * @param outputs
+     */
     private void goForward(Vector velocity, ControlOutputs outputs){
         outputs.setRightWingInclination(0);
         outputs.setLeftWingInclination(0);
@@ -173,11 +229,11 @@ public class AutopilotTaxiingController extends Controller {
 
         if (velocity1D > TAXI_VELOCITY) {
             outputs.setThrust(0);
-            setBrakeForce(outputs, 50f);
+            setBrakeForce(outputs, 50f, 50f, 50f);
         }
         else{
             setThrust(outputs);
-            setBrakeForce(outputs,0f);
+            setBrakeForce(outputs,0f,0f,0f);
         }
     }
 
