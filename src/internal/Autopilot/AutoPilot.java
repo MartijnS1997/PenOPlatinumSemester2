@@ -27,7 +27,7 @@ public class AutoPilot implements Autopilot_v2{
 		this.setSelector(new ControllerSelector(this));
 
 		//may be out commented if the transitions are smooth
-		//this.getSelector().forceActiveController(FlightState.WAY_POINT);
+		//this.getSelector().forceActiveController(FlightState.LANDING);
 
 	}
 //// first make sure we can takeoff
@@ -182,6 +182,17 @@ public class AutoPilot implements Autopilot_v2{
 		this.selector = selector;
 	}
 
+	private AutopilotTaxiingController getTaxiingController() { return taxiingController; }
+	private void setTaxiingController(AutopilotTaxiingController taxiingController){
+		this.taxiingController = taxiingController;
+	}
+
+	private boolean canHaveAsTaxiingController(AutopilotTaxiingController controller){
+
+		return controller != null && controller.getAutopilot() == this && this.taxiingController == null;
+	}
+
+
 	/**
 	 * Checks if the provided selector can be a selector for the autopilot
 	 * @param selector the selector to be tested
@@ -281,6 +292,9 @@ public class AutoPilot implements Autopilot_v2{
 	 */
 	private ControllerSelector selector;
 
+
+	private AutopilotTaxiingController taxiingController;
+
 	/**
 	 * Variable that stores the configuration of the autopilot
 	 */
@@ -329,7 +343,7 @@ public class AutoPilot implements Autopilot_v2{
 }
 
 enum APModes{
-	TAKEOFF, FLYING_TO_BLOCKS, WAY_POINT, LANDING
+	TAKEOFF, FLYING_TO_BLOCKS, WAY_POINT, LANDING, TAXIING
 }
 
 /*

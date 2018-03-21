@@ -40,7 +40,7 @@ public class RearTyrePhysX extends TyrePhysX {
         float fcMAx = this.getMaxFricCoeff();
         float normalForceScalar = normalForce.getSize();
 
-        float lateralForceScalar = xComponent * fcMAx * normalForceScalar;
+        float lateralForceScalar = xComponent * -fcMAx * normalForceScalar;
         Vector forceDirection = ProjectXAxisOnWorldXZPLane(orientation);
 
         return forceDirection.scalarMult(lateralForceScalar);

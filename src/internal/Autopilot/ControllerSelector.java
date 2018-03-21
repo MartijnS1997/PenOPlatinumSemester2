@@ -26,6 +26,7 @@ public class ControllerSelector {
         this.flightController =  new GammaFlightController(autopilot);
         this.wayPointController = new AutopilotWayPointController(autopilot);
         this.landingController = new AutopilotLandingController(autopilot);
+        this.taxiingController = new AutopilotTaxiingController(autopilot);
         //the first controller we'll use is the takeoff controller
         //set the active controller to null reference so we can configure the controller if needed
         this.activeController = null;
@@ -77,6 +78,7 @@ public class ControllerSelector {
         this.getFlightController().setConfig(config);
         this.getWayPointController().setConfig(config);
         this.getLandingController().setConfig(config);
+        this.getTaxiingController().setConfig(config);
     }
 
 
@@ -99,6 +101,7 @@ public class ControllerSelector {
         }
         if(controller instanceof AutopilotLandingController){
             //no next controller is needed
+            this.configureLandingController((AutopilotLandingController) controller);
             return;
         }else{
             return;
@@ -148,6 +151,11 @@ public class ControllerSelector {
         AutopilotInterfaces.Path path = this.getAutopilot().getPath();
         flightController.setFlightPath(path);
     }
+
+    private void configureLandingController(AutopilotLandingController landingController){
+        //get the height of the final
+    }
+
     /**
      * Gets the next controller in line to be used by the autopilot
      * @param activeController the currently active controller
@@ -273,6 +281,10 @@ public class ControllerSelector {
                 this.setActiveController(getLandingController());
                 this.setFollowUpController(null);
                 return;
+            case TAXIING:
+                this.setActiveController(getTaxiingController());
+                this.setFollowUpController(null);
+                return;
             default:
                 //nothing to do here
                 return;
@@ -348,6 +360,16 @@ public class ControllerSelector {
     }
 
     /**
+     * Getter for the taxiing controller, the controller that is responsible for taxiing the drone
+     * and bringing it to a standstill
+     * @return the controller responsible for the taxiing of the drone
+     */
+    private AutopilotTaxiingController getTaxiingController() {
+        return taxiingController;
+    }
+
+
+    /**
      * Getter for the autopilot that is configured with the controller selector
      * @return an autopilot
      */
@@ -384,6 +406,11 @@ public class ControllerSelector {
      * The landing controller used by the autopilot for the landing
      */
     private AutopilotLandingController landingController;
+
+    /**
+     * The landing controller used by the autopilot for the landing
+     */
+    private AutopilotTaxiingController taxiingController;
 
     /**
      * The autopilot connected with the controller selector

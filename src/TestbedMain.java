@@ -1,5 +1,6 @@
 import AutopilotInterfaces.*;
 import gui.*;
+import internal.Autopilot.Controller;
 import internal.Exceptions.AngleOfAttackException;
 import internal.Exceptions.SimulationEndedException;
 import internal.Helper.Vector;
