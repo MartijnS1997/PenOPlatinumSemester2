@@ -287,7 +287,6 @@ public class TestbedMain implements Runnable{
         //Map<Vector, Float> droneConfig = new HashMap<>();
         //droneConfig.put(new Vector(0, 0.20f-0.01f + 1f,0), 0f); //drone standing on ground with tyre compression 0.05
         //World world =  builder.createWorld(); //builder.createWorld(droneConfig)
-        World world = builder.createGroundDroneTestWorld();
         //World world = builder.createFlightTestWorld();
         //World world = builder.createTakeoffWorld();
         //World world = builder.createTotalFlightWorld();

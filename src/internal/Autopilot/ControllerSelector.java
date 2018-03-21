@@ -101,6 +101,7 @@ public class ControllerSelector {
         }
         if(controller instanceof AutopilotLandingController){
             //no next controller is needed
+            this.configureLandingController((AutopilotLandingController) controller);
             return;
         }else{
             return;
@@ -150,6 +151,11 @@ public class ControllerSelector {
         AutopilotInterfaces.Path path = this.getAutopilot().getPath();
         flightController.setFlightPath(path);
     }
+
+    private void configureLandingController(AutopilotLandingController landingController){
+        //get the height of the final
+    }
+
     /**
      * Gets the next controller in line to be used by the autopilot
      * @param activeController the currently active controller

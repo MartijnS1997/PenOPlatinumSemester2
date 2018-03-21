@@ -202,9 +202,9 @@ public class WorldBuilder_v2 {
 
     public World createLandingWorld(){
         Map<Vector, Float> droneConfig = new HashMap<>();
-        droneConfig.put(new Vector(0,50f,0), 0f);
+        droneConfig.put(new Vector(0,50f,300), 0f);
         Drone drone = this.getDroneBuilder_v2().createDrones(droneConfig).get(0);
-        drone.setOrientation(new Vector(0,(float) (20*PI/180), (float)(20*PI/180)));
+        drone.setOrientation(new Vector(0,(float) 0, (float)0));
         //set the drone velocity
         Vector droneAxisVel = new Vector(0,0,-60);
         Vector worldAxisVel = PhysXEngine.droneOnWorld(droneAxisVel, drone.getOrientation());
