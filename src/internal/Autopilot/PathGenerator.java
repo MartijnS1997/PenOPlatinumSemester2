@@ -1,6 +1,7 @@
 package internal.Autopilot;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import internal.Helper.Vector;
@@ -102,6 +103,8 @@ public class PathGenerator {
 				lastBlock = lastBlock.vectorSum(prolongVector.scalarMult(-1));
 				blockCoordinates.add(lastBlock);
 			}
+			
+			Collections.reverse(blockCoordinates);
     		
     		pathLock();
     		
