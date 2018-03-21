@@ -289,6 +289,7 @@ public class TestbedMain implements Runnable{
         //World world =  builder.createWorld(); //builder.createWorld(droneConfig)
         //World world = builder.createFlightTestWorld();
         //World world = builder.createTakeoffWorld();
+        //World world = builder.createTotalFlightWorld();
         World world = builder.createTotalFlightWorld();
         //World world  = builder.createLandingWorld();
         this.setWorld(world);

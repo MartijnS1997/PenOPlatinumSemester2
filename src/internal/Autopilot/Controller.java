@@ -641,7 +641,7 @@ public abstract class Controller {
 
         @Override
         public float getY() {
-            return 20f;//DroneBuilder_v2.START_Y;//DroneBuilder.GAMMA_STARTPOS.getyValue();
+            return 30f;//DroneBuilder_v2.START_Y;//DroneBuilder.GAMMA_STARTPOS.getyValue();
         }
 
         @Override
