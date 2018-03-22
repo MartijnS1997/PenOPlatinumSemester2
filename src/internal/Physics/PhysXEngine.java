@@ -33,7 +33,7 @@ public class PhysXEngine {
                 configuration.getHorStabLiftSlope(), configuration.getTailMass()/2.0f, configuration.getMaxAOA(), 0));
         this.setVerticalStabilizer(new VerticalWingPhysX(new Vector(0,0, abs(configuration.getTailSize())),
                 configuration.getVerStabLiftSlope(), configuration.getTailMass()/2.0f, configuration.getMaxAOA(), 0));
-        this.setDroneChassis(new ChassisPhysX(configuration));
+        this.setDroneChassis(new ChassisPhysX(configuration, this));
         this.setEnginePosition();
         this.setInertiaTensor();
 
@@ -789,9 +789,9 @@ public class PhysXEngine {
         float gravityYComp = - this.getPhysXEngineConfig().getGravity()*this.getTotalMass();
         // get the gravitational force exerted on the drone
         Vector gravity = new Vector(0, gravityYComp, 0);
-
+        Vector[] nonChassisForceArray = {totalLift, thrust, gravity};
         //get the forces exerted by the chassis
-        Vector chassisForces = this.getDroneChassis().netChassisForces(state, inputs, deltaTime);
+        Vector chassisForces = this.getDroneChassis().netChassisForces(state, inputs, deltaTime, Vector.sumVectorArray(nonChassisForceArray));
         // create array containing all the forces exerted on the drone
         Vector[] forceArray = {totalLift, thrust, gravity, chassisForces};
 
@@ -865,7 +865,7 @@ public class PhysXEngine {
      * @return the mass of the wings and the engine
      * @author Martijn Sauwens
      */
-    private float getTotalMass(){
+    protected float getTotalMass(){
         float totalMass = this.getPhysXEngineConfig().getEngineMass();
 
         WingPhysX[] wingArray = this.getWingArray();

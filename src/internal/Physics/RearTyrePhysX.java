@@ -7,13 +7,13 @@ import internal.Helper.Vector;
  * Created by Martijn on 20/02/2018.
  */
 public class RearTyrePhysX extends TyrePhysX {
-    public RearTyrePhysX(Vector tyrePosition, float tyreRadius, float tyreSlope, float dampSlope, float maxBrake, float maxFricCoeff){
-        super(tyrePosition, tyreRadius, tyreSlope, dampSlope, maxBrake, maxFricCoeff);
+    public RearTyrePhysX(ChassisPhysX chassisPhysX, Vector tyrePosition, float tyreRadius, float tyreSlope, float dampSlope, float maxBrake, float maxFricCoeff){
+        super(chassisPhysX, tyrePosition, tyreRadius, tyreSlope, dampSlope, maxBrake, maxFricCoeff);
     }
 
     @Override
-    public Vector getNetForceTyre(DroneState state, float brakeForce, float deltaTime, float prevTyreDelta) {
-        Vector base =  super.getNetForceTyre(state, brakeForce, deltaTime, prevTyreDelta);
+    public Vector getNetForceTyre(DroneState state, Vector nonChassisForces, float brakeForce, float deltaTime, float prevTyreDelta) {
+        Vector base =  super.getNetForceTyre(state, nonChassisForces, brakeForce, deltaTime, prevTyreDelta);
         Vector lateralForce = this.getLateralForce(state, deltaTime, prevTyreDelta);
         return base.vectorSum(lateralForce);
     }

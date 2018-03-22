@@ -177,6 +177,9 @@ public class ControllerSelector {
         if(activeController instanceof AutopilotLandingController){
             //no next controller is needed
             //generate a generic controller that goes full brakes
+            return this.getTaxiingController();
+
+        }if(activeController instanceof AutopilotTaxiingController){
             return new Controller(this.getAutopilot()) {
                 @Override
                 public AutopilotOutputs getControlActions(AutopilotInputs_v2 inputs) {
@@ -253,8 +256,8 @@ public class ControllerSelector {
                     return 0;
                 }
             };
-
-        }else{
+        }
+        else{
             return null;
         }
     }
