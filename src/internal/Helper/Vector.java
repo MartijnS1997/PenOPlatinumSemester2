@@ -6,6 +6,8 @@ package internal.Helper;
 
 import math.Vector3f;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 //import be.kuleuven.cs.som.annotate.*;
 
@@ -436,6 +438,36 @@ public class Vector {
 		return this.scalarMult(coefficient);
 	}
 
+	/**
+	 * Checks if the given instance contains a negative component
+	 * @return true if and only if one or more components of the vector are strictly negative
+	 */
+	public boolean hasNegativeComponent(){
+		return this.getxValue() >= 0 && this.getyValue() >= 0 && this.getzValue() >= 0;
+	}
+
+	/**
+	 * Gets the largest component of the vector
+	 * @return the max component of the vector
+	 */
+	public Float getMaxComponent(){
+		List<Float> vectorList = this.toList();
+		return  Collections.max(vectorList);
+	}
+
+	/**
+	 * Converts the given instance to a list of floats
+	 * @return a list with at indices 0,1 and 2 the x, y and z components of the vector respectively
+	 */
+	public List<Float> toList(){
+		List<Float> vectorList = new ArrayList<>();
+		vectorList.add(this.getxValue());
+		vectorList.add(this.getyValue());
+		vectorList.add(this.getzValue());
+
+		return vectorList;
+	}
+
 
 	/*
 	Static methods
@@ -481,6 +513,7 @@ public class Vector {
 	public static Vector vector3fToVector(Vector3f vector3f){
 		return new Vector(vector3f.x, vector3f.y, vector3f.z);
 	}
+
 
 	/*
 	Getters and Setters

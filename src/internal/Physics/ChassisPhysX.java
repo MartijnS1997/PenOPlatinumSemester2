@@ -7,6 +7,7 @@ import internal.Testbed.Drone;
 import internal.Testbed.DroneState;
 import internal.Helper.Vector;
 
+import static java.lang.Math.PI;
 import static java.lang.Math.abs;
 
 /**
@@ -62,7 +63,8 @@ public class ChassisPhysX {
     public Vector netChassisForces(DroneState state, AutopilotOutputs inputs, float deltaTime, Vector nonChassisForces){
         int nbOfActiveTyres = nbOfActiveTyres(inputs);
         Vector scaledNonChassisForces = nonChassisForces.scalarMult(nbOfActiveTyres);
-//        System.out.println("Orientation: " + state.getOrientation());
+//        System.out.println("Orientation: " + state.getOrientation().scalarMult((float) (180/PI)));
+//        System.out.println("Rotation" + state.getRotation().scalarMult((float) (180/PI)));
 //        System.out.println("Position: " + state.getPosition());
 //        System.out.println("Velocity: " + state.getVelocity());
         //first calculate the known forces exerted by the tires
@@ -76,6 +78,7 @@ public class ChassisPhysX {
         TyrePhysX rearRightTyre = this.getRearRightTyre();
         Vector rearRightTyreForce = rearRightTyre.getNetForceTyre(state,scaledNonChassisForces, inputs.getRightBrakeForce(), deltaTime, state.getPrevRearRightTyreDelta());
 
+//        System.out.println();
         //save the forces so the moments can access them
         this.setFrontTyreForces(frontTyreForce);
         this.setRearLeftTyreForces(rearLeftTyreForce);
@@ -142,7 +145,7 @@ public class ChassisPhysX {
         Vector[] moments = {frontTyreMoment, rearLeftTyreMoment, rearRightTyreMoment};
 //        System.out.println("Net moment on chassis: " + Vector.sumVectorArray(moments));
 //        System.out.println("Net moment: " + Vector.sumVectorArray(moments));
-        System.out.println("\n");
+//        System.out.println("\n");
 
         return Vector.sumVectorArray(moments);
     }

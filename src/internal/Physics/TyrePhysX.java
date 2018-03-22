@@ -103,10 +103,13 @@ public class TyrePhysX {
         //calculate the brake force in the world axis system
         //get the sign of the velocity component amongst the z-axis of the drone
         Vector absVelocity = this.absoluteVelocityWorld(orientation, rotation, velocity);
+//        System.out.println("deltaTime: " + deltaTime);
+//        System.out.println("absolute velocity : " + absVelocity);
         Vector velocityDrone = PhysXEngine.worldOnDrone(absVelocity, orientation);
+//        System.out.println("Absolute velocity drone: " + absVelocity);
         //transform the net forces to the drone axis system
-        Vector nonChassisForcesDrone = PhysXEngine.droneOnWorld(nonChassisForces, orientation);
-
+        Vector nonChassisForcesDrone = PhysXEngine.worldOnDrone(nonChassisForces, orientation);
+//        System.out.println("Non chassis forces: " + nonChassisForces);
         float neededBrakeForce = this.calcNeededBrakeForce(velocityDrone, nonChassisForcesDrone, deltaTime);
 
         //check if we can exert the force
@@ -158,12 +161,13 @@ public class TyrePhysX {
         //first we need the total mass of the drone
         float totalMass = this.getAssociatedChassisPhysics().getAssociatedPhysicsEngine().getTotalMass();
         //get the z-component of the velocity
-        float tyreVelocityZ = tyreVelocityDrone.getzValue();
+        //check if the velocity is lower than 0.01, if so, ignore
+        float tyreVelocityZ = abs(tyreVelocityDrone.getzValue()) >= 0.001 ? tyreVelocityDrone.getzValue() : 0;
         //take the z-component of the chassis force
         float nonChassisZ = nonChassisForceDrone.getzValue();
         //calculate the required brake force to stop the drone
         float velocityComponent = tyreVelocityZ*totalMass/deltaTime;
-        return  -(velocityComponent + nonChassisZ);
+        return  abs(velocityComponent + nonChassisZ) >= 1 ? - (velocityComponent + nonChassisZ) : 0;
     }
 
     /**

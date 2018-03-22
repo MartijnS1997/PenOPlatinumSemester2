@@ -27,7 +27,7 @@ public class AutoPilot implements Autopilot_v2{
 		this.setSelector(new ControllerSelector(this));
 
 		//may be out commented if the transitions are smooth
-		//this.getSelector().forceActiveController(FlightState.WAY_POINT);
+		this.getSelector().forceActiveController(FlightState.TAXIING);
 
 	}
 

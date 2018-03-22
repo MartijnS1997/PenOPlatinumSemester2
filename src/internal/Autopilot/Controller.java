@@ -78,6 +78,8 @@ public abstract class Controller {
      */
     protected abstract float getStandardThrust();
 
+
+
     /*
      * Supplementary control methods
      */
@@ -309,7 +311,7 @@ public abstract class Controller {
      * elaboration: see textbook numerical math for derivative methods, the
      * derivative of f(k+1) - f(k-1) / (2*timeStep) has O(h²) correctness
      */
-    protected Vector getVelocityApprox(AutopilotInputs_v2 prevInputs, AutopilotInputs_v2 currentInputs){
+    public static Vector getVelocityApprox(AutopilotInputs_v2 prevInputs, AutopilotInputs_v2 currentInputs){
         float prevTime = prevInputs.getElapsedTime();
         float currentTime = currentInputs.getElapsedTime();
 
@@ -329,7 +331,7 @@ public abstract class Controller {
      * @return an approx for the rotation (first calculate the rotation in heading pitch and roll components
      *         and transform them to the actual rotational components)
      */
-    public Vector getRotationApprox(AutopilotInputs_v2 prevInputs, AutopilotInputs_v2 currentInputs){
+    public static Vector getRotationApprox(AutopilotInputs_v2 prevInputs, AutopilotInputs_v2 currentInputs){
 
         //get the passed time interval
         float prevTime = prevInputs.getElapsedTime();
@@ -617,10 +619,13 @@ public abstract class Controller {
         public String toString() {
             return "ControlOutputs{" +
                     "thrust=" + thrust +
-                    ", leftWingInclination=" + leftWingInclination*RAD2DEGREE +
-                    ", rightWingInclination=" + rightWingInclination*RAD2DEGREE +
-                    ", horStabInclination=" + horStabInclination*RAD2DEGREE +
-                    ", verStabInclination=" + verStabInclination*RAD2DEGREE +
+                    ", leftWingInclination=" + leftWingInclination +
+                    ", rightWingInclination=" + rightWingInclination +
+                    ", horStabInclination=" + horStabInclination +
+                    ", verStabInclination=" + verStabInclination +
+                    ", leftBrakeForce=" + leftBrakeForce +
+                    ", rightBrakeForce=" + rightBrakeForce +
+                    ", frontBrakeForce=" + frontBrakeForce +
                     '}';
         }
     }
