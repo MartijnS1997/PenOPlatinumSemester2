@@ -104,7 +104,13 @@ public class ControllerSelector {
             //no next controller is needed
             this.configureLandingController((AutopilotLandingController) controller);
             return;
-        }else{
+        }
+
+        if(controller instanceof AutopilotTaxiingController){
+            //configure the taxiing controller
+
+        }
+        else{
             return;
         }
     }
@@ -134,15 +140,7 @@ public class ControllerSelector {
         //takeoffController.setReferenceAltitude(desiredHeight);
     }
 
-    /**
-     * Configures the way point controller (needed the before the landing stage, we need to set
-     * a landing trajectory)
-     * @param wayPointController the WayPointController to be configured
-     */
-    private void configureWayPointController(AutopilotWayPointController wayPointController){
-        Vector startPos = this.getAutopilot().getStartPosition();
-        wayPointController.setDestination(startPos);
-    }
+
 
     /**
      * Configures the flight controller by setting the approximate path
@@ -153,8 +151,24 @@ public class ControllerSelector {
         flightController.setFlightPath(path);
     }
 
+    /**
+     * Configures the way point controller (needed the before the landing stage, we need to set
+     * a landing trajectory)
+     * @param wayPointController the WayPointController to be configured
+     */
+    private void configureWayPointController(AutopilotWayPointController wayPointController){
+        Vector startPos = this.getAutopilot().getStartPosition();
+        wayPointController.setDestination(startPos);
+    }
+
     private void configureLandingController(AutopilotLandingController landingController){
         //get the height of the final
+    }
+
+    private void configureTaxiingController(AutopilotTaxiingController taxiingController){
+        //set the target for the controller
+        Vector target = this.getAutopilot().getStartPosition();
+        taxiingController.setTarget(target);
     }
 
     /**

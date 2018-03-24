@@ -110,7 +110,7 @@ public class TyrePhysX {
         //transform the net forces to the drone axis system
         Vector nonChassisForcesDrone = PhysXEngine.worldOnDrone(nonChassisForces, orientation);
 //        System.out.println("Non chassis forces: " + nonChassisForces);
-        float neededBrakeForce = this.calcNeededBrakeForce(velocityDrone, nonChassisForcesDrone, deltaTime);
+        float neededBrakeForce = this.calcNeededBrakeForce(velocityDrone, nonChassisForcesDrone, deltaTime/* *10*/);
 
         //check if we can exert the force
         float exerted = signum(neededBrakeForce) * min(abs(neededBrakeForce), brakeForce);

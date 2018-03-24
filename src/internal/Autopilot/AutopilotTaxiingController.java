@@ -516,7 +516,7 @@ public class AutopilotTaxiingController extends Controller {
      * The current state of the taxiing, first we need to take an initial turn so we are in the right
      * position to taxi to the target, we always start with an init turn
      */
-    private TaxiingState taxiingState = TaxiingState.INIT_TURN;
+    private TaxiingState taxiingState = TaxiingState.MOVING_TO_TARGET;
 
 
     private enum TaxiingState {
