@@ -136,7 +136,7 @@ public class GammaFlightController extends AutoPilotFlightController {
         float thrust = (float) ((maxThrust/4) + THRUST_FACTOR*this.getTotalMass()*gravity*cubeCoeff);
         //System.out.println("thrust: " + thrust);
         outputs.setThrust(Math.max(Math.min(thrust, maxThrust), 0));
-        if (getVelocityApprox().getzValue() < -60.f){
+        if (getVelocityApprox().getzValue() < -50.f){
             outputs.setThrust(0f);
         }
     }
