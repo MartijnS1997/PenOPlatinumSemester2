@@ -9,6 +9,8 @@ import internal.Helper.Vector;
 
 import static java.lang.Math.*;
 
+import org.omg.CORBA.SetOverrideTypeHelper;
+
 
 /**
  * Created by Martijn on 18/02/2018, extended by Jonathan on 12/3/2018
@@ -71,6 +73,10 @@ public class AutopilotLandingController extends Controller {
                 System.out.println("soft descend");
                 this.getSoftDescendControls(outputs);
                 break;
+            case SLOW_DOWN:
+            	System.out.println("Slowdown");
+            	this.slowDown(outputs);
+            	break;
         }
 
         AutopilotInputs_v2 previousInputs = getPreviousInputs();
@@ -85,7 +91,7 @@ public class AutopilotLandingController extends Controller {
 //        AutopilotInputs previousInputs = getPreviousInputs();*/
 //        ControlOutputs outputs = new ControlOutputs();
 //
-//        //TODO check if stable flight
+//       
 //        if(!this.isStartedDescend()){
 //            //check if the flight is stable
 //            if(!mayInitializeLanding(inputs)){
@@ -130,7 +136,10 @@ public class AutopilotLandingController extends Controller {
         //check if the rapid descend phase was started
         if(!this.isHasStartedRapidDescend()){
             //check if the flight is stable
-            if(!mayInitializeLanding(currentInputs)){
+        	if(!slowEnough(currentInputs)){
+        		return LandingPhases.SLOW_DOWN;
+        	}
+        	else if(!mayInitializeLanding(currentInputs)){
                 //if not, stabilize
                 return LandingPhases.STABILIZE;
             }
@@ -213,9 +222,9 @@ public class AutopilotLandingController extends Controller {
         outputs.setRightWingInclination(outputs.getRightWingInclination() - SOFT_DESCEND_PHASE_MAIN_WING_INCLINATION_DELTA);
         outputs.setLeftWingInclination(outputs.getLeftWingInclination() - SOFT_DESCEND_PHASE_MAIN_WING_INCLINATION_DELTA);
         outputs.setThrust(SOFT_DESCEND_THRUST);
-        outputs.setRightBrakeForce(config.getRMax()/8);
-        outputs.setLeftBrakeForce(config.getRMax()/8);
-        outputs.setFrontBrakeForce(config.getRMax()/8);
+        outputs.setRightBrakeForce(config.getRMax());
+        outputs.setLeftBrakeForce(config.getRMax());
+        outputs.setFrontBrakeForce(config.getRMax());
     }
 
 
@@ -274,7 +283,17 @@ public class AutopilotLandingController extends Controller {
         //super.rollControl(outputs, currentInputs);
         pitchStabilizer(outputs, currentInputs, prevInputs);
         rollStabilizer(outputs, currentInputs, prevInputs);
-        outputs.setThrust(STABILIZING_THURST);
+       	outputs.setThrust(STABILIZING_THURST);
+       
+    
+    }
+    
+    private void slowDown(ControlOutputs outputs){
+       
+        outputs.setThrust(0);
+	    outputs.setRightWingInclination(MAIN_MAX_INCLINATION);
+	    outputs.setLeftWingInclination(MAIN_MAX_INCLINATION);
+       
     }
 
     /**
@@ -354,12 +373,19 @@ public class AutopilotLandingController extends Controller {
         float pitch = orientation.getyValue();
         //check if the roll is within limits
         boolean rollStabilized = abs(roll) < ROLL_STABILIZING_MARGIN;
-        boolean pitchStabilized = abs(pitch) < PITCH_STABILIZING_MARGIN;
+        boolean pitchStabilized = abs(pitch) < PITCH_STABILIZING_MARGIN;      
 
         return rollStabilized && pitchStabilized;
 
     }
 
+    //TODO
+    private boolean slowEnough(AutopilotInputs_v2 inputs){
+    	return (this.getVelocityApprox(this.getPreviousInputs(), getCurrentInputs()).getzValue() > LANDING_SPEED);
+    }
+  
+
+    private final float LANDING_SPEED = -40f;
 
 //    private void setHorizontalStabilizer(ControlOutputs outputs){
 //        //we want to go for zero (stable inclination of the horizontal stabilizer is zero), so the corrective action needs also to be zero
@@ -391,6 +417,7 @@ public class AutopilotLandingController extends Controller {
     private final static float HOR_STABILIZER_MAX = (float)(7*PI/180);
     private final static float PLANE_HEIGHT_FROM_GROUND = 1.2f;
     private final static float MAXIMUM_LANDING_VELOCITY = 1f;
+    private  static final float MAIN_MAX_INCLINATION = (float) (10*PI/180);
 
     //stabilizing constants &instances
     private final static float STABILIZING_THURST = 550f;
@@ -620,7 +647,7 @@ public class AutopilotLandingController extends Controller {
      * Enumerations for the landing phases
      */
     private enum LandingPhases {
-        STABILIZE,RAPID_DESCEND, SOFT_DESCEND;
+        STABILIZE,RAPID_DESCEND, SOFT_DESCEND, SLOW_DOWN;
     }
 }
 
