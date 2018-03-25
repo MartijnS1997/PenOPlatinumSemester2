@@ -196,7 +196,7 @@ public class GammaFlightController extends AutoPilotFlightController {
 
 
     //private static final float STANDARD_INCLINATION = (float) (5*PI/180);
-    public  static final float MAIN_STABLE_INCLINATION = (float) (9*PI/180);//TODO Deze value is brak AF
+    public  static final float MAIN_STABLE_INCLINATION = (float) (8*PI/180);//TODO Deze value is brak AF
     //public  static final float MAIN_MAX_INCLINATION = (float) (10*PI/180);
     private static final float MAX_HOR_STAB_INCLINATION = (float) (10*PI/180);
     private static final float STANDARD_HOR_STAB_INCLINATION = (float) (5*PI/180);
@@ -212,7 +212,7 @@ public class GammaFlightController extends AutoPilotFlightController {
     private static final float MAX_CUBE_COEFF = 3f;
     public  static final float STABILIZER_STABLE_INCLINATION = 0.0f;
     //private static final float GRAVITY = 9.81f;
-    private static final float ROLL_THRESHOLD = (float) (PI * 8.5f/180.0f);
+    private static final float ROLL_THRESHOLD = (float) (PI * 8f/180.0f);
     //private static final float RAD2DEGREE = (float) (180f/ PI);
     //private static final float CHECK_INTERVAL = 1/20.f;
     private static final float X_THRESHOLD = 0f;
