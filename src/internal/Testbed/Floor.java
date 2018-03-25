@@ -18,7 +18,7 @@ public class Floor implements WorldObject {
 		int n = 41; // n moet oneven zijn
         float nx = 20f;
         float nz = 20f;
-		this.position = new Vector(-n*nx/2, 0, -n*nz + 50f);
+		this.position = new Vector(-n*nx/2, 0, -n*nz);
 		createFloor(n, nx, nz);
 	}
 	
