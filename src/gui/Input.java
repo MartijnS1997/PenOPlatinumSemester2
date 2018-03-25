@@ -149,9 +149,11 @@ public Matrix4f getViewMatrix(Settings setting) {
 	}
 
 	public void nextPosition(Vector3f position) {
-//		float newZ = position.z - position.z%((int) (camDistance * Math.tan(Math.PI/3)));
-		float newZ = (float) (Math.signum(-position.z) * camDistance * Math.tan(Math.PI/3)/2 *(int) (position.z/((int) (camDistance * Math.tan(Math.PI/3)/2))));
-		this.hop = new Vector3f(position.x, position.y, newZ);
-		Tile.setPosOffset(new Vector3f(0, 0, newZ));
+		this.hop = new Vector3f(position.x, position.y, roundPos(position.z));
+		Tile.setPosOffset(new Vector3f(roundPos(position.x), roundPos(position.y), roundPos(position.z)));
+	}
+	
+	public float roundPos(float dir) {
+		return (float) (Math.signum(-dir) * camDistance * Math.tan(Math.PI/3)/2 *(int) (dir/((int) (camDistance * Math.tan(Math.PI/3)/2))));
 	}
 }
