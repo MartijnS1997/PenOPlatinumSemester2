@@ -32,6 +32,8 @@ public class Tile implements GraphicsObject {
 	private Vector3f position = new Vector3f();
 	private Vector3f size = new Vector3f(1f, 1f, 1f);
 	
+	static Vector3f positionOffset = new Vector3f();
+	
 	static public void setGraphics(Graphics graphics) {
 		g = graphics;
 	}
@@ -71,6 +73,14 @@ public class Tile implements GraphicsObject {
 	
 	public Vector3f getPos() {
 		return this.position;
+	}
+	
+	public Vector3f getPosWithOffset() {
+		return this.position.add(new Vector3f(2*size.x * (int) (positionOffset.x/(2*size.x)), 2*size.y * (int) (positionOffset.y/(2*size.y)), 2*size.z * (int) (positionOffset.z/(2*size.z))));
+	}
+	
+	public static void setPosOffset(Vector3f offset) {
+		positionOffset = offset;
 	}
 	
 	public void setSize(float size) {

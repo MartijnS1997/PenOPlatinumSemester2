@@ -210,8 +210,8 @@ public class Window {
         	}
         	else if(object.getClass() == Floor.class) {
         		for (GraphicsObject tile: object.getAssociatedGraphicsObjects()) {
-        			program.setUniform("modelMatrix", getModelMatrix(tile.getPos(), tile.getSize()));
-        			if (tile.getPos().subtract(this.cameraposition).length() < viewingDistance) {
+        			program.setUniform("modelMatrix", getModelMatrix(((Tile) tile).getPosWithOffset(), tile.getSize()));
+        			if (((Tile) tile).getPosWithOffset().subtract(this.cameraposition).length() < viewingDistance) {
         				tile.render();
         			}
         		}

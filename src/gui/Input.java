@@ -120,12 +120,12 @@ public Matrix4f getViewMatrix(Settings setting) {
 		
 		switch (setting) {
 		case DRONE_TOP_DOWN_CAM: 
-			position = new Vector3f(hop.x, hop.y + camDistance, -120f + hop.z);
+			position = new Vector3f(hop.x, hop.y + camDistance, hop.z);
 			yaw = (float) Math.PI/2;
 			pitch = (float) -Math.PI/2;
 			break;
 		case DRONE_SIDE_CAM: 
-			position = new Vector3f(hop.x + camDistance, hop.y, -120f + hop.z);
+			position = new Vector3f(hop.x + camDistance, hop.y, hop.z);
 			yaw = (float) Math.PI/2;	
 			pitch = 0;
 			break;
@@ -149,6 +149,11 @@ public Matrix4f getViewMatrix(Settings setting) {
 	}
 
 	public void nextPosition(Vector3f position) {
-		this.hop = new Vector3f(position.x, position.y, position.z - position.z%((int) (camDistance * Math.tan(Math.PI/3))));
+//		float newZ = position.z - position.z%((int) (camDistance * Math.tan(Math.PI/3)));
+		float newZ = (float) (Math.signum(position.z) * camDistance * Math.tan(Math.PI/3)/2 *(int) (position.z/((int) (camDistance * Math.tan(Math.PI/3)/2))));
+		System.out.println(Math.signum(position.z) * camDistance * Math.tan(Math.PI/3)/2);
+		System.out.println(newZ);
+		this.hop = new Vector3f(position.x, position.y, newZ);
+		Tile.setPosOffset(new Vector3f(0, 0, newZ));
 	}
 }
