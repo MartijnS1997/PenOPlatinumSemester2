@@ -150,7 +150,7 @@ public Matrix4f getViewMatrix(Settings setting) {
 
 	public void nextPosition(Vector3f position) {
 		this.hop = new Vector3f(position.x, position.y, roundPos(position.z, 0.5f));
-		Tile.setPosOffset(new Vector3f(-roundPos(position.x, 0.1f), 0, roundPos(position.z, 0.1f)));
+		Tile.setPosOffset(new Vector3f(roundPos(position.x, 0.1f), 0, roundPos(position.z, 0.1f)));
 	}
 	
 	public float roundPos(float dir) {
@@ -158,7 +158,7 @@ public Matrix4f getViewMatrix(Settings setting) {
 	}
 	
 	public float roundPos(float dir, float scale) {
-		return Math.signum(-dir) * getWidthAtCamDistance()*scale * (int) (dir/(scale*getWidthAtCamDistance()));
+		return getWidthAtCamDistance()*scale * (int) (dir/(scale*getWidthAtCamDistance()));
 	}
 	
 	public float getWidthAtCamDistance() {
