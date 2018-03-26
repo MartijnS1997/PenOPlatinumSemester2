@@ -34,8 +34,9 @@ public class WorldBuilder_v2 {
         List<Drone> droneList = this.getDroneBuilder_v2().createDrones(droneConfig);
         World world = new WorldGenerator(NB_OF_BLOCKS).createWorld(new Vector(), World.VISIT_ALL_OBJECTIVE);
         world.addDrones(droneList);
-        Floor floor = new Floor(new Vector());
-        world.addWorldObject(floor);
+        droneList.get(0).setVelocity(new Vector(0,0,-50f));
+        //Floor floor = new Floor(new Vector());
+        //world.addWorldObject(floor);
         Airport airport = new Airport(new Vector(0, 0.5f, 0));
         world.addWorldObject(airport);
         return world;

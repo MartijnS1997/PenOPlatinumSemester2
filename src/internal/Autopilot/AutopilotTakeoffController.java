@@ -4,6 +4,7 @@ import AutopilotInterfaces.Autopilot;
 import AutopilotInterfaces.AutopilotInputs_v2;
 import AutopilotInterfaces.AutopilotOutputs;
 import internal.Helper.Vector;
+import internal.Physics.PhysXEngine;
 
 import static java.lang.Math.*;
 
@@ -65,21 +66,65 @@ public class AutopilotTakeoffController extends Controller{
         outputs.setRightWingInclination(MAIN_STABLE);
     }
 
+    /**
+     * Generates the control actions to stabilize the drone and pitch towards the first target of the drone
+     * @param outputs the outputs to write the control actions to
+     */
     private void stabilizerActions(ControlOutputs outputs){
         AutopilotInputs_v2 currentInputs = this.getCurrentInputs();
         AutopilotInputs_v2 prevInputs = this.getPreviousInputs();
         Vector orientation = Controller.extractOrientation(currentInputs);
-        float pitch = orientation.getyValue();
+        float pitchAngle = -this.pitchToTarget(currentInputs);
         //the pitch should be 0;
         //System.out.println(pitch);
         PIDController pitchPid = this.getPitchPID();
         float deltaTime = Controller.getDeltaTime(prevInputs, currentInputs);
-        float PIDControlActions =  pitchPid.getPIDOutput(pitch,  deltaTime);
+        float PIDControlActions =  pitchPid.getPIDOutput(pitchAngle,  deltaTime);
         //System.out.println("Pitch result PID" + PIDControlActions);
         //adjust the horizontal stabilizer
         float horizontalInclination = this.getStabilizerStableInclination() - PIDControlActions;
         horizontalInclination = signum(horizontalInclination) * min(abs(horizontalInclination), HOR_STABILIZER_MAX);
         outputs.setHorStabInclination(horizontalInclination);
+    }
+
+    /**
+     * Calculates the angle between the heading vector of the drone (0,0,-1) and the reference vector
+     * (the vector between the current position of the drone and the target)
+     * while indicating the direction to steer in the signum of the angle (positive means upward, negative downward)
+     * @param inputs the inputs to extract the current drone state from
+     * @return a positive angle if upward steering is required, a negative one if downward is necessary
+     */
+    private float pitchToTarget(AutopilotInputs_v2 inputs){
+        //get the target
+        Vector target = this.getTarget();
+        //get the current position
+        Vector dronePos = Controller.extractPosition(inputs);
+        //calculate the diff vector to the target
+        Vector diffVectorWorld = target.vectorDifference(dronePos);
+        //get the orientation of the drone
+        Vector orientation = Controller.extractOrientation(inputs);
+        //transform the world diff vector to the drone axis system
+        Vector diffVectorDrone = PhysXEngine.worldOnDrone(diffVectorWorld, orientation);
+        //get the heading vector in the drone axis system
+        Vector heading = new Vector(0,0,-1);
+        //project the difference vector onto the yz-plane of the drone axis system
+        Vector yzNormal = new Vector(1,0,0);
+        Vector projDiffVector = diffVectorDrone.orthogonalProjection(yzNormal);
+        //calculate the angle between the heading and the ref vector
+        float angle = abs(projDiffVector.getAngleBetween(heading));
+        //get the direction by normalizing the cross product a positive cross product means flying up, neg down
+        float direction = signum(heading.crossProduct(projDiffVector).getxValue()); // get the x-value for the direction
+
+        float result = angle*direction;
+        //check for NaN
+        if(Float.isNaN(result)){
+            //default output
+            return 0;
+        }
+        //otherwise return as normal
+        return result;
+
+
     }
 
 
