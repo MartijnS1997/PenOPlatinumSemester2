@@ -15,8 +15,8 @@ public class Airport implements WorldObject {
 	private Set<GraphicsObject> airportTiles = new HashSet<>();
 
 	public Airport(Vector position) {
-		this.position = new Vector(0,0.5f,20);
-		createAirport(15, 250);
+		this.position = position;
+		createAirport(15, 280);
 	}
 	
 	@Override

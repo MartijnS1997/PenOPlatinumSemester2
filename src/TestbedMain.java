@@ -341,8 +341,8 @@ public class TestbedMain implements Runnable{
         // if we only want to show part of the windows, this flag is set in the main loop
         if(this.getShowAllWindows()) {
             this.setDroneView(new Window(monitorWidth/2, monitorHeight/2 - 30, 0.0f, 0.05f, "Drone view", new Vector3f(1.0f, 1.0f, 1.0f), true));
-            this.setTopDownView(new Window(monitorWidth/2, monitorHeight/2 - 30, 1f, 0.05f, "Top down view", new Vector3f(1.0f, 1.0f, 1.0f), true));
-            this.setSideView(new Window(monitorWidth/2, monitorHeight/2 - 30, 1f, 1f, "Side view", new Vector3f(1.0f, 1.0f, 1.0f), true));
+            this.setTopDownView(new Window(monitorWidth/2, monitorHeight/3 - 30, 1f, 0.04f, "Top down view", new Vector3f(1.0f, 1.0f, 1.0f), true));
+            this.setSideView(new Window(monitorWidth/2, monitorHeight/3 - 30, 1f, 0.52f, "Side view", new Vector3f(1.0f, 1.0f, 1.0f), true));
             this.setChaseView(new Window(monitorWidth/2, monitorHeight/2 - 30, 0f, 1f, "Chase view", new Vector3f(1.0f, 1.0f, 1.0f), true));
         } else {
             this.setDroneView(new Window(monitorWidth, monitorHeight, 1.f, 1.f, "Drone view", new Vector3f(1.0f, 1.0f, 1.0f), true));
@@ -379,7 +379,7 @@ public class TestbedMain implements Runnable{
         GLFWVidMode vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
         int monitorWidth = vidmode.width();
         int monitorHeight = vidmode.height();
-        this.getGraphics().makeTextWindow("Stats", 500, 300, 0, monitorHeight - 300);
+        this.getGraphics().makeTextWindow("Stats", monitorWidth/2, monitorHeight/3, monitorWidth/2, monitorHeight*2/3);
         // create the switch when in single window mode
         if (!this.getShowAllWindows()) {
 

@@ -120,12 +120,12 @@ public Matrix4f getViewMatrix(Settings setting) {
 		
 		switch (setting) {
 		case DRONE_TOP_DOWN_CAM: 
-			position = new Vector3f(hop.x, hop.y + camDistance, hop.z - getWidthAtCamDistance()/2);
+			position = new Vector3f(hop.x, hop.y + camDistance, hop.z - getWidthAtCamDistance()/4);
 			yaw = (float) Math.PI/2;
 			pitch = (float) -Math.PI/2;
 			break;
 		case DRONE_SIDE_CAM: 
-			position = new Vector3f(hop.x + camDistance, hop.y, hop.z - getWidthAtCamDistance()/2);
+			position = new Vector3f(hop.x + camDistance, hop.y, hop.z - getWidthAtCamDistance()/4);
 			yaw = (float) Math.PI/2;	
 			pitch = 0;
 			break;
