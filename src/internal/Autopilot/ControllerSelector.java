@@ -109,7 +109,7 @@ public class ControllerSelector {
 
         if(controller instanceof AutopilotTaxiingController){
             //configure the taxiing controller
-
+            configureTaxiingController((AutopilotTaxiingController) controller);
         }
         else{
             return;
