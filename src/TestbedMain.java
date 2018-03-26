@@ -376,9 +376,13 @@ public class TestbedMain implements Runnable{
             this.getSideView().initWindow(Settings.DRONE_SIDE_CAM);
         }
 
+        GLFWVidMode vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+        int monitorWidth = vidmode.width();
+        int monitorHeight = vidmode.height();
+        this.getGraphics().makeTextWindow("Stats", 500, 300, 0, monitorHeight - 300);
         // create the switch when in single window mode
         if (!this.getShowAllWindows()) {
-            this.getGraphics().makeTextWindow("Stats", 500, 300, -10, 790);
+
 //            this.getGraphics().makeButtonWindow();
         }
     }
