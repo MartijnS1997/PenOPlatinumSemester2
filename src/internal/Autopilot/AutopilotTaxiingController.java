@@ -167,7 +167,7 @@ public class AutopilotTaxiingController extends Controller {
   Moving to target constants
    */
 
-    private final static float REFERENCE_VELOCITY = 5f; // reference is 5m/s
+     // reference is 5m/s
     private final static float REACHING_DISTANCE = 10f; // the distance we need to enter before we can call it a day
                                                         // also added a bit of padding for the brakes
 
@@ -219,7 +219,7 @@ public class AutopilotTaxiingController extends Controller {
         PIDController velocityController = this.getVelocityController();
         //get the delta time, note this is an extrapolation, we assume the time step stays the same across the simulation
         float deltaTime = Controller.getDeltaTime(prevInputs, currentInputs);
-        float errorVelocity = REFERENCE_VELOCITY - totalVelocityApprox;
+        float errorVelocity = calcRefVelocity(currentInputs) - totalVelocityApprox;
 //        System.out.println(approxVel);
         //now calculate the output of the PID
         float errorVelPID = velocityController.getPIDOutput(-errorVelocity, deltaTime);
@@ -245,6 +245,35 @@ public class AutopilotTaxiingController extends Controller {
 //        System.out.println(outputs);
 //        System.out.println();
     }
+
+    /**
+     * Calculates the reference velocity used by the taxiing controller
+     * slows down when closer to target
+     * @param inputs the current inputs to extract the needed state data from
+     * @return the velocity needed for the reference
+     */
+    private float calcRefVelocity(AutopilotInputs_v2 inputs){
+        Vector target = this.getTarget();
+        //extract the position
+        Vector position = Controller.extractPosition(inputs);
+        //get the distance to the target
+        float distanceToTarget = position.distanceBetween(target);
+
+        return distanceToTarget > LOW_VEL_RADIUS ? HIGH_REF_VELOCITY : LOW_REF_VELOCITY;
+    }
+
+    /**
+     * The high reference velocity
+     */
+    private static float HIGH_REF_VELOCITY = 20f;
+    /**
+     * The low reference velocity
+     */
+    private static float LOW_REF_VELOCITY = 7.5f;
+    /**
+     * The radius before we go in low velocity mode
+     */
+    private static float LOW_VEL_RADIUS = 500f;
 
     /**
      * Calculates the corrective thrust action needed to keep the velocity up to level
@@ -497,6 +526,10 @@ public class AutopilotTaxiingController extends Controller {
     private Vector target = new Vector(-500, 0,1000);
 
     /**
+     * The reference velocity used by the autopilot cruise control
+     */
+    private float referenceVelocity = 5f;
+    /**
      * The PID controller used to determine the force that needs to be exerted on the brakes
      */
     private final static float BRAKE_GAIN = 500;
@@ -516,7 +549,7 @@ public class AutopilotTaxiingController extends Controller {
      * The current state of the taxiing, first we need to take an initial turn so we are in the right
      * position to taxi to the target, we always start with an init turn
      */
-    private TaxiingState taxiingState = TaxiingState.MOVING_TO_TARGET;
+    private TaxiingState taxiingState = TaxiingState.INIT_TURN;
 
 
     private enum TaxiingState {
