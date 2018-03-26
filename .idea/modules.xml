@@ -2,7 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/p-en-o-platinum.iml" filepath="$PROJECT_DIR$/p-en-o-platinum.iml" />
+      <module fileurl="file://$PROJECT_DIR$/PenOPlatinumSemester2.iml" filepath="$PROJECT_DIR$/PenOPlatinumSemester2.iml" />
+      <module fileurl="file://$PROJECT_DIR$/datatypes/datatypes.iml" filepath="$PROJECT_DIR$/datatypes/datatypes.iml" />
     </modules>
   </component>
 </project>
