@@ -15,7 +15,7 @@ public class Floor implements WorldObject {
 	private Set<GraphicsObject> floorTiles = new HashSet<>();
 
 	public Floor(Vector position) {
-		int n = 11; // n moet oneven zijn
+		int n = 41; // n moet oneven zijn
         float nx = 20f;
         float nz = 20f;
 		this.position = new Vector(-n*nx/2, 0, -n*nz);
