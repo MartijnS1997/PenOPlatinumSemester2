@@ -196,9 +196,8 @@ public class Window {
         	if (object.getClass() == Block.class) {
         		for (GraphicsObject cube: object.getAssociatedGraphicsObjects()) {
         			program.setUniform("modelMatrix", getModelMatrix(((Cube) cube).getRelPos(), cube.getSize()));
-        			if (cube.getPos().subtract(this.cameraposition).length() < viewingDistance) {
-        				cube.render();
-        			}
+//        			if (cube.getPos().subtract(this.cameraposition).length() < viewingDistance)
+					cube.render();
         		}
         	}
         	else if(object.getClass() == Drone.class) {
@@ -211,15 +210,14 @@ public class Window {
         	else if(object.getClass() == Floor.class) {
         		for (GraphicsObject tile: object.getAssociatedGraphicsObjects()) {
         			program.setUniform("modelMatrix", getModelMatrix(((Tile) tile).getPosWithOffset(), tile.getSize()));
-        			if (((Tile) tile).getPosWithOffset().subtract(this.cameraposition).length() < viewingDistance) {
-        				tile.render();
-        			}
+        			if (((Tile) tile).getPosWithOffset().subtract(this.cameraposition).length() < viewingDistance)
+						tile.render();
         		}
         	}
         	else if(object.getClass() == Airport.class) {
         		for (GraphicsObject tile: object.getAssociatedGraphicsObjects()) {
         			program.setUniform("modelMatrix", getModelMatrix(tile.getPos(), tile.getSize()));
-        				tile.render();
+					tile.render();
         		}
         	}
     	}
