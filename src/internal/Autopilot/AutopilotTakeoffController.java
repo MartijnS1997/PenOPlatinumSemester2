@@ -350,5 +350,6 @@ public class AutopilotTakeoffController extends Controller{
      * the distance to the first target before the controller passes control to the next controller
      * note: the drone also needs to see a cube to pass the control;
      */
-    private final static float TARGET_DISTANCE_THRESHOLD = 80f;//TODO We krijgen de  approx van de Y van de eerste cube? ->te hoog AoA eerste cube
+    private final static float TARGET_DISTANCE_THRESHOLD = 80f;
+    
 }
