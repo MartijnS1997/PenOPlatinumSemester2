@@ -13,6 +13,7 @@ import java.util.Optional;
  * A class of controller selectors
  * selects the controller that is currently used by the autopilot
  */
+//TODO: add the stabilizer controller in between the flight and way point phase and (another, or the same one) between the way point and the landing
 public class ControllerSelector {
 
     /**
@@ -24,8 +25,10 @@ public class ControllerSelector {
         //initialize all the needed controllers
         this.takeoffController = new AutopilotTakeoffController(autopilot);
         this.flightController =  new GammaFlightController(autopilot);
+        //this.flightController = new TestFlightController(autopilot);
         this.wayPointController = new AutopilotWayPointController(autopilot);
         this.landingController = new AutopilotLandingController(autopilot);
+        this.taxiingController = new AutopilotTaxiingController(autopilot);
         //the first controller we'll use is the takeoff controller
         //set the active controller to null reference so we can configure the controller if needed
         this.activeController = null;
@@ -77,6 +80,7 @@ public class ControllerSelector {
         this.getFlightController().setConfig(config);
         this.getWayPointController().setConfig(config);
         this.getLandingController().setConfig(config);
+        this.getTaxiingController().setConfig(config);
     }
 
 
@@ -99,8 +103,15 @@ public class ControllerSelector {
         }
         if(controller instanceof AutopilotLandingController){
             //no next controller is needed
+            this.configureLandingController((AutopilotLandingController) controller);
             return;
-        }else{
+        }
+
+        if(controller instanceof AutopilotTaxiingController){
+            //configure the taxiing controller
+
+        }
+        else{
             return;
         }
     }
@@ -130,6 +141,17 @@ public class ControllerSelector {
         //takeoffController.setReferenceAltitude(desiredHeight);
     }
 
+
+
+    /**
+     * Configures the flight controller by setting the approximate path
+     * @param flightController the flight controller to be configured
+     */
+    private void configureFlightController(AutoPilotFlightController flightController){
+        AutopilotInterfaces.Path path = this.getAutopilot().getPath();
+        flightController.setFlightPath(path);
+    }
+
     /**
      * Configures the way point controller (needed the before the landing stage, we need to set
      * a landing trajectory)
@@ -140,14 +162,16 @@ public class ControllerSelector {
         wayPointController.setDestination(startPos);
     }
 
-    /**
-     * Configures the flight controller by setting the approximate path
-     * @param flightController the flight controller to be configured
-     */
-    private void configureFlightController(AutoPilotFlightController flightController){
-        AutopilotInterfaces.Path path = this.getAutopilot().getPath();
-        flightController.setFlightPath(path);
+    private void configureLandingController(AutopilotLandingController landingController){
+        //get the height of the final
     }
+
+    private void configureTaxiingController(AutopilotTaxiingController taxiingController){
+        //set the target for the controller
+        Vector target = this.getAutopilot().getStartPosition();
+        taxiingController.setTarget(target);
+    }
+
     /**
      * Gets the next controller in line to be used by the autopilot
      * @param activeController the currently active controller
@@ -168,6 +192,9 @@ public class ControllerSelector {
         if(activeController instanceof AutopilotLandingController){
             //no next controller is needed
             //generate a generic controller that goes full brakes
+            return this.getTaxiingController();
+
+        }if(activeController instanceof AutopilotTaxiingController){
             return new Controller(this.getAutopilot()) {
                 @Override
                 public AutopilotOutputs getControlActions(AutopilotInputs_v2 inputs) {
@@ -244,8 +271,8 @@ public class ControllerSelector {
                     return 0;
                 }
             };
-
-        }else{
+        }
+        else{
             return null;
         }
     }
@@ -271,6 +298,10 @@ public class ControllerSelector {
                 return;
             case LANDING:
                 this.setActiveController(getLandingController());
+                this.setFollowUpController(null);
+                return;
+            case TAXIING:
+                this.setActiveController(getTaxiingController());
                 this.setFollowUpController(null);
                 return;
             default:
@@ -348,6 +379,16 @@ public class ControllerSelector {
     }
 
     /**
+     * Getter for the taxiing controller, the controller that is responsible for taxiing the drone
+     * and bringing it to a standstill
+     * @return the controller responsible for the taxiing of the drone
+     */
+    private AutopilotTaxiingController getTaxiingController() {
+        return taxiingController;
+    }
+
+
+    /**
      * Getter for the autopilot that is configured with the controller selector
      * @return an autopilot
      */
@@ -384,6 +425,11 @@ public class ControllerSelector {
      * The landing controller used by the autopilot for the landing
      */
     private AutopilotLandingController landingController;
+
+    /**
+     * The landing controller used by the autopilot for the landing
+     */
+    private AutopilotTaxiingController taxiingController;
 
     /**
      * The autopilot connected with the controller selector

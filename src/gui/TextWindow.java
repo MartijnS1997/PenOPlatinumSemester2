@@ -1,13 +1,11 @@
 package gui;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
-import java.util.Set;
 
 import javax.swing.JPanel;
 import javax.swing.JTextField;
@@ -30,19 +28,23 @@ public class TextWindow extends JPanel implements ActionListener{
 	protected JButton button1, button2, button3, button4;
 	SpringLayout layout;
 	private static Graphics graphics;
+	byte counter = 0;
     
     public void update(World world) {
-    	contentPane.removeAll();
-    	addToContentPane(world);
-    	addButtons();
-    	contentPane.revalidate();
-    	frame.repaint();
+    	counter++;
+    	counter %= 5;
+    	if (counter == 0) {
+	    	contentPane.removeAll();
+	    	addToContentPane(world);
+	    	addButtons();
+	    	contentPane.revalidate();
+	    	frame.repaint();
+    	}
     }
     
     private void addToContentPane(World world) {
     	Vector3f velocity = new Vector3f();
     	Vector3f position = new Vector3f();
-    	Vector3f orientation = new Vector3f();
     	float heading = 0;
     	float pitch = 0;
     	float roll = 0;
@@ -69,43 +71,43 @@ public class TextWindow extends JPanel implements ActionListener{
         }
     	
     	JLabel velocityLabel = new JLabel("Velocity: ");
-    	JTextField velocityField = new JTextField(" ( " + velocity.x + ", " + velocity.y + ", " + velocity.z + " ) ");
+    	JTextField velocityField = new JTextField(" ( " + String.format("%.2f", velocity.x) + ", " + String.format("%.2f", velocity.y) + ", " + String.format("%.2f", velocity.z) + " ) ");
     	velocityField.setEditable(false);
     	contentPane.add(velocityLabel);
     	contentPane.add(velocityField); 
     	
     	JLabel positionLabel = new JLabel("Position: ");
-    	JTextField positionField = new JTextField(" ( " + position.x + ", " + position.y + ", " + position.z + " ) ");
+    	JTextField positionField = new JTextField(" ( " + String.format("%.2f", position.x) + ", " + String.format("%.2f", position.y) + ", " + String.format("%.2f", position.z) + " ) ");
     	positionField.setEditable(false);
     	contentPane.add(positionLabel);
     	contentPane.add(positionField); 
     	
     	JLabel headingLabel = new JLabel("Heading: ");
-    	JTextField headingField = new JTextField(" ( " + heading + " ) ");
+    	JTextField headingField = new JTextField(" ( " + String.format("%.2f", heading) + " ) ");
     	headingField.setEditable(false);
     	contentPane.add(headingLabel);
     	contentPane.add(headingField); 
     	
     	JLabel pitchLabel = new JLabel("Pitch: ");
-    	JTextField pitchField = new JTextField(" ( " + pitch + " ) ");
+    	JTextField pitchField = new JTextField(" ( " + String.format("%.2f", pitch) + " ) ");
     	pitchField.setEditable(false);
     	contentPane.add(pitchLabel);
     	contentPane.add(pitchField); 
     	
     	JLabel rollLabel = new JLabel("Roll: ");
-    	JTextField rollField = new JTextField(" ( " + roll + " ) ");
+    	JTextField rollField = new JTextField(" ( " + String.format("%.2f", roll) + " ) ");
     	rollField.setEditable(false);
     	contentPane.add(rollLabel);
     	contentPane.add(rollField); 
     	
     	JLabel distOriginLabel = new JLabel("Distance to origin: ");
-    	JTextField distOriginField = new JTextField(" ( " + distanceOrigin + " ) ");
+    	JTextField distOriginField = new JTextField(" ( " + String.format("%.2f", distanceOrigin) + " ) ");
     	rollField.setEditable(false);
     	contentPane.add(distOriginLabel);
     	contentPane.add(distOriginField); 
     	
     	JLabel totalDistLabel = new JLabel("Total distance traveled: ");
-    	JTextField totalDistField = new JTextField(" ( " + totalDistance + " ) ");
+    	JTextField totalDistField = new JTextField(" ( " + String.format("%.2f", totalDistance) + " ) ");
     	rollField.setEditable(false);
     	contentPane.add(totalDistLabel);
     	contentPane.add(totalDistField); 

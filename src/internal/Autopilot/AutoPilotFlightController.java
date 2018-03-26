@@ -36,7 +36,7 @@ public abstract class AutoPilotFlightController extends Controller{
             return false;
         }
         //there was no drone visible on the camera, see if there are cubes in front of the drone
-        return cubeInFrontOfDrone(inputs);
+        return !cubeInFrontOfDrone(inputs);
     }
 
     /**

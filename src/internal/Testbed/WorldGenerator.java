@@ -463,7 +463,7 @@ public class WorldGenerator {
 	//cube can't go through the ground, so minY has to be >= 2.5m (+2m so they aren't on the ground)
 	private float maxY = 14.5f;
 	private float minY = 4.5f;
-	private float maxZ = -40;
+	private float maxZ = -100;
 	private float minZ = -400;
 
 

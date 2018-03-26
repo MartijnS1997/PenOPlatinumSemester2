@@ -15,10 +15,10 @@ public class Floor implements WorldObject {
 	private Set<GraphicsObject> floorTiles = new HashSet<>();
 
 	public Floor(Vector position) {
-		int n = 101; // n moet oneven zijn
+		int n = 49; // n moet oneven zijn
         float nx = 20f;
         float nz = 20f;
-		this.position = new Vector(-n*nx/2, 0, -n*nz + 50f);
+		this.position = new Vector(-n*nx/2, 0, -n*nz);
 		createFloor(n, nx, nz);
 	}
 	
@@ -49,17 +49,8 @@ public class Floor implements WorldObject {
         	Vector position = delta.vectorSum(getPosition());
             Vector color = new Vector((60.0f+(i%2)*60), 1, 0.6f);
         	Tile tile = new Tile(position.convertToVector3f(), color.convertToVector3f());
-        	tile.setSize(new Vector(nx, 0, nz));
+        	tile.setSize(new Vector(nx, 1, nz));
         	this.setAssociatedGraphicsObject(tile);
         }
-        
-//        Tile tile = new Tile(this.getPosition().convertToVector3f(), (new Vector(240, 1, 1f)).convertToVector3f());
-//    	tile.setSize(new Vector(20, 0, 20));
-//    	this.setAssociatedGraphicsObject(tile);
-        Vector position = getPosition();
-        Vector color = new Vector((60.0f), 1, 0.6f);
-        Tile tile = new Tile(position.convertToVector3f(), color.convertToVector3f());
-        tile.setSize(new Vector(20, 0, 20));
-        this.setAssociatedGraphicsObject(tile);
 	}
 }

@@ -15,7 +15,7 @@ public class Airport implements WorldObject {
 	private Set<GraphicsObject> airportTiles = new HashSet<>();
 
 	public Airport(Vector position) {
-		this.position = new Vector(0,0.1f,20);
+		this.position = new Vector(0,0.5f,20);
 		createAirport(15, 250);
 	}
 	
@@ -51,7 +51,7 @@ public class Airport implements WorldObject {
 		Vector position = this.position.vectorSum(new Vector(0, 0, -(L+W)/2*(float)Math.pow(-1, number)));
 		Vector color = new Vector(0, 0, 0.25f*number);
 		Tile tile = new Tile(position.convertToVector3f(), color.convertToVector3f());
-	    tile.setSize(new Vector(2*W, 0, L));
+	    tile.setSize(new Vector(2*W, 1, L));
 	    this.setAssociatedGraphicsObject(tile);
 	}
 	
@@ -59,7 +59,7 @@ public class Airport implements WorldObject {
 		Vector position = this.position.vectorSum(new Vector(-W/2*(float)Math.pow(-1, number), 0, 0));
 		Vector color = new Vector(0, 0, 0.45f + number/2);
 		Tile tile = new Tile(position.convertToVector3f(), color.convertToVector3f());
-	    tile.setSize(new Vector(W, 0, W));
+	    tile.setSize(new Vector(W, 1, W));
 	    this.setAssociatedGraphicsObject(tile);
 	}
 }

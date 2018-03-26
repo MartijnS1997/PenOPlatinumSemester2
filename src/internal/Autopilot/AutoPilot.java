@@ -27,28 +27,10 @@ public class AutoPilot implements Autopilot_v2{
 		this.setSelector(new ControllerSelector(this));
 
 		//may be out commented if the transitions are smooth
-		//this.getSelector().forceActiveController(FlightState.WAY_POINT);
+		//this.getSelector().forceActiveController(FlightState.FLIGHT);
 
 	}
-//// first make sure we can takeoff
-//		this.setTakeoffController(new AutopilotTakeoffController(this));
-//		System.out.println(controllerConfig);
-//	// then we mus assure our customers a smooth ride
-//		switch(controllerConfig){
-//		case PhysXEngine.ALPHA_MODE:
-//			this.setFlightController(new AlphaFlightController(this));
-//			break;
-//		case PhysXEngine.BETA_MODE:
-//			this.setFlightController(new BetaFlightController(this));
-//			break;
-//		case PhysXEngine.GAMMA_MODE:
-//			this.setFlightController(new GammaFlightController(this));
-//	}
-//	// and last, we need to land
-//		this.setLandingController(new AutopilotLandingController(this));
-//		this.setWayPointController(new AutopilotWayPointController(this));
-//	//set AP mode 2 to make everything work again
-//		this.setAPMode(APModes.WAY_POINT); //AP 3 to test the landing controller
+
 	/**
 	 * Default constructor for the autopilot
 	 */
@@ -182,6 +164,17 @@ public class AutoPilot implements Autopilot_v2{
 		this.selector = selector;
 	}
 
+	private AutopilotTaxiingController getTaxiingController() { return taxiingController; }
+	private void setTaxiingController(AutopilotTaxiingController taxiingController){
+		this.taxiingController = taxiingController;
+	}
+
+	private boolean canHaveAsTaxiingController(AutopilotTaxiingController controller){
+
+		return controller != null && controller.getAutopilot() == this && this.taxiingController == null;
+	}
+
+
 	/**
 	 * Checks if the provided selector can be a selector for the autopilot
 	 * @param selector the selector to be tested
@@ -281,6 +274,9 @@ public class AutoPilot implements Autopilot_v2{
 	 */
 	private ControllerSelector selector;
 
+
+	private AutopilotTaxiingController taxiingController;
+
 	/**
 	 * Variable that stores the configuration of the autopilot
 	 */
@@ -329,7 +325,7 @@ public class AutoPilot implements Autopilot_v2{
 }
 
 enum APModes{
-	TAKEOFF, FLYING_TO_BLOCKS, WAY_POINT, LANDING
+	TAKEOFF, FLYING_TO_BLOCKS, WAY_POINT, LANDING, TAXIING
 }
 
 /*

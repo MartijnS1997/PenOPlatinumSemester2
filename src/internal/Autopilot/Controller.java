@@ -78,6 +78,8 @@ public abstract class Controller {
      */
     protected abstract float getStandardThrust();
 
+
+
     /*
      * Supplementary control methods
      */
@@ -309,7 +311,7 @@ public abstract class Controller {
      * elaboration: see textbook numerical math for derivative methods, the
      * derivative of f(k+1) - f(k-1) / (2*timeStep) has O(h²) correctness
      */
-    protected Vector getVelocityApprox(AutopilotInputs_v2 prevInputs, AutopilotInputs_v2 currentInputs){
+    public static Vector getVelocityApprox(AutopilotInputs_v2 prevInputs, AutopilotInputs_v2 currentInputs){
         float prevTime = prevInputs.getElapsedTime();
         float currentTime = currentInputs.getElapsedTime();
 
@@ -329,7 +331,7 @@ public abstract class Controller {
      * @return an approx for the rotation (first calculate the rotation in heading pitch and roll components
      *         and transform them to the actual rotational components)
      */
-    public Vector getRotationApprox(AutopilotInputs_v2 prevInputs, AutopilotInputs_v2 currentInputs){
+    public static Vector getRotationApprox(AutopilotInputs_v2 prevInputs, AutopilotInputs_v2 currentInputs){
 
         //get the passed time interval
         float prevTime = prevInputs.getElapsedTime();
@@ -621,6 +623,9 @@ public abstract class Controller {
                     ", rightWingInclination=" + rightWingInclination*RAD2DEGREE +
                     ", horStabInclination=" + horStabInclination*RAD2DEGREE +
                     ", verStabInclination=" + verStabInclination*RAD2DEGREE +
+                    ", leftBrakeForce=" + leftBrakeForce +
+                    ", rightBrakeForce=" + rightBrakeForce +
+                    ", frontBrakeForce=" + frontBrakeForce +
                     '}';
         }
     }
@@ -641,7 +646,7 @@ public abstract class Controller {
 
         @Override
         public float getY() {
-            return 20f;//DroneBuilder_v2.START_Y;//DroneBuilder.GAMMA_STARTPOS.getyValue();
+            return 0f;//DroneBuilder_v2.START_Y;//DroneBuilder.GAMMA_STARTPOS.getyValue();
         }
 
         @Override
@@ -836,6 +841,14 @@ public abstract class Controller {
             this.setPreviousError(error);
 
             return output;
+        }
+
+        /**
+         * Resets the current PID by setting the integral part to zero
+         * so the PID can be reused after some time of de-activation
+         */
+        public void reset(){
+            this.integral = 0;
         }
 
         /*
