@@ -619,10 +619,10 @@ public abstract class Controller {
         public String toString() {
             return "ControlOutputs{" +
                     "thrust=" + thrust +
-                    ", leftWingInclination=" + leftWingInclination +
-                    ", rightWingInclination=" + rightWingInclination +
-                    ", horStabInclination=" + horStabInclination +
-                    ", verStabInclination=" + verStabInclination +
+                    ", leftWingInclination=" + leftWingInclination*RAD2DEGREE +
+                    ", rightWingInclination=" + rightWingInclination*RAD2DEGREE +
+                    ", horStabInclination=" + horStabInclination*RAD2DEGREE +
+                    ", verStabInclination=" + verStabInclination*RAD2DEGREE +
                     ", leftBrakeForce=" + leftBrakeForce +
                     ", rightBrakeForce=" + rightBrakeForce +
                     ", frontBrakeForce=" + frontBrakeForce +
@@ -646,7 +646,7 @@ public abstract class Controller {
 
         @Override
         public float getY() {
-            return 30f;//DroneBuilder_v2.START_Y;//DroneBuilder.GAMMA_STARTPOS.getyValue();
+            return 0f;//DroneBuilder_v2.START_Y;//DroneBuilder.GAMMA_STARTPOS.getyValue();
         }
 
         @Override
@@ -841,6 +841,14 @@ public abstract class Controller {
             this.setPreviousError(error);
 
             return output;
+        }
+
+        /**
+         * Resets the current PID by setting the integral part to zero
+         * so the PID can be reused after some time of de-activation
+         */
+        public void reset(){
+            this.integral = 0;
         }
 
         /*

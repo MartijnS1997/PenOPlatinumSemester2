@@ -38,6 +38,15 @@ public class StabilizerController extends Controller {
     }
 
     /**
+     * Resets the stabilizer controller's PID controllers so
+     * the same object can be re-used after some time
+     */
+    public void reset(){
+        this.getPitchController().reset();
+        this.getRollController().reset();
+    }
+
+    /**
      * Getter for the control actions based on the current pitch of the drone
      * @param outputs the outputs to write the result of the calculations to
      */

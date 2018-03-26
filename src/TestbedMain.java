@@ -286,9 +286,10 @@ public class TestbedMain implements Runnable{
      */
     private void initWorld() throws IOException {
         WorldBuilder_v2 builder = new WorldBuilder_v2();
-        //Map<Vector, Float> droneConfig = new HashMap<>();
-        //droneConfig.put(new Vector(0, 0.20f-0.01f + 1f,0), 0f); //drone standing on ground with tyre compression 0.05
-        //World world =  builder.createWorld(); //builder.createWorld(droneConfig)
+//        Map<Vector, Float> droneConfig = new HashMap<>();
+//        droneConfig.put(new Vector(0, 10f,0), 0f); //drone standing on ground with tyre compression 0.05
+        //World world =  builder.createWorld();
+        //World world = builder.createWorld(droneConfig);
         //World world = builder.createFlightTestWorld();
         //World world = builder.createTakeoffWorld();
         //World world = builder.createTotalFlightWorld();

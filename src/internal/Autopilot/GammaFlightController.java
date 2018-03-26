@@ -6,6 +6,7 @@ import AutopilotInterfaces.AutopilotOutputs;
 import AutopilotInterfaces.AutopilotInputs_v2;
 import internal.Autopilot.Controller.ControlOutputs;
 import internal.Exceptions.NoCubeException;
+import internal.Helper.SquareMatrix;
 import internal.Helper.Vector;
 
 import static java.lang.Math.*;
@@ -41,9 +42,12 @@ public class GammaFlightController extends AutoPilotFlightController {
 
         try{
             center = APCamera.getCenterOfNCubes(1);
+            System.out.println("CubeCenter: " + center);
         }catch(NoCubeException e){
             center = new Vector(-10, 0, 4);
         }
+
+        //center = rollCorrectCenterCubes(inputs, center);
 
         //FOR DEBUGGING
         //System.out.println(center);
@@ -68,6 +72,26 @@ public class GammaFlightController extends AutoPilotFlightController {
 
         return outputs;
     }
+
+    /**
+     * Corrects the inputs from the camera for roll effects from piloting the drone
+     * @param inputs the inputs used to extract the current roll of the drone
+     */
+    private Vector rollCorrectCenterCubes(AutopilotInputs_v2 inputs, Vector currentCoord){
+        //get the roll from the inputs
+        float roll = inputs.getRoll();
+        System.out.println("Current roll: " + roll);
+        //make the transformation matrix
+        SquareMatrix rollMatrix = new SquareMatrix(new float[]{(float) cos(roll), (float) -sin(roll), 0,
+                (float) sin(roll), (float) cos(roll) , 0,
+                0               ,  0                , 1});
+        //then transform the inputs back to the original:
+        Vector correctedVector = rollMatrix.matrixVectorProduct(currentCoord);
+        //save the corrected form
+       return correctedVector;
+        //return
+    }
+
     @Override
     protected void rollControl(Controller.ControlOutputs outputs, AutopilotInputs_v2 currentInput){
         float roll = currentInput.getRoll();

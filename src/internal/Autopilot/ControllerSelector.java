@@ -25,6 +25,7 @@ public class ControllerSelector {
         //initialize all the needed controllers
         this.takeoffController = new AutopilotTakeoffController(autopilot);
         this.flightController =  new GammaFlightController(autopilot);
+        //this.flightController = new TestFlightController(autopilot);
         this.wayPointController = new AutopilotWayPointController(autopilot);
         this.landingController = new AutopilotLandingController(autopilot);
         this.taxiingController = new AutopilotTaxiingController(autopilot);
