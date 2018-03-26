@@ -14,8 +14,6 @@ import java.net.Socket;
  */
 public class AutopilotConnection implements Runnable {
 
-
-
     /**
      * Constructor for an autopilot connection
      * @param host the host address of the server to make a connection with, standard "localhost"

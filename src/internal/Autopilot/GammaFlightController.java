@@ -25,7 +25,6 @@ public class GammaFlightController extends AutoPilotFlightController {
     }
 
 
-
     public ControlOutputs getControlActions(AutopilotInputs_v2 inputs){
         this.setCurrentInputs(inputs);
         ControlOutputs outputs = new ControlOutputs();

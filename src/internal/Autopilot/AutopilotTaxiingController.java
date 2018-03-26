@@ -494,7 +494,7 @@ public class AutopilotTaxiingController extends Controller {
      * The target of the taxiing controller
      */
     //TODO remove standard value if the functionality of the controller is tested and the controller selector can make use of it
-    private Vector target = new Vector(-50, 0,1000);
+    private Vector target = new Vector(-500, 0,1000);
 
     /**
      * The PID controller used to determine the force that needs to be exerted on the brakes
