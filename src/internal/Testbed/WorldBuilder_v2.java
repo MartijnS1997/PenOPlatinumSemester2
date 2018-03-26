@@ -37,7 +37,7 @@ public class WorldBuilder_v2 {
         droneList.get(0).setVelocity(new Vector(0,0,-50f));
         //Floor floor = new Floor(new Vector());
         //world.addWorldObject(floor);
-        Airport airport = new Airport(new Vector(0, 0.5f, 0));
+        Airport airport = new Airport(new Vector(0, 0.5f, 20));
         world.addWorldObject(airport);
         return world;
     }
@@ -54,7 +54,7 @@ public class WorldBuilder_v2 {
         world.addDrones(droneList);
         //Floor floor = new Floor(new Vector());
         //world.addWorldObject(floor);
-        Airport airport = new Airport(new Vector(0, 0.5f, 0));
+        Airport airport = new Airport(new Vector(0, 0.5f, 20));
         world.addWorldObject(airport);
         int nbPoints = 100;
         Random random = new Random(1);
@@ -90,7 +90,7 @@ public class WorldBuilder_v2 {
         world.addDrones(droneList);
 //        Floor floor = new Floor(new Vector());
 //        world.addWorldObject(floor);
-        Airport airport = new Airport(new Vector());
+        Airport airport = new Airport(new Vector(0, 0.5f, 20));
         world.addWorldObject(airport);
 //        Vector pos1 = new Vector(0,25f, -60f);
 //        Vector pos2 = new Vector(0,30f, -120f);
@@ -142,7 +142,7 @@ public class WorldBuilder_v2 {
         world.addDrones(droneList);
         Floor floor = new Floor(new Vector());
         world.addWorldObject(floor);
-        Airport airport = new Airport(new Vector(0, 0.5f, 0));
+        Airport airport = new Airport(new Vector(0, 0.5f, 20));
         world.addWorldObject(airport);
         return world;
     }
@@ -156,7 +156,7 @@ public class WorldBuilder_v2 {
         world.addWorldObject(this.getDroneBuilder_v2().createTestBounceDrone());
         Floor floor = new Floor(new Vector());
         world.addWorldObject(floor);
-        Airport airport = new Airport(new Vector(0, 0.5f, 0));
+        Airport airport = new Airport(new Vector(0, 0.5f, 20));
         world.addWorldObject(airport);
         return world;
     }
@@ -170,7 +170,7 @@ public class WorldBuilder_v2 {
         world.addWorldObject(this.getDroneBuilder_v2().createTestBounceDrone());
         Floor floor = new Floor(new Vector());
         world.addWorldObject(floor);
-        Airport airport = new Airport(new Vector(0, 0.5f, 0));
+        Airport airport = new Airport(new Vector(0, 0.5f, 20));
         world.addWorldObject(airport);
         world.setApproxPath(new Path() {
             @Override
@@ -226,7 +226,7 @@ public class WorldBuilder_v2 {
     private static void initSurroundings(World world){
         Floor floor = new Floor(new Vector());
         world.addWorldObject(floor);
-        Airport airport = new Airport(new Vector(0, 10f, 0));
+        Airport airport = new Airport(new Vector(0, 0.5f, 20));
         world.addWorldObject(airport);
     }
 

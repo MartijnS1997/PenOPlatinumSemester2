@@ -6,7 +6,7 @@ import internal.Exceptions.SimulationEndedException;
 import internal.Helper.Vector;
 import internal.Testbed.*;
 import math.Vector3f;
-
+import org.lwjgl.glfw.GLFWVidMode;
 
 
 import java.io.DataInputStream;
@@ -17,6 +17,9 @@ import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+
+import static org.lwjgl.glfw.GLFW.glfwGetPrimaryMonitor;
+import static org.lwjgl.glfw.GLFW.glfwGetVideoMode;
 //TODO implement in such a way that the testbed can support multiple drones (and thus multiple autopilots)
 //TODO also be able to handle crashes and correctly close the autopilots that are connected via the testbed (close the socket?)
 //note: can we split the rendering stage in two separate operations? rendering the camera image for the autopilot
@@ -332,14 +335,17 @@ public class TestbedMain implements Runnable{
 
         this.setDroneCam(new Window(200, 200, 0.5f, 0.4f, "bytestream window", new Vector3f(1.0f, 1.0f, 1.0f), false));
 
+        GLFWVidMode vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+        int monitorWidth = vidmode.width();
+        int monitorHeight = vidmode.height();
         // if we only want to show part of the windows, this flag is set in the main loop
         if(this.getShowAllWindows()) {
-            this.setDroneView(new Window(960, 510, 0.0f, 0.05f, "Drone view", new Vector3f(1.0f, 1.0f, 1.0f), true));
-            this.setTopDownView(new Window(960, 510, 1f, 0.05f, "Top down view", new Vector3f(1.0f, 1.0f, 1.0f), true));
-            this.setSideView(new Window(960, 510, 1f, 1f, "Side view", new Vector3f(1.0f, 1.0f, 1.0f), true));
-            this.setChaseView(new Window(960, 510, 0f, 1f, "Chase view", new Vector3f(1.0f, 1.0f, 1.0f), true));
+            this.setDroneView(new Window(monitorWidth/2, monitorHeight/2 - 30, 0.0f, 0.05f, "Drone view", new Vector3f(1.0f, 1.0f, 1.0f), true));
+            this.setTopDownView(new Window(monitorWidth/2, monitorHeight/3 - 30, 1f, 0.04f, "Top down view", new Vector3f(1.0f, 1.0f, 1.0f), true));
+            this.setSideView(new Window(monitorWidth/2, monitorHeight/3 - 30, 1f, 0.52f, "Side view", new Vector3f(1.0f, 1.0f, 1.0f), true));
+            this.setChaseView(new Window(monitorWidth/2, monitorHeight/2 - 30, 0f, 1f, "Chase view", new Vector3f(1.0f, 1.0f, 1.0f), true));
         } else {
-            this.setDroneView(new Window(1920, 1080, 1.f, 1.f, "Drone view", new Vector3f(1.0f, 1.0f, 1.0f), true));
+            this.setDroneView(new Window(monitorWidth, monitorHeight, 1.f, 1.f, "Drone view", new Vector3f(1.0f, 1.0f, 1.0f), true));
 
         }
 
@@ -370,9 +376,13 @@ public class TestbedMain implements Runnable{
             this.getSideView().initWindow(Settings.DRONE_SIDE_CAM);
         }
 
+        GLFWVidMode vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+        int monitorWidth = vidmode.width();
+        int monitorHeight = vidmode.height();
+        this.getGraphics().makeTextWindow("Stats", monitorWidth/2, monitorHeight/3, monitorWidth/2, monitorHeight*2/3);
         // create the switch when in single window mode
         if (!this.getShowAllWindows()) {
-            this.getGraphics().makeTextWindow("Stats", 500, 300, -10, 790);
+
 //            this.getGraphics().makeButtonWindow();
         }
     }
