@@ -160,7 +160,7 @@ public class GammaFlightController extends AutoPilotFlightController {
         float thrust = (float) ((maxThrust/4) + THRUST_FACTOR*this.getTotalMass()*gravity*cubeCoeff);
         //System.out.println("thrust: " + thrust);
         outputs.setThrust(Math.max(Math.min(thrust, maxThrust), 0));
-        if (getVelocityApprox().getzValue() < -50.f){
+        if (getVelocityApprox().getzValue() < -50.f || pitch < 0){
            outputs.setThrust(0f);
         }
     }
@@ -236,7 +236,7 @@ public class GammaFlightController extends AutoPilotFlightController {
     private static final float MAX_CUBE_COEFF = 3f;
     public  static final float STABILIZER_STABLE_INCLINATION = 0.0f;
     //private static final float GRAVITY = 9.81f;
-    private static final float ROLL_THRESHOLD = (float) (PI * 8.5f/180.0f);
+    private static final float ROLL_THRESHOLD = (float) (PI * 4f/180.0f);
     //private static final float RAD2DEGREE = (float) (180f/ PI);
     //private static final float CHECK_INTERVAL = 1/20.f;
     private static final float X_THRESHOLD = 0f;
