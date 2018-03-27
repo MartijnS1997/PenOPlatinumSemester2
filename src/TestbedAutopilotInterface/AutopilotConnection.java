@@ -1,3 +1,5 @@
+package TestbedAutopilotInterface;
+
 import AutopilotInterfaces.*;
 import internal.Autopilot.Autopilot_v2Implementation;
 import internal.Exceptions.SimulationEndedException;
@@ -6,22 +8,25 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * Created by Martijn on 8/03/2018.
  * A class of AutopilotInterfaces connections
  * Each connection is linked to a certain autopilot and will send and receive data for it
  */
-public class AutopilotConnection implements Runnable {
+public class AutopilotConnection implements Callable<Void> {
 
     /**
      * Constructor for an autopilot connection
      * @param host the host address of the server to make a connection with, standard "localhost"
      * @param TCPPort the TCP port used for communication
      */
-    public AutopilotConnection(String host, int TCPPort) {
+    public AutopilotConnection(String host, int TCPPort, ConcurrentLinkedQueue<OverseerBroadcastChannel> deliveryQueue) {
         this.host = host;
         this.TCPPort = TCPPort;
+        this.deliveryQueue = deliveryQueue;
         this.setAutopilot(new Autopilot_v2Implementation());
     }
 
@@ -35,12 +40,13 @@ public class AutopilotConnection implements Runnable {
      * 3. send the data back to the server and goto 1.
      */
     @Override
-    public void run() {
+    public Void call() {
         //initialize the connection
         initServerConnection();
         //start the main loop
         clientMainLoop();
 
+        return null;
     }
 
     /**
@@ -287,8 +293,17 @@ public class AutopilotConnection implements Runnable {
      * Getter for the TCP port used in the communication with the server
      * @return the TCP port used for communication
      */
-    public int getTCPPort() {
+    private int getTCPPort() {
         return TCPPort;
+    }
+
+    /**
+     * Getter for the queue used by the autopilot to retrieve delivery requests, the requests are passed by the autopilot
+     * overseer
+     * @return a concurrent linked queue the autopilot retrieves the requests from
+     */
+    private ConcurrentLinkedQueue<OverseerBroadcastChannel> getDeliveryQueue() {
+        return deliveryQueue;
     }
 
     /*
@@ -330,6 +345,11 @@ public class AutopilotConnection implements Runnable {
      * The TCP port used in communication with the testbed server
      */
     private int TCPPort;
+
+    /**
+     * The queue to retrieve package requests from
+     */
+    private ConcurrentLinkedQueue<OverseerBroadcastChannel> deliveryQueue;
 
 
     /*

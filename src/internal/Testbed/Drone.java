@@ -536,6 +536,14 @@ public class Drone implements WorldObject, Callable<Void> {
 	}
 
 	/**
+	 * Getter for the ID of the drone used to identify the drone in the GUI
+	 * @return a string containing the drone ID
+	 */
+	public String getDroneID(){
+		return this.getAutopilotConfig().getDroneID();
+	}
+
+	/**
 	 * Variable containing the autopilot outputs
 	 */
 	AutopilotOutputs autopilotOutputs;
