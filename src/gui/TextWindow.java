@@ -102,13 +102,13 @@ public class TextWindow extends JPanel implements ActionListener{
     	
     	JLabel distOriginLabel = new JLabel("Distance to origin: ");
     	JTextField distOriginField = new JTextField(" ( " + String.format("%.2f", distanceOrigin) + " ) ");
-    	rollField.setEditable(false);
+		distOriginField.setEditable(false);
     	contentPane.add(distOriginLabel);
     	contentPane.add(distOriginField); 
     	
     	JLabel totalDistLabel = new JLabel("Total distance traveled: ");
     	JTextField totalDistField = new JTextField(" ( " + String.format("%.2f", totalDistance) + " ) ");
-    	rollField.setEditable(false);
+		totalDistField.setEditable(false);
     	contentPane.add(totalDistLabel);
     	contentPane.add(totalDistField); 
     	
