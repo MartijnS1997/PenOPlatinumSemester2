@@ -3,6 +3,7 @@ package internal.Autopilot;
 
 import AutopilotInterfaces.*;
 import AutopilotInterfaces.Path;
+import TestbedAutopilotInterface.AutopilotOverseer;
 import internal.Testbed.FlightRecorder;
 import internal.Helper.Vector;
 import internal.Physics.PhysXEngine;
@@ -20,9 +21,9 @@ public class AutoPilot implements Autopilot_v2{
 
 	/**
 	 * Primary constructor for the AutopilotInterfaces
-	 * @param controllerConfig the controller that will be used during the flight
+	 * @param overseer the autopilot overseer, used to manage package delivery and collision avoidance
 	 */
-	public AutoPilot(String controllerConfig){
+	public AutoPilot(AutopilotOverseer overseer){
 		//first get the controller selector
 		this.setSelector(new ControllerSelector(this));
 
@@ -31,16 +32,6 @@ public class AutoPilot implements Autopilot_v2{
 
 	}
 
-	/**
-	 * Default constructor for the autopilot
-	 */
-    public AutoPilot() {
-
-    	// set the flightController of the autopilot
-		//Todo uncomment when normal flightController works again
-    	this(PhysXEngine.GAMMA_MODE);
-    	//this.attackController = new AutoPilotControllerNoAttack(this);
-    }
 
 
 	@Override
@@ -120,7 +111,6 @@ public class AutoPilot implements Autopilot_v2{
 	}
 
 
-
 	/**
 	 * @author anthonyrathe
 	 */
@@ -142,6 +132,14 @@ public class AutoPilot implements Autopilot_v2{
 	/*
     Getters & Setters
      */
+
+	/**
+	 * Getter for the ID of the drone that the autopilot is currently simulating
+	 * @return a string containing the ID
+	 */
+	public String getID(){
+		return this.getConfig().getDroneID();
+	}
 
 	/**
 	 * Getter for the controller selector
@@ -185,15 +183,6 @@ public class AutoPilot implements Autopilot_v2{
 		return selector != null && this.getSelector() == null;
 	}
 
-
-
-//	/**
-//	 * Setter for the flight recorder
-//	 */
-//	public void setFlightRecorder(FlightRecorder flightRecorder){
-//		this.getFlightController().setFlightRecorder(flightRecorder);
-//		//this.attackController.setFlightRecorder(flightRecorder);
-//	}
 
 	/**
 	 * The physics engine configured for the autopilot (eg usage of physx optimisations for controller use)

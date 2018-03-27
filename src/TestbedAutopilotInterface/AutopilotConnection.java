@@ -1,6 +1,7 @@
 package TestbedAutopilotInterface;
 
 import AutopilotInterfaces.*;
+import internal.Autopilot.AutoPilot;
 import internal.Autopilot.Autopilot_v2Implementation;
 import internal.Exceptions.SimulationEndedException;
 
@@ -9,7 +10,6 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * Created by Martijn on 8/03/2018.
@@ -23,11 +23,10 @@ public class AutopilotConnection implements Callable<Void> {
      * @param host the host address of the server to make a connection with, standard "localhost"
      * @param TCPPort the TCP port used for communication
      */
-    public AutopilotConnection(String host, int TCPPort, ConcurrentLinkedQueue<OverseerBroadcastChannel> deliveryQueue) {
+    public AutopilotConnection(String host, int TCPPort, AutopilotOverseer overseer) {
         this.host = host;
         this.TCPPort = TCPPort;
-        this.deliveryQueue = deliveryQueue;
-        this.setAutopilot(new Autopilot_v2Implementation());
+        this.setAutopilot(new AutoPilot(overseer));
     }
 
     /**
@@ -297,14 +296,6 @@ public class AutopilotConnection implements Callable<Void> {
         return TCPPort;
     }
 
-    /**
-     * Getter for the queue used by the autopilot to retrieve delivery requests, the requests are passed by the autopilot
-     * overseer
-     * @return a concurrent linked queue the autopilot retrieves the requests from
-     */
-    private ConcurrentLinkedQueue<OverseerBroadcastChannel> getDeliveryQueue() {
-        return deliveryQueue;
-    }
 
     /*
      Instances
@@ -345,11 +336,6 @@ public class AutopilotConnection implements Callable<Void> {
      * The TCP port used in communication with the testbed server
      */
     private int TCPPort;
-
-    /**
-     * The queue to retrieve package requests from
-     */
-    private ConcurrentLinkedQueue<OverseerBroadcastChannel> deliveryQueue;
 
 
     /*

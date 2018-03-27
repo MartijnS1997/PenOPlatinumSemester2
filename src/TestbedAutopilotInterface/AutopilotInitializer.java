@@ -21,30 +21,28 @@ public class AutopilotInitializer {
     /**
      * Initializes all the autopilot connections for a simulation
      */
-    public void initialize(OverseerBroadcastChannel messageChannel){
-//        ExecutorService threadPool = this.getAutopilotThreads();
-//        String host = this.getHost();
-//        int tcpPort = this.getPort();
-//        int nbOfThreads = this.getNbOfAutopilots();
-//        List<AutopilotConnection> connections = new ArrayList<>();
-//        List<ConcurrentLinkedQueue<OverseerBroadcastChannel>> deliveryQueueList = new ArrayList<>();
-//
-//        //create the connection objects
-//        for(int i  = 0; i != nbOfThreads; i++){
-//            //set the queue to the connection
-//            AutopilotConnection connection = new AutopilotConnection(host, tcpPort, broadCastQueue);
-//            connections.add(connection);
-//        }
-//
-//        //then submit them all to the executor service
-//        try {
-//            threadPool.invokeAll(connections);
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
-//
-//        //return the created queues to manage the autopilots
-//        return deliveryQueueList;
+    public void initialize(AutopilotOverseer overseer){
+        ExecutorService threadPool = this.getAutopilotThreads();
+        String host = this.getHost();
+        int tcpPort = this.getPort();
+        int nbOfThreads = this.getNbOfAutopilots();
+        List<AutopilotConnection> connections = new ArrayList<>();
+        List<ConcurrentLinkedQueue<OverseerBroadcastChannel>> deliveryQueueList = new ArrayList<>();
+
+        //create the connection objects
+        for(int i  = 0; i != nbOfThreads; i++){
+            //set the queue to the connection
+            AutopilotConnection connection = new AutopilotConnection(host, tcpPort, overseer);
+            connections.add(connection);
+        }
+
+        //then submit them all to the executor service
+        try {
+            threadPool.invokeAll(connections);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
     }
 
     /**

@@ -1,10 +1,10 @@
 package TestbedAutopilotInterface;
 
-import AutopilotInterfaces.AutopilotConfig;
-import AutopilotInterfaces.AutopilotInputs;
-import AutopilotInterfaces.AutopilotModule;
-import AutopilotInterfaces.AutopilotOutputs;
-import java.util.concurrent.ExecutorService;
+import AutopilotInterfaces.*;
+import internal.Autopilot.AutoPilot;
+
+import java.util.Map;
+import java.util.concurrent.*;
 
 //TODO to notify the threads that they need to deliver a new package, we need a queue for each connection to communicate with
 //sequence:
@@ -16,7 +16,7 @@ import java.util.concurrent.ExecutorService;
  * Created by Martijn on 27/03/2018.
  * A class of autopilot overseers to coordinate correct interaction between the drones
  */
-public class AutopilotOverseer implements AutopilotModule{
+public class AutopilotOverseer implements AutopilotModule, Callable<Void> {
 
     /**
      * Constructor for an autopilot overseer used to coordinate all the autopilots
@@ -25,8 +25,15 @@ public class AutopilotOverseer implements AutopilotModule{
 
     }
 
-    private void initOverseer(){
 
+    /**
+     * Mainloop of the overseer
+     * @return absolutely nothing
+     * @throws Exception
+     */
+    @Override
+    public Void call() throws Exception {
+        return null;
     }
 
     /**
@@ -103,12 +110,71 @@ public class AutopilotOverseer implements AutopilotModule{
     }
 
     /**
-     * The host name used by the overseer to initiate the connections
+     * Invoked by the autopilot, used to store (or initialize) the state data associated with the
+     * autopilot invoking the method (synchronized to prevent thread issues)
+     * @param autoPilot the autopilot updating his status (used for identification)
+     * @param inputs the current inputs of the autopilot
+     * note: has to be called every time when using the autopilot
      */
-    private String hostName = "localhost"; //standard config
+    public synchronized void autopilotStatusUpdate(AutoPilot autoPilot, AutopilotInputs_v2 inputs){
+        //TODO check if concurrency issues arise, use a check-in first and lock the map
+        //get the id
+        String autopilotId = autoPilot.getID();
+        //get the map we write to
+        ConcurrentMap<String, AutopilotInputs_v2> activeAutopilots = this.getActiveAutopilots();
+        //replace the old entry
+        activeAutopilots.put(autopilotId, inputs);
+    }
+
+
 
     /**
-     * The tcp port used by the overseer to initiate the connections with the testbed
+     * Setter for the operational autopilots only to be used by the overseer
+     * @param autopilotData the data to set
      */
-    private int tcpPort = 4242;
+    private void setActiveAutopilots(ConcurrentHashMap<String, AutopilotInputs_v2> autopilotData){
+        this.activeAutopilots = autopilotData;
+    }
+
+    /**
+     * Getter for the map that stores all the delivery requests based on the ID
+     */
+    private ConcurrentMap<String, ConcurrentLinkedQueue<DeliveryRequest>> getDeliveryRequests(){
+        return this.deliveryRequests;
+    }
+
+    /**
+     * Getter for the queue containing the data needed for the autopilot
+     * @param autoPilot the autopilot to extract the delivery requests for
+     * @return the Queue of pending requests
+     */
+    public ConcurrentLinkedQueue<DeliveryRequest> getDeliveryRequest(AutoPilot autoPilot){
+        //get the ID from the autopilot that is invoking the getter
+        String value = autoPilot.getID();
+        //retrieve the corresponding queue for the drone
+        ConcurrentLinkedQueue<DeliveryRequest> queue = this.getDeliveryRequests().get(value);
+        return queue;
+    }
+
+    /**
+     * Getter for the active autopilot conditions, the active autopilots are identified by their ID and pass their
+     * current input every time they are invoked
+     * @return a map containing all the autopilot id's as values and their inputs
+     */
+    private ConcurrentMap<String, AutopilotInputs_v2> getActiveAutopilots() {
+        return activeAutopilots;
+    }
+
+    /**
+     * The hash map that stores all the active autopilots in the world
+     * String contains the ID and inputs the current inputs of the autopilot
+     */
+    private ConcurrentMap<String, AutopilotInputs_v2> activeAutopilots = new ConcurrentHashMap<>();
+
+    /**
+     * A map used to store the all the request made to the overseer, the autopilots can query for their requests
+     * to the broadcast
+     */
+    private ConcurrentMap<String, ConcurrentLinkedQueue<DeliveryRequest>> deliveryRequests = new ConcurrentHashMap<>();
+
 }
