@@ -1,3 +1,5 @@
+package TestbedAutopilotInterface;
+
 import gui.Cube;
 import gui.Graphics;
 import gui.Settings;
@@ -14,6 +16,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -36,10 +39,17 @@ import java.util.stream.Collectors;
 //note on threads: at the start of the connection all the Testbed threads are created and a thread pool to accompany them
 //they are used for communication only and are re-used each execution cycle
 //note: the server operates on port 4242 (TCP) on "localhost" (IP)
-
+//TODO implement the queue server side and set some placement restrictions on the nb of elements that will be placed
+//TODO in the queue (so there is no gigantic impedance mismatch if the server goes full overdrive)
 public class TestBedServer implements Runnable {
 
-
+    /**
+     *
+     * @param timeStep the time step in seconds
+     * @param stepsPerCycle
+     * @param maxNbConnections
+     * @param maxNbThreads
+     */
     public TestBedServer(float timeStep, int stepsPerCycle, int maxNbConnections, int maxNbThreads) {
         this.timeStep = timeStep;
         this.stepsPerCycle = stepsPerCycle;
@@ -163,6 +173,31 @@ public class TestBedServer implements Runnable {
         }
     }
 
+    /**
+     * Used to convey the current state of the testbed to the gui, creating the
+     * necessary data and putting it inside the queue, also deals with the frame rate control
+     * so the testbed wont go too far ahead of the renderer (if even possible)
+     */
+    private void guiCommunication(){
+        //add the element to the queue
+        ConcurrentLinkedQueue<GUIQueueElement> renderQueue = this.getRendererQueue();
+        //extract the queue element from the world
+        World world = this.getWorld();
+        GUIQueueElement newFrame = world.getGuiElements();
+        //insert the frame into the queue
+        renderQueue.add(newFrame);
+        //check if the queue size is smaller than the maximum allowed, if not, wait
+        while(renderQueue.size() > MAX_FRAMES_AHEAD){
+            //if not, sleep for the time one frame needs to be rendered
+            try {
+                float sleepTime = this.getTimeStep()*this.getStepsPerCycle()*1000f; // the times 1000 for converting to millis
+                Thread.sleep((long) sleepTime);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     /*
     Initialization methods for the testbed server
      */
@@ -185,8 +220,7 @@ public class TestBedServer implements Runnable {
     }
 
 
-    //Todo implement the graphics initializer (need for adapted graphics)
-    //Todo check if the initializer can be placed after the generation of the world (or why not)
+    //Todo remove the graphics from the testbed server and move them to the TestbedGUI class
     /**
      * Initializer for the graphics of the server
      * note: no drone cam is supported here, may be added in the future (not part of the assignment)
@@ -195,7 +229,6 @@ public class TestBedServer implements Runnable {
         //create a new graphics object to associate with the server
         this.setGraphics(new Graphics());
 
-        //TODO check if cubes are still needed, with the packet delivery no cubes need to be placed to fly trough
         //provide the graphics for generating cubes
         Cube.setGraphics(this.getGraphics());
 
@@ -324,8 +357,8 @@ public class TestBedServer implements Runnable {
     }
 
     /**
-     * Getter for the in-simulation time step
-     * @return the time step
+     * Getter for the in-simulation time step in seconds
+     * @return the time step in seconds
      */
     private float getTimeStep() {
         return timeStep;
@@ -354,7 +387,7 @@ public class TestBedServer implements Runnable {
     private float elapsedTime = 0;
 
     /**
-     * Variable that stores the in simulation time between the simulation steps
+     * Variable that stores the in simulation time between the simulation steps (in seconds)
      */
     private float timeStep;
 
@@ -588,6 +621,15 @@ public class TestBedServer implements Runnable {
         this.sideView = sideView;
     }
 
+    /**
+     * Getter for the renderer queue, here we insert the state of the simulation
+     * for the GUI to render, this allows to decouple the testbed from the gui
+     * @return a concurrent linked queue used to insert the states to render
+     */
+    private ConcurrentLinkedQueue<GUIQueueElement> getRendererQueue() {
+        return rendererQueue;
+    }
+
     /*
     Graphics related instances #######################################
      */
@@ -604,6 +646,17 @@ public class TestBedServer implements Runnable {
     private Window topDownView;
     private Window chaseView;
     private Window sideView;
+
+    /**
+     * The queue used to communicate with the gui
+     */
+    private ConcurrentLinkedQueue<GUIQueueElement> rendererQueue = new ConcurrentLinkedQueue<>();
+
+    /**
+     * The amount of frames the testbed may go ahead of the renderer before issuing a pause, this
+     * prevents the queue from becoming to large
+     */
+    private final static int MAX_FRAMES_AHEAD = 60;
 
     /*
     Message strings
