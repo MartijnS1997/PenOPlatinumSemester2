@@ -3,9 +3,9 @@ diagnosis\.txt
 
 bin/AccuracyMain\.class
 
-bin/AutopilotConnection\.class
+bin/TestbedAutopilotInterface.AutopilotConnection\.class
 
-bin/AutopilotInitializer\.class
+bin/TestbedAutopilotInterface.AutopilotInitializer\.class
 
 bin/AutopilotInterfaces/Autopilot_v2\.class
 
@@ -97,9 +97,9 @@ bin/SocketMain\.class
 
 bin/SocketMain\$1\.class
 
-bin/TestbedConnection\.class
+bin/TestbedAutopilotInterface.TestbedConnection\.class
 
-bin/TestbedConnection\$TestbedOutputs\.class
+bin/TestbedAutopilotInterface.TestbedConnection\$TestbedOutputs\.class
 
 bin/TestbedMain\.class
 
@@ -107,7 +107,7 @@ bin/TestbedMain\$1\.class
 
 bin/TestbedMain\$MainAutopilotInputs\.class
 
-bin/TestBedServer\.class
+bin/TestbedAutopilotInterface.TestBedServer\.class
 
 bin/tests/Array2Dtests\.class
 

@@ -1,6 +1,10 @@
 package internal.Testbed;
 import AutopilotInterfaces.AutopilotConfig;
 import AutopilotInterfaces.Path;
+import TestbedAutopilotInterface.AirportGuiState;
+import TestbedAutopilotInterface.CubeGuiState;
+import TestbedAutopilotInterface.DroneGuiState;
+import TestbedAutopilotInterface.GUIQueueElement;
 import internal.Exceptions.AngleOfAttackException;
 import internal.Exceptions.SimulationEndedException;
 import internal.Helper.Vector;
@@ -17,6 +21,8 @@ import java.util.stream.Collectors;
  * Class for creating a World object.
  * @author anthonyrathe & Martijn Sauwens
  */
+
+//TODO we moeten deze klasse eens serieus opkuisen... is echt een zooi (de helft van de functies is nog van vorige edities)
 public class World {
 	
 	public World(String objective){
@@ -170,6 +176,8 @@ public class World {
 		return this.getSet(Block.class);
 	}
 
+	public Set<Airport> getAirportSet(){ return this.getSet(Airport.class);
+	}
 
 	/**
 	 * Adds all the world objects in the list to the world
@@ -620,6 +628,134 @@ public class World {
 	public final static float CRASH_DISTANCE = 5.0f;
 	public final static float MAX_LANDING_VELOCITY = 1.0f;
 
+
+	/**
+	 * Creates a new gui queue element, these elements are used to be put in the rendering queue for the
+	 * GUI. This allows us to decouple the testbed from the renderer (we render on a different thread)
+	 * The renderer reads the queue elements one by one (every 1/20 s) and renders the produced frame
+	 * @return a GuiQueue element to insert into the renderer queue
+	 */
+	public GUIQueueElement getGuiElements(){
+		//retrieve the needed sets
+		Set<Drone> drones = this.getDroneSet();
+		Set<Block> blocks = this.getBlockSet();
+		Set<Airport> airports = this.getAirportSet();
+
+		//generate the necessary data
+		Map<String, DroneGuiState> droneGuiQueueElem = getDroneGuiStates(drones);
+		Set<CubeGuiState> cubeGuiQueueElem = getCubeGuiSates(blocks);
+		Set<AirportGuiState> airportGuiQueueElem = getAirportGuiStates(airports);
+
+		//create a new entry for the queue
+		return new GUIQueueElement() {
+			@Override
+			public Map<String, DroneGuiState> getDroneStates() {
+				return droneGuiQueueElem;
+			}
+
+			@Override
+			public Set<CubeGuiState> getCubePositions() {
+				return cubeGuiQueueElem;
+			}
+
+			@Override
+			public Set<AirportGuiState> getAirport() {
+				return airportGuiQueueElem;
+			}
+		};
+
+	}
+
+	/**
+	 * Creates a map of drone gui states with as the key the drone ID and value the
+	 * state of the drone needed to render for the GUI
+	 * @param drones the drones extract the necessary data from
+	 * @return a Map with as keys the drone ID's and the corresponding state of the drones
+	 */
+	private Map<String, DroneGuiState> getDroneGuiStates(Set<Drone> drones)
+	{
+		//generate the map containing the gui states
+		Map<String, DroneGuiState> stateMap = new HashMap<>();
+		//fill the map
+		String key;
+		DroneGuiState value;
+		for(Drone drone: drones){
+			//get the ID, position and orientation of the drone
+			key = drone.getDroneID();
+			value = new DroneGuiState() {
+				@Override
+				public Vector getPosition() {
+					return drone.getPosition();
+				}
+
+				@Override
+				public Vector getOrientation() {
+					return drone.getOrientation();
+				}
+			};
+
+			//add the key value pair
+			stateMap.put(key, value);
+		}
+
+		//return the newly created hashMap
+		return stateMap;
+	}
+
+	/**
+	 * Generates a set of cube states for the GUI
+	 * @param blocks the blocks to convert
+	 * @return a set of gui cube states
+	 */
+	private Set<CubeGuiState> getCubeGuiSates(Set<Block> blocks){
+		//create the set to store all the states
+		Set<CubeGuiState> stateSet = new HashSet<>();
+		for(Block block: blocks){
+			//create the entry
+			CubeGuiState cubeState = new CubeGuiState() {
+				@Override
+				public Vector getPosition() {
+					return block.getPosition();
+				}
+			};
+
+			//add the entry
+			stateSet.add(cubeState);
+		}
+
+		return stateSet;
+	}
+
+	/**
+	 * Generates a set of airport states for the GUI, used for rendering the airports
+	 * present within the world
+	 * @param airports the airports to convert
+	 * @return a set of AirportGuiStates to be put into the GuiQueue
+	 */
+	private Set<AirportGuiState> getAirportGuiStates(Set<Airport> airports){
+		//create the set to store all the states
+		Set<AirportGuiState> stateSet = new HashSet<>();
+		for(Airport airport: airports){
+			//create the entry
+			AirportGuiState airportState = new AirportGuiState() {
+				@Override
+				public Vector getPosition() {
+					return airport.getPosition();
+				}
+
+				@Override
+				public Vector getPrimaryRunWay() {
+					//todo add the primary runway vector to the airport class
+					return new Vector();
+				}
+			};
+
+			//add the entry
+			stateSet.add(airportState);
+		}
+
+		return stateSet;
+	}
 
 
 }
