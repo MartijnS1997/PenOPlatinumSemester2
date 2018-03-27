@@ -265,15 +265,15 @@ public class AutopilotTaxiingController extends Controller {
     /**
      * The high reference velocity
      */
-    private static float HIGH_REF_VELOCITY = 20f;
+    private static float HIGH_REF_VELOCITY = 25f;
     /**
      * The low reference velocity
      */
-    private static float LOW_REF_VELOCITY = 7.5f;
+    private static float LOW_REF_VELOCITY = 5f;
     /**
      * The radius before we go in low velocity mode
      */
-    private static float LOW_VEL_RADIUS = 500f;
+    private static float LOW_VEL_RADIUS = 150f;
 
     /**
      * Calculates the corrective thrust action needed to keep the velocity up to level
