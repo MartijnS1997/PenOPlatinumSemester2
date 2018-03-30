@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
-import gui.GraphicsObject;
-import gui.Tile;
+import gui.GraphicsObjects.GraphicsObject;
+import gui.GraphicsObjects.Tile;
 import internal.Helper.Vector;
 
 public class Airport implements WorldObject {

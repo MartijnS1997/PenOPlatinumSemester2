@@ -9,10 +9,10 @@ import java.util.concurrent.Callable;
 
 import AutopilotInterfaces.AutopilotConfig;
 import AutopilotInterfaces.AutopilotOutputs;
-import gui.Cube;
-import gui.GraphicsObject;
-import gui.Wheel;
-import gui.Polygon;
+import gui.GraphicsObjects.Cube;
+import gui.GraphicsObjects.GraphicsObject;
+import gui.GraphicsObjects.Wheel;
+import gui.GraphicsObjects.Polygon;
 import internal.Physics.PhysXEngine;
 import internal.Physics.PhysicsEngineState;
 import internal.Helper.Vector;

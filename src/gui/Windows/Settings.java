@@ -1,4 +1,4 @@
-package gui;
+package gui.Windows;
 
 public enum Settings {
 	DRONE_CAM,

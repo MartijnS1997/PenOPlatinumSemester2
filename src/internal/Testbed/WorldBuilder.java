@@ -4,9 +4,7 @@ package internal.Testbed;
 import java.io.IOException;
 import java.util.List;
 
-import gui.Cube;
-import gui.Tile;
-import internal.Autopilot.PathGenerator;
+import gui.GraphicsObjects.Cube;
 import internal.Helper.Parser;
 import internal.Helper.Vector;
 /*

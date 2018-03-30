@@ -16,6 +16,12 @@ public interface DroneGuiState {
     Vector getPosition();
 
     /**
+     * Getter for the velocity of the drone at the time of recording the state
+     * @return the state of the drone
+     */
+    Vector getVelocity();
+
+    /**
      * Getter for the orientation of the drone at the time of recording the state
      * @return the orientation of the drone
      */

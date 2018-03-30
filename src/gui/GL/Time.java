@@ -1,4 +1,4 @@
-package gui;
+package gui.GL;
 
 
 import static org.lwjgl.glfw.GLFW.glfwGetTime;

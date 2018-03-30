@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
-import gui.GraphicsObject;
-import gui.Tile;
+import gui.GraphicsObjects.GraphicsObject;
+import gui.GraphicsObjects.Tile;
 import internal.Helper.Vector;
 
 public class Floor implements WorldObject {
@@ -18,7 +18,6 @@ public class Floor implements WorldObject {
 		int n = 51; // n moet oneven zijn
         float nx = 20f;
         float nz = 20f;
-//		this.position = new Vector(-n*nx/2, 0, -n*nz);
 		this.position = new Vector(-n*nx/2, 0, -n*nz/2);
 		createFloor(n, nx, nz);
 	}

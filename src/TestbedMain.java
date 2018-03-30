@@ -1,9 +1,13 @@
 import AutopilotInterfaces.*;
-import gui.*;
-import internal.Autopilot.Controller;
+import gui.GraphicsObjects.Cube;
+import gui.GraphicsObjects.Tile;
+import gui.GraphicsObjects.Wheel;
+import gui.GL.Time;
+import gui.Windows.Graphics;
+import gui.Windows.Settings;
+import gui.Windows.Window;
 import internal.Exceptions.AngleOfAttackException;
 import internal.Exceptions.SimulationEndedException;
-import internal.Helper.Vector;
 import internal.Testbed.*;
 import math.Vector3f;
 import org.lwjgl.glfw.GLFWVidMode;
@@ -14,8 +18,6 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import static org.lwjgl.glfw.GLFW.glfwGetPrimaryMonitor;

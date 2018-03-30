@@ -1,15 +1,16 @@
-package gui;
+package gui.GraphicsObjects;
 
 import static org.lwjgl.glfw.GLFW.glfwMakeContextCurrent;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 import java.util.Arrays;
 
+import gui.Windows.Graphics;
+import gui.GL.Mesh;
 import internal.Helper.HSVconverter;
 import internal.Helper.Vector;
 import math.Matrix3f;
 import math.Vector3f;
-import tests.VectorTest;
 
 public class Cube implements Polygon {
 
@@ -96,8 +97,6 @@ public class Cube implements Polygon {
 	private Vector3f position = new Vector3f();
 	private Vector3f size = new Vector3f(1f, 1f, 1f);
 	
-	private float totalDistance = 0;
-	
 	static public void setGraphics(Graphics graphics) {
 		g = graphics;
 	}
@@ -128,10 +127,9 @@ public class Cube implements Polygon {
 		this.relativePosition = relativePosition;
 	}
 
-	public void update(Vector3f displacement, Vector3f orientation) {
+	public void update(Vector3f position, Vector3f orientation) {
 		this.orientation  = orientation.negate();
-		position = position.add(displacement);
-		totalDistance += displacement.length();
+		this.position = position;
 	}
 	
 	public Vector3f getRelPos() {
@@ -148,10 +146,6 @@ public class Cube implements Polygon {
 	
 	public void delete() {
 		this.mesh.delete();
-	}
-	
-	public float getTotalDistance() {
-		return this.totalDistance;
 	}
 
 	public Vector getPosition(){

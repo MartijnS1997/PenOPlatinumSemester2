@@ -1,10 +1,9 @@
-package gui;
+package gui.Windows;
 
 import javax.swing.AbstractButton;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 
 import java.awt.Color;
 import java.awt.event.ActionEvent;

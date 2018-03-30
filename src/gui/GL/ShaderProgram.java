@@ -1,4 +1,4 @@
-package gui;
+package gui.GL;
 
 import static org.lwjgl.opengl.GL11.GL_TRUE;
 import static org.lwjgl.opengl.GL20.GL_COMPILE_STATUS;

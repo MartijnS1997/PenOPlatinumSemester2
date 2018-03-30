@@ -1,19 +1,10 @@
 package internal.Testbed;
 
-import AutopilotInterfaces.Path;
-import gui.Cube;
-import internal.Autopilot.AutopilotLandingController;
 import internal.Helper.Vector;
-import internal.Physics.PhysXEngine;
-import math.Vector3f;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.concurrent.ExecutorService;
-
-import static java.lang.Math.*;
 
 /**
  * Created by Martijn on 26/02/2018.

@@ -1,4 +1,4 @@
-package gui;
+package gui.Windows;
 
 import static org.lwjgl.glfw.GLFW.GLFW_CONTEXT_VERSION_MAJOR;
 import static org.lwjgl.glfw.GLFW.GLFW_CONTEXT_VERSION_MINOR;
@@ -16,18 +16,21 @@ import static org.lwjgl.glfw.GLFW.glfwTerminate;
 import static org.lwjgl.glfw.GLFW.glfwWindowHint;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
+import TestbedAutopilotInterface.DroneGuiState;
+import gui.GraphicsObjects.GraphicsObject;
+import gui.WorldObjects.Drone;
 import org.lwjgl.glfw.GLFWErrorCallback;
 
-import internal.Testbed.World;
-
 import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 public class Graphics {
 	
-	HashMap<String, Window> windows =  new HashMap<String, Window>();
+	public HashMap<String, Window> windows =  new HashMap<String, Window>();
 	private boolean terminated = false;
-	private World world;
 	private TextWindow textWindow = null;
+	private static final String droneID = "0";
 	
 	public Graphics() {	
 		
@@ -48,37 +51,33 @@ public class Graphics {
 		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); 
 	}
 	
-	public void setWorld(World world) {
-		this.world = world;
-	}
-	
 	public void addWindow(String key, Window window) {
 		windows.put(key, window);
 	}
 	
-	public void makeTextWindow(String title, int width, int height, int xPos, int yPos) {
+	public void makeTextWindow(String title, int width, int height, int xPos, int yPos, Drone drone) {
 		
-		this.textWindow = TextWindow.createAndShowWindow(world, this, title, width, height, xPos, yPos);
+		this.textWindow = TextWindow.createAndShowWindow(this, title, width, height, xPos, yPos, drone);
 	}
 	
 	public void makeButtonWindow() {
 		ButtonWindow.createAndShowWindow(this);
 	}
 	
-	public void renderWindows() {
+	public void renderWindows(Set<GraphicsObject> renderObjects, Drone drone) {
 		// Poll for window events. The key callback above will only be
 		// invoked during this call.
 		glfwPollEvents();
 		
 		if (this.textWindow != null)
-			this.textWindow.update(world);
+			this.textWindow.update(drone);
 		
 		for (String key: windows.keySet()) {
 			Window window = windows.get(key);
 			
 			// Make the OpenGL context current
 			glfwMakeContextCurrent(window.getHandler());
-			window.render(world);
+			window.render(renderObjects, drone);
 			if (window.isTerminated()) {
 				windows.remove(key);
 				break;
@@ -89,7 +88,7 @@ public class Graphics {
 			terminate();	
 	}
 	
-	public void renderWindow(String key) {
+	public void renderWindow(String key, Set<GraphicsObject> renderObjects, Drone drone) {
 		// Poll for window events. The key callback above will only be
 		// invoked during this call.
 		glfwPollEvents();
@@ -98,7 +97,7 @@ public class Graphics {
 		if (window != null) {
 			// Make the OpenGL context current
 			glfwMakeContextCurrent(window.getHandler());
-			window.render(world);
+			window.render(renderObjects, drone);
 			if (window.isTerminated())
 				windows.remove(key);
 			glfwMakeContextCurrent(NULL);

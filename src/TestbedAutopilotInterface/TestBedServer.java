@@ -1,9 +1,11 @@
 package TestbedAutopilotInterface;
 
-import gui.Cube;
-import gui.Graphics;
-import gui.Settings;
-import gui.Window;
+import gui.GraphicsObjects.Cube;
+import gui.GraphicsObjects.Tile;
+import gui.GraphicsObjects.Wheel;
+import gui.Windows.Graphics;
+import gui.Windows.Settings;
+import gui.Windows.Window;
 import internal.Exceptions.AngleOfAttackException;
 import internal.Exceptions.SimulationEndedException;
 import internal.Helper.Vector;
@@ -11,6 +13,7 @@ import internal.Testbed.Drone;
 import internal.Testbed.World;
 import internal.Testbed.WorldBuilder_v2;
 import math.Vector3f;
+import org.lwjgl.glfw.GLFWVidMode;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -21,6 +24,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
+
+import static org.lwjgl.glfw.GLFW.glfwGetPrimaryMonitor;
+import static org.lwjgl.glfw.GLFW.glfwGetVideoMode;
 
 /**
  * Created by Martijn on 23/02/2018.
@@ -231,12 +237,19 @@ public class TestBedServer implements Runnable {
 
         //provide the graphics for generating cubes
         Cube.setGraphics(this.getGraphics());
+        Tile.setGraphics(this.getGraphics());
+        Wheel.setGraphics(this.getGraphics());
+
+        // get monitor size
+        GLFWVidMode vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+        setMonitorWidth(vidmode.width());
+        setMonitorHeight(vidmode.height());
 
         //construct the windows
-        this.setDroneView(new Window(960, 510, 0.0f, 0.05f, "Drone view", new Vector3f(1.0f, 1.0f, 1.0f), true));
-        this.setTopDownView(new Window(960, 510, 1f, 0.05f, "Top down view", new Vector3f(1.0f, 1.0f, 1.0f), true));
-        this.setSideView(new Window(960, 510, 1f, 1f, "Side view", new Vector3f(1.0f, 1.0f, 1.0f), true));
-        this.setChaseView(new Window(960, 510, 0f, 1f, "Chase view", new Vector3f(1.0f, 1.0f, 1.0f), true));
+        this.setDroneView(new Window(getMonitorWidth()/2, getMonitorHeight()/2 - 30, 0.0f, 0.05f, "Drone view", new Vector3f(1.0f, 1.0f, 1.0f), true));
+        this.setTopDownView(new Window(getMonitorWidth()/2, getMonitorHeight()/3 - 30, 1f, 0.04f, "Top down view", new Vector3f(1.0f, 1.0f, 1.0f), true));
+        this.setSideView(new Window(getMonitorWidth()/2, getMonitorHeight()/3 - 30, 1f, 0.52f, "Side view", new Vector3f(1.0f, 1.0f, 1.0f), true));
+        this.setChaseView(new Window(getMonitorWidth()/2, getMonitorHeight()/2 - 30, 0f, 1f, "Chase view", new Vector3f(1.0f, 1.0f, 1.0f), true));
 
         //then add the windows to the graphics engine
         this.getGraphics().addWindow("Drone view", this.getDroneView());
@@ -268,6 +281,7 @@ public class TestBedServer implements Runnable {
         this.getTopDownView().initWindow(Settings.DRONE_TOP_DOWN_CAM);
         this.getChaseView().initWindow(Settings.DRONE_CHASE_CAM);
         this.getSideView().initWindow(Settings.DRONE_SIDE_CAM);
+        this.getGraphics().makeTextWindow("Stats", getMonitorWidth()/2, getMonitorHeight()/3, getMonitorWidth()/2, getMonitorHeight()*2/3);
     }
 
     /**
@@ -630,6 +644,27 @@ public class TestBedServer implements Runnable {
         return rendererQueue;
     }
 
+
+
+    /**
+     * Getters and setters for monitor width and height.
+     */
+    public void setMonitorWidth(int monitorWidth) {
+        this.monitorWidth = monitorWidth;
+    }
+
+    public void setMonitorHeight(int monitorHeight) {
+        this.monitorHeight = monitorHeight;
+    }
+
+    public int getMonitorWidth() {
+        return monitorWidth;
+    }
+
+    public int getMonitorHeight() {
+        return monitorHeight;
+    }
+
     /*
     Graphics related instances #######################################
      */
@@ -646,6 +681,12 @@ public class TestBedServer implements Runnable {
     private Window topDownView;
     private Window chaseView;
     private Window sideView;
+
+    /**
+     * Integers to remember the width and height of the monitor.
+     */
+    private int monitorWidth;
+    private int monitorHeight;
 
     /**
      * The queue used to communicate with the gui

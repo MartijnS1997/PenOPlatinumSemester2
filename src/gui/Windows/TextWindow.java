@@ -1,4 +1,4 @@
-package gui;
+package gui.Windows;
 
 import java.awt.Color;
 import java.awt.Container;
@@ -11,9 +11,8 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SpringLayout;
 
-import internal.Testbed.Drone;
-import internal.Testbed.World;
-import internal.Testbed.WorldObject;
+import TestbedAutopilotInterface.DroneGuiState;
+import gui.WorldObjects.Drone;
 import math.Vector3f;
 
 import javax.swing.AbstractButton;
@@ -30,45 +29,37 @@ public class TextWindow extends JPanel implements ActionListener{
 	private static Graphics graphics;
 	byte counter = 0;
     
-    public void update(World world) {
+    public void update(Drone drone) {
     	counter++;
     	counter %= 5;
     	if (counter == 0) {
 	    	contentPane.removeAll();
-	    	addToContentPane(world);
+	    	addToContentPane(drone);
 	    	addButtons();
 	    	contentPane.revalidate();
 	    	frame.repaint();
     	}
     }
     
-    private void addToContentPane(World world) {
+    private void addToContentPane(Drone drone) {
     	Vector3f velocity = new Vector3f();
     	Vector3f position = new Vector3f();
+    	Vector3f orientation = new Vector3f();
     	float heading = 0;
     	float pitch = 0;
     	float roll = 0;
     	float totalDistance = 0;
     	float distanceOrigin = 0;
-    	
-    	
-        for (WorldObject object: world.getObjectSet()) {
-        	if (object.getClass() == Drone.class) {
-        		velocity = ((Drone) object).getVelocity().convertToVector3f();
-        		position = ((Drone) object).getPosition().convertToVector3f();
-        		heading = ((Drone) object).getHeading();
-        		pitch = ((Drone) object).getPitch();
-        		roll = ((Drone) object).getRoll();
-        		
-        		for (GraphicsObject gObject: object.getAssociatedGraphicsObjects()) {
-        			if (gObject.getClass() == Cube.class) {
-        				totalDistance = ((Cube) gObject).getTotalDistance();
-        				break;
-        			}
-        		}
-        		distanceOrigin = ((Drone) object).getPosition().convertToVector3f().length();
-        	}
-        }
+
+    	velocity = drone.getVelocity();
+        position = drone.getPosition();
+        orientation = drone.getOrientation();
+        heading = orientation.x;
+        pitch = orientation.y;
+        roll = orientation.z;
+		distanceOrigin = drone.getPosition().length();
+		totalDistance = drone.getDistanceTraveled();
+
     	
     	JLabel velocityLabel = new JLabel("Velocity: ");
     	JTextField velocityField = new JTextField(" ( " + String.format("%.2f", velocity.x) + ", " + String.format("%.2f", velocity.y) + ", " + String.format("%.2f", velocity.z) + " ) ");
@@ -208,7 +199,7 @@ public class TextWindow extends JPanel implements ActionListener{
     	layout.putConstraint(SpringLayout.NORTH, button4, 10, SpringLayout.NORTH, contentPane);
     }
 
-    public static TextWindow createAndShowWindow(World world, Graphics graphics, String title, int xDimension, int yDimension, int xPos, int yPos) {
+    public static TextWindow createAndShowWindow(Graphics graphics, String title, int xDimension, int yDimension, int xPos, int yPos, Drone drone) {
     	
     	TextWindow.graphics = graphics;
     	
@@ -219,7 +210,7 @@ public class TextWindow extends JPanel implements ActionListener{
         
         contentPane = frame.getContentPane();
         TextWindow window = new TextWindow();
-        window.addToContentPane(world);
+        window.addToContentPane(drone);
         window.initButtons();
         frame.setContentPane(contentPane);
  
