@@ -73,7 +73,7 @@ public abstract class AutoPilotFlightController extends Controller{
         Vector diffVectorDrone = PhysXEngine.worldOnDrone(diffVectorWorld, droneOrientation);
         //then project the difference vector on the heading vector
         Vector headingVector = new Vector(0,0,-1);
-        Vector projectedDiff = headingVector.projectOnVector(diffVectorDrone);
+        Vector projectedDiff = diffVectorDrone.projectOn(headingVector);//headingVector.projectOnVector(diffVectorDrone);
         //check the scalar product of the projection, if positive we're behind, if not we're ahead
         return projectedDiff.scalarProduct(headingVector) > 0;
     }

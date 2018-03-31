@@ -23,7 +23,7 @@ public class TestbedConnection implements Callable<Void> {
      * @param drone the drone the thread is responsible for instructing
      * @param testBedServer the server associated with the threads
      */
-    TestbedConnection(Socket socket, Drone drone, TestBedServer testBedServer) throws IOException {
+    TestbedConnection(Socket socket, Drone drone, TestbedServer testBedServer) throws IOException {
         this.drone = drone;
         this.socket = socket;
         this.testBedServer = testBedServer;
@@ -168,7 +168,7 @@ public class TestbedConnection implements Callable<Void> {
      * Getter for the associated testbed Server
      * @return the associated testbed server
      */
-    private TestBedServer getTestBedServer() {
+    private TestbedServer getTestBedServer() {
         return testBedServer;
     }
 
@@ -216,7 +216,7 @@ public class TestbedConnection implements Callable<Void> {
     /**
      * Object that stores the associated testbed server (needed to retrieve info)
      */
-    private TestBedServer testBedServer;
+    private TestbedServer testBedServer;
 
     /*
     Flags
@@ -278,7 +278,7 @@ public class TestbedConnection implements Callable<Void> {
         @Override
         public float getElapsedTime() {
             // first get the server
-            TestBedServer server = TestbedConnection.this.getTestBedServer();
+            TestbedServer server = TestbedConnection.this.getTestBedServer();
             // then extract the simulation time
             return server.getElapsedTime();
         }

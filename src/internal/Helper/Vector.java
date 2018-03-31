@@ -428,6 +428,7 @@ public class Vector {
 	 * @param other the vector to project
 	 * @return the other vector projected onto the vector which this method is invoked against
 	 */
+	@Deprecated
 	public Vector projectOnVector(Vector other){
 		//first get the numerator
 		float numerator = this.scalarProduct(other);
@@ -436,6 +437,19 @@ public class Vector {
 
 		//then get multiply with the vector instance
 		return this.scalarMult(coefficient);
+	}
+
+	/**
+	 * Projects the instance onto the provided vector
+	 * @param other the vector to project onto
+	 * @return a vector containing the projection of the instance onto the other
+	 */
+	public Vector projectOn(Vector other){
+		//first get the numerator
+		float numerator = other.scalarProduct(this);
+		float denominator = other.scalarProduct(other);
+		float coefficient = numerator/denominator;
+		return other.scalarMult(coefficient);
 	}
 
 	/**

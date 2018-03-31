@@ -27,7 +27,6 @@ public class AutopilotInitializer {
         int tcpPort = this.getPort();
         int nbOfThreads = this.getNbOfAutopilots();
         List<AutopilotConnection> connections = new ArrayList<>();
-        List<ConcurrentLinkedQueue<OverseerBroadcastChannel>> deliveryQueueList = new ArrayList<>();
 
         //create the connection objects
         for(int i  = 0; i != nbOfThreads; i++){

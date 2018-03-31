@@ -9,6 +9,7 @@ import java.util.concurrent.Callable;
 
 import AutopilotInterfaces.AutopilotConfig;
 import AutopilotInterfaces.AutopilotOutputs;
+import TestbedAutopilotInterface.DeliveryPackage;
 import gui.Cube;
 import gui.GraphicsObject;
 import gui.Wheel;
@@ -22,7 +23,7 @@ import math.Vector3f;
  * @author Anthony Rathé & MartijnSauwens & Bart
  * Immutable variables: maxThrust, engineMass, enginePosition, leftWing, rightWing,
  * 						horizontalStab, verticalStab, inertiaTensor
- * 	note: Orientation = (heading, pitch, roll) (in that order)
+ * 	note: orientation = (heading, pitch, roll) (in that order)
  * 	the orientation has always values in the range [-PI, PI]
  */
 public class Drone implements WorldObject, Callable<Void> {
@@ -305,7 +306,7 @@ public class Drone implements WorldObject, Callable<Void> {
 	 * @return a vector of the following format: (heading, pitch, roll)
 	 */
 	public Vector getOrientation() {
-		return Orientation;
+		return orientation;
 	}
 
 	/**
@@ -316,7 +317,7 @@ public class Drone implements WorldObject, Callable<Void> {
 	 */
 	public void setOrientation(Vector orientation) {
 		Vector tempOrientation = normalizeOrientation(orientation);
-		Orientation = tempOrientation;
+		this.orientation = tempOrientation;
 	}
 
 	/**
@@ -328,7 +329,7 @@ public class Drone implements WorldObject, Callable<Void> {
 	 * @author Martijn Sauwens
 	 */
 	public void setOrientation(float heading, float pitch, float roll) {
-		this.Orientation = normalizeOrientation(new Vector(heading, pitch, roll));
+		this.orientation = normalizeOrientation(new Vector(heading, pitch, roll));
 	}
 
 	/**
@@ -460,54 +461,108 @@ public class Drone implements WorldObject, Callable<Void> {
 
 	//Todo add comment
 
+	/**
+	 * Getter for the physics engine, the class used to simulate the next state of the drone,
+	 * used to calculate all the external forces, moments and sum them up providing a
+	 * PhysicsEngine state object in return to read the new drone state form (central part in managing the
+	 * physics of the testbed)
+	 * @return the PhysX engine configured for the drone
+	 */
 	public PhysXEngine getPhysXEngine() {
 		return physXEngine;
 	}
 
-	public void setPhysXEngine(PhysXEngine physXEngine) {
+	/**
+	 * Setter for the physics engine configured for the drone (see getter for more info)
+	 * @param physXEngine the physics engine to set
+	 */
+	private void setPhysXEngine(PhysXEngine physXEngine) {
 		this.physXEngine = physXEngine;
 	}
 
-	public AutopilotOutputs getAutopilotOutputs() {
+	/**
+	 * The current inputs received from the autopilot, containing brake force, wing inclinations
+	 * and such to steer the drone
+	 * @return the commands for the drone in an AutopilotOutputs object
+	 */
+	private AutopilotOutputs getAutopilotOutputs() {
 		return autopilotOutputs;
 	}
 
+	/**
+	 * Setter for the autopilot outputs (see getter for more info)
+	 * @param autopilotOutputs the inputs to set produced by the autopilot
+	 */
 	public void setAutopilotOutputs(AutopilotOutputs autopilotOutputs) {
 		this.autopilotOutputs = autopilotOutputs;
 	}
 
+	/**
+	 * Getter for the configuration of the drone (is the same as the configuration for the autopilot) this
+	 * object can define an entire drone except for its states
+	 * @return the autopilot config that contains the configuration of the drone
+	 */
 	public AutopilotConfig getAutopilotConfig() {
 		return autopilotConfig;
 	}
 
-	public void setAutopilotConfig(AutopilotConfig autopilotConfig) {
+	/**
+	 * Setter for the configuration of the drone (with the autopilotConfig object) --> see getter for more info
+	 * @param autopilotConfig the autopilot config used to configure the drone
+	 */
+	private void setAutopilotConfig(AutopilotConfig autopilotConfig) {
 		this.autopilotConfig = autopilotConfig;
 	}
+
 
 	public void addFlightRecorder(FlightRecorder flightRecorder){
 		this.getPhysXEngine().setFlightRecorder(flightRecorder);
 	}
 
-	public float getPrevFrontTyreDelta() {
+	/**
+	 * Getter for the compression of the front tyre (big D in the assignment) during the previous iteration
+	 * @return the compression of the front tyre
+	 */
+	private float getPrevFrontTyreDelta() {
 		return prevFrontTyreDelta;
 	}
 
+	/**
+	 * Setter for the compression of the front tyre for this iteration (to be used in tyre physics)
+	 * @param prevFrontTyreDelta the front tyre compression
+	 */
 	public void setPrevFrontTyreDelta(float prevFrontTyreDelta) {
 		this.prevFrontTyreDelta = prevFrontTyreDelta;
 	}
 
-	public float getPrevRearLeftTyreDelta() {
+	/**
+	 * Getter for the front tyre compression obtained during the previous iteration
+	 * @return the previous tyre compression
+	 */
+	private float getPrevRearLeftTyreDelta() {
 		return prevRearLeftTyreDelta;
 	}
 
+	/**
+	 * Setter for the previous compression (see getter)
+	 * @param prevRearLeftTyreDelta the compression to be set
+	 */
 	public void setPrevRearLeftTyreDelta(float prevRearLeftTyreDelta) {
 		this.prevRearLeftTyreDelta = prevRearLeftTyreDelta;
 	}
 
-	public float getPrevRearRightTyreDelta() {
+	/**
+	 * Getter fo the previous compression of the rear right tyre
+	 * @return the compression of the rear right tyre obtained in the previous iteration
+	 */
+	private float getPrevRearRightTyreDelta() {
 		return prevRearRightTyreDelta;
 	}
 
+	/**
+	 * Setter for the compression of the rear right tyre (obtained in the tyre physics)
+	 * @param prevRearRightTyreDelta the previous tyre compression
+	 */
 	public void setPrevRearRightTyreDelta(float prevRearRightTyreDelta) {
 		this.prevRearRightTyreDelta = prevRearRightTyreDelta;
 	}
@@ -531,6 +586,11 @@ public class Drone implements WorldObject, Callable<Void> {
 		this.deltaTime = deltaTime;
 	}
 
+	/**
+	 * Checks if the time difference is valid
+	 * @param deltaTime the time difference to be checked
+	 * @return true if and only if the time delta is positive
+	 */
 	private static boolean isValidDeltaTime(float deltaTime) {
 		return deltaTime > 0.f;
 	}
@@ -542,6 +602,61 @@ public class Drone implements WorldObject, Callable<Void> {
 	public String getDroneID(){
 		return this.getAutopilotConfig().getDroneID();
 	}
+
+	/**
+	 * Getter for the package to be delivered by the drone (returns null if none has been assigned)
+	 * @return a delivery package object containing the information for delivery
+	 */
+	public DeliveryPackage getDeliveryPackage() {
+		return deliveryPackage;
+	}
+
+
+	/**
+	 * Setter for the package to deliver, can only be set if the previous package has been successfully delivered and the
+	 * new package delivery drone's id matched the drone's id,
+	 * if not this method will throw an illegal state
+	 * @param packageToDeliver the new package to deliver
+	 */
+	public void loadPackage(DeliveryPackage packageToDeliver){
+		//check first if we aren't already delivering a package
+		DeliveryPackage currentPackage = this.getDeliveryPackage();
+
+		//we're not carrying any package if the current package is a null pointer
+		if(currentPackage != null){
+			throw new IllegalStateException("Drone is already carrying package");
+		}
+		//check if the package is assigned the current drone, if not, we may not transport the package
+		String deliveryDroneID = packageToDeliver.getDeliveryDroneID();
+		String droneID = this.getDroneID();
+
+		if(!deliveryDroneID.equals(droneID)) {
+			throw new IllegalStateException("The drone does not match the package");
+		}
+		//if it has the same ID, go ahead and transport it
+		this.deliveryPackage = packageToDeliver;
+	}
+
+	/**
+	 * Unloads the current package (only sets the package to a null pointer)
+	 */
+	public void unloadPackage(){
+		DeliveryPackage deliveryPackage = this.getDeliveryPackage();
+		deliveryPackage.setDelivered();
+		this.deliveryPackage = null;
+	}
+
+	/**
+	 * Checks if the drone is currently transporting a package
+	 * @return true if and only if the drone is carrying a package
+	 */
+	public boolean isDelivering(){
+		return this.deliveryPackage != null;
+	}
+
+	/*
+	Drone instances
+	 */
 
 	/**
 	 * Variable containing the autopilot outputs
@@ -561,7 +676,7 @@ public class Drone implements WorldObject, Callable<Void> {
 	/**
 	 * A variable containing the orientation of the drone, (heading, pitch, roll)
 	 */
-	private Vector Orientation;
+	private Vector orientation;
 
 	/**
 	 * A variable containing the rotation vector of the drone (given in the world axis)
@@ -598,6 +713,11 @@ public class Drone implements WorldObject, Callable<Void> {
 	 * A variable containing the time step for next state
 	 */
 	private float deltaTime;
+
+	/**
+	 * The current package the drone is holding to transport to a certain airport
+	 */
+	private DeliveryPackage deliveryPackage;
 
 	/*
 	 * Constants
@@ -1131,7 +1251,7 @@ public class Drone implements WorldObject, Callable<Void> {
 //		Vector rotationVelocity = RotationHPR.scalarMult(deltaTime);
 //		Vector rotationAcceleration = angularAccelerationHPR.scalarMult(deltaTime*deltaTime/2.0f);
 //
-//		//return the next Orientation
+//		//return the next orientation
 //		return currentOrientation.vectorSum(rotationVelocity).vectorSum(rotationAcceleration);
 //	}
 //

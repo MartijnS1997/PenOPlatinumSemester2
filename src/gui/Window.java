@@ -1,6 +1,6 @@
 package gui;
 
-import internal.Testbed.Airport;
+import internal.Testbed.WorldAirport;
 import internal.Testbed.Block;
 import internal.Testbed.Drone;
 import internal.Testbed.Floor;
@@ -214,7 +214,7 @@ public class Window {
 						tile.render();
         		}
         	}
-        	else if(object.getClass() == Airport.class) {
+        	else if(object.getClass() == WorldAirport.class) {
         		for (GraphicsObject tile: object.getAssociatedGraphicsObjects()) {
         			program.setUniform("modelMatrix", getModelMatrix(tile.getPos(), tile.getSize()));
 					tile.render();

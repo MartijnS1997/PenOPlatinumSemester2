@@ -1,16 +1,11 @@
 package TestbedAutopilotInterface;
 
-import gui.Cube;
-import gui.Graphics;
-import gui.Settings;
-import gui.Window;
 import internal.Exceptions.AngleOfAttackException;
 import internal.Exceptions.SimulationEndedException;
 import internal.Helper.Vector;
 import internal.Testbed.Drone;
 import internal.Testbed.World;
 import internal.Testbed.WorldBuilder_v2;
-import math.Vector3f;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -41,20 +36,23 @@ import java.util.stream.Collectors;
 //note: the server operates on port 4242 (TCP) on "localhost" (IP)
 //TODO implement the queue server side and set some placement restrictions on the nb of elements that will be placed
 //TODO in the queue (so there is no gigantic impedance mismatch if the server goes full overdrive)
-public class TestBedServer implements Runnable {
+public class TestbedServer implements Runnable {
 
     /**
-     *
+     * Constructor for a testbed server, used for communication with the autopilots
      * @param timeStep the time step in seconds
-     * @param stepsPerCycle
-     * @param maxNbConnections
-     * @param maxNbThreads
+     * @param stepsPerCycle the amount of steps that are taken within a single execution cycle
+     * @param maxNbThreads the max number of threads the server can handle in the executor service
+     * @param tcpPort the port the server operates on
+     * @param airports the airports to be set in the world, the first entry of the vector is the location
+     *                 and the second is the heading vector of runway zero
      */
-    public TestBedServer(float timeStep, int stepsPerCycle, int maxNbConnections, int maxNbThreads) {
+    public TestbedServer(float timeStep, int stepsPerCycle, int maxNbThreads, int tcpPort, List<AirportSpec> airports) {
         this.timeStep = timeStep;
         this.stepsPerCycle = stepsPerCycle;
-        this.maxNbOfConnections = maxNbConnections;
         this.maxNbOfThreads = maxNbThreads;
+        this.tcpPort = tcpPort;
+        this.airportSpecs = airports;
     }
 
     //Todo initialize the server threads
@@ -156,6 +154,8 @@ public class TestBedServer implements Runnable {
         world.advanceWorldState(timeStep, stepsPerCycles);
         //increment the time that was simulated
         this.incrementElapsedTime();
+        //communicate the new world state with the GUI
+        addFrameToGuiQueue();
     }
 
     /**
@@ -178,7 +178,7 @@ public class TestBedServer implements Runnable {
      * necessary data and putting it inside the queue, also deals with the frame rate control
      * so the testbed wont go too far ahead of the renderer (if even possible)
      */
-    private void guiCommunication(){
+    private void addFrameToGuiQueue(){
         //add the element to the queue
         ConcurrentLinkedQueue<GUIQueueElement> renderQueue = this.getRendererQueue();
         //extract the queue element from the world
@@ -206,44 +206,27 @@ public class TestBedServer implements Runnable {
      * Initializes the testbed (see implementations and comments along the lines for further explanation
      */
     private void initTestbedServer() {
-        // initialize the graphics engine
-        this.initGraphics();
+
+        this.initGui();
 
         // initialize the world that needs to be simulated
         this.initWorld();
-
-        // initialize the windows
-        this.initWindows();
+//
+//        // initialize the windows
+//        this.initWindows();
 
         // initialize the server
         this.initServer();
     }
 
+    private void initGui() {
+        ConcurrentLinkedQueue<GUIQueueElement> guiQueue = this.getRendererQueue();
+        //create the gui
+        TestbedGUI gui = new TestbedGUI(guiQueue);
+        //TODO activate the GUI (wait for jasper to finish the gui to call it)
 
-    //Todo remove the graphics from the testbed server and move them to the TestbedGUI class
-    /**
-     * Initializer for the graphics of the server
-     * note: no drone cam is supported here, may be added in the future (not part of the assignment)
-     */
-    private void initGraphics(){
-        //create a new graphics object to associate with the server
-        this.setGraphics(new Graphics());
-
-        //provide the graphics for generating cubes
-        Cube.setGraphics(this.getGraphics());
-
-        //construct the windows
-        this.setDroneView(new Window(960, 510, 0.0f, 0.05f, "Drone view", new Vector3f(1.0f, 1.0f, 1.0f), true));
-        this.setTopDownView(new Window(960, 510, 1f, 0.05f, "Top down view", new Vector3f(1.0f, 1.0f, 1.0f), true));
-        this.setSideView(new Window(960, 510, 1f, 1f, "Side view", new Vector3f(1.0f, 1.0f, 1.0f), true));
-        this.setChaseView(new Window(960, 510, 0f, 1f, "Chase view", new Vector3f(1.0f, 1.0f, 1.0f), true));
-
-        //then add the windows to the graphics engine
-        this.getGraphics().addWindow("Drone view", this.getDroneView());
-        this.getGraphics().addWindow("Top down view", this.getTopDownView());
-        this.getGraphics().addWindow("Side view", this.getSideView());
-        this.getGraphics().addWindow("Chase view", this.getChaseView());
     }
+
 
     /**
      * Initializer for the world that needs to be simulated by the server
@@ -252,22 +235,15 @@ public class TestBedServer implements Runnable {
     // note: the amount of created drones is equal to the number of connections we can make
     private void initWorld(){
         Map<Vector, Float> droneSates = new HashMap<>();
+        List<AirportSpec> specs = this.getAirportSpecs();
         droneSates.put(new Vector(0,20,0), 0f); // a drone facing forward
         droneSates.put(new Vector(0, 30f, 20f), (float) Math.PI); // a drone facing backward
         WorldBuilder_v2 builder = new WorldBuilder_v2();
-        World world = builder.createWorld(null, this.getThreadPool());
+        World world = builder.createMultiDroneWorld(this.getThreadPool(), droneSates, specs);
+        //add the airport
         this.setWorld(world);
-    }
-
-    /**
-     * Initializer for the windows
-     */
-    private void initWindows(){
-    	this.getGraphics().setWorld(getWorld());
-        this.getDroneView().initWindow(Settings.DRONE_CAM);
-        this.getTopDownView().initWindow(Settings.DRONE_TOP_DOWN_CAM);
-        this.getChaseView().initWindow(Settings.DRONE_CHASE_CAM);
-        this.getSideView().initWindow(Settings.DRONE_SIDE_CAM);
+        //send the newly created world to the GUI
+        addFrameToGuiQueue();
     }
 
     /**
@@ -282,7 +258,7 @@ public class TestBedServer implements Runnable {
         //create the server socket
         ServerSocket serverSocket = null;
         try {
-            serverSocket = new ServerSocket(TestBedServer.getTcpPort());
+            serverSocket = new ServerSocket(getTcpPort());
         } catch (IOException e) {
             //the socket could not be created... I have no idea why, so lets print the issue
             e.printStackTrace();
@@ -341,6 +317,14 @@ public class TestBedServer implements Runnable {
     }
 
     /**
+     * Getter for the specifications of the airports to be added to the world
+     * @return a list containing the specifications of the airports to be added
+     */
+    private List<AirportSpec> getAirportSpecs() {
+        return airportSpecs;
+    }
+
+    /**
      * Getter for the in-simulation flight duration
      * @return the elapsed time
      */
@@ -380,6 +364,11 @@ public class TestBedServer implements Runnable {
      * Object that stores the world that will be simulated
      */
     private World world;
+
+    /**
+     * The specifications of the airports to be added to the world
+     */
+    private List<AirportSpec> airportSpecs;
 
     /**
      * Variable that stores the in-simulation duration of the flight
@@ -426,16 +415,8 @@ public class TestBedServer implements Runnable {
      * Getter for the port to connect with
      * @return the TCP port used for connections
      */
-    public static int getTcpPort() {
-        return TCP_PORT;
-    }
-
-    /**
-     * Getter for the number of connections maintained by the server
-     * @return the number of connections
-     */
-    private int getMaxNbOfConnections() {
-        return maxNbOfConnections;
+    public int getTcpPort() {
+        return tcpPort;
     }
 
     /**
@@ -493,13 +474,8 @@ public class TestBedServer implements Runnable {
     /**
      * Variable that stores the current used port to listen for TCP connections
      */
-    private final static int TCP_PORT = 4242;
+    private int tcpPort = 4242;
 
-    /**
-     * Variable that stores the number of connections maintained by the server,
-     * is equal to the number of drones and autopilots supported by the server
-     */
-    private int maxNbOfConnections;
 
     /**
      * Object that contains a list that stores all the current server threads
@@ -529,99 +505,6 @@ public class TestBedServer implements Runnable {
      */
 
     /**
-     * Getter for the graphics engine, used for generating the objects
-     * @return the graphics engine
-     */
-    private Graphics getGraphics() {
-        return graphics;
-    }
-
-    /**
-     * Setter for the graphics engine
-     * @param graphics the graphics engine to be set
-     */
-    private void setGraphics(Graphics graphics) {
-        if(!canHaveAsGraphics(graphics))
-            throw new IllegalArgumentException(INVALID_GRAPHICS);
-        this.graphics = graphics;
-    }
-
-    /**
-     * Checks if the provided graphics engine can be set as the graphics engine
-     * for the testbed server
-     * @param graphics the graphics engine to be tested
-     * @return true if and only if graphics is not a null reference and the server
-     * hasn't already a graphics engine associated with it
-     */
-    private boolean canHaveAsGraphics(Graphics graphics){
-        return graphics != null && this.getGraphics() == null;
-    }
-
-    /**
-     * Getter for the drone View
-     * @return the drone view
-     */
-    private Window getDroneView() {
-        return droneView;
-    }
-
-    /**
-     * Setter for the drone view
-     * @param droneView the drone view
-     */
-    private void setDroneView(Window droneView) {
-        this.droneView = droneView;
-    }
-
-    /**
-     * Getter for the top down view
-     * @return the top down view
-     */
-    private Window getTopDownView() {
-        return topDownView;
-    }
-
-    /**
-     * Setter for the top down view
-     * @param topDownView the top down view
-     */
-    private void setTopDownView(Window topDownView) {
-        this.topDownView = topDownView;
-    }
-
-    /**
-     * Getter for the chase view
-     * @return the chase view
-     */
-    private Window getChaseView() {
-        return chaseView;
-    }
-
-    /**
-     * Setter for the chase view
-     * @param chaseView the chase view
-     */
-    private void setChaseView(Window chaseView) {
-        this.chaseView = chaseView;
-    }
-
-    /**
-     * Getter for the side view
-     * @return the side view
-     */
-    private Window getSideView() {
-        return sideView;
-    }
-
-    /**
-     * Setter for the side view
-     * @param sideView the side view
-     */
-    private void setSideView(Window sideView) {
-        this.sideView = sideView;
-    }
-
-    /**
      * Getter for the renderer queue, here we insert the state of the simulation
      * for the GUI to render, this allows to decouple the testbed from the gui
      * @return a concurrent linked queue used to insert the states to render
@@ -633,19 +516,6 @@ public class TestBedServer implements Runnable {
     /*
     Graphics related instances #######################################
      */
-    /**
-     * Object that stores the graphics engine for the testbed
-     */
-    private Graphics graphics;
-
-    /**
-     * The windows used in the simulation, note no window for the drone camera input
-     * because this one is not used for the packet service (may be added later)
-     */
-    private Window droneView;
-    private Window topDownView;
-    private Window chaseView;
-    private Window sideView;
 
     /**
      * The queue used to communicate with the gui
