@@ -1,4 +1,4 @@
-package gui;
+package gui.IO;
 
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_A;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_D;
@@ -13,6 +13,9 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_W;
 import static org.lwjgl.glfw.GLFW.GLFW_PRESS;
 import static org.lwjgl.glfw.GLFW.glfwGetKey;
 
+import gui.GraphicsObjects.Tile;
+import gui.GL.Time;
+import gui.Windows.Settings;
 import org.lwjgl.glfw.GLFW;
 
 import math.Matrix4f;
@@ -35,7 +38,7 @@ public class Input {
     private Vector3f look = new Vector3f(0, 0, -1);
 	private Vector3f hop = new Vector3f();
 
-    Input(Settings setting) {
+    public Input(Settings setting) {
     	switch (setting) {
     	case DRONE_TOP_DOWN_CAM: 
     		position = new Vector3f(hop.x, hop.y + camDistance, -120f + hop.z);
@@ -144,7 +147,7 @@ public Matrix4f getViewMatrix(Settings setting) {
 		return this.position;
 	}
 	
-	static boolean isKeyPressed(int keyCode) {
+	public static boolean isKeyPressed(int keyCode) {
 		return glfwGetKey(GLFW.glfwGetCurrentContext(), keyCode) == GLFW_PRESS;
 	}
 

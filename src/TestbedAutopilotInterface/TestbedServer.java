@@ -1,11 +1,14 @@
 package TestbedAutopilotInterface;
 
+
 import internal.Exceptions.AngleOfAttackException;
 import internal.Exceptions.SimulationEndedException;
 import internal.Helper.Vector;
 import internal.Testbed.Drone;
 import internal.Testbed.World;
 import internal.Testbed.WorldBuilder_v2;
+import math.Vector3f;
+import org.lwjgl.glfw.GLFWVidMode;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -16,6 +19,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
+
+import static org.lwjgl.glfw.GLFW.glfwGetPrimaryMonitor;
+import static org.lwjgl.glfw.GLFW.glfwGetVideoMode;
 
 /**
  * Created by Martijn on 23/02/2018.
@@ -226,7 +232,6 @@ public class TestbedServer implements Runnable {
         //TODO activate the GUI (wait for jasper to finish the gui to call it)
 
     }
-
 
     /**
      * Initializer for the world that needs to be simulated by the server

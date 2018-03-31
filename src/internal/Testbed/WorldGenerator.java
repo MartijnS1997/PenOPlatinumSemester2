@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-import gui.Cube;
+import gui.GraphicsObjects.Cube;
 import internal.Helper.Vector;
 import internal.Physics.PhysXEngine;
 

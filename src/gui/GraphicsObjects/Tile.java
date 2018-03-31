@@ -1,4 +1,4 @@
-package gui;
+package gui.GraphicsObjects;
 
 import static org.lwjgl.glfw.GLFW.glfwMakeContextCurrent;
 import static org.lwjgl.system.MemoryUtil.NULL;
@@ -6,6 +6,8 @@ import static org.lwjgl.system.MemoryUtil.NULL;
 import java.util.Arrays;
 
 
+import gui.Windows.Graphics;
+import gui.GL.Mesh;
 import internal.Helper.HSVconverter;
 import internal.Helper.Vector;
 import math.Vector3f;
@@ -54,7 +56,12 @@ public class Tile implements GraphicsObject {
 		
 		this.position = position;
 	}
-	
+
+	@Override
+	public void update(Vector3f position, Vector3f orientation) {
+		this.position = position;
+	}
+
 	public void render() {
 		this.mesh.render();
 	}

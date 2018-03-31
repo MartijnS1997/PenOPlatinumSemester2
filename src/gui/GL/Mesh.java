@@ -1,4 +1,4 @@
-package gui;
+package gui.GL;
 
 import static org.lwjgl.opengl.GL11.GL_FLOAT;
 import static org.lwjgl.opengl.GL11.GL_TRIANGLES;

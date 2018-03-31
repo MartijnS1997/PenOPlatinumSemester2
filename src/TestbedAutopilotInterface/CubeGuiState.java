@@ -16,6 +16,7 @@ public interface CubeGuiState {
      */
     Vector getPosition();
 
+
 //    /**
 //     * Getter for the color of the cubes
 //     * @return a vector containing the HSV color values of the cube (H, S, V)

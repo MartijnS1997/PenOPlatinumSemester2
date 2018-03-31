@@ -1,11 +1,12 @@
-package gui;
+package gui.Windows;
 
-import internal.Testbed.WorldAirport;
-import internal.Testbed.Block;
-import internal.Testbed.Drone;
-import internal.Testbed.Floor;
-import internal.Testbed.World;
-import internal.Testbed.WorldObject;
+import TestbedAutopilotInterface.DroneGuiState;
+import gui.GL.ShaderProgram;
+import gui.GraphicsObjects.GraphicsObject;
+import gui.GraphicsObjects.Polygon;
+import gui.GraphicsObjects.Tile;
+import gui.IO.Input;
+import gui.WorldObjects.Drone;
 import math.Matrix3f;
 import math.Matrix4f;
 import math.Vector3f;
@@ -18,6 +19,7 @@ import org.lwjgl.system.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.*;
+import java.util.Set;
 
 import static org.lwjgl.glfw.Callbacks.*;
 import static org.lwjgl.glfw.GLFW.*;
@@ -168,23 +170,23 @@ public class Window {
 		glfwMakeContextCurrent(NULL);
 	}
 
-	public void render(World world) {
-		renderFrame(world);
+	public void render(Set<GraphicsObject> renderObjects, Drone drone) {
+		renderFrame(renderObjects, drone);
 
 		// Return false if the user has attempted to close
 		// the window or has pressed the ESCAPE key.
 		if (glfwWindowShouldClose(getHandler())) {
-			terminate(world);
+			terminate(renderObjects);
 		}
 //		checkError();
 	}
 	
-	private void renderFrame(World world) {
+	private void renderFrame(Set<GraphicsObject> renderObjects, Drone drone) {
 		GL.setCapabilities(capabilities);
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the buffers
 
-		updateMatrices(world);
+		updateMatrices(drone);
 	
 		program.bind();
         program.setUniform("projectionMatrix", projectionMatrix);
@@ -192,35 +194,47 @@ public class Window {
         
         float viewingDistance = 500;
 
-        for (WorldObject object: world.getObjectSet()) {
-        	if (object.getClass() == Block.class) {
-        		for (GraphicsObject cube: object.getAssociatedGraphicsObjects()) {
-        			program.setUniform("modelMatrix", getModelMatrix(((Cube) cube).getRelPos(), cube.getSize()));
-//        			if (cube.getPos().subtract(this.cameraposition).length() < viewingDistance)
-					cube.render();
-        		}
-        	}
-        	else if(object.getClass() == Drone.class) {
-        		for (GraphicsObject polygon: object.getAssociatedGraphicsObjects()) {
-        			program.setUniform("modelMatrix", getModelMatrix(((Drone) object).getOrientation().convertToVector3f(), ((Polygon) polygon).getRelPos(), polygon.getSize()));
-        			input.nextPosition(polygon.getPos());
-        			polygon.render();
-        		}
-        	}
-        	else if(object.getClass() == Floor.class) {
-        		for (GraphicsObject tile: object.getAssociatedGraphicsObjects()) {
-        			program.setUniform("modelMatrix", getModelMatrix(((Tile) tile).getPosWithOffset(), tile.getSize()));
-        			if (((Tile) tile).getPosWithOffset().subtract(this.cameraposition).length() < viewingDistance)
-						tile.render();
-        		}
-        	}
-        	else if(object.getClass() == WorldAirport.class) {
-        		for (GraphicsObject tile: object.getAssociatedGraphicsObjects()) {
-        			program.setUniform("modelMatrix", getModelMatrix(tile.getPos(), tile.getSize()));
-					tile.render();
-        		}
-        	}
-    	}
+        for (GraphicsObject object: renderObjects) {
+        	if (object.getClass() == Polygon.class) {
+				program.setUniform("modelMatrix", getModelMatrix(((Polygon) object).getOrientation(), ((Polygon) object).getRelPos(), object.getSize()));
+        		if (((Polygon) object).getOrientation() != new Vector3f())
+					input.nextPosition(object.getPos());
+			} else if (object.getClass() == Tile.class) {
+				program.setUniform("modelMatrix", getModelMatrix(((Tile) object).getPosWithOffset(), object.getSize()));
+			} else {
+				program.setUniform("modelMatrix", getModelMatrix(object.getPos(), object.getSize()));
+			}
+			object.render();
+		}
+
+//        for (WorldObject object: world.getObjectSet()) {
+//        	if (object.getClass() == Block.class) {
+//        		for (GraphicsObject cube: object.getAssociatedGraphicsObjects()) {
+//        			program.setUniform("modelMatrix", getModelMatrix(((Cube) cube).getRelPos(), cube.getSize()));
+//					cube.render();
+//        		}
+//        	}
+//        	else if(object.getClass() == Drone.class) {
+//        		for (GraphicsObject polygon: object.getAssociatedGraphicsObjects()) {
+//        			program.setUniform("modelMatrix", getModelMatrix(((Drone) object).getOrientation().convertToVector3f(), ((Polygon) polygon).getRelPos(), polygon.getSize()));
+//        			input.nextPosition(polygon.getPos());
+//        			polygon.render();
+//        		}
+//        	}
+//        	else if(object.getClass() == Floor.class) {
+//        		for (GraphicsObject tile: object.getAssociatedGraphicsObjects()) {
+//        			program.setUniform("modelMatrix", getModelMatrix(((Tile) tile).getPosWithOffset(), tile.getSize()));
+//        			if (((Tile) tile).getPosWithOffset().subtract(this.cameraposition).length() < viewingDistance)
+//						tile.render();
+//        		}
+//        	}
+//        	else if(object.getClass() == Airport.class) {
+//        		for (GraphicsObject tile: object.getAssociatedGraphicsObjects()) {
+//        			program.setUniform("modelMatrix", getModelMatrix(tile.getPos(), tile.getSize()));
+//					tile.render();
+//        		}
+//        	}
+//    	}
 		
 		program.unbind();
 		
@@ -228,7 +242,7 @@ public class Window {
 	}
 	
 	// Free the window callbacks and destroy the window
-	public void terminate(World world) {
+	public void terminate(Set<GraphicsObject> graphicsObjects) {
 		program.delete();
 		
 		glfwFreeCallbacks(getHandler());
@@ -237,9 +251,8 @@ public class Window {
 		/**
 	     * Releases in use OpenGL resources.
 	     */
-		for (WorldObject object: world.getObjectSet()) {
-			for (GraphicsObject graphicsObject: object.getAssociatedGraphicsObjects())
-				graphicsObject.delete();
+		for (GraphicsObject graphicsObject: graphicsObjects) {
+			graphicsObject.delete();
     	}
 		
 		terminated = true;
@@ -253,7 +266,7 @@ public class Window {
 		return windowHandle;
 	}
 	
-	public void updateMatrices(World world) {
+	public void updateMatrices(Drone drone) {
 		if (Input.isKeyPressed(GLFW_KEY_R))
 			this.setting = Settings.DRONE_CAM;
 		else if (Input.isKeyPressed(GLFW_KEY_T))
@@ -269,7 +282,7 @@ public class Window {
 		
 		if (getSetting() == Settings.INDEPENDENT_CAM)
 			input.processInput();
-		updateViewMatrix(setting, world);
+		updateViewMatrix(setting, drone);
 		
 		projectionMatrix = getProjectionMatrix();
 	}
@@ -282,13 +295,13 @@ public class Window {
 		return Matrix4f.translate(position).multiply(Matrix4f.rotate(orientation)).multiply(Matrix4f.scale(size));
 	}
 	
-	public void updateViewMatrix(World world) {
+	public void updateViewMatrix(Drone drone) {
 		switch (getSetting()) {
 		case DRONE_CAM: 
-			this.viewMatrix = getView(world, new Vector3f(1f, 1f, 1f), new Vector3f(1f, 1f, 1f).scale(3f));
+			this.viewMatrix = getView(drone, new Vector3f(1f, 1f, 1f), new Vector3f(1f, 1f, 1f).scale(3f));
 			break;
 		case DRONE_CHASE_CAM: 
-			this.viewMatrix = getView(world, new Vector3f(1f, 0f, 0f), new Vector3f(-1f, 0f, -1f).scale(10f));
+			this.viewMatrix = getView(drone, new Vector3f(1f, 0f, 0f), new Vector3f(-1f, 0f, -1f).scale(10f));
 			break;
 		default: 
 			this.viewMatrix = input.getViewMatrix(getSetting());
@@ -297,13 +310,13 @@ public class Window {
 		}
 	}
 	
-	public void updateViewMatrix(Settings setting, World world) {
+	public void updateViewMatrix(Settings setting, Drone drone) {
 		switch (setting) {
 		case DRONE_CAM: 
-			this.viewMatrix = getView(world, new Vector3f(1f, 1f, 1f), new Vector3f(1f, 1f, 1f).scale(3f));
+			this.viewMatrix = getView(drone, new Vector3f(1f, 1f, 1f), new Vector3f(1f, 1f, 1f).scale(3f));
 			break;
 		case DRONE_CHASE_CAM: 
-			this.viewMatrix = getView(world, new Vector3f(1f, 0f, 0f), new Vector3f(-1f, 0f, -1f).scale(13f));
+			this.viewMatrix = getView(drone, new Vector3f(1f, 0f, 0f), new Vector3f(-1f, 0f, -1f).scale(13f));
 			break;
 		default: 
 			this.viewMatrix = input.getViewMatrix(setting);
@@ -312,13 +325,9 @@ public class Window {
 		}
 	}
 	
-	public Matrix4f getView(World world, Vector3f camOrientation, Vector3f camPosition) {   
-		Vector3f orientation = new Vector3f();
-		Vector3f dronePosition = new Vector3f();
-        for (Drone drone: world.getDroneSet()) {
-        	orientation = drone.getOrientation().convertToVector3f().scale(camOrientation);
-        	dronePosition = drone.getPosition().convertToVector3f();
-        }
+	public Matrix4f getView(Drone drone, Vector3f camOrientation, Vector3f camPosition) {
+		Vector3f orientation = drone.getOrientation().scale(camOrientation);
+		Vector3f dronePosition = drone.getPosition();
         
         Matrix3f transformationMatrix = Matrix3f.transformationMatrix(orientation).transpose();
         

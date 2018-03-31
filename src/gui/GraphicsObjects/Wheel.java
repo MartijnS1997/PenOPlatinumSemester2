@@ -1,17 +1,16 @@
-package gui;
+package gui.GraphicsObjects;
 
 import static org.lwjgl.glfw.GLFW.glfwMakeContextCurrent;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
-import java.util.Arrays;
-
+import gui.Windows.Graphics;
+import gui.GL.Mesh;
 import internal.Helper.HSVconverter;
 import internal.Helper.Vector;
 import math.Matrix3f;
 import math.Vector3f;
-import tests.VectorTest;
 
-public class Wheel implements Polygon{
+public class Wheel implements Polygon {
 
 	private float[] positions;
 	private int[] indices;

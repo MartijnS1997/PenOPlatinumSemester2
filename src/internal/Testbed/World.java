@@ -694,6 +694,11 @@ public class World {
 				}
 
 				@Override
+				public Vector getVelocity() {
+					return drone.getVelocity();
+				}
+
+				@Override
 				public Vector getOrientation() {
 					return drone.getOrientation();
 				}

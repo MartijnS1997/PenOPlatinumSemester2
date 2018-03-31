@@ -1,4 +1,4 @@
-package gui;
+package gui.IO;
 
 import static org.lwjgl.glfw.GLFW.glfwGetCursorPos;
 

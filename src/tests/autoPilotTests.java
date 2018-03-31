@@ -1,5 +1,5 @@
 package tests;
-import gui.Window;
+import gui.Windows.Window;
 
 import internal.Autopilot.AutoPilot;
 import internal.Autopilot.AutoPilotCamera;
