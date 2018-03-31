@@ -1,7 +1,5 @@
 package TestbedAutopilotInterface;
 
-import internal.Helper.Vector;
-
 import java.util.Map;
 import java.util.Set;
 

@@ -4,7 +4,6 @@ package internal.Autopilot;
 import AutopilotInterfaces.*;
 import AutopilotInterfaces.Path;
 import TestbedAutopilotInterface.AutopilotOverseer;
-import internal.Testbed.FlightRecorder;
 import internal.Helper.Vector;
 import internal.Physics.PhysXEngine;
 
@@ -26,13 +25,16 @@ public class AutoPilot implements Autopilot_v2{
 	public AutoPilot(AutopilotOverseer overseer){
 		//first get the controller selector
 		this.setSelector(new ControllerSelector(this));
-
+		this.overseer = overseer;
+		this.communicator = new OverseerCommunication(this, overseer);
 		//may be out commented if the transitions are smooth
 		//this.getSelector().forceActiveController(FlightState.TAXIING);
 
 	}
 
-
+	public AutoPilot() {
+		this(null);
+	}
 
 	@Override
 	public AutopilotOutputs simulationStarted(AutopilotConfig config, AutopilotInputs_v2 inputs) {
@@ -105,7 +107,11 @@ public class AutoPilot implements Autopilot_v2{
 	 * @return control outputs for the drone
 	 */
     private AutopilotOutputs getControlOutputs(AutopilotInputs_v2 inputs){
-
+		//set the current inputs so the communicator can access them
+		this.setCurrentInputs(inputs);
+		//get the overseer
+		OverseerCommunication communicator = this.getCommunicator();
+		communicator.overseerCommunication();
 		return this.getSelector().getControlActions(inputs);
 
 	}
@@ -249,12 +255,55 @@ public class AutoPilot implements Autopilot_v2{
 		return path;
 	}
 
-	public Vector getStartPosition() {
+	/**
+	 * Setter for the start position of the drone, this will be used by the controller selector to
+	 * set a target for the taxiing controller (may be omitted later on)
+	 * @return
+	 */
+	protected Vector getStartPosition() {
 		return this.startPosition;
 	}
 
-	public void setStartPosition(Vector position) {
+	/**
+	 * setter for the start position of the drone (see getter for more info)
+	 * @param position the current starting position
+	 *                 todo: add checker to see if the startpos isn't already configured
+	 */
+	private void setStartPosition(Vector position) {
 		this.startPosition = position;
+	}
+
+
+	/**
+	 * Getter for the current inputs of the autopilot (needed by the autopilot overseer communication)
+	 * @return an AutopilotInputs_v2 object that contains the current inputs for the autopilot
+	 */
+	protected AutopilotInputs_v2 getCurrentInputs() {
+		return currentInputs;
+	}
+
+	/**
+	 * Setter for the current inputs of the autopilot (see getter for more info)
+	 * @param currentInputs the current inputs provided by the testbed
+	 */
+	private void setCurrentInputs(AutopilotInputs_v2 currentInputs) {
+		this.currentInputs = currentInputs;
+	}
+
+	/**
+	 * Getter for the overseer communication entity, used to communicate with the overseer
+	 * @return an OverseerCommunication object used to communicate with the overseer
+	 */
+	private OverseerCommunication getCommunicator() {
+		return communicator;
+	}
+
+	/**
+	 * Getter for the overseer that governs all autopilots
+	 * @return the overseer that regulates the autopilots
+	 */
+	private AutopilotOverseer getOverseer() {
+		return overseer;
 	}
 
 	/**
@@ -303,6 +352,21 @@ public class AutoPilot implements Autopilot_v2{
 	 * Variable for storing the startPosition of the drone, which also serves as the destination position
 	 */
 	private Vector startPosition;
+
+	/**
+	 * The overseer used to coordinate all the autopilots
+	 */
+	private AutopilotOverseer overseer;
+
+	/**
+	 * The inputs currently received by the autopilot
+	 */
+	private AutopilotInputs_v2 currentInputs;
+
+	/**
+	 * The entity that regulates the communication with the overseer
+	 */
+	private OverseerCommunication communicator;
 
 
     /*

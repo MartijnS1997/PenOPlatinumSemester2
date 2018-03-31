@@ -8,6 +8,7 @@ import gui.Windows.Settings;
 import gui.Windows.Window;
 import internal.Exceptions.AngleOfAttackException;
 import internal.Exceptions.SimulationEndedException;
+import internal.Helper.Vector;
 import internal.Testbed.*;
 import math.Vector3f;
 import org.lwjgl.glfw.GLFWVidMode;
@@ -18,6 +19,8 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import static org.lwjgl.glfw.GLFW.glfwGetPrimaryMonitor;
@@ -215,7 +218,7 @@ public class TestbedMain implements Runnable{
      * @throws IOException
      */
     private AutopilotInputs_v2 firstCycle() throws IOException {
-        byte[] image = this.generateImage();
+        byte[] image = new byte[0];//this.generateImage();
         this.updateSimulationTime();
         return new MainAutopilotInputs(this.getDrone(), image, this.getSimulationTime());
     }
@@ -246,7 +249,7 @@ public class TestbedMain implements Runnable{
         //update the simulation time for the outputs (elapsed time)
         updateSimulationTime();
         //generate the image for the autopilot
-        byte[] cameraImage = generateImage();
+        byte[] cameraImage = new byte[0]; //generateImage();
 
         //create the output object
         autopilotInputs = new MainAutopilotInputs(this.getDrone(), cameraImage, this.getSimulationTime());
@@ -262,7 +265,7 @@ public class TestbedMain implements Runnable{
      * @throws IOException
      */
     private byte[] generateImage() throws IOException {
-        this.getGraphics().renderWindows();
+//        this.getGraphics().renderWindows();
         return droneCam.getCameraView();
     }
 
@@ -291,14 +294,13 @@ public class TestbedMain implements Runnable{
      */
     private void initWorld() throws IOException {
         WorldBuilder_v2 builder = new WorldBuilder_v2();
-//        Map<Vector, Float> droneConfig = new HashMap<>();
-//        droneConfig.put(new Vector(0, 10f,0), 0f); //drone standing on ground with tyre compression 0.05
-        //World world =  builder.createWorld();
-        //World world = builder.createWorld(droneConfig);
+        Map<Vector, Float> droneConfig = new HashMap<>();
+        droneConfig.put(new Vector(0, 10f,0), 0f); //drone standing on ground with tyre compression 0.05
+        World world =  builder.createWorld(droneConfig);
         //World world = builder.createFlightTestWorld();
         //World world = builder.createTakeoffWorld();
         //World world = builder.createTotalFlightWorld();
-        World world = builder.createTotalFlightWorld();
+        //World world = builder.createTotalFlightWorld();
         //World world  = builder.createLandingWorld();
         this.setWorld(world);
         Drone drone =(Drone)(world.getDroneSet().toArray())[0]; //only one drone is present
@@ -367,7 +369,7 @@ public class TestbedMain implements Runnable{
      * Initialize the windows used in the simulation
      */
     private void initWindows(){
-    	this.getGraphics().setWorld(getWorld());
+    	//this.getGraphics().setWorld(getWorld());
         // Initialize the windows
         this.getDroneCam().initWindow(Settings.DRONE_CAM);
         this.getDroneView().initWindow(Settings.DRONE_CAM);
@@ -381,7 +383,7 @@ public class TestbedMain implements Runnable{
         GLFWVidMode vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
         int monitorWidth = vidmode.width();
         int monitorHeight = vidmode.height();
-        this.getGraphics().makeTextWindow("Stats", monitorWidth/2, monitorHeight/3, monitorWidth/2, monitorHeight*2/3);
+        //this.getGraphics().makeTextWindow("Stats", monitorWidth/2, monitorHeight/3, monitorWidth/2, monitorHeight*2/3);
         // create the switch when in single window mode
         if (!this.getShowAllWindows()) {
 

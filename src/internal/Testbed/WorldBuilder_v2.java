@@ -1,5 +1,6 @@
 package internal.Testbed;
 
+import TestbedAutopilotInterface.AirportSpec;
 import internal.Helper.Vector;
 
 import java.util.List;
@@ -23,13 +24,13 @@ public class WorldBuilder_v2 {
      */
     public World createWorld(Map<Vector, Float> droneConfig){
         List<Drone> droneList = this.getDroneBuilder_v2().createDrones(droneConfig);
-        World world = new WorldGenerator(NB_OF_BLOCKS).createWorld(new Vector(), World.VISIT_ALL_OBJECTIVE);
+        //World world = new WorldGenerator(NB_OF_BLOCKS).createWorld(new Vector(), World.VISIT_ALL_OBJECTIVE);
+        World world = new World();
         world.addDrones(droneList);
         droneList.get(0).setVelocity(new Vector(0,0,-50f));
-        Floor floor = new Floor(new Vector());
-        world.addWorldObject(floor);
-        Airport airport = new Airport(new Vector(0, 0.5f, 20));
-        world.addWorldObject(airport);
+//        Floor floor = new Floor(new Vector());
+//        world.addWorldObject(floor);
+        initSurroundings(world);
         return world;
     }
 
@@ -42,24 +43,51 @@ public class WorldBuilder_v2 {
      */
     public World createWorld(Map<Vector, Float> droneConfig, ExecutorService threads){
         List<Drone> droneList = this.getDroneBuilder_v2().createDrones(droneConfig);
-        World world = new World(World.NO_OBJECTIVE, threads);
+        World world = new World(threads);
         world.addDrones(droneList);
-        Floor floor = new Floor(new Vector());
-        world.addWorldObject(floor);
-        Airport airport = new Airport(new Vector(0, 0.5f, 20));
-        world.addWorldObject(airport);
+//        Floor floor = new Floor(new Vector());
+//        world.addWorldObject(floor);
+        initSurroundings(world);
         return world;
     }
 
+//
+//    public World createTotalFlightWorld(){
+//        WorldGenerator generator = new WorldGenerator(NB_OF_BLOCKS);
+//        Vector startCubes = new Vector(0, 30f, -700f);
+//        World world = generator.createWorld(startCubes, World.FLIGHT_OBJECTIVE);
+//        world.addWorldObject(this.getDroneBuilder_v2().createTestBounceDrone());
+//
+//        initSurroundings(world);
+//
+//        return world;
+//    }
 
-    public World createTotalFlightWorld(){
-        WorldGenerator generator = new WorldGenerator(NB_OF_BLOCKS);
-        Vector startCubes = new Vector(0, 30f, -700f);
-        World world = generator.createWorld(startCubes, World.FLIGHT_OBJECTIVE);
-        world.addWorldObject(this.getDroneBuilder_v2().createTestBounceDrone());
-
-        initSurroundings(world);
-
+    /**
+     * Creates a world with multiple drones (same nb of drones as threads
+     * @param droneThreads the threads used to simulate the drones
+     * @param droneConfig the configuration of the drones to add (standard config for other parameters is used
+     *                    in the drone builder itself) the keys of the map is the position of the drone and
+     *                    the value is the heading of the drone)
+     * @param airports the airports: the arrays have to contain a position (entry 0) and
+     *                 heading (entry 1)
+     * @return the world created with the given thread pool and the airports (are converted to WorldAirport)
+     */
+    public World createMultiDroneWorld(ExecutorService droneThreads, Map<Vector, Float> droneConfig, List<AirportSpec> airports){
+        World world = new World(droneThreads);
+        //TODO add the drones and place them onto a certain airport upon init.
+        for(AirportSpec airport: airports){
+            //set the width and length of the airports (all calls will, be ignored after the second one
+            world.setRunwayWidth(airport.getRunwayWidth());
+            world.setRunwayLength(airport.getRunwayLength());
+            Vector position = airport.getPosition();
+            Vector heading = airport.getPrimaryRunWay();
+            world.addAirport(position, heading);
+        }
+        //create the drones
+        DroneBuilder_v2 builder_v2 = this.getDroneBuilder_v2();
+        List<Drone> droneList = builder_v2.createDrones(droneConfig);
+        world.addDrones(droneList);
         return world;
     }
 
@@ -69,10 +97,7 @@ public class WorldBuilder_v2 {
      * @param world the world to initialize
      */
     private static void initSurroundings(World world){
-        Floor floor = new Floor(new Vector());
-        world.addWorldObject(floor);
-        Airport airport = new Airport(new Vector(0, 0.5f, 20));
-        world.addWorldObject(airport);
+        world.addAirport(new Vector(0,0.5f, 20), new Vector(0,0,-1));
     }
 
 
