@@ -25,8 +25,8 @@ public class DifferentiationTest {
 
     @Before
     public void setupMutableFixture(){
-        WorldBuilder builder = new WorldBuilder();
-        drone = builder.getDrone();
+        //WorldBuilder builder = new WorldBuilder();
+        //drone = builder.getDrone();
     }
 
     @Test

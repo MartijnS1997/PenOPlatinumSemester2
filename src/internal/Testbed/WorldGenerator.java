@@ -308,13 +308,13 @@ public class WorldGenerator {
 		return newPositions;
 	}
 
-	/**
-	 * Creates a world with zero offset
-	 * @return a world filled with N cubes with all a different HSV combination
-	 */
-	public World createWorld(){
-		return createWorld(new Vector(), World.VISIT_ALL_OBJECTIVE);
-	}
+//	/**
+//	 * Creates a world with zero offset
+//	 * @return a world filled with N cubes with all a different HSV combination
+//	 */
+//	public World createWorld(){
+//		return createWorld(new Vector(), World.VISIT_ALL_OBJECTIVE);
+//	}
 
 	/**
 	 * Create a world with nbOfCubes cubes who all have a different HSV combination and a different position
@@ -336,7 +336,7 @@ public class WorldGenerator {
 //		ArrayList<Vector> allColors = redGenerator();
 
 		//the current objective is visit all
-		World world = new World(objective);
+		World world = new World();
 		Random r = new Random();
 
 		for (int i = 0; i < n; i++){
@@ -351,8 +351,6 @@ public class WorldGenerator {
 			Cube cube = new Cube(pos.convertToVector3f(), clr.convertToVector3f(), true);
 			cube.setSize(5f);
 			block.setAssocatedCube(cube);
-
-			world.addWorldObject(block);
 
 		}
 

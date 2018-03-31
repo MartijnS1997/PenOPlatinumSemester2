@@ -12,6 +12,7 @@ import internal.Helper.Vector;
  * Created by Martijn on 26/10/2017.
  * a class to build a world, set the standard configuration here.
  */
+@Deprecated
 public class WorldBuilder {
 
     public WorldBuilder() {
@@ -21,7 +22,7 @@ public class WorldBuilder {
     public World createWorld(String config) throws IOException{
         World world = new World();
     	if (!isPredefWorld()) {
-    		world = this.getWorldGenerator().createWorld();
+    		//world = this.getWorldGenerator().createWorld();
     	}
     	else {
     	    Parser parser = new Parser(this.getPredefDirectory());
@@ -42,7 +43,7 @@ public class WorldBuilder {
         world.addDrone(this.getDrone());
 
         
-        WorldAirport airport = new WorldAirport(new Vector(0, 0.01f, -0));
+        //WorldAirport airport = new WorldAirport(new Vector(0, 0.01f, -0));
         //world.addAirport(airport);
 
         return world;
