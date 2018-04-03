@@ -27,6 +27,7 @@ public class OverseerAirportMap {
      * is associated with the given ID
      * @param airportID the airport id used to find the requested airport
      * @return an airport object containing all the info needed to navigate
+     *         returns null if the airport is not present on the map
      */
     public MapAirport getAirport(int airportID){
         Map<Integer, MapAirport> airports = this.getAirportMap();
@@ -96,7 +97,7 @@ public class OverseerAirportMap {
      * @return  the airport the in which the current provided position lies
      *          null if there isn't such an airport
      */
-    private MapAirport getAirportAt(Vector position){
+    protected MapAirport getAirportAt(Vector position){
         //filter the map of all airports and check if the drone is within the borders of the airport
         Map<Integer, MapAirport> airports = this.getAirportMap();
         //filter for the airports that are located at the given position

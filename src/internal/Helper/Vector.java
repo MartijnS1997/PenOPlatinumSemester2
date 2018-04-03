@@ -416,10 +416,10 @@ public class Vector {
 
 
 	/**
-	 * Makes a deep copy of the vector currently selected and returns the copy
-	 * @return a deep copy of the current vector
+	 * Makes a deep deepCopy of the vector currently selected and returns the deepCopy
+	 * @return a deep deepCopy of the current vector
 	 */
-	public Vector copy(){
+	public Vector deepCopy(){
 		return new Vector(this.getxValue(), this.getyValue(), this.getzValue());
 	}
 

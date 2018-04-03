@@ -5,11 +5,8 @@ import internal.Exceptions.AngleOfAttackException;
 import internal.Exceptions.SimulationEndedException;
 import internal.Helper.Vector;
 import internal.Testbed.Drone;
-import internal.Testbed.DroneBuilder_v2;
 import internal.Testbed.World;
 import internal.Testbed.WorldBuilder_v2;
-import math.Vector3f;
-import org.lwjgl.glfw.GLFWVidMode;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -20,9 +17,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
-
-import static org.lwjgl.glfw.GLFW.glfwGetPrimaryMonitor;
-import static org.lwjgl.glfw.GLFW.glfwGetVideoMode;
 
 /**
  * Created by Martijn on 23/02/2018.
@@ -54,16 +48,14 @@ public class TestbedServer implements Runnable {
      * @param airports the airports to be set in the world, the first entry of the vector is the location
      *                 and the second is the heading vector of runway zero
      */
-    public TestbedServer(float timeStep, int stepsPerCycle, int maxNbThreads, int tcpPort, List<AirportSpec> airports) {
+    public TestbedServer(float timeStep, int stepsPerCycle, int maxNbThreads, int tcpPort, List<AirportSpec> airports, List<DroneSpec> drones) {
         this.timeStep = timeStep;
         this.stepsPerCycle = stepsPerCycle;
         this.maxNbOfThreads = maxNbThreads;
         this.tcpPort = tcpPort;
         this.airportSpecs = airports;
+        this.droneSpecs = drones;
     }
-
-    //Todo initialize the server threads
-    //Todo implement the incrementation of the simulation time
 
     /**
      * Run method, gets called upon thread creation for this class (own main loop)
@@ -125,8 +117,10 @@ public class TestbedServer implements Runnable {
 
         //now that all the communication is done, we can simulate the next step
         //(all the drones have received their commands for the next step)
+        long start = System.currentTimeMillis();
         advanceWorld();
-        System.out.println("invoking communication");
+        long end = System.currentTimeMillis();
+        System.out.println("Elapsed time: " + (end - start) + "millis");
         //once the world is advanced, we are finished here
     }
 
@@ -139,10 +133,8 @@ public class TestbedServer implements Runnable {
         //first send all the connections to the thread pool
         ExecutorService threadPool = this.getThreadPool();
         Set<TestbedConnection> connections = this.getServerTestbedConnections();
-        System.out.println("Connections: " + this.getServerTestbedConnections());
         //invoke all the connections to get a response from their connected autopilots
         List<Future<Void>> busyConnectionList = threadPool.invokeAll(connections);
-        System.out.println("Invoking connections");
         //now we wait for all the connections to finish
         boolean allConnectionsFinished = false;
         while(!allConnectionsFinished){
@@ -168,14 +160,12 @@ public class TestbedServer implements Runnable {
         float timeStep = this.getTimeStep();
         int stepsPerCycles = this.getStepsPerCycle();
         //advance the state of the world for n steps of time delta t
-        System.out.println("Advancing world state");
         world.advanceWorldState(timeStep, stepsPerCycles);
         //increment the time that was simulated
         this.incrementElapsedTime();
         System.out.println(world.toString());
         //communicate the new world state with the GUI
         addFrameToGuiQueue();
-        System.out.println("frame added");
     }
 
     /**
@@ -266,12 +256,10 @@ public class TestbedServer implements Runnable {
     // Todo implement the world initializer, first cleanup the world and drone builder
     // note: the amount of created drones is equal to the number of connections we can make
     private void initWorld(){
-        Map<Vector, Float> droneSates = new HashMap<>();
-        List<AirportSpec> specs = this.getAirportSpecs();
-        droneSates.put(new Vector(0, DroneBuilder_v2.START_Y - 0.001f,0), 0f); // a drone facing forward
-        droneSates.put(new Vector(0, DroneBuilder_v2.START_Y - 0.001f, 20f), (float) Math.PI); // a drone facing backward
+        List<AirportSpec> airportSpecs = this.getAirportSpecs();
+        List<DroneSpec> droneSpecs = this.getDroneSpecs();
         WorldBuilder_v2 builder = new WorldBuilder_v2();
-        World world = builder.createMultiDroneWorld(this.getThreadPool(), droneSates, specs);
+        World world = builder.createMultiDroneWorld(this.getThreadPool(), droneSpecs, airportSpecs);
         //add the airport
         this.setWorld(world);
         //send the newly created world to the GUI
@@ -352,6 +340,14 @@ public class TestbedServer implements Runnable {
     }
 
     /**
+     * Getter for the specifications of the drones to be added to the world
+     * @return a lis containing droneSpec objects containing the info needed to generate the drones in the world
+     */
+    private List<DroneSpec> getDroneSpecs() {
+        return droneSpecs;
+    }
+
+    /**
      * Getter for the in-simulation flight duration
      * @return the elapsed time
      */
@@ -396,6 +392,11 @@ public class TestbedServer implements Runnable {
      * The specifications of the airports to be added to the world
      */
     private List<AirportSpec> airportSpecs;
+
+    /**
+     * The specifications of the drones to be added to the world
+     */
+    private List<DroneSpec>  droneSpecs;
 
     /**
      * Variable that stores the in-simulation duration of the flight

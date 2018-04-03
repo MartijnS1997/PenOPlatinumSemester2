@@ -1,6 +1,7 @@
 package internal.Testbed;
 
 import TestbedAutopilotInterface.AirportSpec;
+import TestbedAutopilotInterface.DroneSpec;
 import internal.Helper.Vector;
 
 import java.util.List;
@@ -66,16 +67,13 @@ public class WorldBuilder_v2 {
     /**
      * Creates a world with multiple drones (same nb of drones as threads
      * @param droneThreads the threads used to simulate the drones
-     * @param droneConfig the configuration of the drones to add (standard config for other parameters is used
-     *                    in the drone builder itself) the keys of the map is the position of the drone and
-     *                    the value is the heading of the drone)
+     * @param drones the specifications for the drones to add to the world (no checks performed)
      * @param airports the airports: the arrays have to contain a position (entry 0) and
      *                 heading (entry 1)
      * @return the world created with the given thread pool and the airports (are converted to WorldAirport)
      */
-    public World createMultiDroneWorld(ExecutorService droneThreads, Map<Vector, Float> droneConfig, List<AirportSpec> airports){
+    public World createMultiDroneWorld(ExecutorService droneThreads, List<DroneSpec> drones, List<AirportSpec> airports){
         World world = new World(droneThreads);
-        //TODO add the drones and place them onto a certain airport upon init.
         for(AirportSpec airport: airports){
             //set the width and length of the airports (all calls will, be ignored after the second one
             world.setRunwayWidth(airport.getRunwayWidth());
@@ -86,7 +84,7 @@ public class WorldBuilder_v2 {
         }
         //create the drones
         DroneBuilder_v2 builder_v2 = this.getDroneBuilder_v2();
-        List<Drone> droneList = builder_v2.createDrones(droneConfig);
+        List<Drone> droneList = builder_v2.createDrones(drones);
         world.addDrones(droneList);
         return world;
     }

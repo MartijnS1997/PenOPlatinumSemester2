@@ -475,8 +475,8 @@ public abstract class Controller {
         }
 
         /**
-         * gets a deep copy of the given output instance
-         * @return the copy
+         * gets a deep deepCopy of the given output instance
+         * @return the deepCopy
          */
         public ControlOutputs copy(){
             ControlOutputs copy = new ControlOutputs();

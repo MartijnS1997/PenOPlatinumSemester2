@@ -2,7 +2,7 @@ package TestbedAutopilotInterface;
 
 import AutopilotInterfaces.*;
 import internal.Autopilot.AutoPilot;
-
+import internal.Helper.Vector;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -165,6 +165,45 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void> {
     }
 
     /**
+     * Getter for the airport where the autopilot is currently at
+     * gives null if the drone is not present on an airport (should have crashed by now)
+     * @param autopilot the autopilot to get the airport for
+     * @return the MapAirport object containing all the information needed for the autopilot
+     * --> the position used by the method is the position submitted by the autopilot during the communication
+     */
+   public MapAirport getAirportAt(AutoPilot autopilot){
+        //get the position of the autopilot
+       String autopilotID = autopilot.getID();
+       AutopilotInputs_v2 inputs = this.getActiveAutopilots().get(autopilotID);
+       Vector position = extractPosition(inputs);
+       OverseerAirportMap airportMap = this.getAirportMap();
+       return airportMap.getAirportAt(position);
+   }
+
+    /**
+     * Getter for the airport with the requested ID, if no such airport exists, return null
+     * @param airportID the id used to get the airport
+     * @return the airport with the same id as the argument, returns null if no such airport exists
+     */
+   public MapAirport getAirportByID(int airportID){
+       OverseerAirportMap map = this.getAirportMap();
+       return map.getAirport(airportID);
+   }
+
+    /**
+     * Extracts the position from the inputs received by the autopilots
+     * @param inputs the inputs used to extract the position from
+     * @return a vector containing the position expressed in the inputs
+     */
+   protected static Vector extractPosition(AutopilotInputs_v2 inputs){
+       float xPos = inputs.getX();
+       float yPos = inputs.getY();
+       float zPos = inputs.getZ();
+
+       return new Vector(xPos, yPos, zPos);
+   }
+
+    /**
      * Getter for the cruising altitude of the specified autopilot
      * @param autopilot the autopilot to retrieve the cruising altitude for
      * @return the cruising altitude for the provided autopilot
@@ -226,6 +265,14 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void> {
      */
     private ConcurrentMap<String, Float> getCruisingAltitudes() {
         return cruisingAltitudes;
+    }
+
+    /**
+     * Getter for the map that contains all the airports currently active in the world
+     * @return an overseerAirportMap object containing all the information about the airports for the overseer
+     */
+    private OverseerAirportMap getAirportMap() {
+        return airportMap;
     }
 
     /**

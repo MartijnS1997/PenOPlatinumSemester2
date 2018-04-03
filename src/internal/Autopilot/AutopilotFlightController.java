@@ -15,14 +15,14 @@ import static java.lang.Math.*;
  * Appended and edited by Anthony Rath� on 6/11/2017
  * A class of AutopilotInterfaces Controllers
  */
-public abstract class AutoPilotFlightController extends Controller{
+public abstract class AutopilotFlightController extends Controller{
 
 
 	/**
      * Constructor for the autopilotController
      * @param autopilot
      */
-    public AutoPilotFlightController(AutoPilot autopilot){
+    public AutopilotFlightController(AutoPilot autopilot){
         super(autopilot);
         
     }
@@ -190,7 +190,7 @@ public abstract class AutoPilotFlightController extends Controller{
         List<Vector> flightPathList = Controller.extractPath(flightPath);
         //find the one the furthest away
         //compare the accumulator to the sta
-        Vector destination = flightPathList.stream().reduce(startPos.copy(), (v1, v2) -> startPos.distanceBetween(v1) > startPos.distanceBetween(v2) ? v1 : v2);
+        Vector destination = flightPathList.stream().reduce(startPos.deepCopy(), (v1, v2) -> startPos.distanceBetween(v1) > startPos.distanceBetween(v2) ? v1 : v2);
 
         this.setFurthestCube(destination);
     }

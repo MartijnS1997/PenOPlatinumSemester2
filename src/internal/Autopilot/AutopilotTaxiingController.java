@@ -1,6 +1,7 @@
 package internal.Autopilot;
 
 import AutopilotInterfaces.*;
+import com.sun.istack.internal.Nullable;
 import internal.Helper.Vector;
 import internal.Physics.PhysXEngine;
 
@@ -29,6 +30,16 @@ public class AutopilotTaxiingController extends Controller {
 
         return outputs;
 
+    }
+
+    /**
+     * Setter for the next target of the taxiing controller
+     * @param location the location to taxi to
+     * @param orientation the direction in which the controller has to be oriented
+     *                    if null the orientation doesn't matter
+     */
+    public void setTarget(Vector location, @Nullable Vector orientation ){
+        //TODO implement
     }
 
     private void getControlActionsActiveState(ControlOutputs outputs){

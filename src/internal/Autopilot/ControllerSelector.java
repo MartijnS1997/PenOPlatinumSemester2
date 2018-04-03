@@ -5,9 +5,6 @@ import AutopilotInterfaces.AutopilotInputs_v2;
 import AutopilotInterfaces.AutopilotOutputs;
 import internal.Helper.Vector;
 
-import java.util.List;
-import java.util.Optional;
-
 /**
  * Created by Martijn on 13/03/2018.
  * A class of controller selectors
@@ -135,8 +132,8 @@ public class ControllerSelector {
             this.configureTakeoffController((AutopilotTakeoffController) controller);
             return;
         }
-        if(controller instanceof AutoPilotFlightController){
-            this.configureFlightController((AutoPilotFlightController) controller);
+        if(controller instanceof AutopilotFlightController){
+            this.configureFlightController((AutopilotFlightController) controller);
             return;
         }
         if(controller instanceof  AutopilotWayPointController) {
@@ -195,7 +192,7 @@ public class ControllerSelector {
      * Configures the flight controller by setting the approximate path
      * @param flightController the flight controller to be configured
      */
-    private void configureFlightController(AutoPilotFlightController flightController){
+    private void configureFlightController(AutopilotFlightController flightController){
         AutopilotInterfaces.Path path = this.getAutopilot().getPath();
         flightController.setFlightPath(path);
     }
@@ -230,7 +227,7 @@ public class ControllerSelector {
         if(activeController instanceof AutopilotTakeoffController){
             return this.getFlightController();
         }
-        if(activeController instanceof AutoPilotFlightController){
+        if(activeController instanceof AutopilotFlightController){
             //return this.getWayPointController();
             return this.getLandingController();
         }
@@ -330,7 +327,7 @@ public class ControllerSelector {
      * this method's only purpose is for controller behavior testing
      * @param flightState the flight state the controller needs to be brought in
      */
-    void forceActiveController(FlightState flightState){
+    void forceActiveController(AutopilotState flightState){
         switch(flightState){
             case TAKEOFF:
                 this.setActiveController(getTakeoffController());
@@ -340,15 +337,15 @@ public class ControllerSelector {
                 this.setActiveController(getFlightController());
                 this.setFollowUpController(getWayPointController());
                 return;
-            case WAY_POINT:
-                this.setActiveController(getWayPointController());
-                this.setFollowUpController(getLandingController());
-                return;
+//            case WAY_POINT:
+//                this.setActiveController(getWayPointController());
+//                this.setFollowUpController(getLandingController());
+//                return;
             case LANDING:
                 this.setActiveController(getLandingController());
                 this.setFollowUpController(null);
                 return;
-            case TAXIING:
+            case TAXIING_TO_GATE:
                 this.setActiveController(getTaxiingController());
                 this.setFollowUpController(null);
                 return;
@@ -404,7 +401,7 @@ public class ControllerSelector {
      * Getter for the flight controller, the controller that controls the flight between the cubes themselves
      * @return the flight controller used for navigating to the cubes
      */
-    private AutoPilotFlightController getFlightController() {
+    private AutopilotFlightController getFlightController() {
         return flightController;
     }
 
@@ -462,7 +459,7 @@ public class ControllerSelector {
     /**
      * the flight controller used by the autopilot
      */
-    private AutoPilotFlightController flightController;
+    private AutopilotFlightController flightController;
 
     /**
      * The way point controller used by the autopilot for following way points

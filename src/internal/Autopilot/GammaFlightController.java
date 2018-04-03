@@ -1,10 +1,6 @@
 package internal.Autopilot;
 
-import AutopilotInterfaces.AutopilotConfig;
-import AutopilotInterfaces.AutopilotInputs;
-import AutopilotInterfaces.AutopilotOutputs;
 import AutopilotInterfaces.AutopilotInputs_v2;
-import internal.Autopilot.Controller.ControlOutputs;
 import internal.Exceptions.NoCubeException;
 import internal.Helper.SquareMatrix;
 import internal.Helper.Vector;
@@ -17,7 +13,7 @@ import static java.lang.Math.*;
  * A flight controller made for the 15Â° AOA assignment
  * TODO: Implement the controller fully
  */
-public class GammaFlightController extends AutoPilotFlightController {
+public class GammaFlightController extends AutopilotFlightController {
 
     public GammaFlightController(AutoPilot autoPilot) {
         super(autoPilot);
@@ -346,7 +342,7 @@ public class GammaFlightController extends AutoPilotFlightController {
 //    @Override
 //    public AutopilotOutputs getControlActions(AutopilotInputs inputs) {
 //        this.setCurrentInputs(inputs);
-//        ControlOutputs outputs = this.getPreviousOutputs().copy(); //get a copy from the previous outputs
+//        ControlOutputs outputs = this.getPreviousOutputs().deepCopy(); //get a deepCopy from the previous outputs
 //        //get the middle of the cubes:
 //        AutoPilotCamera APCamera = this.getAutopilot().getAPCamera();
 //        APCamera.loadNewImage(getCurrentInputs().getImage());

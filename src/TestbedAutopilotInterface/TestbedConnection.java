@@ -99,9 +99,9 @@ public class TestbedConnection implements Callable<Void> {
         AutopilotOutputs droneInputs = null;
 
         try {
-            System.out.println("outputs: ");
+            //System.out.println("outputs: ");
             droneInputs = AutopilotOutputsReader.read(this.getInputStream());
-            System.out.println(Drone.extractInputs(droneInputs));
+            //System.out.println(Drone.extractInputs(droneInputs));
         } catch (IOException e) {
             //and yet again something utterly mysterious happened
             e.printStackTrace();

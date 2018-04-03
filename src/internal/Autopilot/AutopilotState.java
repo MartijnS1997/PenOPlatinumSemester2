@@ -9,6 +9,6 @@ package internal.Autopilot;
  * LANDING: the autopilot objective is getting the drone safely to ground again
  * TAXIINg: the autopilot objective is taxiing to a specified point on the ground
  */
-public enum FlightState {
-    TAKEOFF, FLIGHT, WAY_POINT, LANDING, TAXIING
+public enum AutopilotState {
+    TAKEOFF, FLIGHT, LANDING, TAXIING_TO_GATE, TAXIING_TO_RUNWAY
 }

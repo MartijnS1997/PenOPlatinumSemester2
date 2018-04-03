@@ -24,11 +24,12 @@ public class AutoPilot implements Autopilot_v2{
 	 */
 	public AutoPilot(AutopilotOverseer overseer){
 		//first get the controller selector
-		this.setSelector(new ControllerSelector(this));
+		//this.setSelector(new ControllerSelector(this));
+		this.stateMachine = new AutopilotFiniteStateMachine(this);
 		this.overseer = overseer;
 		this.communicator = new OverseerCommunication(this, overseer);
 		//may be out commented if the transitions are smooth
-		//this.getSelector().forceActiveController(FlightState.TAXIING);
+		//this.getSelector().forceActiveController(FlightState.TAXIING_TO_GATE);
 
 	}
 
@@ -85,7 +86,7 @@ public class AutoPilot implements Autopilot_v2{
 		//initialize the Physics Engine Optimisations
 		this.setPhysXOptimisations(this.getPhysXEngine().createPhysXOptimisations());
 		//initialize the controllers
-		this.getSelector().setConfig(configuration);
+		//this.getSelector().setConfig(configuration);
 
 
         //Initialize the autopilot camera
@@ -114,7 +115,10 @@ public class AutoPilot implements Autopilot_v2{
 		//get the overseer
 		OverseerCommunication communicator = this.getCommunicator();
 		communicator.overseerCommunication();
-		return this.getSelector().getControlActions(inputs);
+		//return this.getSelector().getControlActions(inputs);
+
+		//get the outputs from the state machine
+		return this.getStateMachine().getMachineOutput(inputs);
 
 	}
 
@@ -241,13 +245,6 @@ public class AutoPilot implements Autopilot_v2{
 		this.config = config;
 	}
 
-	/**
-	 * setter for the current mode
-	 * @param newAPMode the autopilot mode
-	 */
-	protected void setAPMode(APModes newAPMode) {
-		this.APMode = newAPMode;
-	}
 
 	/**
 	 * Getter for the path approximation to be followed by the autopilot
@@ -309,6 +306,16 @@ public class AutoPilot implements Autopilot_v2{
 	}
 
 	/**
+	 * Getter for the finite state machine used by the autopilot for getting
+	 * the control actions and controlling the sequence of controllers needed to guide the
+	 * package delivery system
+	 * @return the state machine used to guide the autopilot
+	 */
+	private AutopilotFiniteStateMachine getStateMachine(){
+		return this.stateMachine;
+	}
+
+	/**
 	 * The controller selector for the AP, selects the currently active controller
 	 * that is responsible for each flight state
 	 */
@@ -340,15 +347,6 @@ public class AutoPilot implements Autopilot_v2{
 	 * Object that stores the current path to follow
 	 */
 	private Path path;
-	
-	/**
-	 * store current AutoPilot mode:
-	 * 1 = landing mode
-	 * 2 = flight mode
-	 * 3 = takeoff mode
-	 */
-	private APModes APMode;
-
 
 	/**
 	 * Variable for storing the startPosition of the drone, which also serves as the destination position
@@ -370,6 +368,11 @@ public class AutoPilot implements Autopilot_v2{
 	 */
 	private OverseerCommunication communicator;
 
+	/**
+	 * The finite state machine used to govern the controllers for the autopilot
+	 */
+	private AutopilotFiniteStateMachine stateMachine;
+
 
     /*
     Error messages
@@ -378,11 +381,6 @@ public class AutoPilot implements Autopilot_v2{
 	public final static String INVALID_CONTROLLER = "The flightController is already initialized";
 
 }
-
-enum APModes{
-	TAKEOFF, FLYING_TO_BLOCKS, WAY_POINT, LANDING, TAXIING
-}
-
 /*
 CODE GRAVEYARD
  */

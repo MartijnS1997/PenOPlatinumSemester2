@@ -3,6 +3,7 @@ package internal.Autopilot;
 import AutopilotInterfaces.AutopilotInputs_v2;
 import TestbedAutopilotInterface.AutopilotOverseer;
 import TestbedAutopilotInterface.DeliveryRequest;
+import TestbedAutopilotInterface.MapAirport;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -36,6 +37,26 @@ public class OverseerCommunication {
         float cruisingAltitude = overseer.getCruisingAltitude(autopilot);
         this.setAssignedCruiseAltitude(cruisingAltitude);
 
+    }
+
+    /**
+     * Getter for the airport with the same id, calls the map of the overseer to retrieve the airport from
+     * @param airportID the airport ID used to search the map
+     * @return the airport with the corresponding ID, returns null if the airport is not present on the map
+     * --> wrapper to shield the overseer from the rest of the autopilot
+     */
+    protected MapAirport getAirportByID(int airportID){
+       return  this.getOverseer().getAirportByID(airportID);
+    }
+
+    /**
+     * Getter for the airport at which the drone is currently located/standing on
+     * @return the airport at which the drone is currently located, returns null if the drone isn't located at
+     *         any airport
+     * --> wrapper to shield the overseer from the rest of the autopilot
+     */
+    protected MapAirport getAirportAtCurrentLocation(){
+        return this.getOverseer().getAirportAt(this.getAutopilot());
     }
 
     private void readForDeliveryRequest(AutoPilot autopilot, AutopilotOverseer overseer){
