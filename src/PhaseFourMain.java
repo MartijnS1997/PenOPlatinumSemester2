@@ -19,7 +19,7 @@ public class PhaseFourMain {
         AutopilotOverseer overseer = new AutopilotOverseer();
         //run the server
         Thread serverThread = new Thread(testBedServer);
-        serverThread.run();
+        serverThread.start();
         //run the initializer
         initializer.initialize(overseer);
         //call the overseer (it wil continue on this thread)

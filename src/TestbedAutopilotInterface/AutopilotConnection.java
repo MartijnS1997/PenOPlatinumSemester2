@@ -4,6 +4,7 @@ import AutopilotInterfaces.*;
 import internal.Autopilot.AutoPilot;
 import internal.Autopilot.Autopilot_v2Implementation;
 import internal.Exceptions.SimulationEndedException;
+import jdk.nashorn.internal.runtime.ECMAException;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -43,7 +44,11 @@ public class AutopilotConnection implements Callable<Void> {
         //initialize the connection
         initServerConnection();
         //start the main loop
-        clientMainLoop();
+        try {
+            clientMainLoop();
+        }catch(Exception e){
+            e.printStackTrace();
+        }
 
         return null;
     }
@@ -62,9 +67,8 @@ public class AutopilotConnection implements Callable<Void> {
                 if (!this.isAutopilotConfigured()) {
                     AutopilotConfig config = this.getAutopilotConfig();
                     AutopilotInputs_v2 inputs = this.getInputs();
-
                     outputs = autopilot.simulationStarted(config, inputs);
-
+                    this.setAutopilotConfigured();
                 } else {
                     // if already configured we only need to get the new inputs
                     AutopilotInputs_v2 inputs = this.getInputs();
@@ -95,6 +99,7 @@ public class AutopilotConnection implements Callable<Void> {
         //get the data from the input stream
         AutopilotInputs_v2 inputs = null;
         try {
+            System.out.println("Reading inputs");
              inputs = AutopilotInputs_v2Reader.read(inputStream);
         } catch(java.io.EOFException e){
             //the connection has closed terminate:

@@ -97,72 +97,72 @@ public class Drone implements WorldObject, Callable<Void> {
 
 		//Todo set the tyreDelta to appropriate initial value
 
-		// the cube associated with the drone
-		try {
-			
-			Cube wings = new Cube(position.convertToVector3f(), new Vector3f(240f, 1f, 1f), false);
-			wings.setSize(new Vector3f(5f, 0.1f, 0.7f).scale(scalingFactor));
-			this.setAssociatedGraphicsObject(wings);
-			
-			Vector3f position2 = new Vector3f(0f, 0f, 1.75f).scale(scalingFactor);
-			Cube middleFrame = new Cube(position2, new Vector3f(240f, 1f, 1f), wings, false);
-			middleFrame.setSize(new Vector3f(0.6f, 0.6f, 2.5f).scale(scalingFactor));
-			this.setAssociatedGraphicsObject(middleFrame);
-			
-			Vector3f position3 = new Vector3f(0f, 0.6f, 4.5f).scale(scalingFactor);
-			Cube verticalStabilizer = new Cube(position3, new Vector3f(240f, 1f, 1f), wings, false);
-			verticalStabilizer.setSize(new Vector3f(0.2f, 1.2f, 0.5f).scale(scalingFactor));
-			this.setAssociatedGraphicsObject(verticalStabilizer);
-			
-			Vector3f position4 = new Vector3f(0f, 1f, 4.5f).scale(scalingFactor);
-			Cube horizontalStabilizer = new Cube(position4, new Vector3f(240f, 1f, 1f), wings, false);
-			horizontalStabilizer.setSize(new Vector3f(1.7f, 0.1f, 0.5f).scale(scalingFactor));
-			this.setAssociatedGraphicsObject(horizontalStabilizer);
-			
-			Vector3f position5 = new Vector3f(0f, 0f, 3.6f).scale(scalingFactor);
-			Cube longFrame = new Cube(position5, new Vector3f(240f, 1f, 1f), wings, false);
-			longFrame.setSize(new Vector3f(0.3f, 0.3f, 1.5f).scale(scalingFactor));
-			this.setAssociatedGraphicsObject(longFrame);
-			
-			Vector3f position6 = new Vector3f(0f, 0.4f, -0.5f).scale(scalingFactor);
-			Cube shortFrame = new Cube(position6, new Vector3f(240f, 1f, 1f), wings, false);
-			shortFrame.setSize(new Vector3f(1f, 1f, 2f).scale(scalingFactor));
-			this.setAssociatedGraphicsObject(shortFrame);
-			
-			Vector3f position7 = new Vector3f(0f, 0f, -1.5f).scale(scalingFactor);
-			Cube front = new Cube(position7, new Vector3f(240f, 1f, 1f), wings, false);
-			front.setSize(new Vector3f(0.8f, 0.5f, 1f).scale(scalingFactor));
-			this.setAssociatedGraphicsObject(front);
-			
-			
-			Vector3f positioncp1 = new Vector3f(0f, 0.8f, -0.5f).scale(scalingFactor);
-			Cube cockpit1 = new Cube(positioncp1, new Vector3f(30f, 1f, 1f), wings, false);
-			cockpit1.setSize(new Vector3f(0.7f, 0.8f, 1f).scale(scalingFactor));
-			this.setAssociatedGraphicsObject(cockpit1);
-			
-//			Vector3f positioncp2 = new Vector3f(0f, 0.8f, -0.5f).scale(scalingFactor);
-//			Wheel cockpitcp2 = new Wheel(positioncp1, new Vector3f(30f, 1f, 1f), wings, 25);
+//		// the cube associated with the drone
+//		try {
+//
+//			Cube wings = new Cube(position.convertToVector3f(), new Vector3f(240f, 1f, 1f), false);
+//			wings.setSize(new Vector3f(5f, 0.1f, 0.7f).scale(scalingFactor));
+//			this.setAssociatedGraphicsObject(wings);
+//
+//			Vector3f position2 = new Vector3f(0f, 0f, 1.75f).scale(scalingFactor);
+//			Cube middleFrame = new Cube(position2, new Vector3f(240f, 1f, 1f), wings, false);
+//			middleFrame.setSize(new Vector3f(0.6f, 0.6f, 2.5f).scale(scalingFactor));
+//			this.setAssociatedGraphicsObject(middleFrame);
+//
+//			Vector3f position3 = new Vector3f(0f, 0.6f, 4.5f).scale(scalingFactor);
+//			Cube verticalStabilizer = new Cube(position3, new Vector3f(240f, 1f, 1f), wings, false);
+//			verticalStabilizer.setSize(new Vector3f(0.2f, 1.2f, 0.5f).scale(scalingFactor));
+//			this.setAssociatedGraphicsObject(verticalStabilizer);
+//
+//			Vector3f position4 = new Vector3f(0f, 1f, 4.5f).scale(scalingFactor);
+//			Cube horizontalStabilizer = new Cube(position4, new Vector3f(240f, 1f, 1f), wings, false);
+//			horizontalStabilizer.setSize(new Vector3f(1.7f, 0.1f, 0.5f).scale(scalingFactor));
+//			this.setAssociatedGraphicsObject(horizontalStabilizer);
+//
+//			Vector3f position5 = new Vector3f(0f, 0f, 3.6f).scale(scalingFactor);
+//			Cube longFrame = new Cube(position5, new Vector3f(240f, 1f, 1f), wings, false);
+//			longFrame.setSize(new Vector3f(0.3f, 0.3f, 1.5f).scale(scalingFactor));
+//			this.setAssociatedGraphicsObject(longFrame);
+//
+//			Vector3f position6 = new Vector3f(0f, 0.4f, -0.5f).scale(scalingFactor);
+//			Cube shortFrame = new Cube(position6, new Vector3f(240f, 1f, 1f), wings, false);
+//			shortFrame.setSize(new Vector3f(1f, 1f, 2f).scale(scalingFactor));
+//			this.setAssociatedGraphicsObject(shortFrame);
+//
+//			Vector3f position7 = new Vector3f(0f, 0f, -1.5f).scale(scalingFactor);
+//			Cube front = new Cube(position7, new Vector3f(240f, 1f, 1f), wings, false);
+//			front.setSize(new Vector3f(0.8f, 0.5f, 1f).scale(scalingFactor));
+//			this.setAssociatedGraphicsObject(front);
+//
+//
+//			Vector3f positioncp1 = new Vector3f(0f, 0.8f, -0.5f).scale(scalingFactor);
+//			Cube cockpit1 = new Cube(positioncp1, new Vector3f(30f, 1f, 1f), wings, false);
 //			cockpit1.setSize(new Vector3f(0.7f, 0.8f, 1f).scale(scalingFactor));
 //			this.setAssociatedGraphicsObject(cockpit1);
-			
-			Vector3f rearwheel1position = new Vector3f(0.5f, -0.5f, 0f).scale(scalingFactor);
-			Wheel rearwheel1 = new Wheel(rearwheel1position, new Vector3f(0f, 1f, 1f), wings, 25);
-			rearwheel1.setSize(new Vector3f(0.1f, 0.2f, 0.2f).scale(scalingFactor));
-			this.setAssociatedGraphicsObject(rearwheel1);
-			
-			Vector3f rearwheel2position = new Vector3f(-0.5f, -0.5f, 0f).scale(scalingFactor);
-			Wheel rearwheel2 = new Wheel(rearwheel2position, new Vector3f(0f, 1f, 1f), wings, 25);
-			rearwheel2.setSize(new Vector3f(0.1f, 0.2f, 0.2f).scale(scalingFactor));
-			this.setAssociatedGraphicsObject(rearwheel2);
-			
-			Vector3f frontwheelposition = new Vector3f(0f, -0.5f, -1.5f).scale(scalingFactor);
-			Wheel frontwheel = new Wheel(frontwheelposition, new Vector3f(0f, 1f, 1f), wings, 25);
-			frontwheel.setSize(new Vector3f(0.1f, 0.2f, 0.2f).scale(scalingFactor));
-			this.setAssociatedGraphicsObject(frontwheel);
-			
-		}catch(NullPointerException e){
-			this.setAssociatedGraphicsObject(new Cube(position.convertToVector3f(), new Vector3f(240f, 100f, 100f), false));
-		}
+//
+////			Vector3f positioncp2 = new Vector3f(0f, 0.8f, -0.5f).scale(scalingFactor);
+////			Wheel cockpitcp2 = new Wheel(positioncp1, new Vector3f(30f, 1f, 1f), wings, 25);
+////			cockpit1.setSize(new Vector3f(0.7f, 0.8f, 1f).scale(scalingFactor));
+////			this.setAssociatedGraphicsObject(cockpit1);
+//
+//			Vector3f rearwheel1position = new Vector3f(0.5f, -0.5f, 0f).scale(scalingFactor);
+//			Wheel rearwheel1 = new Wheel(rearwheel1position, new Vector3f(0f, 1f, 1f), wings, 25);
+//			rearwheel1.setSize(new Vector3f(0.1f, 0.2f, 0.2f).scale(scalingFactor));
+//			this.setAssociatedGraphicsObject(rearwheel1);
+//
+//			Vector3f rearwheel2position = new Vector3f(-0.5f, -0.5f, 0f).scale(scalingFactor);
+//			Wheel rearwheel2 = new Wheel(rearwheel2position, new Vector3f(0f, 1f, 1f), wings, 25);
+//			rearwheel2.setSize(new Vector3f(0.1f, 0.2f, 0.2f).scale(scalingFactor));
+//			this.setAssociatedGraphicsObject(rearwheel2);
+//
+//			Vector3f frontwheelposition = new Vector3f(0f, -0.5f, -1.5f).scale(scalingFactor);
+//			Wheel frontwheel = new Wheel(frontwheelposition, new Vector3f(0f, 1f, 1f), wings, 25);
+//			frontwheel.setSize(new Vector3f(0.1f, 0.2f, 0.2f).scale(scalingFactor));
+//			this.setAssociatedGraphicsObject(frontwheel);
+//
+//		}catch(NullPointerException e){
+//			this.setAssociatedGraphicsObject(new Cube(position.convertToVector3f(), new Vector3f(240f, 100f, 100f), false));
+//		}
 
 		this.setAutopilotConfig(configuration);
 
@@ -204,6 +204,8 @@ public class Drone implements WorldObject, Callable<Void> {
 		//engage autopilot
 		AutopilotOutputs autopilotOutputs = this.getAutopilotOutputs();
 
+		//System.out.println(extractInputs(autopilotOutputs));
+
 		DroneState state = this.getDroneState();
 		//calculate the next state of the physics engine
 		PhysicsEngineState nextState = this.getPhysXEngine().getNextStatePhysXEngine(deltaTime,state, autopilotOutputs, INSIGNIFICANCE);
@@ -233,6 +235,24 @@ public class Drone implements WorldObject, Callable<Void> {
 		this.setPrevRearLeftTyreDelta(nextState.getRearLeftTyreDelta());
 		this.setPrevRearRightTyreDelta(nextState.getRearRightTyreDelta());
 
+	}
+
+	/**
+	 * Extracts the inputs and returns them as a string (used for debugging)
+	 * @param outputs the inputs to generate the string for
+	 * @return a string containing the values of the inputs
+	 */
+	public static String extractInputs(AutopilotOutputs outputs){
+		String thrust = "thrust: " + outputs.getThrust() + "\n";
+		String leftMain = "left main: " + outputs.getLeftWingInclination() + "\n";
+		String rightMain = "right main: " + outputs.getRightWingInclination() + "\n";
+		String horStab = "horizontal stabilizer: " + outputs.getHorStabInclination() + "\n";
+		String verticStab = "vertical stabilizer: " + outputs.getVerStabInclination() + "\n";
+		String frontBrake = "front brake force: " + outputs.getFrontBrakeForce() + "\n";
+		String leftBrake = "left brake force: " + outputs.getLeftBrakeForce() + "\n";
+		String rightBrake = "right brake force: " + outputs.getRightBrakeForce();
+
+		return thrust + leftMain + rightMain + horStab + verticStab + frontBrake + leftBrake + rightBrake;
 	}
 
 	//TODO implement, pass the required arguments to the physXEngine he knows how to handle the request
@@ -754,6 +774,14 @@ public class Drone implements WorldObject, Callable<Void> {
 	private final static String INVALID_TIMESTEP = "The provided time needs to be strictly positive";
 	private final static String AUTOPILOT_CONFIG = "the autopilot has already been initialized";
 	public static final String INVALID_TIME = "Invalid Time";
+
+	@Override
+	public String toString() {
+		return "Drone{" +
+				"position: " + position +
+				"velocity: " + velocity +
+				'}';
+	}
 }
 	/*
 	code graveyard:

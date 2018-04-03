@@ -26,36 +26,6 @@ public class WorldAirport extends MapAirport {
 		super(location, heading, runwayWidth, runwayLength, airportID);
 	}
 
-	/**
-	 * Checks if the given position is within the airport
-	 * @param position the position to check
-	 * @return true if and only if the position is located onto airport
-	 */
-	public boolean isWithinAirport(Vector position){
-		//first get the heading vector of the airport
-		Vector heading = this.getHeadingVector();
-		Vector location = this.getLocation();
-		//also grab the length and the width of the runway
-		float length = this.getRunwayLength();
-		float width = this.getRunwayWidth();
-		//project the position upon the heading vector
-		//first we need to subtract the position of the airport from the provided position
-		//to get the relative position (account for translation of the projection)
-		position = position.vectorDifference(location);
-		Vector projection = position.projectOn(heading);
-		//check if the size is smaller than the length of the airport
-		if(projection.getSize() > length) {
-			return false;
-		}
-		//check if the difference fits within the width of the airport (is orthogonal to the heading)
-		Vector projDiff = projection.vectorDifference(position);
-		if(projDiff.getSize() > width){
-			return false;
-		}
-		//all checks passed, return true
-		return true;
-	}
-
 
 	/**
 	 * Getter for the state of the Airport for the GUI

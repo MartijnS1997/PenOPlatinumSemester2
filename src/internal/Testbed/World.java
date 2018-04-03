@@ -53,9 +53,8 @@ public class World {
 			throw new IllegalArgumentException(INVALID_TIME_INTERVAL);
 
 //		Set<Block> blockSet = this.getBlockSet();
-
+		System.out.println("Drone velocity before :" + this.getDroneSet());
 		//System.out.println("nb Intervals: " + nbIntervals);
-
 		for(int index = 0; index != nbIntervals; index++) {
 			//needs to refresh the drone set on each iteration
 			Set<Drone> droneSet = this.getDroneSet();
@@ -70,11 +69,12 @@ public class World {
 
 			//advance all the drones:
 			this.advanceAllDrones(droneSet, timeInterval);
+
 			//TODO uncomment if ready to handle crashes properly
 			//now check for a crash
 			//checkForCrashes(droneSet);
 		}
-
+		System.out.println("Drone velocity after" + this.getDroneSet());
 	}
 
 	/**
@@ -90,6 +90,7 @@ public class World {
 		}
 		//get the execution pool
 		ExecutorService droneThreads = this.getDroneThreads();
+		//System.out.println("used ThreadPool: " + this.getDroneThreads());
 		//first invoke all the next states
 		List<Future<Void>> unfinishedThreads = droneThreads.invokeAll(droneSet);
 		List<Future<Void>> finishedThreads = new ArrayList<>();
@@ -152,7 +153,7 @@ public class World {
 		Map<String, Drone>  drones = this.getDroneMap();
 		Set<DeliveryPackage> packages = this.getPackages();
 		//first check if all the drones can unload their packages
-		unloadPackages((Set<Drone>) drones.values());
+		unloadPackages(new HashSet<>(drones.values()));
 		//then load all the packages
 		loadPackages(drones, packages);
 
@@ -210,7 +211,7 @@ public class World {
 	 * @author anthonyrathe
 	 */
 	public Set<Drone> getDroneSet(){
-		return (Set<Drone>) this.drones.values();
+		return new HashSet<>(this.drones.values());
 	}
 
 	/**
@@ -230,7 +231,7 @@ public class World {
 	}
 
 	private Set<WorldAirport> getAirportSet(){
-		return (Set<WorldAirport>) this.getAirportMap().values();
+		return new HashSet<>(this.getAirportMap().values());
 	}
 	
 	/**
@@ -246,12 +247,16 @@ public class World {
 	}
 
 	/**
-	 * Add all the drones in list to the world
+	 * Add all the drones in the collection to the world
 	 * @param drones the drones to be added
 	 */
 	public void addDrones(Collection<Drone> drones){
-		Set<Drone> droneSet = this.getDroneSet();
-		droneSet.addAll(drones);
+		Map<String, Drone> droneMap = this.getDroneMap();
+		//add all the drones
+		for(Drone drone: drones){
+			String ID =drone.getDroneID();
+			droneMap.put(ID, drone);
+		}
 	}
 
     /**
@@ -500,7 +505,8 @@ public class World {
 			}
 		}
 
-		return true;
+		//TODO uncomment if packages are implemented
+		return false;
 	}
 
 
@@ -713,6 +719,36 @@ public class World {
 	}
 
 
+	/**
+	 * Generates a set of airport states for the GUI, used for rendering the airports
+	 * present within the world
+	 * @param airports the airports to convert
+	 * @return a set of AirportGuiStates to be put into the GuiQueue
+	 */
+	private Set<AirportGuiState> getAirportGuiStates(Set<WorldAirport> airports){
+		//create the set to store all the states
+		Set<AirportGuiState> stateSet = new HashSet<>();
+		for(WorldAirport airport: airports){
+			//create the entry
+			AirportGuiState airportState = airport.getGuiState();
+
+			//add the entry
+			stateSet.add(airportState);
+		}
+
+		return stateSet;
+	}
+
+	@Override
+	public String toString() {
+		return "World{" +
+				", airports=" + airports +
+				", drones=" + drones +
+				'}';
+	}
+}
+
+
 	/*
 	Code graveyard
 	 */
@@ -768,28 +804,6 @@ public class World {
 //		return stateSet;
 //	}
 
-	/**
-	 * Generates a set of airport states for the GUI, used for rendering the airports
-	 * present within the world
-	 * @param airports the airports to convert
-	 * @return a set of AirportGuiStates to be put into the GuiQueue
-	 */
-	private Set<AirportGuiState> getAirportGuiStates(Set<WorldAirport> airports){
-		//create the set to store all the states
-		Set<AirportGuiState> stateSet = new HashSet<>();
-		for(WorldAirport airport: airports){
-			//create the entry
-			AirportGuiState airportState = airport.getGuiState();
-
-			//add the entry
-			stateSet.add(airportState);
-		}
-
-		return stateSet;
-	}
-
-
-}
 
 /*
 Code graveyard

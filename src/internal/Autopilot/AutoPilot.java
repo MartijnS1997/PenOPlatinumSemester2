@@ -94,7 +94,9 @@ public class AutoPilot implements Autopilot_v2{
         int nbColumns = configuration.getNbColumns();
         float horizViewAngle = configuration.getHorizontalAngleOfView();
         float verticViewAngle = configuration.getVerticalAngleOfView();
-        this.setAPCamera(new AutoPilotCamera(inputImage, horizViewAngle, verticViewAngle, nbRows, nbColumns));
+
+		//this.setAPCamera(new AutoPilotCamera(inputImage, horizViewAngle, verticViewAngle, nbRows, nbColumns));
+
 
         setStartPosition(new Vector(inputs.getX(), inputs.getY(), inputs.getZ()));
 
@@ -294,7 +296,7 @@ public class AutoPilot implements Autopilot_v2{
 	 * Getter for the overseer communication entity, used to communicate with the overseer
 	 * @return an OverseerCommunication object used to communicate with the overseer
 	 */
-	private OverseerCommunication getCommunicator() {
+	protected OverseerCommunication getCommunicator() {
 		return communicator;
 	}
 

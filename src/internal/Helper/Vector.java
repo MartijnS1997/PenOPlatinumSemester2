@@ -242,7 +242,7 @@ public class Vector {
 	 */
 	@Override
 	public String toString() {
-		return "Vector [xValue=" + xValue + ", yValue=" + yValue + ", zValue=" + zValue + "]";
+		return "(" + xValue + ", " + yValue + ", " + zValue + ")";
 	}
 
 	

@@ -1,5 +1,6 @@
 package TestbedAutopilotInterface;
 
+import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
 import gui.GraphicsObjects.Cube;
 import gui.GraphicsObjects.Tile;
 import gui.GraphicsObjects.Wheel;
@@ -22,7 +23,7 @@ import static org.lwjgl.glfw.GLFW.glfwGetVideoMode;
  * Created by Martijn on 26/03/2018.
  * A class of tesbed Gui's for visualising the testbed contents
  */
-public class TestbedGUI implements Callable<Void>{
+public class TestbedGUI implements Runnable{
 
     /**
      * Constructor for a testbed GUI, generates all the gui elements from the testbed
@@ -51,9 +52,14 @@ public class TestbedGUI implements Callable<Void>{
     }
 
     @Override
-    public Void call() throws Exception {
+    public void run() {
 
-        initTestbedGUI();
+        try{
+            initTestbedGUI();
+        } catch (IOException e){
+            //do nothing
+        }
+
 
         while(true) {
             //set the timer for real frame rate

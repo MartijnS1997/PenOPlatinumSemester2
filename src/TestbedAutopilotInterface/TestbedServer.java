@@ -5,6 +5,7 @@ import internal.Exceptions.AngleOfAttackException;
 import internal.Exceptions.SimulationEndedException;
 import internal.Helper.Vector;
 import internal.Testbed.Drone;
+import internal.Testbed.DroneBuilder_v2;
 import internal.Testbed.World;
 import internal.Testbed.WorldBuilder_v2;
 import math.Vector3f;
@@ -72,7 +73,12 @@ public class TestbedServer implements Runnable {
         //first initialize the testbed server
         this.initTestbedServer();
         //then start simulating the server
-        this.serverMainLoop();
+        try {
+            this.serverMainLoop();
+        }catch(Exception e){
+            //check for any exception during the execution of the main loop
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -87,18 +93,23 @@ public class TestbedServer implements Runnable {
             }catch(java.io.EOFException | SimulationEndedException e) {
                 //the connection at the other side has closed or the simulation has ended
                 //terminate the testbed
+                System.out.println("terminating testbed");
                 this.terminateServer();
                 simulationActive = false;
 
             }catch(AngleOfAttackException angleOffAttackException){
                 //angle of attack exception occurred
                 this.terminateServer();
+                System.out.println("terminating testbed");
                 throw angleOffAttackException;
 
             }catch(IOException | InterruptedException e){
                 //no clue what happened
+                System.out.println("Interrupted");
                 e.printStackTrace();
             }
+
+            System.out.println("next iteration");
 
         }
     }
@@ -106,7 +117,6 @@ public class TestbedServer implements Runnable {
     /*
     Methods for the simulation cycle
      */
-    //Todo implement the simulation cycle
     private void simulateStep() throws IOException, InterruptedException {
 
         //first open up the connection and communicate the state to the autopilot
@@ -116,7 +126,7 @@ public class TestbedServer implements Runnable {
         //now that all the communication is done, we can simulate the next step
         //(all the drones have received their commands for the next step)
         advanceWorld();
-
+        System.out.println("invoking communication");
         //once the world is advanced, we are finished here
     }
 
@@ -129,9 +139,10 @@ public class TestbedServer implements Runnable {
         //first send all the connections to the thread pool
         ExecutorService threadPool = this.getThreadPool();
         Set<TestbedConnection> connections = this.getServerTestbedConnections();
+        System.out.println("Connections: " + this.getServerTestbedConnections());
         //invoke all the connections to get a response from their connected autopilots
         List<Future<Void>> busyConnectionList = threadPool.invokeAll(connections);
-
+        System.out.println("Invoking connections");
         //now we wait for all the connections to finish
         boolean allConnectionsFinished = false;
         while(!allConnectionsFinished){
@@ -157,11 +168,14 @@ public class TestbedServer implements Runnable {
         float timeStep = this.getTimeStep();
         int stepsPerCycles = this.getStepsPerCycle();
         //advance the state of the world for n steps of time delta t
+        System.out.println("Advancing world state");
         world.advanceWorldState(timeStep, stepsPerCycles);
         //increment the time that was simulated
         this.incrementElapsedTime();
+        System.out.println(world.toString());
         //communicate the new world state with the GUI
         addFrameToGuiQueue();
+        System.out.println("frame added");
     }
 
     /**
@@ -215,21 +229,34 @@ public class TestbedServer implements Runnable {
 
         this.initGui();
 
-        // initialize the world that needs to be simulated
-        this.initWorld();
+        this.initThreads();
+
 //
 //        // initialize the windows
 //        this.initWindows();
-
+        // initialize the world that needs to be simulated
+        this.initWorld();
         // initialize the server
         this.initServer();
+
+    }
+
+    /**
+     * Initializes the thread pool needed to simulate the world
+     */
+    private void initThreads() {
+        ExecutorService threadPool = Executors.newFixedThreadPool(this.getMaxNbOfThreads());
+        //set the thread pool
+        System.out.println(threadPool);
+        this.setThreadPool(threadPool);
     }
 
     private void initGui() {
         ConcurrentLinkedQueue<GUIQueueElement> guiQueue = this.getRendererQueue();
         //create the gui
         TestbedGUI gui = new TestbedGUI(guiQueue);
-        //TODO activate the GUI (wait for jasper to finish the gui to call it)
+        Thread guiThread = new Thread(gui);
+        guiThread.start();
 
     }
 
@@ -241,8 +268,8 @@ public class TestbedServer implements Runnable {
     private void initWorld(){
         Map<Vector, Float> droneSates = new HashMap<>();
         List<AirportSpec> specs = this.getAirportSpecs();
-        droneSates.put(new Vector(0,20,0), 0f); // a drone facing forward
-        droneSates.put(new Vector(0, 30f, 20f), (float) Math.PI); // a drone facing backward
+        droneSates.put(new Vector(0, DroneBuilder_v2.START_Y - 0.001f,0), 0f); // a drone facing forward
+        droneSates.put(new Vector(0, DroneBuilder_v2.START_Y - 0.001f, 20f), (float) Math.PI); // a drone facing backward
         WorldBuilder_v2 builder = new WorldBuilder_v2();
         World world = builder.createMultiDroneWorld(this.getThreadPool(), droneSates, specs);
         //add the airport
@@ -255,11 +282,6 @@ public class TestbedServer implements Runnable {
      * Initializes the server and creates the objects needed for the connections
      */
     private void initServer(){
-        //create the thread pool
-        ExecutorService threadPool = Executors.newFixedThreadPool(this.getMaxNbOfThreads());
-        //set the thread pool
-        this.setThreadPool(threadPool);
-
         //create the server socket
         ServerSocket serverSocket = null;
         try {
@@ -465,7 +487,7 @@ public class TestbedServer implements Runnable {
      *         server doesn't already have an initialized thread pool
      */
     private boolean canHaveAsThreadPool(ExecutorService threadPool){
-        return threadPool != null && this.getThreadPool() != null;
+        return threadPool != null && this.getThreadPool() == null;
     }
 
     /*

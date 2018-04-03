@@ -3,7 +3,9 @@ package TestbedAutopilotInterface;
 import internal.Helper.Vector;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Created by Martijn on 28/03/2018.
@@ -68,6 +70,75 @@ public class OverseerAirportMap {
         }catch(NullPointerException e){
             throw new IllegalArgumentException("The queried airport does not exist");
         }
+    }
+
+    /**
+     * Get the takeoff direction for a drone located at the current position
+     * @param position
+     * @return (0,0,0) if the position is not within airport boundaries
+     *          Airport.getHeading() for the current airport that the drone is within the borders of
+     */
+    public Vector getTakeOffDirection(Vector position){
+        MapAirport airport = this.getAirportAt(position);
+
+        if(airport == null){
+            return new Vector();
+        }
+
+        // get the takeoff direction for the drone
+        int runwayID = this.getRunwayAt(position, airport);
+        return airport.getTakeoffDirection(runwayID);
+    }
+
+    /**
+     * Get the airport ID in which span the given position lies
+     * @param position vector the containing the position to check for
+     * @return  the airport the in which the current provided position lies
+     *          null if there isn't such an airport
+     */
+    private MapAirport getAirportAt(Vector position){
+        //filter the map of all airports and check if the drone is within the borders of the airport
+        Map<Integer, MapAirport> airports = this.getAirportMap();
+        //filter for the airports that are located at the given position
+        List<MapAirport> airportAt = airports.values().stream()
+                                    .filter(a -> a.isWithinAirport(position))
+                                    .collect(Collectors.toList());
+        //check if any of the airport met the requirements
+        if(airportAt.size() == 0){
+            //if not return null
+            return null;
+        }
+        else{
+            //if so return the first element of the list (normally there aren't any overlapping airports)
+            return airportAt.get(0);
+        }
+    }
+
+    /**
+     * Gets the ID of the runway on which the position is located
+     * @param position the position to check
+     * @return the id of the runway the position is currently located at, -1 if there is no such runway
+     */
+    private int getRunwayAt(Vector position, MapAirport airport){
+        //check if an airport was found, if not return -1;
+        if(airport == null){
+            return -1;
+        }
+
+        //check at which runway the position is located
+        //get the heading of the airport
+        Vector airportHeading = airport.getHeadingVector();
+        //get the location of the airport
+        Vector airportLocation = airport.getLocation();
+
+        //subtract the airport location from the current position to get a position relative to the center of the airport
+        position = position.vectorDifference(airportLocation);
+        //project the position onto the heading vector
+        Vector posProjection  = position.projectOn(airportHeading);
+        //take the scalar product of the projection and the heading, if it is negative take runway one,
+        //if not take runway zero
+        float scalar = posProjection.scalarProduct(airportHeading);
+        return scalar > 0 ? 0 : 1;
     }
 
     /**

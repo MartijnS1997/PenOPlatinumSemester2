@@ -170,6 +170,55 @@ public class MapAirport {
     }
 
     /**
+     * Checks if the given position is within the airport
+     * @param position the position to check
+     * @return true if and only if the position is located onto airport
+     */
+    public boolean isWithinAirport(Vector position){
+        //first get the heading vector of the airport
+        Vector heading = this.getHeadingVector();
+        Vector location = this.getLocation();
+        //also grab the length and the width of the runway
+        float length = this.getRunwayLength();
+        float width = this.getRunwayWidth();
+        //project the position upon the heading vector
+        //first we need to subtract the position of the airport from the provided position
+        //to get the relative position (account for translation of the projection)
+        position = position.vectorDifference(location);
+        //only keep the x and z components of the position
+        position = new Vector(position.getxValue(), 0f, position.getyValue());
+        Vector projection = position.projectOn(heading);
+        //check if the size is smaller than the length of the airport
+        if(projection.getSize() > length) {
+            return false;
+        }
+        //check if the difference fits within the width of the airport (is orthogonal to the heading)
+        Vector projDiff = projection.vectorDifference(position);
+        if(projDiff.getSize() > width){
+            return false;
+        }
+        //all checks passed, return true
+        return true;
+    }
+
+    /**
+     * Get the takeoff direction of the runway with the matching runway ID
+     * @param runwayID the ID of the runway the takeoff direction is requested for
+     * @return the takeoff direction of the runway with the same ID, if the id
+     *          does not match the available runways return (0,0,0)
+     */
+    public Vector getTakeoffDirection(int runwayID){
+        switch(runwayID){
+            case 0:
+                return getRunwayZeroTakeoffDirection();
+            case 1:
+                return getRunwayOneTakeoffDirection();
+            default:
+                return new Vector();
+        }
+    }
+
+    /**
      * Getter for the landing direction for runway zero, this is the direction
      * in which an autopilot has to approach the runway if it wants to attempt a landing
      * @return a vector containing the direction in which to approach runway zero (x,0,z)
@@ -179,12 +228,29 @@ public class MapAirport {
     }
 
     /**
+     * Getter for the takeoff director for runway zero, this is the direction
+     * in which to takeoff
+     * @return a vector containing the direction to takeoff at runway zero
+     */
+    public Vector getRunwayZeroTakeoffDirection(){
+        return this.getHeadingVector();
+    }
+
+    /**
      * Getter for the landing direction for the runway one, this is the direction
      * in which an autopilot has to approach the runway if it wants to attempt a landing
      * @return a vector containing the direction in which to approach runway one (x,0,z)
      */
     public Vector getRunwayOneLandingDirection(){
         return this.getHeadingVector();
+    }
+
+    /**
+     * Get the takeoff direction of airport one, this is the direction in which to fly to takeoff
+     * @return the takeoff direction of runway one
+     */
+    public Vector getRunwayOneTakeoffDirection(){
+        return this.getHeadingVector().scalarMult(-1);
     }
 
     /**

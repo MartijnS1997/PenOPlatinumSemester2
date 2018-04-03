@@ -3,10 +3,7 @@ package TestbedAutopilotInterface;
 import AutopilotInterfaces.*;
 import internal.Autopilot.AutoPilot;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.*;
 
 //TODO to notify the threads that they need to deliver a new package, we need a queue for each connection to communicate with
@@ -136,6 +133,9 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void> {
         if(activeAutopilots.get(autopilotId ) == null){
             //assign it an cruising altitude
             setCruisingAltitude(autopilotId);
+            //assign a queue
+            setDeliveryQueue(autoPilot);
+
         }
         //replace the old entry
         activeAutopilots.put(autopilotId, inputs);
@@ -152,6 +152,16 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void> {
         //retrieve the corresponding queue for the drone
         ConcurrentLinkedQueue<DeliveryRequest> queue = this.getDeliveryRequests().get(value);
         return queue;
+    }
+
+    /**
+     * Assigns a delivery queue to the given autopilot
+     * warning if invoked when the queue already exists, it will be erased
+     * @param autopilot the autopilot to create a queue for
+     */
+    private void setDeliveryQueue(AutoPilot autopilot){
+        String autopilotID = autopilot.getID();
+        this.getDeliveryRequests().put(autopilotID, new ConcurrentLinkedQueue<DeliveryRequest>());
     }
 
     /**
@@ -173,7 +183,7 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void> {
         //get the max of all the values
         ConcurrentMap<String, Float> altitudeMap = this.getCruisingAltitudes();
         int numberOfDrones = altitudeMap.keySet().size();
-        Set<Float> altitudes = (Set<Float>) altitudeMap.values();
+        Set<Float> altitudes = new HashSet<>(altitudeMap.values());
         Optional<Float> maxAltitudeOpt = altitudes.stream().reduce((a, b) -> a >= b ? a : b );
         float assignedAltitude;
 
