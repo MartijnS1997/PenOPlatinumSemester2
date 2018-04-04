@@ -272,10 +272,11 @@ public class DroneBuilder_v2 {
      * Aside from the ID, all the drones are the same
      */
     private AutopilotConfig createConfig(){
+        String droneID =  DroneBuilder_v2.this.generateDoneID();
         return new AutopilotConfig() {
             @Override
             public String getDroneID() {
-                return DroneBuilder_v2.this.generateDoneID();
+                return droneID;
             }
 
             @Override

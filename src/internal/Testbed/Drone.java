@@ -778,6 +778,7 @@ public class Drone implements WorldObject, Callable<Void> {
 	@Override
 	public String toString() {
 		return "Drone{" +
+				"droneID: " + getDroneID() +
 				"position: " + position +
 				"velocity: " + velocity +
 				'}';
