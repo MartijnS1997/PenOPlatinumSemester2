@@ -30,7 +30,6 @@ public class Graphics {
 	public HashMap<String, Window> windows =  new HashMap<String, Window>();
 	private boolean terminated = false;
 	private TextWindow textWindow = null;
-	private static final String droneID = "0";
 	
 	public Graphics() {	
 		

@@ -7,6 +7,7 @@ import gui.GraphicsObjects.Polygon;
 import gui.GraphicsObjects.Wheel;
 import math.Vector3f;
 
+import java.util.HashSet;
 import java.util.Set;
 
 public class Drone implements WorldObject{
@@ -15,7 +16,7 @@ public class Drone implements WorldObject{
     private Vector3f velocity;
     private Vector3f orientation;
     private float scalingFactor = 1;
-    private Set<GraphicsObject> graphicsObjectSet;
+    private Set<GraphicsObject> graphicsObjectSet = new HashSet<GraphicsObject>();
 
     private float distanceTraveled = 0;
 

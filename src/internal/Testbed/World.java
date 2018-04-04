@@ -211,7 +211,7 @@ public class World {
 	 * @author anthonyrathe
 	 */
 	public Set<Drone> getDroneSet(){
-		return new HashSet<>(this.drones.values());
+		return new HashSet<Drone>(this.drones.values());
 	}
 
 	/**
@@ -231,7 +231,7 @@ public class World {
 	}
 
 	private Set<WorldAirport> getAirportSet(){
-		return new HashSet<>(this.getAirportMap().values());
+		return new HashSet<WorldAirport>(this.getAirportMap().values());
 	}
 	
 	/**
