@@ -7,21 +7,22 @@ import TestbedAutopilotInterface.GUIQueueElement;
 import gui.GraphicsObjects.GraphicsObject;
 import gui.Windows.Graphics;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 public class Objects {
-    private static Set<GraphicsObject> objectSet = new HashSet<>();
-    private static Map<String, DroneGuiState> droneGuiStates;
-    private static Set<CubeGuiState> cubeGuiStates;
-    private static Set<AirportGuiState> airportGuiStates;
+    private static Set<GraphicsObject> objectSet = new HashSet<GraphicsObject>();
+    private static Map<String, DroneGuiState> droneGuiStates = new HashMap<String, DroneGuiState>();
+    private static Set<CubeGuiState> cubeGuiStates = new HashSet<CubeGuiState>();
+    private static Set<AirportGuiState> airportGuiStates = new HashSet<AirportGuiState>();
 
-    private static Map<String, Drone> drones;
-    private static Set<WorldObject> worldObjects;
+    private static Map<String, Drone> drones = new HashMap<String, Drone>();
+    private static Set<WorldObject> worldObjects = new HashSet<WorldObject>();
     private static Graphics graphics;
     private static Floor floor;
-    private static final String mainDroneID = "0";
+    private static String mainDroneID = null;
 
     public static void createAll(GUIQueueElement queueElement) {
         updateStates(queueElement);
@@ -29,6 +30,8 @@ public class Objects {
         floor = new Floor();
 
         for (String droneID : getDroneGuiStates().keySet()) {
+            if (mainDroneID == null)
+                mainDroneID = droneID;
             getDrones().put(droneID, new Drone(getDroneGuiStates().get(droneID)));
         }
 
@@ -45,7 +48,10 @@ public class Objects {
         updateStates(queueElement);
 
         for (String droneID : getDroneGuiStates().keySet()) {
-            getDrones().get(droneID).updateObjects(getDroneGuiStates().get(droneID));
+            if (getDrones().containsKey(droneID))
+                getDrones().get(droneID).updateObjects(getDroneGuiStates().get(droneID));
+            else
+                getDrones().put(droneID, new Drone(getDroneGuiStates().get(droneID)));
         }
     }
 

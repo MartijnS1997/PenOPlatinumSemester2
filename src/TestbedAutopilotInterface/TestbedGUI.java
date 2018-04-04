@@ -41,10 +41,10 @@ public class TestbedGUI implements Runnable{
 
         // the settings of the world influence the way the windows are rendered so
         // we may only initialize them after the world config is known
-        while (prevGUIQueueElement == null) {
+        while (getPrevGUIQueueElement() == null) {
             readFromQueue();
         }
-        Objects.createAll(prevGUIQueueElement);
+        Objects.createAll(getPrevGUIQueueElement());
         this.initWindows();
 
         // set the timer for real time sync

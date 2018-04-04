@@ -4,6 +4,7 @@ import gui.GraphicsObjects.GraphicsObject;
 import gui.GraphicsObjects.Tile;
 import math.Vector3f;
 
+import java.util.HashSet;
 import java.util.Set;
 
 public class Floor implements WorldObject {
@@ -11,7 +12,7 @@ public class Floor implements WorldObject {
     private int n;
     private float nx;
     private float nz;
-    private Set<GraphicsObject> graphicsObjectSet;
+    private Set<GraphicsObject> graphicsObjectSet = new HashSet<GraphicsObject>();
 
     public Floor() {
         n = 51; // n moet oneven zijn
