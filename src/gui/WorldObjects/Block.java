@@ -1,38 +1,23 @@
 package gui.WorldObjects;
 
+import gui.GraphicsObjects.Cube;
 import gui.GraphicsObjects.GraphicsObject;
-import gui.GraphicsObjects.Tile;
 import math.Vector3f;
 
 import java.util.HashSet;
 import java.util.Set;
 
-public class Floor implements WorldObject {
-    private Vector3f position;
-    private int n;
-    private float nx;
-    private float nz;
+public class Block implements WorldObject {
     private Set<GraphicsObject> graphicsObjectSet = new HashSet<GraphicsObject>();
+    private Vector3f position;
 
-    public Floor() {
-        n = 51; // n moet oneven zijn
-        nx = 20f;
-        nz = 20f;
-        this.position = new Vector3f(-n*nx/2, 0, -n*nz/2);
+    public Block() {
         initGraphicsObjects();
     }
 
     @Override
     public void initGraphicsObjects() {
-
-        for (int i = 0; i < n*n; i++) {
-            Vector3f delta = new Vector3f(nx*(i%n), 0, nz*(i/n));
-            Vector3f position = delta.add(getPosition());
-            Vector3f color = new Vector3f((60.0f+(i%2)*60), 1, 0.6f);
-            Tile tile = new Tile(position, color, true);
-            tile.setSize(new Vector3f(nx, 1, nz));
-            this.addGraphicsObject(tile);
-        }
+        this.addGraphicsObject(new Cube(new Vector3f(), new Vector3f(), false));
     }
 
     @Override
