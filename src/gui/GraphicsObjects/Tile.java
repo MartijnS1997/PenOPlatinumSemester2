@@ -29,7 +29,7 @@ public class Tile implements GraphicsObject {
 	private float[] colours;
 
 	static Graphics g;
-	
+	private boolean moves = false;
 	private Mesh mesh;
 	private Vector3f position = new Vector3f();
 	private Vector3f size = new Vector3f(1f, 1f, 1f);
@@ -55,6 +55,11 @@ public class Tile implements GraphicsObject {
 		this(colour);
 		
 		this.position = position;
+	}
+
+	public Tile(Vector3f position, Vector3f colour, boolean moves) {
+		this(position, colour);
+		this.moves = moves;
 	}
 
 	@Override
@@ -83,7 +88,10 @@ public class Tile implements GraphicsObject {
 	}
 	
 	public Vector3f getPosWithOffset() {
-		return this.position.add(new Vector3f(2*size.x * (int) (positionOffset.x/(2*size.x)), 2*size.y * (int) (positionOffset.y/(2*size.y)), 2*size.z * (int) (positionOffset.z/(2*size.z))));
+		if (moves)
+			return this.position.add(new Vector3f(2*size.x * (int) (positionOffset.x/(2*size.x)), 2*size.y * (int) (positionOffset.y/(2*size.y)), 2*size.z * (int) (positionOffset.z/(2*size.z))));
+		else
+			return getPos();
 	}
 	
 	public static void setPosOffset(Vector3f offset) {

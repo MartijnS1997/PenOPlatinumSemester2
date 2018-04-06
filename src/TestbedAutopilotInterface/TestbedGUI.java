@@ -68,7 +68,6 @@ public class TestbedGUI implements Runnable{
             Objects.update(getPrevGUIQueueElement());
             Objects.renderAll();
             readFromQueue();
-
         }
     }
 

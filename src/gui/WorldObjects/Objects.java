@@ -7,10 +7,7 @@ import TestbedAutopilotInterface.GUIQueueElement;
 import gui.GraphicsObjects.GraphicsObject;
 import gui.Windows.Graphics;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class Objects {
     private static Set<GraphicsObject> objectSet = new HashSet<GraphicsObject>();
@@ -22,21 +19,26 @@ public class Objects {
     private static Set<WorldObject> worldObjects = new HashSet<WorldObject>();
     private static Graphics graphics;
     private static Floor floor;
+    private static Airport airport;
     private static String mainDroneID = null;
 
     public static void createAll(GUIQueueElement queueElement) {
         updateStates(queueElement);
 
         floor = new Floor();
+        addWorldObject(floor);
+
+        airport = new Airport();
+        addWorldObject(airport);
 
         for (String droneID : getDroneGuiStates().keySet()) {
             if (mainDroneID == null)
                 mainDroneID = droneID;
             getDrones().put(droneID, new Drone(getDroneGuiStates().get(droneID)));
+            addWorldObject(getDrones().get(droneID));
         }
-
-        worldObjects.addAll(getDrones().values());
     }
+
 
     public static void updateStates(GUIQueueElement queueElement) {
         setDroneGuiStates(queueElement.getDroneStates());
@@ -50,12 +52,23 @@ public class Objects {
         for (String droneID : getDroneGuiStates().keySet()) {
             if (getDrones().containsKey(droneID))
                 getDrones().get(droneID).updateObjects(getDroneGuiStates().get(droneID));
-            else
+            else {
                 getDrones().put(droneID, new Drone(getDroneGuiStates().get(droneID)));
+                addWorldObject(getDrones().get(droneID));
+            }
         }
     }
 
+    public static void updateGraphicsObjects() {
+        Set<GraphicsObject> newGraphicsObjects = new HashSet<GraphicsObject>();
+        for (WorldObject worldObject: getWorldObjects()) {
+            newGraphicsObjects.addAll(worldObject.getGraphicsObjectSet());
+        }
+        setObjectSet(newGraphicsObjects);
+    }
+
     public static void renderAll() {
+        updateGraphicsObjects();
         getGraphics().renderWindows(getObjectSet(), getDrones().get(getMainDroneID()));
     }
 
@@ -116,6 +129,14 @@ public class Objects {
 
     public static void setWorldObjects(Set<WorldObject> worldObjects) {
         Objects.worldObjects = worldObjects;
+    }
+
+    public static void addWorldObjects(Set<WorldObject> worldObjects) {
+        Objects.worldObjects.addAll(worldObjects);
+    }
+
+    public static void addWorldObject(WorldObject worldObject) {
+        Objects.worldObjects.add(worldObject);
     }
 
     public static String getMainDroneID() {

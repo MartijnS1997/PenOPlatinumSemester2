@@ -2,9 +2,7 @@ package gui.Windows;
 
 import TestbedAutopilotInterface.DroneGuiState;
 import gui.GL.ShaderProgram;
-import gui.GraphicsObjects.GraphicsObject;
-import gui.GraphicsObjects.Polygon;
-import gui.GraphicsObjects.Tile;
+import gui.GraphicsObjects.*;
 import gui.IO.Input;
 import gui.WorldObjects.Drone;
 import math.Matrix3f;
@@ -193,13 +191,11 @@ public class Window {
         program.setUniform("viewMatrix", viewMatrix);
         
         float viewingDistance = 500;
-
+		input.nextPosition(drone.getPosition());
         for (GraphicsObject object: renderObjects) {
-        	if (object.getClass() == Polygon.class) {
+        	if (object.getClass() == Cube.class || object.getClass() == Wheel.class) {
 				program.setUniform("modelMatrix", getModelMatrix(((Polygon) object).getOrientation(), ((Polygon) object).getRelPos(), object.getSize()));
-        		if (((Polygon) object).getOrientation() != new Vector3f())
-					input.nextPosition(object.getPos());
-			} else if (object.getClass() == Tile.class) {
+        	} else if (object.getClass() == Tile.class) {
 				program.setUniform("modelMatrix", getModelMatrix(((Tile) object).getPosWithOffset(), object.getSize()));
 			} else {
 				program.setUniform("modelMatrix", getModelMatrix(object.getPos(), object.getSize()));

@@ -30,6 +30,7 @@ public class TextWindow extends JPanel implements ActionListener{
 	byte counter = 0;
     
     public void update(Drone drone) {
+
     	counter++;
     	counter %= 5;
     	if (counter == 0) {
