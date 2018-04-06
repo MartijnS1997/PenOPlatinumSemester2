@@ -49,9 +49,10 @@ public class TestbedServer implements Runnable {
      * @param airports the airports to be set in the world, the first entry of the vector is the location
      *                 and the second is the heading vector of runway zero
      */
-    public TestbedServer(float timeStep, int stepsPerCycle, int maxNbThreads, int tcpPort, List<AirportSpec> airports, List<DroneSpec> drones) {
+    public TestbedServer(float timeStep, int stepsPerCycle, int stepsPerSubCycle, int maxNbThreads, int tcpPort, List<AirportSpec> airports, List<DroneSpec> drones) {
         this.timeStep = timeStep;
         this.stepsPerCycle = stepsPerCycle;
+        this.stepsPerSubCycle = stepsPerSubCycle;
         this.maxNbOfThreads = maxNbThreads;
         this.tcpPort = tcpPort;
         this.airportSpecs = airports;
@@ -159,9 +160,10 @@ public class TestbedServer implements Runnable {
     private void advanceWorld() throws InterruptedException, IOException {
         World world = this.getWorld();
         float timeStep = this.getTimeStep();
-        int stepsPerCycles = this.getStepsPerCycle();
+        int stepsPerCycle = this.getStepsPerCycle();
+        int stepsPerSubCycle = this.getStepsPerSubCycle();
         //advance the state of the world for n steps of time delta t
-        world.advanceWorldState(timeStep, stepsPerCycles);
+        world.advanceWorldState(timeStep, stepsPerCycle, stepsPerSubCycle);
         //increment the time that was simulated
         this.incrementElapsedTime();
         System.out.println(world.toString());
@@ -381,6 +383,14 @@ public class TestbedServer implements Runnable {
         return stepsPerCycle;
     }
 
+    /**
+     * Getter for the number of cycles that the world simulates before doing another check (used for acceleration)
+     * @return an integer containing the number of sub cycles to do while simulating a drone
+     */
+    public int getStepsPerSubCycle() {
+        return stepsPerSubCycle;
+    }
+
     /*
     Physics related instances ########################################
      */
@@ -415,6 +425,12 @@ public class TestbedServer implements Runnable {
      */
     private int stepsPerCycle;
 
+    /**
+     * Variable for the number of sub-cycles for every simulation cycle, used to reduce the overhead for the testbed
+     * --> number of sub-cycles are the number of simulation steps one drone simulates before a check in the
+     *     world class occurs for crashes and package delivery
+     */
+    private int stepsPerSubCycle;
    /*
    Server related getters and setters #################################
     */
@@ -556,14 +572,13 @@ public class TestbedServer implements Runnable {
      * The amount of frames the testbed may go ahead of the renderer before issuing a pause, this
      * prevents the queue from becoming to large
      */
-    private final static int MAX_FRAMES_AHEAD = 60;
+    private final static int MAX_FRAMES_AHEAD = 600;
 
     /*
     Message strings
      */
     private static final String INVALID_SERVER_SOCKET = "Invalid server socket, provided socket is null reference or the server socket is already initialized";
     private static final String INVALID_THREAD_POOL = "Invalid thread pool, thread pool is already initialized or the provided pool is a null reference";
-    private static final String INVALID_GRAPHICS = "Invalid graphics, graphics engine is already initialized or the provided engine is a null reference";
 
 
 }

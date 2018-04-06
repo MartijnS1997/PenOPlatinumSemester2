@@ -146,7 +146,7 @@ public class autoPilotTests {
 	public final void autoPilotDroneInstructionTest() throws IOException, ExecutionException, InterruptedException {
 		for (int i = 0; i < 1000; i++) {
 			System.out.println(world.getDrone().getPosition());
-			world.advanceWorldState(TIME_STEP, STEPS_PER_ITERATION);
+			world.advanceWorldState(TIME_STEP, STEPS_PER_ITERATION, 10);
 		}
 		
 		

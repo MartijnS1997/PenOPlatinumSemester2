@@ -15,7 +15,7 @@ public class PhaseFourMain {
 
     public static void main(String[] args){
         //create the server (will automatically initialize the gui
-        TestbedServer testBedServer = new TestbedServer(timeStep, stepsPerCycle, nbDrones, tcpPort, getAirportSpecs(), getDronesSpecs());
+        TestbedServer testBedServer = new TestbedServer(timeStep, stepsPerCycle, stepsPerSubCycle, nbDrones, tcpPort, getAirportSpecs(), getDronesSpecs());
         AutopilotInitializer initializer = new AutopilotInitializer(host, tcpPort, nbDrones);
         //create the overseer
         AutopilotOverseer overseer = new AutopilotOverseer();
@@ -145,6 +145,7 @@ public class PhaseFourMain {
 
     private static int nbDrones = 2;
     private static int stepsPerCycle = 50;
+    private static int stepsPerSubCycle = 10;
     private static float timeStep = 0.001f;
 
     private static int tcpPort = 4242;

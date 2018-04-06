@@ -18,15 +18,27 @@ public class searchTests {
         //generate the airports
         OverseerAirportMap airportMap = generateAirportMap();
         Map<String, AutopilotInputs_v2> drones = generateDrones(airportMap);
-        Set<DeliveryPackage> packages = generateDeliveries(airportMap);
+        Set<DeliveryPackage> packages = generateDeliveries(airportMap,0);
 
         //print the airport map
         System.out.println(airportMap);
         System.out.println(airportMap);
-
+        long startTime = System.currentTimeMillis();
         DeliveryPlanning planner = new DeliveryPlanning(packages, airportMap, drones);
         Map<String, List<DeliveryPackage>> schedule = planner.call();
+        long endTime = System.currentTimeMillis();
+        long totalTime = endTime - startTime;
         printSchedule(schedule, airportMap, drones);
+
+        //add new deliveries
+        startTime = System.currentTimeMillis();
+        Set<DeliveryPackage> newPackages = generateDeliveries(airportMap, 1);
+        planner.addPackages(newPackages);
+        Map<String, List<DeliveryPackage>> addedSchedule = planner.call();
+        endTime = System.currentTimeMillis();
+        printSchedule(addedSchedule, airportMap, drones);
+        totalTime = totalTime + (endTime - startTime);
+        System.out.println("total execution time: " + totalTime);
 
     }
 
@@ -99,8 +111,12 @@ public class searchTests {
             }
         };
 
-        airport = airportMap.getAirport(8);
+        airport = airportMap.getAirport(6);
         Vector location2 = airport.getLocation();
+
+
+        airport = airportMap.getAirport(15);
+        Vector location3 = airport.getLocation();
 
         AutopilotInputs_v2 inputsDrone2 = new AutopilotInputs_v2() {
             @Override
@@ -144,17 +160,60 @@ public class searchTests {
             }
         };
 
+        AutopilotInputs_v2 inputsDrone3 = new AutopilotInputs_v2() {
+            @Override
+            public byte[] getImage() {
+                return new byte[0];
+            }
+
+            @Override
+            public float getX() {
+                return location3.getxValue();
+            }
+
+            @Override
+            public float getY() {
+                return location3.getyValue();
+            }
+
+            @Override
+            public float getZ() {
+                return location3.getzValue();
+            }
+
+            @Override
+            public float getHeading() {
+                return 0;
+            }
+
+            @Override
+            public float getPitch() {
+                return 0;
+            }
+
+            @Override
+            public float getRoll() {
+                return 0;
+            }
+
+            @Override
+            public float getElapsedTime() {
+                return 0;
+            }
+        };
+
         drones.put("0", inputsDrone1);
         drones.put("1", inputsDrone2);
+        drones.put("2", inputsDrone3);
 
         return drones;
     }
 
     private static OverseerAirportMap generateAirportMap(){
         //lets create 9 airports arranged in a square
-        int nbRows = 3;
-        int nbColumns = 3;
-        float rowSpace = 2000; //z-distance between airports
+        int nbRows = 4;
+        int nbColumns = 4;
+        float rowSpace = 2500; //z-distance between airports
         float columnSpace = 2000; //x-distance between airports
 
         float runwayLength = 280;
@@ -176,14 +235,14 @@ public class searchTests {
         return map;
     }
 
-    private static Set<DeliveryPackage> generateDeliveries(OverseerAirportMap airportMap){
+    private static Set<DeliveryPackage> generateDeliveries(OverseerAirportMap airportMap, int modRes){
         //set one package for every airport
         //deliver the package to airport with index + 2 (mod nb airports)
         int nbOfAirports = airportMap.getNbOfAirports();
         Set<DeliveryPackage> deliveries = new HashSet<>();
         for(int id = 0; id != nbOfAirports; id++){
-//            if(id%2 == 0)
-//                continue;
+            if(id%2 == modRes)
+                continue;
             DeliveryPackage deliveryPackage = new DeliveryPackage(id, 0, (id + 2)%nbOfAirports, 0);
             deliveries.add(deliveryPackage);
         }

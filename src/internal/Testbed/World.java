@@ -47,7 +47,7 @@ public class World {
 	 * @author Martijn Sauwens
 	 * @throws IOException
 	 */
-	public void advanceWorldState(float timeInterval, int nbIntervals) throws IllegalArgumentException, IOException, InterruptedException {
+	public void advanceWorldState(float timeInterval, int nbTotalIterations, int nbSubIterations) throws IllegalArgumentException, IOException, InterruptedException {
 
 		if(!isValidTimeInterval(timeInterval))
 			throw new IllegalArgumentException(INVALID_TIME_INTERVAL);
@@ -55,25 +55,41 @@ public class World {
 //		Set<Block> blockSet = this.getBlockSet();
 		System.out.println("Drone velocity before :" + this.getDroneSet());
 		//System.out.println("nb Intervals: " + nbIntervals);
-		for(int index = 0; index != nbIntervals; index++) {
-			//needs to refresh the drone set on each iteration
-			Set<Drone> droneSet = this.getDroneSet();
 
-			//unload/load all the packages
-			movePackages();
-			//check if all the packages are delivered
-			if(allPackagesDelivered()){
-				throw new SimulationEndedException();
-			}
+        //keep iterating until we reach zero iterations to do (no for loop to fit the nb sub iterations
+        int iterationsTodo = nbTotalIterations;
+		while(iterationsTodo != 0) {
 
+            //needs to refresh the drone set on each iteration
+            Set<Drone> droneSet = this.getDroneSet();
 
-			//advance all the drones:
-			this.advanceAllDrones(droneSet, timeInterval);
+            //unload/load all the packages
+            movePackages();
+            //check if all the packages are delivered
+            if (allPackagesDelivered()) {
+                throw new SimulationEndedException();
+            }
 
-			//TODO uncomment if ready to handle crashes properly
-			//now check for a crash
-			//checkForCrashes(droneSet);
-		}
+		    //check if we can still do the nb of sub iterations requested (while still staying in sync with the testbed)
+		    if(iterationsTodo >= nbSubIterations) {
+
+                //advance all the drones:
+                this.advanceAllDrones(droneSet, timeInterval, nbSubIterations);
+
+                //subtract the number of sub iterations
+                iterationsTodo -= nbSubIterations;
+            }else{
+		        //the iterations to do are smaller than the requested sub iterations, only do the leftover iterations
+                this.advanceAllDrones(droneSet, timeInterval, iterationsTodo);
+                //no iterations left
+                iterationsTodo = 0;
+            }
+
+            //TODO uncomment if ready to handle crashes properly
+            //now check for a crash
+            //checkForCrashes(droneSet);
+
+        }
 		System.out.println("Drone velocity after" + this.getDroneSet());
 	}
 
@@ -81,11 +97,13 @@ public class World {
 	 * Method to advance all the drones in the drone set for exactly one iteration step
 	 * @param droneSet the set of drones to be advanced
 	 * @param deltaTime the time for the next state step
+	 * @param nbIterations the number of iterations to in one call
 	 * @throws InterruptedException
 	 */
-	private void advanceAllDrones(Set<Drone> droneSet, float deltaTime) throws InterruptedException {
+	private void advanceAllDrones(Set<Drone> droneSet, float deltaTime, int nbIterations) throws InterruptedException {
 		//first set the time interval for all the drones
 		for(Drone drone: droneSet){
+		    drone.setNbIterations(nbIterations);
 			drone.setDeltaTime(deltaTime);
 		}
 		//get the execution pool

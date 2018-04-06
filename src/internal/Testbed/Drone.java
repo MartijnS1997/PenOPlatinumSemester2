@@ -26,7 +26,7 @@ import math.Vector3f;
  * 	note: orientation = (heading, pitch, roll) (in that order)
  * 	the orientation has always values in the range [-PI, PI]
  */
-public class Drone implements WorldObject, Callable<Void> {
+public class Drone implements Callable<Void> {
 
 
 	/*
@@ -45,7 +45,6 @@ public class Drone implements WorldObject, Callable<Void> {
 		this(position, velocity, orientation, rotationVector, 0f, 0f, 0f, config);
 		//check if the drone is actually flying
 		if(this.getPhysXEngine().chassisTouchesGround(orientation, position)){
-			//Todo uncomment if the simulator is ready for ground
 			//throw new IllegalStateException("Drone touches ground, cannot initialize");
 		}
 	}
@@ -95,75 +94,6 @@ public class Drone implements WorldObject, Callable<Void> {
 		//PhysXEngine.PhysXOptimisations optimisations = this.getPhysXEngine().createPhysXOptimisations();
 		//this.setVelocity(optimisations.balanceDrone(this.getOrientation(), (float) (7*PI/180), 0.0f)[1]);
 
-		//Todo set the tyreDelta to appropriate initial value
-
-//		// the cube associated with the drone
-//		try {
-//
-//			Cube wings = new Cube(position.convertToVector3f(), new Vector3f(240f, 1f, 1f), false);
-//			wings.setSize(new Vector3f(5f, 0.1f, 0.7f).scale(scalingFactor));
-//			this.setAssociatedGraphicsObject(wings);
-//
-//			Vector3f position2 = new Vector3f(0f, 0f, 1.75f).scale(scalingFactor);
-//			Cube middleFrame = new Cube(position2, new Vector3f(240f, 1f, 1f), wings, false);
-//			middleFrame.setSize(new Vector3f(0.6f, 0.6f, 2.5f).scale(scalingFactor));
-//			this.setAssociatedGraphicsObject(middleFrame);
-//
-//			Vector3f position3 = new Vector3f(0f, 0.6f, 4.5f).scale(scalingFactor);
-//			Cube verticalStabilizer = new Cube(position3, new Vector3f(240f, 1f, 1f), wings, false);
-//			verticalStabilizer.setSize(new Vector3f(0.2f, 1.2f, 0.5f).scale(scalingFactor));
-//			this.setAssociatedGraphicsObject(verticalStabilizer);
-//
-//			Vector3f position4 = new Vector3f(0f, 1f, 4.5f).scale(scalingFactor);
-//			Cube horizontalStabilizer = new Cube(position4, new Vector3f(240f, 1f, 1f), wings, false);
-//			horizontalStabilizer.setSize(new Vector3f(1.7f, 0.1f, 0.5f).scale(scalingFactor));
-//			this.setAssociatedGraphicsObject(horizontalStabilizer);
-//
-//			Vector3f position5 = new Vector3f(0f, 0f, 3.6f).scale(scalingFactor);
-//			Cube longFrame = new Cube(position5, new Vector3f(240f, 1f, 1f), wings, false);
-//			longFrame.setSize(new Vector3f(0.3f, 0.3f, 1.5f).scale(scalingFactor));
-//			this.setAssociatedGraphicsObject(longFrame);
-//
-//			Vector3f position6 = new Vector3f(0f, 0.4f, -0.5f).scale(scalingFactor);
-//			Cube shortFrame = new Cube(position6, new Vector3f(240f, 1f, 1f), wings, false);
-//			shortFrame.setSize(new Vector3f(1f, 1f, 2f).scale(scalingFactor));
-//			this.setAssociatedGraphicsObject(shortFrame);
-//
-//			Vector3f position7 = new Vector3f(0f, 0f, -1.5f).scale(scalingFactor);
-//			Cube front = new Cube(position7, new Vector3f(240f, 1f, 1f), wings, false);
-//			front.setSize(new Vector3f(0.8f, 0.5f, 1f).scale(scalingFactor));
-//			this.setAssociatedGraphicsObject(front);
-//
-//
-//			Vector3f positioncp1 = new Vector3f(0f, 0.8f, -0.5f).scale(scalingFactor);
-//			Cube cockpit1 = new Cube(positioncp1, new Vector3f(30f, 1f, 1f), wings, false);
-//			cockpit1.setSize(new Vector3f(0.7f, 0.8f, 1f).scale(scalingFactor));
-//			this.setAssociatedGraphicsObject(cockpit1);
-//
-////			Vector3f positioncp2 = new Vector3f(0f, 0.8f, -0.5f).scale(scalingFactor);
-////			Wheel cockpitcp2 = new Wheel(positioncp1, new Vector3f(30f, 1f, 1f), wings, 25);
-////			cockpit1.setSize(new Vector3f(0.7f, 0.8f, 1f).scale(scalingFactor));
-////			this.setAssociatedGraphicsObject(cockpit1);
-//
-//			Vector3f rearwheel1position = new Vector3f(0.5f, -0.5f, 0f).scale(scalingFactor);
-//			Wheel rearwheel1 = new Wheel(rearwheel1position, new Vector3f(0f, 1f, 1f), wings, 25);
-//			rearwheel1.setSize(new Vector3f(0.1f, 0.2f, 0.2f).scale(scalingFactor));
-//			this.setAssociatedGraphicsObject(rearwheel1);
-//
-//			Vector3f rearwheel2position = new Vector3f(-0.5f, -0.5f, 0f).scale(scalingFactor);
-//			Wheel rearwheel2 = new Wheel(rearwheel2position, new Vector3f(0f, 1f, 1f), wings, 25);
-//			rearwheel2.setSize(new Vector3f(0.1f, 0.2f, 0.2f).scale(scalingFactor));
-//			this.setAssociatedGraphicsObject(rearwheel2);
-//
-//			Vector3f frontwheelposition = new Vector3f(0f, -0.5f, -1.5f).scale(scalingFactor);
-//			Wheel frontwheel = new Wheel(frontwheelposition, new Vector3f(0f, 1f, 1f), wings, 25);
-//			frontwheel.setSize(new Vector3f(0.1f, 0.2f, 0.2f).scale(scalingFactor));
-//			this.setAssociatedGraphicsObject(frontwheel);
-//
-//		}catch(NullPointerException e){
-//			this.setAssociatedGraphicsObject(new Cube(position.convertToVector3f(), new Vector3f(240f, 100f, 100f), false));
-//		}
-
 		this.setAutopilotConfig(configuration);
 
 	}
@@ -183,9 +113,14 @@ public class Drone implements WorldObject, Callable<Void> {
 	@Override
 	public Void call() throws Exception {
 		float deltaTime = this.getDeltaTime();
-		toNextState(deltaTime);
+		int nbIterations = this.getNbIterations();
+		for(int counter = 0; counter != nbIterations; counter++) {
+			toNextState(deltaTime);
+		}
 		return null;
 	}
+
+
 
 	/**
 	 * advances the drone for a given time step, it changes the position, velocity, orientation and rotation
@@ -195,7 +130,6 @@ public class Drone implements WorldObject, Callable<Void> {
 	 * @throws IOException
 	 * @author Martijn Sauwens & Bart Jacobs
 	 */
-	@Override
 	public void toNextState(float deltaTime) throws IOException {
 		if (!WorldObject.isValidTimeStep(deltaTime))
 			throw new IllegalArgumentException(INVALID_TIMESTEP);
@@ -214,14 +148,6 @@ public class Drone implements WorldObject, Callable<Void> {
 		Vector differencePos = (nextState.getPosition()).vectorDifference(this.getPosition());
 
 		// move the cube representing the drone
-
-		try{
-			for (GraphicsObject polygon: this.getAssociatedGraphicsObjects())
-				((Polygon) polygon).update(differencePos.convertToVector3f(), getOrientation().convertToVector3f());
-		}catch(NullPointerException e){
-
-			//let it go
-		}
 
 //		System.out.println("prev left tyre delta: " + state.getPrevRearLeftTyreDelta());
 //		System.out.println("Rear left tyre delta: " + nextState.getRearLeftTyreDelta());
@@ -260,20 +186,6 @@ public class Drone implements WorldObject, Callable<Void> {
 		Vector orientation = this.getOrientation();
 		Vector position = this.getPosition();
 		return this.getPhysXEngine().checkCrash(orientation, position);
-	}
-
-
-	/*
-	 ############################# Gui configuration methods #############################
-	 */
-
-	public Set<GraphicsObject> getAssociatedGraphicsObjects() {
-		return droneCubes;
-	}
-
-
-	private void setAssociatedGraphicsObject(GraphicsObject droneCube) {
-		this.droneCubes.add(droneCube);
 	}
 
 
@@ -404,7 +316,6 @@ public class Drone implements WorldObject, Callable<Void> {
 	 *
 	 * @return a vector containing the position
 	 */
-	@Override
 	public Vector getPosition() {
 		return position;
 	}
@@ -616,6 +527,24 @@ public class Drone implements WorldObject, Callable<Void> {
 	}
 
 	/**
+	 * Getter for the number of iterations done in one call
+	 * @return an integer representing the number of iterations to do
+	 */
+	private int getNbIterations() {
+		return nbIterations;
+	}
+
+	/**
+	 * Setter for the number of iterations to do in one call
+	 * @param nbIterations the number of iterations to do in one call (integer)
+	 */
+	public void setNbIterations(int nbIterations) {
+		if(nbIterations < 0)
+			throw new IllegalArgumentException("negative iteration number");
+		this.nbIterations = nbIterations;
+	}
+
+	/**
 	 * Getter for the ID of the drone used to identify the drone in the GUI
 	 * @return a string containing the drone ID
 	 */
@@ -735,6 +664,11 @@ public class Drone implements WorldObject, Callable<Void> {
 	private float deltaTime;
 
 	/**
+	 * A variable containing the number of iterations to do in one call
+	 */
+	private int nbIterations = 1; // a standard value for the nb of iterations
+
+	/**
 	 * The current package the drone is holding to transport to a certain airport
 	 */
 	private DeliveryPackage deliveryPackage;
@@ -747,17 +681,7 @@ public class Drone implements WorldObject, Callable<Void> {
 	 */
 	private static float LIGHTSPEED = 300000000;
 
-	/**
-	 * Variable that stores the cubes representing the drone
-	 */
-	private Set<GraphicsObject> droneCubes = new HashSet<>();
 
-
-	/**
-	 * variable used for the size of the drone.
-	 */
-	private static final float scalingFactor = 1f;
-	    
 	/*
 	 * Error Messages:
 	 */

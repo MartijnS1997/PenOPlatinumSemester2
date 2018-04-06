@@ -4,6 +4,7 @@ import AutopilotInterfaces.AutopilotInputs_v2;
 import AutopilotInterfaces.AutopilotOutputs;
 
 import static internal.Autopilot.AutopilotState.*;
+import static java.lang.Math.PI;
 
 /**
  * Created by Martijn on 3/04/2018.
@@ -45,17 +46,17 @@ public class AutopilotFiniteStateMachine {
 
             @Override
             public float getLeftWingInclination() {
-                return 0;
+                return (float) (5*PI/180);
             }
 
             @Override
             public float getRightWingInclination() {
-                return 0;
+                return (float)(5*PI/180);
             }
 
             @Override
             public float getHorStabInclination() {
-                return 0;
+                return (float) (-5*PI/180);
             }
 
             @Override

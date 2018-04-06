@@ -331,10 +331,12 @@ public class PhysXEngine {
      * @author Martijn Sauwens
      */
     public static Vector worldOnDrone(Vector vector, Vector orientation) {
-        SquareMatrix transform = getDroneToWorldTransformMatrix(orientation);
-        SquareMatrix transpose = transform.transpose();
-
-        return transpose.matrixVectorProduct(vector);
+//        SquareMatrix transform = getDroneToWorldTransformMatrix(orientation);
+//        SquareMatrix transpose = transform.transpose();
+//
+//        return transpose.matrixVectorProduct(vector);
+        SquareMatrix transform = SquareMatrix.getWorldOnDroneTransformMatrix(orientation);
+        return transform.matrixVectorProduct(vector);
     }
 
     /**
@@ -344,11 +346,12 @@ public class PhysXEngine {
      * @author Jasper Callaerts & Martijn Sauwens
      */
     private static SquareMatrix getDroneToWorldTransformMatrix(Vector orientation) {
-        SquareMatrix heading = SquareMatrix.getHeadingTransformMatrix(orientation.getxValue());
-        SquareMatrix pitch = SquareMatrix.getPitchTransformMatrix(orientation.getyValue());
-        SquareMatrix roll = SquareMatrix.getRollTransformMatrix(orientation.getzValue());
-
-        return heading.matrixProduct(pitch).matrixProduct(roll);
+//        SquareMatrix heading = SquareMatrix.getHeadingTransformMatrix(orientation.getxValue());
+//        SquareMatrix pitch = SquareMatrix.getPitchTransformMatrix(orientation.getyValue());
+//        SquareMatrix roll = SquareMatrix.getRollTransformMatrix(orientation.getzValue());
+//
+//        return heading.matrixProduct(pitch).matrixProduct(roll);
+        return SquareMatrix.getDroneOnWorldTransformMatrix(orientation);
     }
 
     public static Vector HPRtoRotation(Vector rotationHPR, Vector orientation){

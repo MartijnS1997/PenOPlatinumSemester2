@@ -2,7 +2,7 @@ package internal.Autopilot;
 
 import AutopilotInterfaces.AutopilotInputs_v2;
 import TestbedAutopilotInterface.AutopilotOverseer;
-import TestbedAutopilotInterface.DeliveryRequest;
+import TestbedAutopilotInterface.DeliveryPackage;
 import TestbedAutopilotInterface.MapAirport;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -60,17 +60,17 @@ public class OverseerCommunication {
     }
 
     private void readForDeliveryRequest(AutoPilot autopilot, AutopilotOverseer overseer){
-        DeliveryRequest currentDeliveryRequest = this.getCurrentRequest();
+        DeliveryPackage currentDeliveryRequest = this.getCurrentRequest();
         //check if we are currently serving a request
         if(currentDeliveryRequest != null){
             return;
         }
         //if not look for a new one
         //get the queue
-        ConcurrentLinkedQueue<DeliveryRequest> deliveryQueue = overseer.getDeliveryRequest(autopilot);
+        ConcurrentLinkedQueue<DeliveryPackage> deliveryQueue = overseer.getDeliveryRequest(autopilot);
         System.out.println(deliveryQueue);
         //now poll the queue, if not empty, take a new one, if empty return null
-        DeliveryRequest newRequest = !deliveryQueue.isEmpty() ? deliveryQueue.poll() : null;
+        DeliveryPackage newRequest = !deliveryQueue.isEmpty() ? deliveryQueue.poll() : null;
         //set the delivery request
         this.setCurrentRequest(newRequest);
     }
@@ -118,7 +118,7 @@ public class OverseerCommunication {
      * necessary for delivering the packet
      * @return the current delivery request
      */
-    protected DeliveryRequest getCurrentRequest() {
+    protected DeliveryPackage getCurrentRequest() {
         return currentRequest;
     }
 
@@ -133,7 +133,7 @@ public class OverseerCommunication {
      * Setter for the delivery request that is currently handled by the autopilot
      * @param currentRequest the current request
      */
-    private void setCurrentRequest(DeliveryRequest currentRequest) {
+    private void setCurrentRequest(DeliveryPackage currentRequest) {
         this.currentRequest = currentRequest;
     }
 
@@ -154,7 +154,7 @@ public class OverseerCommunication {
      * The current delivery request the autopilot is handling for the overseer,
      * these request get read from the queue that is associated with the autopilot in the overseer
      */
-    private DeliveryRequest currentRequest;
+    private DeliveryPackage currentRequest;
 
     /**
      * The autopilot that the communicator represents with the overseer

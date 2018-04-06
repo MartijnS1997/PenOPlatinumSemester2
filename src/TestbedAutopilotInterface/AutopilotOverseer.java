@@ -12,9 +12,8 @@ import java.util.concurrent.*;
 //(we can also use the broadcast queue to enter the states of all the drones
 
 //note need a map of the world to navigate the drones and make decisions on what drone does what
-//TODO add a dynamic cruising altitude locator to allocate the cruising altitudes (adjust the altitudes if two drones are about to collide or make this drone's responsibility)
-//TODO implement planning algorithm to plan the package delivery of the drone
 //TODO assign the packages to the drones, shared List with the world of all the packages that need to be delivered
+//TODO check if drones have crashed during the simulation, delete them if needed
 //--> the overseer must set the assigned drone
 /**
  * Created by Martijn on 27/03/2018.
@@ -27,6 +26,11 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void> {
      */
     public AutopilotOverseer() {
         //Bartje is overseer??
+
+        //all we must do is periodically check if there is any drone without any packages to deliver
+        //if so we start the search for package allocation
+        //TODO implement the calling for the delivery planner and allocate the packages
+        //TODO implement mechanism to periodically check for empty drone queues
     }
 
     /**
@@ -51,7 +55,7 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void> {
     }
 
     /**
-     * Define a new airport located  ath the given location
+     * Define a new airport located  at the given location with the specified heading for runway zero
      * @param centerX the x-center coordinate
      * @param centerZ the y-center coordinate
      * @param centerToRunway0X the pointer of the first runway
@@ -59,7 +63,12 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void> {
      */
     @Override
     public void defineAirport(float centerX, float centerZ, float centerToRunway0X, float centerToRunway0Z) {
-
+        OverseerAirportMap airportMap = this.getAirportMap();
+        //convert the center coordinate to a vector
+        Vector center = new Vector(centerX, 0, centerZ);
+        //convert the heading to a vector
+        Vector heading = new Vector(centerToRunway0X, 0, centerToRunway0Z);
+        airportMap.addAirport(center, heading);
     }
 
     /**
@@ -96,7 +105,8 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void> {
     }
 
     /**
-     * Setter for package delivery
+     * Adds a package to the delivery buffer waiting for delivery (they will later be added to a drone
+     * if one drone has no packages to deliver
      * @param fromAirport the sender airport
      * @param fromGate the sender gate to retrieve the package from
      * @param toAirport the destination airport
@@ -104,7 +114,9 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void> {
      */
     @Override
     public void deliverPackage(int fromAirport, int fromGate, int toAirport, int toGate) {
-
+        //create the package
+        DeliveryPackage delivery = new DeliveryPackage(fromAirport, fromGate, toAirport, toGate);
+        this.addDeliveryToBuffer(delivery);
     }
 
     /**
@@ -146,11 +158,11 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void> {
      * @param autoPilot the autopilot to extract the delivery requests for
      * @return the Queue of pending requests
      */
-    public ConcurrentLinkedQueue<DeliveryRequest> getDeliveryRequest(AutoPilot autoPilot){
+    public ConcurrentLinkedQueue<DeliveryPackage> getDeliveryRequest(AutoPilot autoPilot){
         //get the ID from the autopilot that is invoking the getter
         String value = autoPilot.getID();
         //retrieve the corresponding queue for the drone
-        ConcurrentLinkedQueue<DeliveryRequest> queue = this.getDeliveryRequests().get(value);
+        ConcurrentLinkedQueue<DeliveryPackage> queue = this.getDeliveryRequests().get(value);
         return queue;
     }
 
@@ -161,7 +173,27 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void> {
      */
     private void setDeliveryQueue(AutoPilot autopilot){
         String autopilotID = autopilot.getID();
-        this.getDeliveryRequests().put(autopilotID, new ConcurrentLinkedQueue<DeliveryRequest>());
+        this.getDeliveryRequests().put(autopilotID, new ConcurrentLinkedQueue<>());
+    }
+
+    /**
+     * Checks if there are any drones with empty queues
+     * @return true if there is a drone with an empty queue
+     */
+    private boolean checkForIdleDrone(){
+        //get the map of all the queues
+        Map<String, ConcurrentLinkedQueue<DeliveryPackage>> deliveryQueues = this.getDeliveryRequests();
+        //iterate trough all the queues and check if one is empty
+        for(String droneID: deliveryQueues.keySet()){
+            //get the queue associated with the id
+            ConcurrentLinkedQueue<DeliveryPackage> queue = deliveryQueues.get(droneID);
+            //check if empty
+            if(queue.isEmpty()){
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -255,7 +287,7 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void> {
     /**
      * Getter for the map that stores all the delivery requests based on the ID
      */
-    private ConcurrentMap<String, ConcurrentLinkedQueue<DeliveryRequest>> getDeliveryRequests(){
+    private ConcurrentMap<String, ConcurrentLinkedQueue<DeliveryPackage>> getDeliveryRequests(){
         return this.deliveryRequests;
     }
 
@@ -276,6 +308,23 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void> {
     }
 
     /**
+     * Getter for the buffer containing all the packages that are not assigned to any drone
+     * @return a set of delivery packages (the packages that still need to be assigned to a drone)
+     */
+    private Set<DeliveryPackage> getPackageBuffer() {
+        return packageBuffer;
+    }
+
+    /**
+     * Add the specified delivery to the buffer
+     * @param deliveryPackage the package to add to the buffer
+     */
+    private void addDeliveryToBuffer(DeliveryPackage deliveryPackage){
+        Set<DeliveryPackage> buffer = this.getPackageBuffer();
+        packageBuffer.add(deliveryPackage);
+    }
+
+    /**
      * The hash map that stores all the active autopilots in the world
      * String contains the ID and inputs the current inputs of the autopilot
      */
@@ -285,7 +334,7 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void> {
      * A map used to store the all the request made to the overseer, the autopilots can query for their requests
      * to the broadcast
      */
-    private ConcurrentMap<String, ConcurrentLinkedQueue<DeliveryRequest>> deliveryRequests = new ConcurrentHashMap<>();
+    private ConcurrentMap<String, ConcurrentLinkedQueue<DeliveryPackage>> deliveryRequests = new ConcurrentHashMap<String, ConcurrentLinkedQueue<DeliveryPackage>>();
 
     /**
      * A map containing the cruising altitude of each autopilot identified by the identifier string
@@ -299,6 +348,12 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void> {
     private OverseerAirportMap airportMap;
 
     /**
+     * The buffer used to store packages until one drone has no packages to deliver, then we start the search and
+     * allocate them all to the drones
+     */
+    private Set<DeliveryPackage> packageBuffer = new HashSet<>();
+
+    /**
      * The base altitude to assign to the drones (incremented from here)
      */
     private final static float BASE_ALTITUDE = 30f;
@@ -307,5 +362,6 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void> {
      * The minimal cruising altitude difference between two drones
      */
     private final static float ALTITUDE_DELTA = 15f;
+
 
 }

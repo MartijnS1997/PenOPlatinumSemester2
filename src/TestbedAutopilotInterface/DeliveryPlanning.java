@@ -19,16 +19,9 @@ public class DeliveryPlanning implements Callable<Map<String, List<DeliveryPacka
 
 
     //Todo add a method to resume search based on the current assigned deliveries
-    //Todo only call the delivery planning if there is a drone in the overseer that does not have a package to
-    //Todo deliver and there are packages to do so for
-
-    //what we need:
-    //a list of the drones and their current assigned deliveries and their current location
-    //a list of the packages that need to be delivered
-    //a list of all the airports
-    //a function to calculate the distance between them
-    //a function to calculate the delivery time (may be constant)
-    //a variable that saves the current tree depth
+    //--> maybe clear the heuristic values of the drones? (case where we have an idle drone)
+    //--> we can re-init root based on the queues that are currently present in the overseer
+    //    and re calculate the heuristic values
 
     /**
      * Constructor for a delivery planning, implements search to find a good/optimal delivery allocation for the
@@ -45,6 +38,27 @@ public class DeliveryPlanning implements Callable<Map<String, List<DeliveryPacka
         this.deliveries = deliveryPackages;
         //then init the drones
         initRoot(activeDrones);
+    }
+
+    /**
+     * adds the the provided packages to the search queue, when the delivery planning is called again we will resume
+     * the search with the packages added (previous allocations aren't changed because we want to service the previous
+     * submitted packages first)
+     * @param packages a collection of packages to add
+     */
+    public void addPackages(Collection<DeliveryPackage> packages){
+        //we need to clear the queue if we want to continue the search with the same previous allocation
+        //of the packages
+        List<DeliveryNode> nodeQueue = this.getNodeQueue();
+        //get the first node --> the new root for our search
+        DeliveryNode newRoot= this.getFirstNode();
+        //add the delivery to the root
+        newRoot.addPackagesToDeliver(packages);
+        //clear the nodeQueue
+        nodeQueue.clear();
+        //add the root to the queue
+        nodeQueue.add(newRoot);
+        //we're done
     }
 
     @Override
@@ -116,10 +130,6 @@ public class DeliveryPlanning implements Callable<Map<String, List<DeliveryPacka
         return nodeQueue.remove(0);
     }
 
-    private void pruneQueue(){
-
-    }
-
     /**
      * Get the first node in the queue
      * @return the first node
@@ -182,7 +192,7 @@ public class DeliveryPlanning implements Callable<Map<String, List<DeliveryPacka
                 //create the child
                 DeliveryNode childNode = new DeliveryNode(drones, packages);
                 //add the delivery
-                childNode.addDelivery(drone.getDroneID(), delivery);
+                childNode.addDeliveryToDrone(drone.getDroneID(), delivery);
                 //add the child to the expanded node
                 childNodes.add(childNode);
             }
@@ -220,25 +230,6 @@ public class DeliveryPlanning implements Callable<Map<String, List<DeliveryPacka
      */
     private Collection<DeliveryPackage> deliveries;
 
-    //instances used for the iterative deepening
-
-
-    /**
-     * Getter for the search depth used for iterative deepening
-     * @return a float respresenting the search depth
-     */
-    private float getSearchDepth() {
-        return searchDepth;
-    }
-
-    /**
-     * Setter for the search depth used for iterative deepening
-     * @param searchDepth the new search depth to use
-     */
-    private void setSearchDepth(float searchDepth) {
-        this.searchDepth = searchDepth;
-    }
-
     /**
      * Getter for the queue used to search the tree
      * @return a list of delivery nodes
@@ -259,8 +250,8 @@ public class DeliveryPlanning implements Callable<Map<String, List<DeliveryPacka
         deliveryNodes.sort(new Comparator<DeliveryNode>() {
             @Override
             public int compare(DeliveryNode node1, DeliveryNode node2) {
-                float costNode1 = node1.getCostValue();
-                float costNode2 = node2.getCostValue();
+                float costNode1 = node1.getApproxCost();
+                float costNode2 = node2.getApproxCost();
                 //check for the values
                 if (costNode1 > costNode2) {
                     //1 means set node 1 forwards (higher index)
@@ -282,6 +273,7 @@ public class DeliveryPlanning implements Callable<Map<String, List<DeliveryPacka
 
     /**
      * Implements the node adding for branch and bound total cost search (no optimisation)
+     * --> added heuristic, but no pruning yet
      * Todo implement insertion for faster iterations
      * @param childNodes the nodes to add to the queue
      */
@@ -293,8 +285,8 @@ public class DeliveryPlanning implements Callable<Map<String, List<DeliveryPacka
         nodeQueue.sort(new Comparator<DeliveryNode>() {
             @Override
             public int compare(DeliveryNode node1, DeliveryNode node2) {
-                float costNode1 = node1.getCostValue();
-                float costNode2 = node2.getCostValue();
+                float costNode1 = node1.getApproxCost();
+                float costNode2 = node2.getApproxCost();
                 //check for the values
                 if (costNode1 > costNode2) {
                     //1 means set node 1 forwards (higher index)
@@ -313,11 +305,6 @@ public class DeliveryPlanning implements Callable<Map<String, List<DeliveryPacka
 //        System.out.println("First node packets delivered: " + getFirstNode().getPackagesToDeliver().size());
 
     }
-
-    /**
-     * The depth boundary to search
-     */
-    private float searchDepth = 0.0f;
 
     /**
      * The queue used to keep track of the visited and to visit nodes
@@ -363,11 +350,20 @@ public class DeliveryPlanning implements Callable<Map<String, List<DeliveryPacka
         }
 
         /**
+         * Adds packages to the packages to deliver set (used for submitting new packages)
+         * @param packages the packages to deliver on top of the previously set packages
+         */
+        private void addPackagesToDeliver(Collection<DeliveryPackage> packages){
+            Set<DeliveryPackage> packagesToDeliver = this.getPackagesToDeliver();
+            packagesToDeliver.addAll(packages);
+        }
+
+        /**
          * Adds the provided package to the drone with the corresponding ID in the map
          * @param droneID the id of the drone to add the delivery for
          * @param delivery the DeliveryPackage to be added to the drone with the given ID
          */
-        private void addDelivery(String droneID, DeliveryPackage delivery){
+        private void addDeliveryToDrone(String droneID, DeliveryPackage delivery){
             if(this.isCompleted){
                 throw new IllegalStateException("Node already configured");
             }
@@ -400,8 +396,27 @@ public class DeliveryPlanning implements Callable<Map<String, List<DeliveryPacka
          */
         private void updateDronePosition(DeliveryPackage delivery, DeliveryDrone drone) {
             //calculate the new value of the drone based on distance
-            Vector dronePos = drone.getPosition();
+
             //get id of the source and destination airport
+            float deliveryDistance = getDeliveryDistance(delivery, drone);
+            //the destination airport
+            int destinationAirportID = delivery.getDestinationAirport();
+            MapAirport destinationAirport = airportMap.getAirport(destinationAirportID);
+            Vector destinationAirportLocation = destinationAirport.getLocation();
+            //move the drone to the next airport
+            drone.setPosition(destinationAirportLocation);
+            //increment the time
+            drone.incrementTotalTravelTime(deliveryDistance);
+        }
+
+        /**
+         * Getter for the total travelling distance needed for the given drone to deliver the provided package
+         * @param delivery the delivery
+         * @param drone the drone to calculate the distance for
+         * @return the distance needed to fly to the source airport and to fly from source to destination
+         */
+        private float getDeliveryDistance(DeliveryPackage delivery,DeliveryDrone drone) {
+            Vector dronePos = drone.getPosition();
             int sourceAirportID = delivery.getSourceAirport();
             int destinationAirportID = delivery.getDestinationAirport();
             //get the map of the world
@@ -415,12 +430,7 @@ public class DeliveryPlanning implements Callable<Map<String, List<DeliveryPacka
             //get the distance (from current position, to the source to the destination
             float droneToSourceDistance = dronePos.distanceBetween(sourceAirportLocation);
             float sourceToDestination = destinationAirportLocation.distanceBetween(sourceAirportLocation);
-            float deliveryDistance = droneToSourceDistance + sourceToDestination;
-
-            //move the drone to the next airport
-            drone.setPosition(destinationAirportLocation);
-            //increment the time
-            drone.incrementTotalTravelTime(deliveryDistance);
+            return droneToSourceDistance + sourceToDestination;
         }
 
 
@@ -463,6 +473,14 @@ public class DeliveryPlanning implements Callable<Map<String, List<DeliveryPacka
             return null;
         }
 
+        /**
+         * Getter for the total approximated cost for the given node
+         * @return the sum of the cost and the heuristic
+         */
+        private float getApproxCost(){
+            return getCostValue() + getHeuristicValue();
+        }
+
 
         /**
          * Getter for the cost value of the node
@@ -487,6 +505,46 @@ public class DeliveryPlanning implements Callable<Map<String, List<DeliveryPacka
             //return the maximum
 
             return calcCost;
+        }
+
+        /**
+         * Calculates the heuristic value for the node
+         * the heuristic that we use works as following, take all the packages that need to be delivered
+         * and split between the drones based on their distance to drones then take the distance the furthest
+         * from the drone
+         * note: probable update, find the convex hull, the time needed to go around it is the minimum time
+         * to deliver all the packages in the hull
+         * @return the heuristic value for the node
+         */
+        private float getHeuristicValue(){
+            float heuristic = this.getSavedHeuristic();
+            if(heuristic >= 0){
+                return this.getSavedHeuristic();
+            }
+            //first get all the packages and all the drones
+            Set<DeliveryPackage> packages = this.getPackagesToDeliver();
+            //a list of the drones (we'll need the index)
+            List<DeliveryDrone> drones = new ArrayList<>(this.getDroneMap().values());
+            //the map containing the drone id's as keys and the package with the maximum delivery distance
+            //for the drone with the corresponding id
+            float maxDeliveryTime = 0;
+            //iterate trough all the packages and find the drone the closest to the package
+            for(DeliveryPackage delivery: packages){
+                //use map to map the distance of the package to each drone, then find the index of the max
+                //and assign the package to that drone
+                List<Float> deliveryDistances = drones.stream().map(drone -> getDeliveryDistance(delivery, drone)).collect(Collectors.toList());
+                //find the index of the minimum value
+                float packageMin = Collections.min(deliveryDistances);
+
+                //if the new minimum delivery time is larger than the previous max, set the max time
+                if(maxDeliveryTime < packageMin){
+                    maxDeliveryTime = packageMin;
+                }
+                //continue to the next iteration
+            }
+            //save the heuristic
+            this.setSavedHeuristic(maxDeliveryTime);
+            return maxDeliveryTime;
         }
 
         /**
@@ -541,6 +599,26 @@ public class DeliveryPlanning implements Callable<Map<String, List<DeliveryPacka
         }
 
         /**
+         * Saved value of the heuristic, avoids recomputation during the search (tradeoff between computation and
+         * memory but is only one tiny float, so don't worry)
+         * If the heuristic isn't calculated yet, returns -1f
+         * DO NOT USE OUTSIDE OF THE DELIVERY NODE CLASS!
+         * @return the heuristic saved for the node
+         */
+        private float getSavedHeuristic() {
+            return heuristic;
+        }
+
+        /**
+         * Setter for the heuristic value of the node (see getter for more info)
+         * DO NOT USE OUTSIDE OF THE DELIVERY NODE CLASS!
+         * @param heuristic the heuristic value of the node to set
+         */
+        private void setSavedHeuristic(float heuristic) {
+            this.heuristic = heuristic;
+        }
+
+        /**
          * Getter for the map containing all the delivery drones used by the node
          * Key = ID, value = drone
          * @return a map containing the drones with their state used for the search
@@ -587,6 +665,11 @@ public class DeliveryPlanning implements Callable<Map<String, List<DeliveryPacka
          * The cost value saved for faster computation
          */
         private float cost = -1f;
+
+        /**
+         * The heuristic value of the node, saved for faster computation
+         */
+        private float heuristic = -1f;
     }
 
     /**

@@ -243,7 +243,7 @@ public class TestbedMain implements Runnable{
         this.getDrone().setAutopilotOutputs(autopilotOutputs);
         //System.out.println("all drones in world: " + this.getWorld().getDroneSet());
 //        long startTime = System.currentTimeMillis();
-        this.getWorld().advanceWorldState(TIME_STEP, STEPS_PER_CYCLE);
+        this.getWorld().advanceWorldState(TIME_STEP, STEPS_PER_CYCLE, STEPS_PER_SUBCYCLE);
 //        long deltaCalcTime = System.currentTimeMillis()-startTime;
 //        System.out.println("physics time: " + deltaCalcTime);
         //update the simulation time for the outputs (elapsed time)
@@ -649,6 +649,7 @@ public class TestbedMain implements Runnable{
     private final static float TIME_STEP = 0.001f;
     private final static float FRAMERATE = 20.0f;
     private final static int STEPS_PER_CYCLE = Math.round((1 / FRAMERATE) / TIME_STEP);
+    private final static int STEPS_PER_SUBCYCLE = 10;
     private final static long FRAME_MILLIS = 50;
 
     /*
