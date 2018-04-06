@@ -54,6 +54,14 @@ public class OverseerAirportMap {
     }
 
     /**
+     * Getter for the number of airports available on the map
+     * @return an integer containing the nb of airports present on the map
+     */
+    public int getNbOfAirports(){
+        return this.getAirportMap().size();
+    }
+
+    /**
      * Getter for the distance between two airports with the given ID
      * @param airportOne the first airport
      * @param airportTwo the second airport
@@ -212,4 +220,9 @@ public class OverseerAirportMap {
      */
     private int nextAvailableAirportID = 0;
 
+    @Override
+    public String toString() {
+        return "OverseerAirportMap: " +
+                airportMap;
+    }
 }

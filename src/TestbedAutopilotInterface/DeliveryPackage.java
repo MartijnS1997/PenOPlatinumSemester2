@@ -101,5 +101,10 @@ public class DeliveryPackage {
      */
     private boolean delivered = false;
 
-
+    @Override
+    public String toString() {
+        return "DeliveryPackage " +
+                "sourceAirport: " + sourceAirport +
+                ", destinationAirport: " + destinationAirport;
+    }
 }

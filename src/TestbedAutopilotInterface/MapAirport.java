@@ -401,5 +401,12 @@ public class MapAirport {
      * a map containing the id of the specified gate and its corresponding location
      */
     private Map<Integer, Vector> gates = new HashMap<>();
+
+    @Override
+    public String toString() {
+        return "MapAirport " +
+                "location: " + location +
+                ", airportID: " + airportID;
+    }
 }
 

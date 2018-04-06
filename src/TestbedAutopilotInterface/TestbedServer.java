@@ -195,6 +195,7 @@ public class TestbedServer implements Runnable {
         //extract the queue element from the world
         World world = this.getWorld();
         GUIQueueElement newFrame = world.getGuiElements();
+        System.out.println("drone states: " + newFrame.getDroneStates());
         //insert the frame into the queue
         renderQueue.add(newFrame);
         //check if the queue size is smaller than the maximum allowed, if not, wait

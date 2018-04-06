@@ -1,21 +1,42 @@
 package TestbedAutopilotInterface;
 
-import AutopilotInterfaces.AutopilotInputs;
 import AutopilotInterfaces.AutopilotInputs_v2;
 import internal.Helper.Vector;
 
 import java.util.*;
+import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
 /**
  * Created by Martijn on 27/03/2018.
  * A planner for the package assignment of the drones
- * --> heuristic search with iterative deepening
+ * --> cost search with iterative deepening
  * --> in the first iteration of creating the algorithm we deepCopy ALL the drone state on every new node
  * --> first test: hill climbing 1 (no iterative deepening, first check if basics work)
  */
-public class DeliveryPlanning {
+public class DeliveryPlanning implements Callable<Map<String, List<DeliveryPackage>>>{
 
+
+
+    //Todo add a method to resume search based on the current assigned deliveries
+    //Todo only call the delivery planning if there is a drone in the overseer that does not have a package to
+    //Todo deliver and there are packages to do so for
+
+    //what we need:
+    //a list of the drones and their current assigned deliveries and their current location
+    //a list of the packages that need to be delivered
+    //a list of all the airports
+    //a function to calculate the distance between them
+    //a function to calculate the delivery time (may be constant)
+    //a variable that saves the current tree depth
+
+    /**
+     * Constructor for a delivery planning, implements search to find a good/optimal delivery allocation for the
+     * drones (currently implementing hill climbing 1)
+     * @param deliveryPackages the packages to deliver
+     * @param airportMap the map containing all the airports of the overseer
+     * @param activeDrones a map containing the drone ID's as keys and the current location as values
+     */
     public DeliveryPlanning(Collection<DeliveryPackage> deliveryPackages,
                             OverseerAirportMap airportMap, Map<String, AutopilotInputs_v2> activeDrones){
 
@@ -23,8 +44,95 @@ public class DeliveryPlanning {
         this.airportMap = airportMap;
         this.deliveries = deliveryPackages;
         //then init the drones
+        initRoot(activeDrones);
     }
 
+    @Override
+    public Map<String, List<DeliveryPackage>> call() throws Exception {
+        return initSearch();
+    }
+
+    /**
+     * Starts the search for the optimal delivery method for all the packages
+     * @return a map with as keys the id's of the drones and value a list containing the packages that it needs
+     *         to deliver, the first package to deliver is at index 0
+     */
+    private Map<String, List<DeliveryPackage>> initSearch(){
+
+       while(!goalReached()){
+           //get the first node
+           DeliveryNode firstNode = this.removeFirstNode();
+           //expand the first node
+           List<DeliveryNode> children = expandNode(firstNode);
+           addNodesHillClimb(children);
+//           addNodesTotalCost(children);
+       }
+       //the goal is reached, report the first node
+       DeliveryNode goalNode = this.getFirstNode();
+       //print the total time needed:
+       System.out.println("\nDeliveryTime: "+ goalNode.getCostValue()+"\n");
+       //return a map with as key the drone id and an ordered list for the deliveries that it has to make
+       return convertNodeToDeliveryScheme(goalNode);
+    }
+
+    /**
+     * Converts the provided node into a map containing the drone ID as the key and its assigned deliveries (in order)
+     * to a map (to form as schedule)
+     * @param node the node to convert
+     * @return a map with as key the drone ID and value the assigned deliveries (first one to deliver at first index)
+     */
+    private static Map<String, List<DeliveryPackage>> convertNodeToDeliveryScheme(DeliveryNode node){
+        //get the drones of the node
+        Map<String, DeliveryDrone> drones = node.getDroneMap();
+        Map<String, List<DeliveryPackage>> deliverySchedule = new HashMap<>();
+        //iterate trough all the drones
+        for(DeliveryDrone drone: drones.values()){
+           //get the deliveries assigned to the drone
+            List<DeliveryPackage> assignedDeliveries = drone.getAssignedDeliveries();
+            //get the ID of the drone
+            String droneID = drone.getDroneID();
+            //add the key - value to the map
+            deliverySchedule.put(droneID, assignedDeliveries);
+        }
+
+        //return the schedule
+        return deliverySchedule;
+    }
+
+    private boolean goalReached(){
+        //get the first element, if it does not contain any packages to deliver, we've reached our goal
+        List<DeliveryNode> nodeQueue = this.getNodeQueue();
+        DeliveryNode firstNode = nodeQueue.get(0);
+        //if the size of the packages to deliver is zero, we're finished
+        return firstNode.getPackagesToDeliver().size() == 0;
+    }
+
+    /**
+     * Removes the head of the list while returning the value that was located at the head
+     * @return the delivery node that was at the head of the queue
+     */
+    private DeliveryNode removeFirstNode(){
+        List<DeliveryNode> nodeQueue = this.getNodeQueue();
+        return nodeQueue.remove(0);
+    }
+
+    private void pruneQueue(){
+
+    }
+
+    /**
+     * Get the first node in the queue
+     * @return the first node
+     */
+    private DeliveryNode getFirstNode(){
+        List<DeliveryNode> nodeQueue = this.getNodeQueue();
+        return nodeQueue.get(0);
+    }
+
+    /**
+     * Initializes the root node by adding all the drones that are currently active in the overseer
+     * @param activeDrones a map with key the id of the drone and value the current state
+     */
     private void initRoot(Map<String, AutopilotInputs_v2> activeDrones){
         //create a map to put the newly generated drones in
         Map<String, DeliveryDrone> drones  = new HashMap<>();
@@ -41,24 +149,49 @@ public class DeliveryPlanning {
             drones.put(droneID, deliveryDrone);
         }
 
+        //get the packages that need to be delivered
+        Collection<DeliveryPackage> deliveries = this.getDeliveries();
+
         //create the root of the search tree
-        DeliveryNode root = new DeliveryNode(drones);
+        DeliveryNode root = new DeliveryNode(drones,deliveries);
         //add the root to the queue
         List<DeliveryNode> nodeQueue = this.getNodeQueue();
         nodeQueue.add(root);
 
     }
 
-    //TODO add deep deepCopy of the airport map & deliveries such that we can execute on a different thread
-    //TODO add method that traverses the search tree
+    /**
+     * Expands the given node
+     * for each drone-delivery combination a new child node is created
+     * @param parentNode the node to expand
+     * @return a list containing all the children of the parent
+     */
+    private List<DeliveryNode> expandNode(DeliveryNode parentNode){
 
-    //what we need:
-    //a list of the drones and their current assigned deliveries and their current location
-    //a list of the packages that need to be delivered
-    //a list of all the airports
-    //a function to calculate the distance between them
-    //a function to calculate the delivery time (may be constant)
-    //a variable that saves the current tree depth
+        //get all the drones in the node and all the packages that still need to be delivered
+        Map<String, DeliveryDrone> drones = parentNode.getDroneMap();
+        Set<DeliveryPackage> packages = parentNode.getPackagesToDeliver();
+
+        //the list containing all the new nodes
+        List<DeliveryNode> childNodes = new ArrayList<>();
+
+        //for every package-drone combination create a new node & add the package
+        for(DeliveryPackage delivery : packages){
+            for(DeliveryDrone drone: drones.values()){
+
+                //create the child
+                DeliveryNode childNode = new DeliveryNode(drones, packages);
+                //add the delivery
+                childNode.addDelivery(drone.getDroneID(), delivery);
+                //add the child to the expanded node
+                childNodes.add(childNode);
+            }
+        }
+
+        //System.out.println("expanding node, packages to deliver: " + packages.size());
+        return childNodes;
+
+    }
 
     /**
      * Getter for the map that contains all the information about the airports in the world
@@ -115,26 +248,26 @@ public class DeliveryPlanning {
     }
 
     /**
-     * adds the provided nodes to the queue, sorts them first based on their heuristic value in such a way
+     * adds the provided nodes to the queue, sorts them first based on their cost value in such a way
      * that the largest value will come first
      * @param deliveryNodes the nodes to be added
      */
-    private void addNodes(List<DeliveryNode> deliveryNodes){
-        //first sort the nodes based on heuristic value
+    private void addNodesHillClimb(List<DeliveryNode> deliveryNodes){
+        //first sort the nodes based on cost value
         //Sort sorts from small to large, to get the right effect we should set the largest as "smaller" than the
         //smaller one in the comparator
         deliveryNodes.sort(new Comparator<DeliveryNode>() {
             @Override
             public int compare(DeliveryNode node1, DeliveryNode node2) {
-                float heuristicNode1 = node1.getHeuristicValue();
-                float heuristicNode2 = node2.getHeuristicValue();
+                float costNode1 = node1.getCostValue();
+                float costNode2 = node2.getCostValue();
                 //check for the values
-                if (heuristicNode1 < heuristicNode2) {
-                    //1 means set node2 one forward in the list (in bubble sort)
+                if (costNode1 > costNode2) {
+                    //1 means set node 1 forwards (higher index)
                     return 1;
                 }
-                if (heuristicNode1 > heuristicNode2) {
-                    //-1 means set node2 one backwards in the list (in bubble sort)
+                if (costNode1 < costNode2) {
+                    //-1 means set node1 one backwards (lower index)  in the list (in bubble sort)
                     return -1;
                 }
                 //0 means let them both stay where they are (in bubble sort)
@@ -145,6 +278,40 @@ public class DeliveryPlanning {
         //now that the nodes are sorted add them in front of the queue
         List<DeliveryNode> nodeQueue = this.getNodeQueue();
         nodeQueue.addAll(0, deliveryNodes);
+    }
+
+    /**
+     * Implements the node adding for branch and bound total cost search (no optimisation)
+     * Todo implement insertion for faster iterations
+     * @param childNodes the nodes to add to the queue
+     */
+    private void addNodesTotalCost(List<DeliveryNode> childNodes){
+        //add the nodes to the list, sort the list afterwards
+        //TODO use insertion to quickly insert the new values
+        List<DeliveryNode> nodeQueue = this.getNodeQueue();
+        nodeQueue.addAll(childNodes);
+        nodeQueue.sort(new Comparator<DeliveryNode>() {
+            @Override
+            public int compare(DeliveryNode node1, DeliveryNode node2) {
+                float costNode1 = node1.getCostValue();
+                float costNode2 = node2.getCostValue();
+                //check for the values
+                if (costNode1 > costNode2) {
+                    //1 means set node 1 forwards (higher index)
+                    return 1;
+                }
+                if (costNode1 < costNode2) {
+                    //-1 means set node1 one backwards (lower index)  in the list (in bubble sort)
+                    return -1;
+                }
+                //0 means let them both stay where they are (in bubble sort)
+                return 0;
+            }
+        });
+
+//        System.out.println("Size of queue: "+ nodeQueue.size());
+//        System.out.println("First node packets delivered: " + getFirstNode().getPackagesToDeliver().size());
+
     }
 
     /**
@@ -161,7 +328,7 @@ public class DeliveryPlanning {
     /**
      * A node of our delivery search tree
      * Has the following properties:
-     * --> a heuristic value (the maximum travel time of all the drones)
+     * --> a cost value (the maximum travel time of all the drones)
      * --> a list of all the drones and their assigned packages
      * --> a method to add a package to a given drone in the node
      */
@@ -173,7 +340,7 @@ public class DeliveryPlanning {
          * @param parentDrones a map containing the drones and their assigned packages from the parent of the node
          *                     the key is the drone ID and the value the delivery drone itself
          */
-        private DeliveryNode(Map<String, DeliveryDrone> parentDrones) {
+        private DeliveryNode(Map<String, DeliveryDrone> parentDrones, Collection<DeliveryPackage> packagesToDeliver) {
             //create a deep copy of the map we've received
             Map<String, DeliveryDrone> childDrones = new HashMap<>();
             for(String droneID : parentDrones.keySet()){
@@ -184,7 +351,15 @@ public class DeliveryPlanning {
                 childDrones.put(droneID, copyDrone);
             }
 
+            //create shallow copy of the packages Set
+            Set<DeliveryPackage> packages = new HashSet<>();
+            for(DeliveryPackage delivery : packagesToDeliver){
+                packages.add(delivery);
+            }
+
+            //set the copies for the node
             this.droneMap = childDrones;
+            this.packagesToDeliver = packages;
         }
 
         /**
@@ -197,45 +372,108 @@ public class DeliveryPlanning {
                 throw new IllegalStateException("Node already configured");
             }
 
+            //remove the package from the set of packages to deliver
+            Set<DeliveryPackage> packages = this.getPackagesToDeliver();
+            packages.remove(delivery);
+
             //get the drone we want the package to deliver to
             Map<String, DeliveryDrone> drones = this.getDroneMap();
             DeliveryDrone drone = drones.get(droneID);
+            updateDronePosition(delivery, drone);
 
-            //calculate the new value of the drone based on distance
-            Vector dronePos = drone.getPosition();
-            //get id of the airport
-            int airportID = delivery.getDestinationAirport();
-            //get the map of the world
-            OverseerAirportMap airportMap = DeliveryPlanning.this.getAirportMap();
-            //get the airport
-            MapAirport airport = airportMap.getAirport(airportID);
-            //get the location of the airport
-            Vector airportLocation = airport.getLocation();
-            //get the distance
-            float distanceBetween = airportLocation.distanceBetween(dronePos);
 
-            //move the drone to the next airport
-            drone.setPosition(airportLocation);
-            //increment the time
-            drone.incrementTotalTravelTime(distanceBetween);
             //add the new package to deliver
             drone.addDelivery(delivery);
+
+            //set the added delivery to the node
+            this.setCurrentDelivery(delivery);
+            this.setCurrentDeliveryDroneID(droneID);
 
             //we're finished
             isCompleted = true;
         }
 
+        /**
+         * Updates the position of the drone and the total travel time for the deliveries
+         * @param delivery the delivery to add to the drone and update it for
+         * @param drone the drone to update
+         */
+        private void updateDronePosition(DeliveryPackage delivery, DeliveryDrone drone) {
+            //calculate the new value of the drone based on distance
+            Vector dronePos = drone.getPosition();
+            //get id of the source and destination airport
+            int sourceAirportID = delivery.getSourceAirport();
+            int destinationAirportID = delivery.getDestinationAirport();
+            //get the map of the world
+            OverseerAirportMap airportMap = DeliveryPlanning.this.getAirportMap();
+            //get the source airport and the airport to deliver to
+            MapAirport sourceAirport = airportMap.getAirport(sourceAirportID);
+            MapAirport destinationAirport = airportMap.getAirport(destinationAirportID);
+            //get the location of the source and destination airport
+            Vector sourceAirportLocation = sourceAirport.getLocation();
+            Vector destinationAirportLocation = destinationAirport.getLocation();
+            //get the distance (from current position, to the source to the destination
+            float droneToSourceDistance = dronePos.distanceBetween(sourceAirportLocation);
+            float sourceToDestination = destinationAirportLocation.distanceBetween(sourceAirportLocation);
+            float deliveryDistance = droneToSourceDistance + sourceToDestination;
+
+            //move the drone to the next airport
+            drone.setPosition(destinationAirportLocation);
+            //increment the time
+            drone.incrementTotalTravelTime(deliveryDistance);
+        }
+
 
         /**
-         * Getter for the heuristic value of the node
+         * Checks if the node has delivered the provided package
+         * @return true if the node has a drone that has the same delivery assigned
+         */
+        private boolean deliversPackage(DeliveryPackage deliveryPackage){
+            //check if the to deliver contains the package
+            Set<DeliveryPackage> toDeliver = this.getPackagesToDeliver();
+            //if the packages to deliver does not contain the specified package, we've already delivered it
+            return !toDeliver.contains(deliveryPackage);
+
+        }
+
+        /**
+         * Gets the drone that delivers the requested package
+         * returns null if the node does not deliver the package
+         * @param delivery the delivery to check for
+         * @return the drone id of the drone that delivers the package, if the package is not
+         *         yet delivered by the node return null
+         */
+        private String getDeliveryDroneID(DeliveryPackage delivery){
+            //check if we deliver the package
+            if(this.deliversPackage(delivery)){
+                return null;
+            }
+            //get the set of all drones
+            Map<String, DeliveryDrone> droneMap = this.getDroneMap();
+            for(DeliveryDrone drone: droneMap.values()){
+                //get the deliveries of the drone
+                List<DeliveryPackage> droneDeliveries = drone.getAssignedDeliveries();
+                //check if the drone delivers the requested package
+                if(droneDeliveries.contains(delivery)){
+                    //if so return the delivery id
+                    return drone.getDroneID();
+                }
+            }
+
+            return null;
+        }
+
+
+        /**
+         * Getter for the cost value of the node
          * the value is calculated as the maximum delivery time of all the drones in the map
          * @return the highest delivery time of all the drones
          */
-        private float getHeuristicValue(){
-            //check if we've calculated the heuristic before
-            float savedHeuristic = this.getSavedHeuristic();
-            if(savedHeuristic > 0){
-                return savedHeuristic;
+        private float getCostValue(){
+            //check if we've calculated the cost before
+            float savedCost = this.getSavedCost();
+            if(savedCost > 0){
+                return savedCost;
             }
             //if not:
             //get all the drones
@@ -244,29 +482,62 @@ public class DeliveryPlanning {
             //first map to a collection of floats (the time travelled)
             Collection<Float> deliveryTimes = deliveryDrones.stream().map(DeliveryDrone::getTotalTravelTime).collect(Collectors.toList());
             //then get the maximum value
-            float calcHeuristic = Collections.max(deliveryTimes);
-            this.setSavedHeuristic(calcHeuristic);
+            float calcCost = Collections.max(deliveryTimes);
+            this.setSavedCost(calcCost);
             //return the maximum
 
-            return calcHeuristic;
+            return calcCost;
         }
 
         /**
-         * Getter for the heuristic that was saved after the first call of the heuristic value calculation
-         * purpose is to avoid redundant calculations (heuristic value may be called multiple times for)
+         * Getter for the delivery that was last added to the node
+         * @return the last added delivery
+         * note: is used for path deletion
+         */
+        private DeliveryPackage getCurrentDelivery(){
+            return this.currentDelivery;
+        }
+
+        /**
+         * Setter for the delivery that was last added to the node
+         * @param currentDelivery the delivery to set
+         */
+        private void setCurrentDelivery(DeliveryPackage currentDelivery){
+            this.currentDelivery = currentDelivery;
+        }
+
+        /**
+         * Getter for the drone that is currently used to deliver the assigned package (used for pruning)
+         * @return the ID of the drone used to deliver the package
+         */
+        private String getCurrentDeliveryDroneID() {
+            return currentDeliveryDroneID;
+        }
+
+        /**
+         * Setter for the drone that is currently used to deliver the assigned package (used for pruning
+         * @param currentDeliveryDroneID the ID to set
+         */
+        private void setCurrentDeliveryDroneID(String currentDeliveryDroneID) {
+            this.currentDeliveryDroneID = currentDeliveryDroneID;
+        }
+
+        /**
+         * Getter for the cost that was saved after the first call of the cost value calculation
+         * purpose is to avoid redundant calculations (cost value may be called multiple times for)
          * --> returns -1f if not initialized, for use withing the private class only!
-         * @return a floating point number containing the value for the heuristic
+         * @return a floating point number containing the value for the cost
          */
-        public float getSavedHeuristic() {
-            return heuristic;
+        private float getSavedCost() {
+            return cost;
         }
 
         /**
-         * Setter for the heuristic that was saved after the calculation of it
-         * @param heuristic the heuristic value to assign to the node
+         * Setter for the cost that was saved after the calculation of it
+         * @param cost the cost value to assign to the node
          */
-        public void setSavedHeuristic(float heuristic) {
-            this.heuristic = heuristic;
+        private void setSavedCost(float cost) {
+            this.cost = cost;
         }
 
         /**
@@ -279,17 +550,43 @@ public class DeliveryPlanning {
         }
 
         /**
+         * Getter for the set containing the packages that still need to be delivered (and are not assigned to a drone)
+         * @return a set containing delivery packages
+         */
+        private Set<DeliveryPackage> getPackagesToDeliver() {
+            return packagesToDeliver;
+        }
+
+        /**
          * A map containing all the drones and their currently assigned packages
          * with as keys the ID's of the given drones and as value the drones themselves (used for fast adding)
          */
         private Map<String, DeliveryDrone> droneMap = new HashMap<>();
 
         /**
+         * The set containing all packages that still need to be delivered by the drones
+         */
+        private Set<DeliveryPackage> packagesToDeliver = new HashSet<>();
+
+        /**
+         * The delivery that was added in this node (used for pruning)
+         */
+        private DeliveryPackage currentDelivery;
+
+        /**
+         * The id of the drone that was lastly used to deliver the package
+         */
+        private String currentDeliveryDroneID;
+
+        /**
          * Flag to indicate if an extra package was added to the node
          */
         private boolean isCompleted = false;
 
-        private float heuristic = -1f;
+        /**
+         * The cost value saved for faster computation
+         */
+        private float cost = -1f;
     }
 
     /**
@@ -298,7 +595,7 @@ public class DeliveryPlanning {
      * --> position
      * --> identifier
      * --> assigned packages
-     * --> the total travel time (used as heuristic)
+     * --> the total travel time (used as cost)
      */
     private class DeliveryDrone{
         /**
@@ -420,7 +717,7 @@ public class DeliveryPlanning {
         }
 
         /**
-         * The list of deliveries assigned to the drone
+         * The list of deliveries assigned to the drone, the package to be delivered first is the package at index 0
          */
         private List<DeliveryPackage> assignedDeliveries = new ArrayList<>();
 

@@ -195,7 +195,7 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void> {
      * @param inputs the inputs used to extract the position from
      * @return a vector containing the position expressed in the inputs
      */
-   protected static Vector extractPosition(AutopilotInputs_v2 inputs){
+   public static Vector extractPosition(AutopilotInputs_v2 inputs){
        float xPos = inputs.getX();
        float yPos = inputs.getY();
        float zPos = inputs.getZ();
