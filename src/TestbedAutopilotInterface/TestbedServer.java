@@ -202,6 +202,9 @@ public class TestbedServer implements Runnable {
         renderQueue.add(newFrame);
         //check if the queue size is smaller than the maximum allowed, if not, wait
         while(renderQueue.size() > MAX_FRAMES_AHEAD){
+//            GUIQueueElement[] rendererArray =  renderQueue.toArray(new GUIQueueElement[0]);
+//            for(int index = 0; index != rendererArray.length; index++)
+//                System.out.print(rendererArray[index].getDroneStates()+" ");
             //if not, sleep for the time one frame needs to be rendered
             try {
                 float sleepTime = this.getTimeStep()*this.getStepsPerCycle()*1000f; // the times 1000 for converting to millis

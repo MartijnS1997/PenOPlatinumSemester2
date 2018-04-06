@@ -711,20 +711,23 @@ public class World {
 		for(Drone drone: drones){
 			//get the ID, position and orientation of the drone
 			key = drone.getDroneID();
+			Vector position = drone.getPosition().deepCopy();
+			Vector velocity = drone.getVelocity().deepCopy();
+			Vector orientation = drone.getOrientation().deepCopy();
 			value = new DroneGuiState() {
 				@Override
 				public Vector getPosition() {
-					return drone.getPosition();
+					return position;
 				}
 
 				@Override
 				public Vector getVelocity() {
-					return drone.getVelocity();
+					return velocity;
 				}
 
 				@Override
 				public Vector getOrientation() {
-					return drone.getOrientation();
+					return orientation;
 				}
 			};
 
