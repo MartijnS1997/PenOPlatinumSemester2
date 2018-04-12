@@ -69,7 +69,34 @@ public class DeliveryPlanning implements Callable<Map<String, List<DeliveryPacka
 
     @Override
     public Map<String, List<DeliveryPackage>> call(){
-        return initSearch();
+        return hillClimbingSearch();
+    }
+
+    /**
+     * Executes the beam search algorithm with as values the heuristic value + cost
+     * only keeps the specified nb of nodes (can be set with setBeamSearchWidth)
+     * @return a planning created with the beam search algorithm
+     */
+    public Map<String, List<DeliveryPackage>> beamSearch(){
+        while(!goalReached()){
+            //we need to expand all the nodes
+            List<DeliveryNode> queue = this.getNodeQueue();
+            List<DeliveryNode> allChildren = new LinkedList<>();
+
+            for(DeliveryNode node: queue){
+                List<DeliveryNode> children = this.expandNode(node);
+                allChildren.addAll(children);
+            }
+
+            addNodesBeamSearch(allChildren);
+
+        }
+
+        DeliveryNode goalNode = this.getFirstNode();
+        //print the total time needed:
+        System.out.println("\nDeliveryTime: "+ goalNode.getCostValue()+"\n");
+        //return a map with as key the drone id and an ordered list for the deliveries that it has to make
+        return convertNodeToDeliveryScheme(goalNode);
     }
 
     /**
@@ -77,7 +104,7 @@ public class DeliveryPlanning implements Callable<Map<String, List<DeliveryPacka
      * @return a map with as keys the id's of the drones and value a list containing the packages that it needs
      *         to deliver, the first package to deliver is at index 0
      */
-    private Map<String, List<DeliveryPackage>> initSearch(){
+     public Map<String, List<DeliveryPackage>> hillClimbingSearch(){
 
        while(!goalReached()){
            //get the first node
@@ -93,6 +120,23 @@ public class DeliveryPlanning implements Callable<Map<String, List<DeliveryPacka
        System.out.println("\nDeliveryTime: "+ goalNode.getCostValue()+"\n");
        //return a map with as key the drone id and an ordered list for the deliveries that it has to make
        return convertNodeToDeliveryScheme(goalNode);
+    }
+
+    public Map<String, List<DeliveryPackage>> totalCostSearch(){
+        while(!goalReached()){
+            //get the first node
+            DeliveryNode firstNode = this.removeFirstNode();
+            //expand the first node
+            List<DeliveryNode> children = expandNode(firstNode);
+            //addNodesHillClimb(children);
+            addNodesTotalCost(children);
+        }
+        //the goal is reached, report the first node
+        DeliveryNode goalNode = this.getFirstNode();
+        //print the total time needed:
+        System.out.println("\nDeliveryTime: "+ goalNode.getCostValue()+"\n");
+        //return a map with as key the drone id and an ordered list for the deliveries that it has to make
+        return convertNodeToDeliveryScheme(goalNode);
     }
 
     /**
@@ -207,40 +251,6 @@ public class DeliveryPlanning implements Callable<Map<String, List<DeliveryPacka
 
     }
 
-    /**
-     * Getter for the map that contains all the information about the airports in the world
-     * @return the airport map used by the overseer
-     */
-    private OverseerAirportMap getAirportMap() {
-        return airportMap;
-    }
-
-    /**
-     * Getter for the packages that need to be delivered
-     * @return a collection of delivery packages
-     */
-    private Collection<DeliveryPackage> getDeliveries() {
-        return deliveries;
-    }
-
-    //instances used to get heuristics and delivery specs
-    /**
-     * The map containing all the airports in the world
-     */
-    private OverseerAirportMap airportMap;
-
-    /**
-     * The collection of deliveries to be made to the airports
-     */
-    private Collection<DeliveryPackage> deliveries;
-
-    /**
-     * Getter for the queue used to search the tree
-     * @return a list of delivery nodes
-     */
-    private List<DeliveryNode> getNodeQueue() {
-        return nodeQueue;
-    }
 
     /**
      * adds the provided nodes to the queue, sorts them first based on their cost value in such a way
@@ -311,10 +321,111 @@ public class DeliveryPlanning implements Callable<Map<String, List<DeliveryPacka
     }
 
     /**
+     * Adds the given nodes to the queue as specified by beam search, only take the n best nodes
+     * and discard the rest
+     * @param nodes the nodes to add
+     */
+    private void addNodesBeamSearch(List<DeliveryNode> nodes){
+        //first sort the list based on the cost and the heuristic
+        nodes.sort(new Comparator<DeliveryNode>() {
+            @Override
+            public int compare(DeliveryNode node1, DeliveryNode node2) {
+                float costNode1 = node1.getApproxCost();
+                float costNode2 = node2.getApproxCost();
+                //check for the values
+                if (costNode1 > costNode2) {
+                    //1 means set node 1 forwards (higher index)
+                    return 1;
+                }
+                if (costNode1 < costNode2) {
+                    //-1 means set node1 one backwards (lower index)  in the list (in bubble sort)
+                    return -1;
+                }
+                //0 means let them both stay where they are (in bubble sort)
+                return 0;
+            }
+        });
+
+        //get the sublist, size beamWidth, if nodes.size < beamWidth, take the size as sublist
+        int beamWidth = this.getBeamSearchWidth();
+        int nbChildren = nodes.size();
+        int upperIndex = beamWidth < nbChildren? beamWidth : nbChildren;
+
+        //get the sublist
+        List<DeliveryNode> newQueue = nodes.subList(0, upperIndex);
+
+        //clear the queue
+        List<DeliveryNode> queue = this.getNodeQueue();
+        queue.clear();
+
+        //add the sublist
+        queue.addAll(newQueue);
+
+    }
+
+    /**
+     * Getter for the map that contains all the information about the airports in the world
+     * @return the airport map used by the overseer
+     */
+    private OverseerAirportMap getAirportMap() {
+        return airportMap;
+    }
+
+    /**
+     * Getter for the packages that need to be delivered
+     * @return a collection of delivery packages
+     */
+    private Collection<DeliveryPackage> getDeliveries() {
+        return deliveries;
+    }
+
+    //instances used to get heuristics and delivery specs
+    /**
+     * The map containing all the airports in the world
+     */
+    private OverseerAirportMap airportMap;
+
+    /**
+     * The collection of deliveries to be made to the airports
+     */
+    private Collection<DeliveryPackage> deliveries;
+
+    /**
+     * Getter for the queue used to search the tree
+     * @return a list of delivery nodes
+     */
+    private List<DeliveryNode> getNodeQueue() {
+        return nodeQueue;
+    }
+
+
+    /**
      * The queue used to keep track of the visited and to visit nodes
      * we use a linked list so the adding of new nodes to the queue is more efficient
      */
     private List<DeliveryNode> nodeQueue = new LinkedList<>();
+
+    /**
+     * Getter for the beam search width: the nb of nodes the beam search algorithm keeps after expanding a node
+     * @return the number of nodes to keep after a single beamsearch expansion
+     */
+    private int getBeamSearchWidth() {
+        return beamSearchWidth;
+    }
+
+    /**
+     * Setter for the width of the beam search algorithm
+     * The width defines how many best nodes are kept after expansion
+     * @param beamSearchWidth the width to set
+     */
+    public void setBeamSearchWidth(int beamSearchWidth) {
+        this.beamSearchWidth = beamSearchWidth;
+    }
+
+    /**
+     * The width of the beam search
+     */
+    private int beamSearchWidth = 5;
 
     /**
      * A node of our delivery search tree
