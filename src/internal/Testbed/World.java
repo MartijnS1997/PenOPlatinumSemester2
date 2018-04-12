@@ -1,6 +1,12 @@
 package internal.Testbed;
 import AutopilotInterfaces.Path;
-import TestbedAutopilotInterface.*;
+import TestbedAutopilotInterface.GUI.AirportGuiState;
+import TestbedAutopilotInterface.GUI.CubeGuiState;
+import TestbedAutopilotInterface.GUI.DroneGuiState;
+import TestbedAutopilotInterface.GUI.GUIQueueElement;
+import TestbedAutopilotInterface.Overseer.AutopilotOverseer;
+import TestbedAutopilotInterface.Overseer.DeliveryPackage;
+import TestbedAutopilotInterface.Overseer.PackageService;
 import internal.Exceptions.AngleOfAttackException;
 import internal.Exceptions.SimulationEndedException;
 import internal.Helper.Vector;
@@ -34,9 +40,12 @@ public class World {
 	 * Constructor used for a shared thread pool with the testbed server (since the amount of communication threads are
 	 * equal to the amount of drones. The threads are never active at the same time so we may share them)
 	 * @param threadPool the thread pool assigned to the world for simulating drones
+	 * @param packageService the package service used by the world to assign packages to the drone
+	 *                       (only makes queries to it and sets if packages have been successfully delivered)
 	 */
-	public World(ExecutorService threadPool){
+	public World(ExecutorService threadPool, PackageService packageService){
 		this.droneThreads = threadPool;
+		this.packageService = packageService;
 	}
 
 	/**
@@ -53,7 +62,7 @@ public class World {
 			throw new IllegalArgumentException(INVALID_TIME_INTERVAL);
 
 //		Set<Block> blockSet = this.getBlockSet();
-		System.out.println("Drone velocity before :" + this.getDroneSet());
+//		System.out.println("Drone velocity before :" + this.getDroneSet());
 		//System.out.println("nb Intervals: " + nbIntervals);
 
         //keep iterating until we reach zero iterations to do (no for loop to fit the nb sub iterations
@@ -90,7 +99,7 @@ public class World {
             //checkForCrashes(droneSet);
 
         }
-		System.out.println("Drone velocity after" + this.getDroneSet());
+//		System.out.println("Drone velocity after" + this.getDroneSet());
 	}
 
 	/**
@@ -98,7 +107,7 @@ public class World {
 	 * @param droneSet the set of drones to be advanced
 	 * @param deltaTime the time for the next state step
 	 * @param nbIterations the number of iterations to in one call
-	 * @throws InterruptedException
+	 * @throws InterruptedException if the futures times out (nothing you can do about)
 	 */
 	private void advanceAllDrones(Set<Drone> droneSet, float deltaTime, int nbIterations) throws InterruptedException {
 		//first set the time interval for all the drones
@@ -169,7 +178,10 @@ public class World {
 	private void movePackages(){
 		//get the package set
 		Map<String, Drone>  drones = this.getDroneMap();
-		Set<DeliveryPackage> packages = this.getPackages();
+		PackageService packageService = this.getPackageService();
+		//get all the packages that need to be delivered and are assigned a drone (these are the only
+		//ones that need to be loaded and unloaded
+		Set<DeliveryPackage> packages = packageService.getAllUndeliveredAssignedPackages();
 		//first check if all the drones can unload their packages
 		unloadPackages(new HashSet<>(drones.values()));
 		//then load all the packages
@@ -516,7 +528,8 @@ public class World {
 	 * @return true if and only if all the packages have the delivered flag
 	 */
 	private boolean allPackagesDelivered(){
-		Set<DeliveryPackage> packages = this.getPackages();
+		PackageService service = this.getPackageService();
+		Set<DeliveryPackage> packages = service.getAllUndeliveredPackages();
 		for(DeliveryPackage delivery : packages){
 			if(!delivery.isDelivered()){
 				return false;
@@ -563,41 +576,41 @@ public class World {
 		return timeInterval > 0.0f;
 	}
 
-	/**
-	 * Getter for the list of packages that need to be delivered
-	 * @return the list of all packages that need to be delivered in this world
-	 */
-	private Set<DeliveryPackage> getPackages() {
-		return packages;
-	}
+//	/**
+//	 * Getter for the list of packages that need to be delivered
+//	 * @return the list of all packages that need to be delivered in this world
+//	 */
+//	private Set<DeliveryPackage> getPackages() {
+//		return packages;
+//	}
 
-	/**
-	 * Adds a single package to the world that has to be delivered
-	 * only adds the package if it is a non null reference, otherwise this method does not have any effect
-	 * @param deliveryPackage the package to deliver
-	 */
-	public void addPackage(DeliveryPackage deliveryPackage){
-		//get the current package set
-		Set<DeliveryPackage> packages = this.getPackages();
-		//and add the package
-		if(isValidPackage(deliveryPackage)) {
-			packages.add(deliveryPackage);
-		}
-	}
+//	/**
+//	 * Adds a single package to the world that has to be delivered
+//	 * only adds the package if it is a non null reference, otherwise this method does not have any effect
+//	 * @param deliveryPackage the package to deliver
+//	 */
+//	public void addPackage(DeliveryPackage deliveryPackage){
+//		//get the current package set
+//		Set<DeliveryPackage> packages = this.getPackages();
+//		//and add the package
+//		if(isValidPackage(deliveryPackage)) {
+//			packages.add(deliveryPackage);
+//		}
+//	}
 
-	/**
-	 * Adds all the supplied packages to the world, if the packages are not valid they will not be added
-	 * to the world (no notification is given, these invalid packages are simply ignored)
-	 * @param newPackages the packages to add
-	 */
-	public void addPackages(Collection<DeliveryPackage> newPackages){
-		//get the current package set
-		Set<DeliveryPackage> packageSet = this.getPackages();
-		//filter for all the valid packages in the new packages
-		Set<DeliveryPackage> validPackages = newPackages.stream().filter(p -> isValidPackage(p)).collect(Collectors.toSet());
-		//add all the packages that are valid
-		packageSet.addAll(validPackages);
-	}
+//	/**
+//	 * Adds all the supplied packages to the world, if the packages are not valid they will not be added
+//	 * to the world (no notification is given, these invalid packages are simply ignored)
+//	 * @param newPackages the packages to add
+//	 */
+//	public void addPackages(Collection<DeliveryPackage> newPackages){
+//		//get the current package set
+//		Set<DeliveryPackage> packageSet = this.getPackages();
+//		//filter for all the valid packages in the new packages
+//		Set<DeliveryPackage> validPackages = newPackages.stream().filter(p -> isValidPackage(p)).collect(Collectors.toSet());
+//		//add all the packages that are valid
+//		packageSet.addAll(validPackages);
+//	}
 
 	/**
 	 * Checks if the package can be added to the world
@@ -606,6 +619,16 @@ public class World {
 	 */
 	private static boolean isValidPackage(DeliveryPackage deliveryPackage){
 		return deliveryPackage != null;
+	}
+
+	/**
+	 * Getter for the package service used in the world
+	 * the service is responsible for assigning packages to the drones and notifying the world
+	 * about which packages should be given to which drone
+	 * @return a package service used by the world
+	 */
+	private PackageService getPackageService() {
+		return packageService;
 	}
 
 	/**
@@ -625,15 +648,17 @@ public class World {
 	 */
 	private Map<Integer, WorldAirport> airports = new HashMap<>();
 
-	/**
-	 * A list containing all the packages that need to be delivered in the world
-	 */
-	private Set<DeliveryPackage> packages = new HashSet<>();
 
 	/**
 	 * The map of drones currently active in the world (key=droneID, value=drone with ID)
 	 */
 	private Map<String, Drone> drones = new HashMap<>();
+
+
+	/**
+	 * The package service used to deliver the packages, is used to check which packages need to be passed to which drone
+	 */
+	private PackageService packageService;
 
 
 	/**

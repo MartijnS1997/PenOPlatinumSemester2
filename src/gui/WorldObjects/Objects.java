@@ -1,9 +1,9 @@
 package gui.WorldObjects;
 
-import TestbedAutopilotInterface.AirportGuiState;
-import TestbedAutopilotInterface.CubeGuiState;
-import TestbedAutopilotInterface.DroneGuiState;
-import TestbedAutopilotInterface.GUIQueueElement;
+import TestbedAutopilotInterface.GUI.AirportGuiState;
+import TestbedAutopilotInterface.GUI.CubeGuiState;
+import TestbedAutopilotInterface.GUI.DroneGuiState;
+import TestbedAutopilotInterface.GUI.GUIQueueElement;
 import gui.GraphicsObjects.GraphicsObject;
 import gui.Windows.Graphics;
 

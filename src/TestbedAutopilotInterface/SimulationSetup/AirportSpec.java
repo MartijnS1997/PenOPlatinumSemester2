@@ -1,15 +1,12 @@
-package TestbedAutopilotInterface;
+package TestbedAutopilotInterface.SimulationSetup;
 
 import internal.Helper.Vector;
 
 /**
- * Created by Martijn on 27/03/2018.
- * An interface for testbed-gui communication, is responsible for passing the needed parameters
- * of the airport to render it
- * note: extra functionality may be added later
+ * Created by Martijn on 31/03/2018.
+ * An interface used to initialize the airports
  */
-public interface AirportGuiState {
-
+public interface AirportSpec {
     /**
      * Getter for the position of the airport in the world, by default the y-coordinate is 0
      * @return a vector containing the position of the airport in the world (x, 0, z)
@@ -23,4 +20,16 @@ public interface AirportGuiState {
      * @return a vector containing the direction of the primary runway (x, 0, z)
      */
     Vector getPrimaryRunWay();
+
+    /**
+     * Getter for the width of the runway for the airport
+     * @return the width of the runway
+     */
+    float getRunwayWidth();
+
+    /**
+     * Getter for the length of the runway for the airport
+     * @return the length of the runway
+     */
+    float getRunwayLength();
 }

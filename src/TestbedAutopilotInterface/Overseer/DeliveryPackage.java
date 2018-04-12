@@ -1,4 +1,4 @@
-package TestbedAutopilotInterface;
+package TestbedAutopilotInterface.Overseer;
 
 /**
  * Created by Martijn on 27/03/2018.
@@ -79,7 +79,7 @@ public class DeliveryPackage {
      * Setter for the ID of the drone that is assigned to deliver the package
      * @param deliveryDroneID a string with the ID of the drone that has to delivered said package
      */
-    public void setDeliveryDroneID(String deliveryDroneID) {
+    protected void setDeliveryDroneID(String deliveryDroneID) {
         this.deliveryDroneID = deliveryDroneID;
     }
 

@@ -1,4 +1,4 @@
-package TestbedAutopilotInterface;
+package TestbedAutopilotInterface.GUI;
 
 import internal.Helper.Vector;
 

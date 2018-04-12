@@ -1,10 +1,9 @@
 package TestbedAutopilotInterface;
 
 import AutopilotInterfaces.*;
+import TestbedAutopilotInterface.Overseer.AutopilotOverseer;
 import internal.Autopilot.AutoPilot;
-import internal.Autopilot.Autopilot_v2Implementation;
 import internal.Exceptions.SimulationEndedException;
-import jdk.nashorn.internal.runtime.ECMAException;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -99,7 +98,7 @@ public class AutopilotConnection implements Callable<Void> {
         //get the data from the input stream
         AutopilotInputs_v2 inputs = null;
         try {
-            System.out.println("Reading inputs");
+//            System.out.println("Reading inputs");
              inputs = AutopilotInputs_v2Reader.read(inputStream);
         } catch(java.io.EOFException e){
             //the connection has closed terminate:

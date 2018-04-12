@@ -1,11 +1,7 @@
 package internal.Testbed;
 
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
-
-import TestbedAutopilotInterface.AirportGuiState;
-import TestbedAutopilotInterface.MapAirport;
+import TestbedAutopilotInterface.GUI.AirportGuiState;
+import TestbedAutopilotInterface.Overseer.MapAirport;
 import internal.Helper.Vector;
 
 //TODO make aiports NON world objects and pull the world object interface from the general testbed (only drones are

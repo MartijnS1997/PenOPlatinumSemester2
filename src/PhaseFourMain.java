@@ -1,4 +1,10 @@
 import TestbedAutopilotInterface.*;
+import TestbedAutopilotInterface.Overseer.AutopilotOverseer;
+import TestbedAutopilotInterface.Overseer.DeliveryPackage;
+import TestbedAutopilotInterface.SimulationSetup.AirportSpec;
+import TestbedAutopilotInterface.SimulationSetup.DroneSpec;
+import TestbedAutopilotInterface.SimulationSetup.SimulationEnvironment;
+import TestbedAutopilotInterface.SimulationSetup.SimulationGen;
 import internal.Helper.Vector;
 
 import java.util.ArrayList;
@@ -6,6 +12,7 @@ import java.util.List;
 import java.util.Set;
 
 import static java.lang.Math.PI;
+import static java.lang.Math.signum;
 
 /**
  * Created by Martijn on 31/03/2018.
@@ -14,13 +21,20 @@ import static java.lang.Math.PI;
 public class PhaseFourMain {
 
     public static void main(String[] args){
-        //create the server (will automatically initialize the gui
-        TestbedServer testBedServer = new TestbedServer(timeStep, stepsPerCycle, stepsPerSubCycle, nbDrones, tcpPort, getAirportSpecs(), getDronesSpecs());
+        //create a simulation generator
+        SimulationGen generator = new SimulationGen(worldXSize, worldZSize, nbDrones, nbAirports, nbPackages);
+        //create the simulation environment
+        SimulationEnvironment environment = generator.generateGridWorld(gridWorldRows, gridworldColumns);
+        //print the environment
+        System.out.println(SimulationGen.environmentToString(environment));
+        //generate the overseer
+        AutopilotOverseer overseer = SimulationGen.generateOverseer(environment);
+        //create the server
+        TestbedServer testbedServer = generator.generateTestbedServer(environment, overseer);
+        //create the autopilot initializer
         AutopilotInitializer initializer = new AutopilotInitializer(host, tcpPort, nbDrones);
-        //create the overseer
-        AutopilotOverseer overseer = new AutopilotOverseer();
-        //run the server
-        Thread serverThread = new Thread(testBedServer);
+        //run server (will also initiate gui
+        Thread serverThread = new Thread(testbedServer);
         serverThread.start();
         //run the initializer
         initializer.initialize(overseer);
@@ -138,12 +152,20 @@ public class PhaseFourMain {
         return droneSpecs;
     }
 
+    //specify world parameters
+    private static float worldXSize = 5000;
+    private static float worldZSize = 5000;
+    private static int nbDrones = 2;
+    private static int nbAirports = 6;
+    private static int nbPackages = 9;
+    private static int gridWorldRows = 2;
+    private static int gridworldColumns = 3;
     //TODO add/implement the packages
     private static Set<DeliveryPackage> getDeliveries(){
         return null;
     }
 
-    private static int nbDrones = 2;
+
     private static int stepsPerCycle = 50;
     private static int stepsPerSubCycle = 10;
     private static float timeStep = 0.001f;

@@ -2,7 +2,7 @@ package internal.Testbed;
 
 import AutopilotInterfaces.AutopilotConfig;
 import AutopilotInterfaces.AutopilotOutputs;
-import TestbedAutopilotInterface.DroneSpec;
+import TestbedAutopilotInterface.SimulationSetup.DroneSpec;
 import internal.Helper.Vector;
 import internal.Physics.PhysXEngine;
 

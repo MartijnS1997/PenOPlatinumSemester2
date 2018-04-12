@@ -3,21 +3,14 @@ package internal.Testbed;
 
 import java.io.IOException;
 import java.lang.Math;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.concurrent.Callable;
 
 import AutopilotInterfaces.AutopilotConfig;
 import AutopilotInterfaces.AutopilotOutputs;
-import TestbedAutopilotInterface.DeliveryPackage;
-import gui.GraphicsObjects.Cube;
-import gui.GraphicsObjects.GraphicsObject;
-import gui.GraphicsObjects.Wheel;
-import gui.GraphicsObjects.Polygon;
+import TestbedAutopilotInterface.Overseer.DeliveryPackage;
 import internal.Physics.PhysXEngine;
 import internal.Physics.PhysicsEngineState;
 import internal.Helper.Vector;
-import math.Vector3f;
 
 /**
  * @author Anthony Rathé & MartijnSauwens & Bart

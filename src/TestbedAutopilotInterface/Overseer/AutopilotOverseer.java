@@ -1,10 +1,11 @@
-package TestbedAutopilotInterface;
+package TestbedAutopilotInterface.Overseer;
 
 import AutopilotInterfaces.*;
 import internal.Autopilot.AutoPilot;
 import internal.Helper.Vector;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.stream.Collectors;
 
 //TODO to notify the threads that they need to deliver a new package, we need a queue for each connection to communicate with
 //sequence:
@@ -15,32 +16,120 @@ import java.util.concurrent.*;
 //TODO assign the packages to the drones, shared List with the world of all the packages that need to be delivered
 //TODO check if drones have crashed during the simulation, delete them if needed
 //--> the overseer must set the assigned drone
+//TODO also add the overseer to the world so it can read the set of packages that are pending
 /**
  * Created by Martijn on 27/03/2018.
  * A class of autopilot overseers to coordinate correct interaction between the drones
  */
-public class AutopilotOverseer implements AutopilotModule, Callable<Void> {
+public class AutopilotOverseer implements AutopilotModule, Callable<Void>, PackageService {
 
     /**
      * Constructor for an autopilot overseer used to coordinate all the autopilots
      */
-    public AutopilotOverseer() {
+    public AutopilotOverseer(int initNbOfAutopilots) {
         //Bartje is overseer??
-
-        //all we must do is periodically check if there is any drone without any packages to deliver
-        //if so we start the search for package allocation
-        //TODO implement the calling for the delivery planner and allocate the packages
-        //TODO implement mechanism to periodically check for empty drone queues
+        this.initNbOfAutopilots = initNbOfAutopilots;
     }
 
+    //all we must do is periodically check if there is any drone without any packages to deliver
+    //if so we start the search for package allocation
+    //TODO implement the calling for the delivery planner and allocate the packages
+    //TODO implement mechanism to periodically check for empty drone queues
+    //note we only support single package submission for now (may be added later)
     /**
-     * Mainloop of the overseer
+     * Main loop of the overseer
      * @return absolutely nothing
      * @throws Exception
      */
     @Override
     public Void call() throws Exception {
+        //for now a single call to deliver the packages will suffice
+        this.deliverPackages();
         return null;
+    }
+
+    /**
+     * Assigns all the packages that are currently in the delivery buffer
+     * to the currently active autopilots
+     */
+    private void deliverPackages(){
+        //get the buffer
+        Set<DeliveryPackage> packages = this.getUnassignedPackages();
+        //also the airport map
+        OverseerAirportMap airportMap = this.getAirportMap();
+        //and also a a copy of the positions of the drone
+        Map<String, Vector> dronePositions = this.getAutopilotPositions();
+        //create the new delivery search
+        DeliveryPlanning planning = new DeliveryPlanning(packages, airportMap, dronePositions);
+
+        //call the planner (for now no new thread will be used)
+        Map<String, List<DeliveryPackage>> deliveryScheme =  planning.call();
+        assignDeliveriesToQueue(deliveryScheme);
+
+        //add all the buffered packages to the pending package set
+        this.addPackagesToDeliver(packages);
+        //clear the buffer (otherwise we will resubmit the same deliveries)
+        packages.clear();
+
+        //after this we're done
+    }
+
+    /**
+     * Assigns the given delivery scheme to the delivery queues of the autopilots managed by the overseer
+     * @param deliveryScheme the scheme found by the planner, now to be set as the actual delivery scheme for
+     *                       the autopilots
+     */
+    private void assignDeliveriesToQueue(Map<String, List<DeliveryPackage>> deliveryScheme) {
+        //assign the delivery planning to the drones
+        Map<String, ConcurrentLinkedQueue<DeliveryPackage>> deliveryRequests = this.getDeliveryRequests();
+        for(String droneID: deliveryScheme.keySet()){
+            //add the deliveries sequentially to the queue (so we maintain the order)
+            ConcurrentLinkedQueue<DeliveryPackage> droneDeliveryQueue = deliveryRequests.get(droneID);
+            List<DeliveryPackage> droneDeliveryScheme = deliveryScheme.get(droneID);
+
+            for(DeliveryPackage delivery: droneDeliveryScheme){
+                delivery.setDeliveryDroneID(droneID);
+                droneDeliveryQueue.add(delivery);
+            }
+        }
+    }
+
+    /**
+     * Getter for the positions of the active autopilots, copies the map of inputs maintained by the autopilots
+     * into a map with as key the drone ID and as value the current position of that drone
+     * This method is also synchronized so no changes can be made to the map during the copying
+     * after that we can use the copy to start the package distribution
+     * @return a map with as key the id of the drone and as value the position of the drone linked to the ID
+     */
+    private synchronized Map<String, Vector> getAutopilotPositions(){
+        Map<String, AutopilotInputs_v2> activeAutopilots = this.getActiveAutopilots();
+        Map<String, Vector> autopilotPositions = new HashMap<>();
+        for(String droneID: activeAutopilots.keySet()){
+            //first get the inputs associated with the ID
+            AutopilotInputs_v2 inputs = activeAutopilots.get(droneID);
+            //then extract the inputs
+            Vector position = extractPosition(inputs);
+            //then put the positions in the map
+            autopilotPositions.put(droneID, position);
+        }
+        //return the map
+        return autopilotPositions;
+    }
+
+    /**
+     * Gets all the unassigned packages currently in the to deliver set
+     * --> call may be synchronized in future to be absolutely sure that no packages were added while
+     *     scanning for unassigned ones
+     * @return a set of all the packages that do not have a drone assigned to deliver them
+     */
+    private synchronized Set<DeliveryPackage> getUnassignedPackages(){
+        Set<DeliveryPackage> allPackages = this.getPackagesToDeliver();
+        //filter for all the packages that have no drone assigned yet to deliver them
+        Set<DeliveryPackage> unassignedPackages =  allPackages.stream()
+                                                   .filter(delivery -> delivery.getDeliveryDroneID() == null)
+                                                   .collect(Collectors.toSet());
+        //return that set
+        return unassignedPackages;
     }
 
     /**
@@ -113,10 +202,10 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void> {
      * @param toGate the destination gate for the package
      */
     @Override
-    public void deliverPackage(int fromAirport, int fromGate, int toAirport, int toGate) {
+    public synchronized void deliverPackage(int fromAirport, int fromGate, int toAirport, int toGate) {
         //create the package
         DeliveryPackage delivery = new DeliveryPackage(fromAirport, fromGate, toAirport, toGate);
-        this.addDeliveryToBuffer(delivery);
+        this.addPackageToDeliver(delivery);
     }
 
     /**
@@ -307,21 +396,77 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void> {
         return airportMap;
     }
 
+
     /**
-     * Getter for the buffer containing all the packages that are not assigned to any drone
-     * @return a set of delivery packages (the packages that still need to be assigned to a drone)
+     * Getter for all the packages that have been assigned to be delivered by a certain drone
+     * @return the set of all packages that need to be delievered
      */
-    private Set<DeliveryPackage> getPackageBuffer() {
-        return packageBuffer;
+    @Override
+    public synchronized Set<DeliveryPackage> getAssignedPackages() {
+        //get the set of all the packages
+        Set<DeliveryPackage> packagesToDeliver = this.getPackagesToDeliver();
+        //get all the packages that have drone assigned to deliver them
+        Set<DeliveryPackage> assignedPackages = packagesToDeliver.stream()
+                                                .filter(delivery -> delivery.getDeliveryDroneID() != null)
+                                                .collect(Collectors.toSet());
+        return assignedPackages;
+    }
+
+    @Override
+    public synchronized Set<DeliveryPackage> getAllUndeliveredPackages() {
+        Set<DeliveryPackage> packagesToDeliver = this.getPackagesToDeliver();
+        //get all the packages that need to be delivered
+        Set<DeliveryPackage> undelivered = packagesToDeliver.stream()
+                .filter(delivery -> !delivery.isDelivered())
+                .collect(Collectors.toSet());
+
+        return undelivered;
+    }
+
+    @Override
+    public synchronized Set<DeliveryPackage> getAllUndeliveredAssignedPackages() {
+        Set<DeliveryPackage> packagesToDeliver = this.getPackagesToDeliver();
+        //get all the packages that have drone assigned and need to be delivered
+        Set<DeliveryPackage> assignedAndUndeliveredPackages = packagesToDeliver.stream()
+                .filter(delivery -> delivery.getDeliveryDroneID() != null&&!delivery.isDelivered())
+                .collect(Collectors.toSet());
+        return assignedAndUndeliveredPackages;
     }
 
     /**
-     * Add the specified delivery to the buffer
-     * @param deliveryPackage the package to add to the buffer
+     * Getter for the set that contains all the packages that are yet to be delivered by the drones
+     * this set is shared by the world such that it knows which drone belongs to which package & so it
+     * can check for delivery
+     * @return the packages pending to be delivered
      */
-    private void addDeliveryToBuffer(DeliveryPackage deliveryPackage){
-        Set<DeliveryPackage> buffer = this.getPackageBuffer();
-        packageBuffer.add(deliveryPackage);
+    @Override
+    public Set<DeliveryPackage> getPackagesToDeliver() {
+        return packagesToDeliver;
+    }
+
+    /**
+     * Adds extra pending packages to the already existing set of pending packages
+     * @param packages the packages to be added to the pending set
+     */
+    private void addPackagesToDeliver(Set<DeliveryPackage> packages) {
+        this.packagesToDeliver.addAll(packages);
+    }
+
+    /**
+     * Adds the specified package to the packages to deliver queue
+     * @param delivery the delivery to add to the set
+     */
+    private void addPackageToDeliver(DeliveryPackage delivery){
+        this.getPackagesToDeliver().add(delivery);
+    }
+
+    /**
+     * Getter for the number of autopilots that area added to the world upon initialization
+     * we use this to check for package allocation
+     * @return the number of autopilots initially in the world
+     */
+    private int getInitNbOfAutopilots() {
+        return initNbOfAutopilots;
     }
 
     /**
@@ -329,6 +474,11 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void> {
      * String contains the ID and inputs the current inputs of the autopilot
      */
     private ConcurrentMap<String, AutopilotInputs_v2> activeAutopilots = new ConcurrentHashMap<>();
+
+    /**
+     * Getter for the number of autopilots that are active upon creation of the world
+     */
+    private int initNbOfAutopilots;
 
     /**
      * A map used to store the all the request made to the overseer, the autopilots can query for their requests
@@ -348,10 +498,11 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void> {
     private OverseerAirportMap airportMap;
 
     /**
-     * The buffer used to store packages until one drone has no packages to deliver, then we start the search and
-     * allocate them all to the drones
+     * The packages that are submitted by the overseer to the drones to deliver but are not delivered yet
+     * this set is shared with the world of the simulation environment such that it knows which package
+     * needs to be delivered by which drone
      */
-    private Set<DeliveryPackage> packageBuffer = new HashSet<>();
+    private Set<DeliveryPackage> packagesToDeliver = new HashSet<>();
 
     /**
      * The base altitude to assign to the drones (incremented from here)

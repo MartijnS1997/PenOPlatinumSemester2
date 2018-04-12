@@ -1,4 +1,4 @@
-package TestbedAutopilotInterface;
+package TestbedAutopilotInterface.GUI;
 
 import java.util.Map;
 import java.util.Set;

@@ -1,9 +1,13 @@
 package TestbedAutopilotInterface;
 
 
+import TestbedAutopilotInterface.GUI.GUIQueueElement;
+import TestbedAutopilotInterface.GUI.TestbedGUI;
+import TestbedAutopilotInterface.Overseer.PackageService;
+import TestbedAutopilotInterface.SimulationSetup.AirportSpec;
+import TestbedAutopilotInterface.SimulationSetup.DroneSpec;
 import internal.Exceptions.AngleOfAttackException;
 import internal.Exceptions.SimulationEndedException;
-import internal.Helper.Vector;
 import internal.Testbed.Drone;
 import internal.Testbed.World;
 import internal.Testbed.WorldBuilder_v2;
@@ -11,7 +15,6 @@ import internal.Testbed.WorldBuilder_v2;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.time.Clock;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
@@ -36,8 +39,7 @@ import java.util.stream.Collectors;
 //note on threads: at the start of the connection all the Testbed threads are created and a thread pool to accompany them
 //they are used for communication only and are re-used each execution cycle
 //note: the server operates on port 4242 (TCP) on "localhost" (IP)
-//TODO implement the queue server side and set some placement restrictions on the nb of elements that will be placed
-//TODO in the queue (so there is no gigantic impedance mismatch if the server goes full overdrive)
+
 public class TestbedServer implements Runnable {
 
     /**
@@ -49,14 +51,32 @@ public class TestbedServer implements Runnable {
      * @param airports the airports to be set in the world, the first entry of the vector is the location
      *                 and the second is the heading vector of runway zero
      */
-    public TestbedServer(float timeStep, int stepsPerCycle, int stepsPerSubCycle, int maxNbThreads, int tcpPort, List<AirportSpec> airports, List<DroneSpec> drones) {
+    public TestbedServer(float timeStep, int stepsPerCycle, int stepsPerSubCycle, int maxNbThreads, int tcpPort,
+                         PackageService packageService, List<AirportSpec> airports, List<DroneSpec> drones) {
         this.timeStep = timeStep;
         this.stepsPerCycle = stepsPerCycle;
         this.stepsPerSubCycle = stepsPerSubCycle;
         this.maxNbOfThreads = maxNbThreads;
         this.tcpPort = tcpPort;
+        this.packageService = packageService;
         this.airportSpecs = airports;
         this.droneSpecs = drones;
+    }
+
+    /**
+     * Constructor for a testbed server used for compact initialization, has exactly the same effect
+     * as constructing with the expanded testbed server
+     * @param config the configuration for the server (see interface documentation for more)
+     */
+    public TestbedServer(TestbedServerConfig config){
+        this.timeStep = config.getTimeStep();
+        this.stepsPerCycle = config.getStepsPerCycle();
+        this.stepsPerSubCycle = config.getStepsPerSubCycle();
+        this.maxNbOfThreads = config.getMaxNbThreads();
+        this.tcpPort = config.getTcpPort();
+        this.packageService = config.getPackageService();
+        this.airportSpecs = config.getAirportSpecifications();
+        this.droneSpecs = config.getDroneSpecifications();
     }
 
     /**
@@ -103,7 +123,7 @@ public class TestbedServer implements Runnable {
                 e.printStackTrace();
             }
 
-            System.out.println("next iteration");
+//            System.out.println("next iteration");
 
         }
     }
@@ -122,7 +142,7 @@ public class TestbedServer implements Runnable {
         long start = System.currentTimeMillis();
         advanceWorld();
         long end = System.currentTimeMillis();
-        System.out.println("Elapsed time: " + (end - start) + "millis");
+//        System.out.println("Elapsed time: " + (end - start) + "millis");
         //once the world is advanced, we are finished here
     }
 
@@ -166,7 +186,7 @@ public class TestbedServer implements Runnable {
         world.advanceWorldState(timeStep, stepsPerCycle, stepsPerSubCycle);
         //increment the time that was simulated
         this.incrementElapsedTime();
-        System.out.println(world.toString());
+//        System.out.println(world.toString());
         //communicate the new world state with the GUI
         addFrameToGuiQueue();
     }
@@ -197,14 +217,12 @@ public class TestbedServer implements Runnable {
         //extract the queue element from the world
         World world = this.getWorld();
         GUIQueueElement newFrame = world.getGuiElements();
-        System.out.println("drone states: " + newFrame.getDroneStates());
+//        System.out.println("drone states: " + newFrame.getDroneStates());
         //insert the frame into the queue
         renderQueue.add(newFrame);
         //check if the queue size is smaller than the maximum allowed, if not, wait
         while(renderQueue.size() > MAX_FRAMES_AHEAD){
-//            GUIQueueElement[] rendererArray =  renderQueue.toArray(new GUIQueueElement[0]);
-//            for(int index = 0; index != rendererArray.length; index++)
-//                System.out.print(rendererArray[index].getDroneStates()+" ");
+//
             //if not, sleep for the time one frame needs to be rendered
             try {
                 float sleepTime = this.getTimeStep()*this.getStepsPerCycle()*1000f; // the times 1000 for converting to millis
@@ -212,6 +230,7 @@ public class TestbedServer implements Runnable {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+
         }
     }
 
@@ -244,7 +263,7 @@ public class TestbedServer implements Runnable {
     private void initThreads() {
         ExecutorService threadPool = Executors.newFixedThreadPool(this.getMaxNbOfThreads());
         //set the thread pool
-        System.out.println(threadPool);
+//        System.out.println(threadPool);
         this.setThreadPool(threadPool);
     }
 
@@ -260,13 +279,14 @@ public class TestbedServer implements Runnable {
     /**
      * Initializer for the world that needs to be simulated by the server
      */
-    // Todo implement the world initializer, first cleanup the world and drone builder
     // note: the amount of created drones is equal to the number of connections we can make
     private void initWorld(){
         List<AirportSpec> airportSpecs = this.getAirportSpecs();
+        System.out.println("nb Airports: " + airportSpecs.size());
         List<DroneSpec> droneSpecs = this.getDroneSpecs();
+        PackageService packageService = this.getPackageService();
         WorldBuilder_v2 builder = new WorldBuilder_v2();
-        World world = builder.createMultiDroneWorld(this.getThreadPool(), droneSpecs, airportSpecs);
+        World world = builder.createMultiDroneWorld(this.getThreadPool(), packageService, droneSpecs, airportSpecs);
         //add the airport
         this.setWorld(world);
         //send the newly created world to the GUI
@@ -339,6 +359,14 @@ public class TestbedServer implements Runnable {
     }
 
     /**
+     * Getter for the package service to be used by the world that is simulated by the testbed
+     * @return a package service used by the world
+     */
+    private PackageService getPackageService() {
+        return packageService;
+    }
+
+    /**
      * Getter for the specifications of the airports to be added to the world
      * @return a list containing the specifications of the airports to be added
      */
@@ -402,6 +430,11 @@ public class TestbedServer implements Runnable {
      * Object that stores the world that will be simulated
      */
     private World world;
+
+    /**
+     * The package service to be used by the world
+     */
+    private PackageService packageService;
 
     /**
      * The specifications of the airports to be added to the world
@@ -575,7 +608,7 @@ public class TestbedServer implements Runnable {
      * The amount of frames the testbed may go ahead of the renderer before issuing a pause, this
      * prevents the queue from becoming to large
      */
-    private final static int MAX_FRAMES_AHEAD = 600;
+    private final static int MAX_FRAMES_AHEAD = 1000; //gives approx of 100mb data on heap --> gui utilizes about 150mb so seems fair
 
     /*
     Message strings
@@ -583,6 +616,69 @@ public class TestbedServer implements Runnable {
     private static final String INVALID_SERVER_SOCKET = "Invalid server socket, provided socket is null reference or the server socket is already initialized";
     private static final String INVALID_THREAD_POOL = "Invalid thread pool, thread pool is already initialized or the provided pool is a null reference";
 
+
+//    float timeStep, int stepsPerCycle, int stepsPerSubCycle, int maxNbThreads, int tcpPort,
+//    PackageService packageService, List<AirportSpec> airports, List<DroneSpec> drones)
+
+    /**
+     * An interface used for configuring the server
+     */
+    public interface TestbedServerConfig{
+
+        /**
+         * Getter for the TCP port to be used by the server
+         * @return the tcp port to be used by the server
+         */
+        int getTcpPort();
+
+        /**
+         * Getter for the number of steps that will be used for a single simulation cycle
+         * one cycle is a full round trip from simulating the next state to receiving the new inputs from the
+         * autopilots
+         * @return int with the number of steps to be used per cycle
+         */
+        int getStepsPerCycle();
+
+        /**
+         * Getter for the number of steps there are made for a single sub cycle
+         * during a sub cycle no checks are performed on the drones to check if they have crashed or
+         * delivered a package
+         * @return the number of sub steps per cycle (integer)
+         */
+        int getStepsPerSubCycle();
+
+        /**
+         * Getter for the time step to be used by the server while simulating the testbed
+         * @return float indicating the simulation step time in seconds
+         */
+        float getTimeStep();
+
+        /**
+         * Getter for the maximum number of threads to be employed by the server
+         * @return the max nb of threads
+         */
+        int getMaxNbThreads();
+
+        /**
+         * Getter for the package service to be used by the world that is simulated by the server
+         * @return a package service object, will be used by the world
+         */
+        PackageService getPackageService();
+
+        /**
+         * Getter for the drone specifications,
+         * these specifications will be used for generating the world
+         * @return a list of dronespec objects for configuring the world
+         */
+        List<DroneSpec> getDroneSpecifications();
+
+        /**
+         * Getter for the airport specifications
+         * these specifications will be used to generate the airports in the world
+         * @return a list of airport specifications to be used while generating the world
+         */
+        List<AirportSpec> getAirportSpecifications();
+    }
 
 }
 

@@ -1,7 +1,7 @@
 package tests;
 
 import AutopilotInterfaces.AutopilotInputs_v2;
-import TestbedAutopilotInterface.*;
+import TestbedAutopilotInterface.Overseer.*;
 import internal.Helper.Vector;
 import org.junit.Test;
 
@@ -17,7 +17,7 @@ public class searchTests {
     public void testSearch() throws Exception {
         //generate the airports
         OverseerAirportMap airportMap = generateAirportMap();
-        Map<String, AutopilotInputs_v2> drones = generateDrones(airportMap);
+        Map<String, Vector> drones = generateDrones(airportMap);
         Set<DeliveryPackage> packages = generateDeliveries(airportMap,0);
 
         //print the airport map
@@ -42,9 +42,9 @@ public class searchTests {
 
     }
 
-    private void printSchedule(Map<String, List<DeliveryPackage>> schedule, OverseerAirportMap airportMap, Map<String, AutopilotInputs_v2> drones){
+    private void printSchedule(Map<String, List<DeliveryPackage>> schedule, OverseerAirportMap airportMap, Map<String, Vector> drones){
         for(String droneID : schedule.keySet()){
-            System.out.println("Current Drone: " + droneID + ", Start: " + AutopilotOverseer.extractPosition(drones.get(droneID)));
+            System.out.println("Current Drone: " + droneID + ", Start: " + drones.get(droneID));
             System.out.println();
             //get the delivery list
             List<DeliveryPackage> deliveryPackages = schedule.get(droneID);
@@ -63,148 +63,22 @@ public class searchTests {
         }
     }
 
-    private static Map<String, AutopilotInputs_v2> generateDrones(OverseerAirportMap airportMap){
+    private static Map<String, Vector> generateDrones(OverseerAirportMap airportMap){
         //we only need two drones located at two airports
-        Map<String, AutopilotInputs_v2> drones = new HashMap<>();
+        Map<String, Vector> drones = new HashMap<>();
         //create the first drone
         MapAirport airport = airportMap.getAirport(0);
         Vector location1 = airport.getLocation();
-        AutopilotInputs_v2 inputsDrone1 = new AutopilotInputs_v2() {
-            @Override
-            public byte[] getImage() {
-                return new byte[0];
-            }
-
-            @Override
-            public float getX() {
-                return location1.getxValue();
-            }
-
-            @Override
-            public float getY() {
-                return location1.getyValue();
-            }
-
-            @Override
-            public float getZ() {
-                return location1.getzValue();
-            }
-
-            @Override
-            public float getHeading() {
-                return 0;
-            }
-
-            @Override
-            public float getPitch() {
-                return 0;
-            }
-
-            @Override
-            public float getRoll() {
-                return 0;
-            }
-
-            @Override
-            public float getElapsedTime() {
-                return 0;
-            }
-        };
 
         airport = airportMap.getAirport(6);
         Vector location2 = airport.getLocation();
 
-
         airport = airportMap.getAirport(15);
         Vector location3 = airport.getLocation();
 
-        AutopilotInputs_v2 inputsDrone2 = new AutopilotInputs_v2() {
-            @Override
-            public byte[] getImage() {
-                return new byte[0];
-            }
-
-            @Override
-            public float getX() {
-                return location2.getxValue();
-            }
-
-            @Override
-            public float getY() {
-                return location2.getyValue();
-            }
-
-            @Override
-            public float getZ() {
-                return location2.getzValue();
-            }
-
-            @Override
-            public float getHeading() {
-                return 0;
-            }
-
-            @Override
-            public float getPitch() {
-                return 0;
-            }
-
-            @Override
-            public float getRoll() {
-                return 0;
-            }
-
-            @Override
-            public float getElapsedTime() {
-                return 0;
-            }
-        };
-
-        AutopilotInputs_v2 inputsDrone3 = new AutopilotInputs_v2() {
-            @Override
-            public byte[] getImage() {
-                return new byte[0];
-            }
-
-            @Override
-            public float getX() {
-                return location3.getxValue();
-            }
-
-            @Override
-            public float getY() {
-                return location3.getyValue();
-            }
-
-            @Override
-            public float getZ() {
-                return location3.getzValue();
-            }
-
-            @Override
-            public float getHeading() {
-                return 0;
-            }
-
-            @Override
-            public float getPitch() {
-                return 0;
-            }
-
-            @Override
-            public float getRoll() {
-                return 0;
-            }
-
-            @Override
-            public float getElapsedTime() {
-                return 0;
-            }
-        };
-
-        drones.put("0", inputsDrone1);
-        drones.put("1", inputsDrone2);
-        drones.put("2", inputsDrone3);
+        drones.put("0", location1);
+        drones.put("1", location2);
+        drones.put("2", location3);
 
         return drones;
     }

@@ -1,9 +1,8 @@
 package gui.WorldObjects;
 
-import TestbedAutopilotInterface.DroneGuiState;
+import TestbedAutopilotInterface.GUI.DroneGuiState;
 import gui.GraphicsObjects.Cube;
 import gui.GraphicsObjects.GraphicsObject;
-import gui.GraphicsObjects.Polygon;
 import gui.GraphicsObjects.Wheel;
 import math.Vector3f;
 

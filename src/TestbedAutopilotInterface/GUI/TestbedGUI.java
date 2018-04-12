@@ -1,6 +1,5 @@
-package TestbedAutopilotInterface;
+package TestbedAutopilotInterface.GUI;
 
-import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
 import gui.GraphicsObjects.Cube;
 import gui.GraphicsObjects.Tile;
 import gui.GraphicsObjects.Wheel;
@@ -13,7 +12,6 @@ import math.Vector3f;
 import org.lwjgl.glfw.GLFWVidMode;
 
 import java.io.IOException;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static org.lwjgl.glfw.GLFW.glfwGetPrimaryMonitor;

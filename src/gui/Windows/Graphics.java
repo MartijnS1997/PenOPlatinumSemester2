@@ -16,13 +16,11 @@ import static org.lwjgl.glfw.GLFW.glfwTerminate;
 import static org.lwjgl.glfw.GLFW.glfwWindowHint;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
-import TestbedAutopilotInterface.DroneGuiState;
 import gui.GraphicsObjects.GraphicsObject;
 import gui.WorldObjects.Drone;
 import org.lwjgl.glfw.GLFWErrorCallback;
 
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 
 public class Graphics {

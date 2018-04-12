@@ -1,6 +1,5 @@
 package gui.Windows;
 
-import TestbedAutopilotInterface.DroneGuiState;
 import gui.GL.ShaderProgram;
 import gui.GraphicsObjects.*;
 import gui.IO.Input;

@@ -1,6 +1,5 @@
-package TestbedAutopilotInterface;
+package TestbedAutopilotInterface.Overseer;
 
-import AutopilotInterfaces.AutopilotInputs_v2;
 import internal.Helper.Vector;
 
 import java.util.*;
@@ -18,10 +17,15 @@ public class DeliveryPlanning implements Callable<Map<String, List<DeliveryPacka
 
 
 
-    //Todo add a method to resume search based on the current assigned deliveries
-    //--> maybe clear the heuristic values of the drones? (case where we have an idle drone)
-    //--> we can re-init root based on the queues that are currently present in the overseer
-    //    and re calculate the heuristic values
+    //Todo implement resuming calculations for package delivery
+    //each drone should maintain the queues that it already has
+    //but we must construct the root each time we calculate for next state --> so add function
+    //to add the current package distribution (not the calculated) to the drones
+
+    //Todo clear queue after calculation (or remove queue altogether)
+    //--> maybe we can limit the search to the last N-layers? we now just go straight trough all the packages
+    //maybe keep the N-best nodes in the queue and only take the goal node if its value is the best of all the nodes
+    //in the queue
 
     /**
      * Constructor for a delivery planning, implements search to find a good/optimal delivery allocation for the
@@ -31,7 +35,7 @@ public class DeliveryPlanning implements Callable<Map<String, List<DeliveryPacka
      * @param activeDrones a map containing the drone ID's as keys and the current location as values
      */
     public DeliveryPlanning(Collection<DeliveryPackage> deliveryPackages,
-                            OverseerAirportMap airportMap, Map<String, AutopilotInputs_v2> activeDrones){
+                            OverseerAirportMap airportMap, Map<String, Vector> activeDrones){
 
         //first add the packages and overseer map to the instance
         this.airportMap = airportMap;
@@ -44,6 +48,8 @@ public class DeliveryPlanning implements Callable<Map<String, List<DeliveryPacka
      * adds the the provided packages to the search queue, when the delivery planning is called again we will resume
      * the search with the packages added (previous allocations aren't changed because we want to service the previous
      * submitted packages first)
+     * note: when resuming the search we implicitly assume that the drones are at the locations assigned
+     * to them at the end of the search
      * @param packages a collection of packages to add
      */
     public void addPackages(Collection<DeliveryPackage> packages){
@@ -62,7 +68,7 @@ public class DeliveryPlanning implements Callable<Map<String, List<DeliveryPacka
     }
 
     @Override
-    public Map<String, List<DeliveryPackage>> call() throws Exception {
+    public Map<String, List<DeliveryPackage>> call(){
         return initSearch();
     }
 
@@ -141,18 +147,16 @@ public class DeliveryPlanning implements Callable<Map<String, List<DeliveryPacka
 
     /**
      * Initializes the root node by adding all the drones that are currently active in the overseer
-     * @param activeDrones a map with key the id of the drone and value the current state
+     * @param dronePositions a map with key the id of the drone and value the current state
      */
-    private void initRoot(Map<String, AutopilotInputs_v2> activeDrones){
+    private void initRoot(Map<String, Vector> dronePositions){
         //create a map to put the newly generated drones in
         Map<String, DeliveryDrone> drones  = new HashMap<>();
 
         //then iterate trough all the entries and generate the delivery drones
-        for(String droneID: activeDrones.keySet()){
+        for(String droneID: dronePositions.keySet()){
             //get the inputs associated with the drone
-            AutopilotInputs_v2 inputs = activeDrones.get(droneID);
-            //extract the position from the inputs
-            Vector position = AutopilotOverseer.extractPosition(inputs);
+            Vector position = dronePositions.get(droneID);
             //create the drone
             DeliveryDrone deliveryDrone = new DeliveryDrone(position, droneID);
             //add to the drone map

@@ -11,7 +11,6 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SpringLayout;
 
-import TestbedAutopilotInterface.DroneGuiState;
 import gui.WorldObjects.Drone;
 import math.Vector3f;
 

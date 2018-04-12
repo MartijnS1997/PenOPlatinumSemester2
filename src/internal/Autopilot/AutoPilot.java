@@ -3,7 +3,7 @@ package internal.Autopilot;
 
 import AutopilotInterfaces.*;
 import AutopilotInterfaces.Path;
-import TestbedAutopilotInterface.AutopilotOverseer;
+import TestbedAutopilotInterface.Overseer.AutopilotOverseer;
 import internal.Helper.Vector;
 import internal.Physics.PhysXEngine;
 

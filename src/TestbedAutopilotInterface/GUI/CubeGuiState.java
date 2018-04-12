@@ -1,4 +1,4 @@
-package TestbedAutopilotInterface;
+package TestbedAutopilotInterface.GUI;
 
 import internal.Helper.Vector;
 
@@ -19,7 +19,7 @@ public interface CubeGuiState {
 
 //    /**
 //     * Getter for the color of the cubes
-//     * @return a vector containing the HSV color values of the cube (H, S, V)
+//     * @return a vector containing the HSV color values of the cube (H, AIRPORT_FIT_EXCEPTION, V)
 //     */
 //    Vector getHSVColor();
 }
