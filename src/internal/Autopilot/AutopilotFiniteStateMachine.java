@@ -131,11 +131,12 @@ public class AutopilotFiniteStateMachine {
     }
 
     /**
-     * Advances the finite state machine to the next state (may the same one as before)
+     * Advances the finite state machine to the next state (may be the same one as before)
      * while setting the right parameters for each controller
      * @param inputs the inputs to base the configuration on
      * @return the state that needs to be active to generate the next outputs
      * note: may change the configuration of the controllers during the method call (eg targets may be changed)
+     * note: usecase --> should be called every iteration to get the next state
      */
     private AutopilotState toNextState(AutopilotInputs_v2 inputs){
         //get the next state needed by the controller
@@ -239,6 +240,7 @@ public class AutopilotFiniteStateMachine {
     /**
      * Getter for the state that is the next in the row for the finite state machine, does only provide
      * the state that follows the provided state. Does not determine what the next state should be
+     * --> only for reference
      * @param state the state to find the successor for
      * @return the state that succeeds the provided state
      */

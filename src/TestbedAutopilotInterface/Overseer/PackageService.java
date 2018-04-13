@@ -13,7 +13,7 @@ public interface PackageService {
      * Gets all the packages that need to be delivered by the package service
      * @return a Set of DeliveryPackages that need to be delivered
      */
-    Set<DeliveryPackage> getPackagesToDeliver();
+    Set<DeliveryPackage> getSubmittedPackages();
 
     /**
      * Getter for all the packages that have an assigned drone

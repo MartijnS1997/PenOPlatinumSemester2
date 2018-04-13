@@ -1,5 +1,6 @@
 package TestbedAutopilotInterface.Overseer;
 
+import com.sun.istack.internal.Nullable;
 import internal.Helper.Vector;
 
 import java.util.*;
@@ -9,23 +10,13 @@ import java.util.stream.Collectors;
 /**
  * Created by Martijn on 27/03/2018.
  * A planner for the package assignment of the drones
- * --> cost search with iterative deepening
- * --> in the first iteration of creating the algorithm we deepCopy ALL the drone state on every new node
- * --> first test: hill climbing 1 (no iterative deepening, first check if basics work)
+ * Proper way to use this class
+ * 1. create the planner
+ * 2. initialize the search with initSearch
+ * 3. execute the search with executeSearch
  */
-public class DeliveryPlanning implements Callable<Map<String, List<DeliveryPackage>>>{
+public class DeliveryPlanner implements Callable<Map<String, List<DeliveryPackage>>>{
 
-
-
-    //Todo implement resuming calculations for package delivery
-    //each drone should maintain the queues that it already has
-    //but we must construct the root each time we calculate for next state --> so add function
-    //to add the current package distribution (not the calculated) to the drones
-
-    //Todo clear queue after calculation (or remove queue altogether)
-    //--> maybe we can limit the search to the last N-layers? we now just go straight trough all the packages
-    //maybe keep the N-best nodes in the queue and only take the goal node if its value is the best of all the nodes
-    //in the queue
 
     /**
      * Constructor for a delivery planning, implements search to find a good/optimal delivery allocation for the
@@ -34,14 +25,110 @@ public class DeliveryPlanning implements Callable<Map<String, List<DeliveryPacka
      * @param airportMap the map containing all the airports of the overseer
      * @param activeDrones a map containing the drone ID's as keys and the current location as values
      */
-    public DeliveryPlanning(Collection<DeliveryPackage> deliveryPackages,
-                            OverseerAirportMap airportMap, Map<String, Vector> activeDrones){
+    @Deprecated
+    public DeliveryPlanner(Collection<DeliveryPackage> deliveryPackages,
+                           OverseerAirportMap airportMap, Map<String, Vector> activeDrones){
 
         //first add the packages and overseer map to the instance
         this.airportMap = airportMap;
-        this.deliveries = deliveryPackages;
         //then init the drones
-        initRoot(activeDrones);
+        DeliveryNode root = initRoot(activeDrones, deliveryPackages, null);
+        List<DeliveryNode> nodeQueue = this.getNodeQueue();
+        nodeQueue.add(root);
+    }
+
+    /**
+     * Constructor for a planner to create schedules to deliver the packages
+     * @param airportMap the map of the airports used to coordinate the package delivery
+     */
+    public DeliveryPlanner(OverseerAirportMap airportMap){
+        this.airportMap = airportMap;
+    }
+
+    /**
+     * Initializes the root node by adding all the drones that are currently active in the overseer
+     * @param dronePositions a map with key the id of the drone and value the current state
+     * @param unassignedPackages  the packages that have not yet been assigned to a drone
+     * @param undeliveredPackages the packages that have already been assigned to a drone but are not delivered yet
+     *                            is used to init a root for a search where the world is already in a certain state
+     */
+    private DeliveryNode initRoot(Map<String, Vector> dronePositions, Collection<DeliveryPackage> unassignedPackages,
+                                  @Nullable Map<String, List<DeliveryPackage>> undeliveredPackages){
+        //create a map to put the newly generated drones in
+        Map<String, DeliveryDrone> drones  = new HashMap<>();
+
+        //then iterate trough all the entries and generate the delivery drones
+        for(String droneID: dronePositions.keySet()){
+            //get the inputs associated with the drone
+            Vector position = dronePositions.get(droneID);
+            //create the drone
+            DeliveryDrone deliveryDrone = new DeliveryDrone(position, droneID);
+            //add to the drone map
+            drones.put(droneID, deliveryDrone);
+        }
+
+        //create the root of the search tree
+        DeliveryNode root = new DeliveryNode(drones,unassignedPackages);
+
+        //check if there is need for any pre-configuring
+        if(undeliveredPackages != null){
+            // then add all the undelivered packages to the drones
+            for(String droneID: undeliveredPackages.keySet()){
+                //get the undelivered (but assigned) packages for the drone
+                List<DeliveryPackage> undelivered = undeliveredPackages.get(droneID);
+                root.addDeliveriesToDrone(droneID, undelivered);
+            }
+        }
+
+        //add the root to the queue
+        return root;
+    }
+
+    /**
+     * Re initializes the root for the current state of the simulation
+     * the deliveries that are already assigned but are not yet delivered have to be set
+     * such that the search may correctly start, the deliveries that have yet to be assigned
+     * are added to the root as the delivery packages to assign for the search
+     * @param allDeliveries all the deliveries currently coordinated by the overseer
+     * @param activeDrones the active drones in the world, a key value map with as key the drone ID and the
+     *                     value the current position of the drone
+     * @param assignedPackages the packages that have already been assigned to a drone but are yet to be delivered
+     *                         the keys are the drone ID's and the corresponding values the packages that have
+     *                         to be delivered by the drones (used for re-initialization of the root)
+     */
+    public void initializeSearch(Collection<DeliveryPackage> allDeliveries, Map<String, List<DeliveryPackage>> assignedPackages,
+                                 Map<String, Vector> activeDrones){
+        //we need to go further with the previous assignment (modified with the current completed deliveries)
+        //get the unassigned deliveries
+        Set<DeliveryPackage> unassignedDeliveries = getUnassignedDeliveries(allDeliveries);
+        //generate the root node based on the unassigned and assigned but undelivered packages
+        DeliveryNode root = initRoot(activeDrones, unassignedDeliveries, assignedPackages);
+        //clear the queue and add the new root, we'll start anew from here
+        List<DeliveryNode> queue = this.getNodeQueue();
+        queue.clear();
+        queue.add(root);
+    }
+
+    /**
+     * extracts all the unassigned deliveries from the given collection
+     * @param allDeliveries a collection containing all the deliveries to be done
+     * @return a set containing only the deliveries whose deliveryDroneID is null;
+     */
+    private static Set<DeliveryPackage> getUnassignedDeliveries(Collection<DeliveryPackage> allDeliveries){
+        return allDeliveries.stream().
+                filter(delivery -> delivery.getDeliveryDroneID() == null). //filter for the unassigned packages
+                collect(Collectors.toSet());
+    }
+
+    /**
+     * Extracts all the assigned but undelivered packages from the given collection
+     * @param allDeliveries the collection to extract the undelivered assigned deliveries from
+     * @return a set only containing deliveries whose deliveryDroneID != null and where the isDelivered flag is false
+     */
+    private static Set<DeliveryPackage> getAssignedUndeliveredDeliveries(Collection<DeliveryPackage> allDeliveries){
+        return allDeliveries.stream().
+                filter(delivery -> delivery.getDeliveryDroneID() != null && !delivery.isDelivered()).
+                collect(Collectors.toSet());
     }
 
     /**
@@ -52,6 +139,7 @@ public class DeliveryPlanning implements Callable<Map<String, List<DeliveryPacka
      * to them at the end of the search
      * @param packages a collection of packages to add
      */
+    @Deprecated
     public void addPackages(Collection<DeliveryPackage> packages){
         //we need to clear the queue if we want to continue the search with the same previous allocation
         //of the packages
@@ -67,9 +155,39 @@ public class DeliveryPlanning implements Callable<Map<String, List<DeliveryPacka
         //we're done
     }
 
+    /**
+     * only used if the search would be located on a separate thread (which is not the case at the moment)
+     */
     @Override
     public Map<String, List<DeliveryPackage>> call(){
-        return hillClimbingSearch();
+        return executeSearch();
+    }
+
+    /**
+     * Generates a delivery scheme based on the root in the queue
+     * a scheme is a map containing a String for the drone ID and the value are the deliveries
+     * the drone corresponding to the ID should make
+     * @return A map containing the droneID's as keys and the corresponding deliveries as a list of delivery packages
+     * @throws IllegalStateException thrown if the queue does contain more than one element (thus no root)
+     */
+    public Map<String, List<DeliveryPackage>> executeSearch() throws IllegalStateException{
+        //first check if the queue only contains root
+        if(this.getNodeQueue().size() != 1){
+            throw new IllegalStateException("More nodes than root");
+        }
+        //get the algorithm to be used first
+        SearchAlgorithm searchAlgorithm = this.getSearchAlgorithm();
+        switch (searchAlgorithm){
+            case HILL_CLIMBING_1:
+                return hillClimbingSearch();
+            case TOTAL_COST:
+                return totalCostSearch();
+            case BEAM_SEARCH:
+                return beamSearch();
+            default:
+                //default case, normally wouldn't appear, but just in case, do beam search
+                return beamSearch();
+        }
     }
 
     /**
@@ -95,6 +213,8 @@ public class DeliveryPlanning implements Callable<Map<String, List<DeliveryPacka
         DeliveryNode goalNode = this.getFirstNode();
         //print the total time needed:
         System.out.println("\nDeliveryTime: "+ goalNode.getCostValue()+"\n");
+        //clear the queue we're currently using, after we've returned we won't need it anymore (better release the memory)
+//        this.getNodeQueue().clear();
         //return a map with as key the drone id and an ordered list for the deliveries that it has to make
         return convertNodeToDeliveryScheme(goalNode);
     }
@@ -106,20 +226,22 @@ public class DeliveryPlanning implements Callable<Map<String, List<DeliveryPacka
      */
      public Map<String, List<DeliveryPackage>> hillClimbingSearch(){
 
-       while(!goalReached()){
+         System.out.println("Started Hill climb");
+
+        while(!goalReached()){
            //get the first node
            DeliveryNode firstNode = this.removeFirstNode();
            //expand the first node
            List<DeliveryNode> children = expandNode(firstNode);
            addNodesHillClimb(children);
-//           addNodesTotalCost(children);
-       }
-       //the goal is reached, report the first node
-       DeliveryNode goalNode = this.getFirstNode();
-       //print the total time needed:
-       System.out.println("\nDeliveryTime: "+ goalNode.getCostValue()+"\n");
-       //return a map with as key the drone id and an ordered list for the deliveries that it has to make
-       return convertNodeToDeliveryScheme(goalNode);
+        //           addNodesTotalCost(children);
+        }
+        //the goal is reached, report the first node
+        DeliveryNode goalNode = this.getFirstNode();
+        //print the total time needed:
+        System.out.println("\nDeliveryTime: "+ goalNode.getCostValue()+"\n");
+        //return a map with as key the drone id and an ordered list for the deliveries that it has to make
+        return convertNodeToDeliveryScheme(goalNode);
     }
 
     public Map<String, List<DeliveryPackage>> totalCostSearch(){
@@ -189,34 +311,6 @@ public class DeliveryPlanning implements Callable<Map<String, List<DeliveryPacka
         return nodeQueue.get(0);
     }
 
-    /**
-     * Initializes the root node by adding all the drones that are currently active in the overseer
-     * @param dronePositions a map with key the id of the drone and value the current state
-     */
-    private void initRoot(Map<String, Vector> dronePositions){
-        //create a map to put the newly generated drones in
-        Map<String, DeliveryDrone> drones  = new HashMap<>();
-
-        //then iterate trough all the entries and generate the delivery drones
-        for(String droneID: dronePositions.keySet()){
-            //get the inputs associated with the drone
-            Vector position = dronePositions.get(droneID);
-            //create the drone
-            DeliveryDrone deliveryDrone = new DeliveryDrone(position, droneID);
-            //add to the drone map
-            drones.put(droneID, deliveryDrone);
-        }
-
-        //get the packages that need to be delivered
-        Collection<DeliveryPackage> deliveries = this.getDeliveries();
-
-        //create the root of the search tree
-        DeliveryNode root = new DeliveryNode(drones,deliveries);
-        //add the root to the queue
-        List<DeliveryNode> nodeQueue = this.getNodeQueue();
-        nodeQueue.add(root);
-
-    }
 
     /**
      * Expands the given node
@@ -316,7 +410,7 @@ public class DeliveryPlanning implements Callable<Map<String, List<DeliveryPacka
         });
 
 //        System.out.println("Size of queue: "+ nodeQueue.size());
-//        System.out.println("First node packets delivered: " + getFirstNode().getPackagesToDeliver().size());
+//        System.out.println("First node packets delivered: " + getFirstNode().getSubmittedPackages().size());
 
     }
 
@@ -371,13 +465,6 @@ public class DeliveryPlanning implements Callable<Map<String, List<DeliveryPacka
         return airportMap;
     }
 
-    /**
-     * Getter for the packages that need to be delivered
-     * @return a collection of delivery packages
-     */
-    private Collection<DeliveryPackage> getDeliveries() {
-        return deliveries;
-    }
 
     //instances used to get heuristics and delivery specs
     /**
@@ -385,10 +472,6 @@ public class DeliveryPlanning implements Callable<Map<String, List<DeliveryPacka
      */
     private OverseerAirportMap airportMap;
 
-    /**
-     * The collection of deliveries to be made to the airports
-     */
-    private Collection<DeliveryPackage> deliveries;
 
     /**
      * Getter for the queue used to search the tree
@@ -426,6 +509,32 @@ public class DeliveryPlanning implements Callable<Map<String, List<DeliveryPacka
      * The width of the beam search
      */
     private int beamSearchWidth = 5;
+
+    /**
+     * Getter for the search algorithm that is currently employed by the delivery planning
+     * may be dynamically changed by the user if the dimensions of the search vary
+     * @return the search algorithm used by the delivery planning
+     */
+    private SearchAlgorithm getSearchAlgorithm() {
+        return searchAlgorithm;
+    }
+
+    /**
+     * Setter for the search algorithm used by the delivery planning to determine the assignment to the drones
+     * available options:
+     * --> Hill_Climb_1: hill climbing with an accumulated cost and a heuristic to determine the next node
+     * --> Total_Cost: total cost search with heuristic optimizations (use of heuristic but no path deletion)
+     * --> Beam_Search: beam search with accumulated cost and a heuristic, beam width can be set by the user
+     * @param searchAlgorithm the algorithm to be used for the search
+     */
+    public void setSearchAlgorithm(SearchAlgorithm searchAlgorithm) {
+        this.searchAlgorithm = searchAlgorithm;
+    }
+
+    /**
+     * The search algorithm currently employed
+     */
+    private SearchAlgorithm searchAlgorithm = SearchAlgorithm.BEAM_SEARCH;
 
     /**
      * A node of our delivery search tree
@@ -474,6 +583,24 @@ public class DeliveryPlanning implements Callable<Map<String, List<DeliveryPacka
         }
 
         /**
+         * Adds all the specified deliveries (in order) to the drone, & calculates the cost value for the
+         * specific drone
+         * @param droneID the id of the drone to add the packages to
+         * @param deliveries the deliveries to add to the drone (in same order as specified)
+         * note: only use to re-initialize the search for an already active simulation
+         */
+        private void addDeliveriesToDrone(String droneID, List<DeliveryPackage> deliveries){
+            //get the drone to add the packages to
+            DeliveryDrone drone = this.getDroneMap().get(droneID);
+            for(DeliveryPackage delivery: deliveries){
+                updateDronePosition(delivery, drone);
+                drone.addDelivery(delivery);
+            }
+
+            //upon exit we should be ready
+        }
+
+        /**
          * Adds the provided package to the drone with the corresponding ID in the map
          * @param droneID the id of the drone to add the delivery for
          * @param delivery the DeliveryPackage to be added to the drone with the given ID
@@ -497,7 +624,6 @@ public class DeliveryPlanning implements Callable<Map<String, List<DeliveryPacka
             drone.addDelivery(delivery);
 
             //set the added delivery to the node
-            this.setCurrentDelivery(delivery);
             this.setCurrentDeliveryDroneID(droneID);
 
             //we're finished
@@ -535,7 +661,7 @@ public class DeliveryPlanning implements Callable<Map<String, List<DeliveryPacka
             int sourceAirportID = delivery.getSourceAirport();
             int destinationAirportID = delivery.getDestinationAirport();
             //get the map of the world
-            OverseerAirportMap airportMap = DeliveryPlanning.this.getAirportMap();
+            OverseerAirportMap airportMap = DeliveryPlanner.this.getAirportMap();
             //get the source airport and the airport to deliver to
             MapAirport sourceAirport = airportMap.getAirport(sourceAirportID);
             MapAirport destinationAirport = airportMap.getAirport(destinationAirportID);
@@ -663,23 +789,6 @@ public class DeliveryPlanning implements Callable<Map<String, List<DeliveryPacka
         }
 
         /**
-         * Getter for the delivery that was last added to the node
-         * @return the last added delivery
-         * note: is used for path deletion
-         */
-        private DeliveryPackage getCurrentDelivery(){
-            return this.currentDelivery;
-        }
-
-        /**
-         * Setter for the delivery that was last added to the node
-         * @param currentDelivery the delivery to set
-         */
-        private void setCurrentDelivery(DeliveryPackage currentDelivery){
-            this.currentDelivery = currentDelivery;
-        }
-
-        /**
          * Getter for the drone that is currently used to deliver the assigned package (used for pruning)
          * @return the ID of the drone used to deliver the package
          */
@@ -761,10 +870,6 @@ public class DeliveryPlanning implements Callable<Map<String, List<DeliveryPacka
          */
         private Set<DeliveryPackage> packagesToDeliver = new HashSet<>();
 
-        /**
-         * The delivery that was added in this node (used for pruning)
-         */
-        private DeliveryPackage currentDelivery;
 
         /**
          * The id of the drone that was lastly used to deliver the package
@@ -933,6 +1038,13 @@ public class DeliveryPlanning implements Callable<Map<String, List<DeliveryPacka
          * The current total travel time of the drone
          */
         private float totalTravelTime = 0;
+    }
+
+    /**
+     * An enumeration used to determine the current search algorithm used to assign the packages
+     */
+    private enum SearchAlgorithm {
+        TOTAL_COST, HILL_CLIMBING_1, BEAM_SEARCH
     }
 
 }

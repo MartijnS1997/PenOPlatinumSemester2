@@ -105,6 +105,7 @@ public class DeliveryPackage {
     public String toString() {
         return "DeliveryPackage " +
                 "sourceAirport: " + sourceAirport +
-                ", destinationAirport: " + destinationAirport;
+                ", destinationAirport: " + destinationAirport +
+                ", deliveryDroneID: " + deliveryDroneID;
     }
 }

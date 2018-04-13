@@ -57,7 +57,6 @@ public class World {
 	 * @throws IOException
 	 */
 	public void advanceWorldState(float timeInterval, int nbTotalIterations, int nbSubIterations) throws IllegalArgumentException, IOException, InterruptedException {
-
 		if(!isValidTimeInterval(timeInterval))
 			throw new IllegalArgumentException(INVALID_TIME_INTERVAL);
 

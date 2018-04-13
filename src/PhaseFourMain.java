@@ -20,9 +20,11 @@ import static java.lang.Math.signum;
  */
 public class PhaseFourMain {
 
-    public static void main(String[] args){
+    public static void main(String[] args) throws Exception {
         //create a simulation generator
         SimulationGen generator = new SimulationGen(worldXSize, worldZSize, nbDrones, nbAirports, nbPackages);
+        //set the seed so we generate the same world
+        generator.setRandomSeed(0);
         //create the simulation environment
         SimulationEnvironment environment = generator.generateGridWorld(gridWorldRows, gridworldColumns);
         //print the environment
@@ -32,15 +34,15 @@ public class PhaseFourMain {
         //create the server
         TestbedServer testbedServer = generator.generateTestbedServer(environment, overseer);
         //create the autopilot initializer
-        AutopilotInitializer initializer = new AutopilotInitializer(host, tcpPort, nbDrones);
+        AutopilotInitializer initializer = new AutopilotInitializer(host, tcpPort, nbDrones, overseer);
         //run server (will also initiate gui
         Thread serverThread = new Thread(testbedServer);
         serverThread.start();
         //run the initializer
-        initializer.initialize(overseer);
-        //call the overseer (it wil continue on this thread)
-
-        initOverseer(overseer);
+        Thread autopilotInitializerThread = new Thread(initializer);
+        autopilotInitializerThread.start();
+        //call the overseer (it will continue on this thread)
+        overseer.call();
     }
 
     private static void initOverseer(AutopilotOverseer overseer) {

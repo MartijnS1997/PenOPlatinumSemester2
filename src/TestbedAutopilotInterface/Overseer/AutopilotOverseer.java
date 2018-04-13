@@ -3,6 +3,7 @@ package TestbedAutopilotInterface.Overseer;
 import AutopilotInterfaces.*;
 import internal.Autopilot.AutoPilot;
 import internal.Helper.Vector;
+
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
@@ -13,7 +14,6 @@ import java.util.stream.Collectors;
 //(we can also use the broadcast queue to enter the states of all the drones
 
 //note need a map of the world to navigate the drones and make decisions on what drone does what
-//TODO assign the packages to the drones, shared List with the world of all the packages that need to be delivered
 //TODO check if drones have crashed during the simulation, delete them if needed
 //--> the overseer must set the assigned drone
 //TODO also add the overseer to the world so it can read the set of packages that are pending
@@ -43,24 +43,75 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void>, Packa
      */
     @Override
     public Void call() throws Exception {
-        //for now a single call to deliver the packages will suffice
-        this.deliverPackages();
+        //only start the delivery if all drones to spread the deliveries across have been added
+        while(this.getActiveAutopilots().size() != this.getInitNbOfAutopilots()){
+            //do nothing
+        }
+
+        //call the main loop
+        overseerMainLoop();
+
         return null;
+    }
+
+    private void overseerMainLoop(){
+        //get the airport map
+        OverseerAirportMap airportMap = this.getAirportMap();
+        //create the delivery planner
+        DeliveryPlanner planner = new DeliveryPlanner(airportMap);
+        this.setPlanner(planner);
+
+        //loop until the simulation has been ended by the testbed
+        while(!this.isSimulationEnded()){
+            //distribute the packages
+            distributePackages();
+            //then wait until one of the drone's queues is empty
+            while(!hasIdleDrone()){
+                //TODO we may also use the autopilots to wake the overseer thread if they spot that their queue is empty
+                //TODO make mechanism that the planner is not invoked if there are no packages to deliver
+            }
+        }
+    }
+
+    /**
+     * Distributes the packages that have not been assigned yet to a drone
+     * starts the delivery planner (may require some work --> beam search)
+     */
+    private void distributePackages(){
+        //get the planner
+        DeliveryPlanner planner = this.getPlanner();
+        //initialize the search
+        //first get the list of all packages
+        Set<DeliveryPackage> submittedDeliveries = this.getSubmittedPackages();
+        //get the map of the drones and their current assigned deliveries
+        Map<String, List<DeliveryPackage>> assignedDeliveries = this.getUndeliveredPackgesPerDrone();
+        //get the map of the drones and their current positions
+        Map<String, Vector> autopilotPositions = this.getAutopilotPositions();
+        //initialize the search
+        planner.initializeSearch(submittedDeliveries, assignedDeliveries, autopilotPositions);
+        //execute the search
+        Map<String, List<DeliveryPackage>> deliveryScheme = planner.executeSearch();
+        //and apply the found scheme
+        assignDeliveriesToQueue(deliveryScheme);
     }
 
     /**
      * Assigns all the packages that are currently in the delivery buffer
      * to the currently active autopilots
      */
+    @Deprecated
     private void deliverPackages(){
         //get the buffer
         Set<DeliveryPackage> packages = this.getUnassignedPackages();
+        System.out.println("The nb of unassigned packages: " + packages.size());
         //also the airport map
         OverseerAirportMap airportMap = this.getAirportMap();
         //and also a a copy of the positions of the drone
         Map<String, Vector> dronePositions = this.getAutopilotPositions();
+        //the position of the drones
+        System.out.println("drone positions: " + dronePositions);
         //create the new delivery search
-        DeliveryPlanning planning = new DeliveryPlanning(packages, airportMap, dronePositions);
+        DeliveryPlanner planning = new DeliveryPlanner(packages, airportMap, dronePositions);
 
         //call the planner (for now no new thread will be used)
         Map<String, List<DeliveryPackage>> deliveryScheme =  planning.call();
@@ -68,9 +119,6 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void>, Packa
 
         //add all the buffered packages to the pending package set
         this.addPackagesToDeliver(packages);
-        //clear the buffer (otherwise we will resubmit the same deliveries)
-        packages.clear();
-
         //after this we're done
     }
 
@@ -117,13 +165,35 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void>, Packa
     }
 
     /**
+     * Gets the undelivered packages per drone
+     * All the queues for each drone are converted into a list (with the same order)
+     * containing the deliveries for each drone
+     * @return a map containing the drone ID as the keys and the corresponding deliveries as lists for the value
+     */
+    private synchronized Map<String, List<DeliveryPackage>> getUndeliveredPackgesPerDrone(){
+        //first get for each drone the packages that it still needs to deliver
+        Map<String, ConcurrentLinkedQueue<DeliveryPackage>> assignedDeliveries = this.getDeliveryRequests();
+        //initialize the map that will contain the undelivered packages
+        Map<String, List<DeliveryPackage>> deliveriesPerDrone = new HashMap<>();
+
+        for(String droneID:  assignedDeliveries.keySet()){
+            ConcurrentLinkedQueue<DeliveryPackage> droneQueue = assignedDeliveries.get(droneID);
+            //convert the queue to a list
+            List<DeliveryPackage> deliveries = new LinkedList<>(droneQueue);
+            deliveriesPerDrone.put(droneID, deliveries);
+        }
+
+        return deliveriesPerDrone;
+    }
+
+    /**
      * Gets all the unassigned packages currently in the to deliver set
      * --> call may be synchronized in future to be absolutely sure that no packages were added while
      *     scanning for unassigned ones
      * @return a set of all the packages that do not have a drone assigned to deliver them
      */
     private synchronized Set<DeliveryPackage> getUnassignedPackages(){
-        Set<DeliveryPackage> allPackages = this.getPackagesToDeliver();
+        Set<DeliveryPackage> allPackages = this.getSubmittedPackages();
         //filter for all the packages that have no drone assigned yet to deliver them
         Set<DeliveryPackage> unassignedPackages =  allPackages.stream()
                                                    .filter(delivery -> delivery.getDeliveryDroneID() == null)
@@ -213,7 +283,7 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void>, Packa
      */
     @Override
     public void simulationEnded() {
-
+        this.setSimulationEnded();
     }
 
 
@@ -239,6 +309,7 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void>, Packa
 
         }
         //replace the old entry
+//        System.out.println("Autopilot ID: " + autopilotId + ", Autopilot location: " + extractPosition(inputs));
         activeAutopilots.put(autopilotId, inputs);
     }
 
@@ -269,7 +340,7 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void>, Packa
      * Checks if there are any drones with empty queues
      * @return true if there is a drone with an empty queue
      */
-    private boolean checkForIdleDrone(){
+    private boolean hasIdleDrone(){
         //get the map of all the queues
         Map<String, ConcurrentLinkedQueue<DeliveryPackage>> deliveryQueues = this.getDeliveryRequests();
         //iterate trough all the queues and check if one is empty
@@ -404,7 +475,7 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void>, Packa
     @Override
     public synchronized Set<DeliveryPackage> getAssignedPackages() {
         //get the set of all the packages
-        Set<DeliveryPackage> packagesToDeliver = this.getPackagesToDeliver();
+        Set<DeliveryPackage> packagesToDeliver = this.getSubmittedPackages();
         //get all the packages that have drone assigned to deliver them
         Set<DeliveryPackage> assignedPackages = packagesToDeliver.stream()
                                                 .filter(delivery -> delivery.getDeliveryDroneID() != null)
@@ -414,7 +485,7 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void>, Packa
 
     @Override
     public synchronized Set<DeliveryPackage> getAllUndeliveredPackages() {
-        Set<DeliveryPackage> packagesToDeliver = this.getPackagesToDeliver();
+        Set<DeliveryPackage> packagesToDeliver = this.getSubmittedPackages();
         //get all the packages that need to be delivered
         Set<DeliveryPackage> undelivered = packagesToDeliver.stream()
                 .filter(delivery -> !delivery.isDelivered())
@@ -425,7 +496,7 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void>, Packa
 
     @Override
     public synchronized Set<DeliveryPackage> getAllUndeliveredAssignedPackages() {
-        Set<DeliveryPackage> packagesToDeliver = this.getPackagesToDeliver();
+        Set<DeliveryPackage> packagesToDeliver = this.getSubmittedPackages();
         //get all the packages that have drone assigned and need to be delivered
         Set<DeliveryPackage> assignedAndUndeliveredPackages = packagesToDeliver.stream()
                 .filter(delivery -> delivery.getDeliveryDroneID() != null&&!delivery.isDelivered())
@@ -434,30 +505,31 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void>, Packa
     }
 
     /**
-     * Getter for the set that contains all the packages that are yet to be delivered by the drones
-     * this set is shared by the world such that it knows which drone belongs to which package & so it
-     * can check for delivery
+     * Getter for the packages that have been submitted to the overseer, this set contains
+     * 1. packages that have been submitted but not yet assigned
+     * 2. packages that have been assigned but not yet delivered
+     * 3. packages that have been delivered
      * @return the packages pending to be delivered
      */
     @Override
-    public Set<DeliveryPackage> getPackagesToDeliver() {
-        return packagesToDeliver;
+    public Set<DeliveryPackage> getSubmittedPackages() {
+        return submittedPackages;
     }
 
     /**
-     * Adds extra pending packages to the already existing set of pending packages
+     * Adds extra pending packages to the already existing set of submitted packages
      * @param packages the packages to be added to the pending set
      */
     private void addPackagesToDeliver(Set<DeliveryPackage> packages) {
-        this.packagesToDeliver.addAll(packages);
+        this.submittedPackages.addAll(packages);
     }
 
     /**
-     * Adds the specified package to the packages to deliver queue
+     * Adds the specified package to the set of submitted packages
      * @param delivery the delivery to add to the set
      */
     private void addPackageToDeliver(DeliveryPackage delivery){
-        this.getPackagesToDeliver().add(delivery);
+        this.getSubmittedPackages().add(delivery);
     }
 
     /**
@@ -467,6 +539,22 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void>, Packa
      */
     private int getInitNbOfAutopilots() {
         return initNbOfAutopilots;
+    }
+
+    /**
+     * Getter for the planner used by the autopilot overseer to distribute the packages amongst the drones
+     * @return the planner used by the overseer
+     */
+    private DeliveryPlanner getPlanner() {
+        return planner;
+    }
+
+    /**
+     * Setter for the planner used by the overseer, used to distribute the packages amongst the drones
+     * @param planner the planner to set
+     */
+    private void setPlanner(DeliveryPlanner planner) {
+        this.planner = planner;
     }
 
     /**
@@ -498,11 +586,17 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void>, Packa
     private OverseerAirportMap airportMap;
 
     /**
-     * The packages that are submitted by the overseer to the drones to deliver but are not delivered yet
-     * this set is shared with the world of the simulation environment such that it knows which package
-     * needs to be delivered by which drone
+     * The packages that are submitted to the overseer, the set contains the following kind of packages
+     * 1. submitted but not yet assigned for delivery
+     * 2. assigned but not yet delivered
+     * 3. delivered
      */
-    private Set<DeliveryPackage> packagesToDeliver = new HashSet<>();
+    private Set<DeliveryPackage> submittedPackages = new HashSet<>();
+
+    /**
+     * The planner used for distributing/assigning the packages to the drones (as optimally as possible)
+     */
+    private DeliveryPlanner planner;
 
     /**
      * The base altitude to assign to the drones (incremented from here)
@@ -513,6 +607,30 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void>, Packa
      * The minimal cruising altitude difference between two drones
      */
     private final static float ALTITUDE_DELTA = 15f;
+
+    /*
+    Some flags with their setters
+     */
+
+    /**
+     * Getter for the simulation ended flag
+     * used to signal to the overseer that the simulation has ended and that it may wrap up its activities
+     * (e.g. planning the delivery sequence for the drones)
+     * @return the flag value (true if the simulation has ended, false if not)
+     */
+    private boolean isSimulationEnded() {
+        return simulationEnded;
+    }
+
+    /**
+     * Used to toggle the simulation ended flag and signal to the overseer that the simulation has been ended
+     * (for more info see the getter)
+     */
+    private void setSimulationEnded() {
+        this.simulationEnded = true;
+    }
+
+    private boolean simulationEnded = false;
 
 
 }

@@ -42,6 +42,7 @@ public class AutopilotConnection implements Callable<Void> {
     public Void call() {
         //initialize the connection
         initServerConnection();
+        System.out.println("connection to server acquired");
         //start the main loop
         try {
             clientMainLoop();

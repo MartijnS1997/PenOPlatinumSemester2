@@ -524,6 +524,7 @@ public class SimulationGen {
         Set<DeliverySpec> deliveryPackages = simulationEnvironment.getDeliveryPackages();
 
         int nbDrones = drones.size();
+        System.out.println("nbDrones specified upon creation: " + nbDrones);
 
         AutopilotOverseer overseer = new AutopilotOverseer(nbDrones);
         //add the airports to the overseer

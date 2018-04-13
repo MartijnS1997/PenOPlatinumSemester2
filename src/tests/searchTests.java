@@ -1,6 +1,5 @@
 package tests;
 
-import AutopilotInterfaces.AutopilotInputs_v2;
 import TestbedAutopilotInterface.Overseer.*;
 import internal.Helper.Vector;
 import org.junit.Test;
@@ -24,7 +23,7 @@ public class searchTests {
         System.out.println(airportMap);
         System.out.println(airportMap);
         long startTime = System.currentTimeMillis();
-        DeliveryPlanning planner = new DeliveryPlanning(packages, airportMap, drones);
+        DeliveryPlanner planner = new DeliveryPlanner(packages, airportMap, drones);
         Map<String, List<DeliveryPackage>> schedule = planner.call();
         long endTime = System.currentTimeMillis();
         long totalTime = endTime - startTime;
