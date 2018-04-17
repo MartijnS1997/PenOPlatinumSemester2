@@ -6,7 +6,6 @@ import math.Vector3f;
 public interface Polygon extends GraphicsObject {
 	
 	Vector3f relativePosition = new Vector3f();
-	Vector3f orientation = new Vector3f();
 	
 	public void update(Vector3f displacement, Vector3f orientation);
 

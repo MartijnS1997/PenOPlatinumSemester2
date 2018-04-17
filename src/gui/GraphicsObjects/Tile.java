@@ -11,6 +11,7 @@ import gui.GL.Mesh;
 import internal.Helper.HSVconverter;
 import internal.Helper.Vector;
 import math.Vector3f;
+import org.lwjgl.system.CallbackI;
 
 public class Tile implements GraphicsObject {
 
@@ -32,6 +33,7 @@ public class Tile implements GraphicsObject {
 	private boolean moves = false;
 	private Mesh mesh;
 	private Vector3f position = new Vector3f();
+	private Vector3f orientation = new Vector3f();
 	private Vector3f size = new Vector3f(1f, 1f, 1f);
 	
 	static Vector3f positionOffset = new Vector3f();
@@ -55,6 +57,11 @@ public class Tile implements GraphicsObject {
 		this(colour);
 		
 		this.position = position;
+	}
+
+	public Tile(Vector3f position, Vector3f colour, Vector3f orientation) {
+		this(position, colour);
+		setOrientation(orientation);
 	}
 
 	public Tile(Vector3f position, Vector3f colour, boolean moves) {
@@ -86,6 +93,8 @@ public class Tile implements GraphicsObject {
 	public Vector3f getPos() {
 		return this.position;
 	}
+
+	public Vector3f getOrientation() { return this.orientation; }
 	
 	public Vector3f getPosWithOffset() {
 		if (moves)
@@ -97,6 +106,8 @@ public class Tile implements GraphicsObject {
 	public static void setPosOffset(Vector3f offset) {
 		positionOffset = offset;
 	}
+
+	public void setOrientation(Vector3f orientation) { this.orientation = orientation; }
 	
 	public void setSize(float size) {
 		this.size = new Vector3f(size, size, size);

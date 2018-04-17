@@ -19,7 +19,7 @@ public class Objects {
     private static Set<WorldObject> worldObjects = new HashSet<WorldObject>();
     private static Graphics graphics;
     private static Floor floor;
-    private static Airport airport;
+    private static Set<Airport> airports = new HashSet<Airport>();
     private static String mainDroneID = null;
 
     public static void createAll(GUIQueueElement queueElement) {
@@ -28,8 +28,11 @@ public class Objects {
         floor = new Floor();
         addWorldObject(floor);
 
-        airport = new Airport();
-        addWorldObject(airport);
+        for ( AirportGuiState airportGuiState : getAirportGuiStates()) {
+            Airport airport = new Airport(airportGuiState.getPosition().convertToVector3f(), airportGuiState.getPrimaryRunWay().convertToVector3f());
+            airports.add(airport);
+            addWorldObject(airport);
+        }
 
         for (String droneID : getDroneGuiStates().keySet()) {
             if (mainDroneID == null)

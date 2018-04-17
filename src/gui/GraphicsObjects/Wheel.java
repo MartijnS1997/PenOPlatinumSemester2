@@ -53,14 +53,14 @@ public class Wheel implements Polygon {
 		this.relativePosition = relativePosition;
 	}
 
-	public void update(Vector3f displacement, Vector3f orientation) {
-		this.orientation  = orientation.negate();
-		position = position.add(displacement);
+	public void update(Vector3f position, Vector3f orientation) {
+		this.orientation  = orientation;
+		this.position = position;
 	}
-	
+
 	public Vector3f getRelPos() {
 		Vector3f pos = this.position;
-		Matrix3f transformation = Matrix3f.transformationMatrix(this.orientation.negate()).transpose();
+		Matrix3f transformation = Matrix3f.transformationMatrix(this.orientation).transpose();
 		Vector3f difference = transformation.multiply(relativePosition);
 		pos = pos.add(difference);
 		return pos;
@@ -84,6 +84,10 @@ public class Wheel implements Polygon {
 	
 	public Vector3f getPos() {
 		return this.position;
+	}
+
+	public Vector3f getOrientation() {
+		return this.orientation;
 	}
 	
 	public void setSize(float size) {

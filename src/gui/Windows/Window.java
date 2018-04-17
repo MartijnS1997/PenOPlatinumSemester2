@@ -168,6 +168,7 @@ public class Window {
 	}
 
 	public void render(Set<GraphicsObject> renderObjects, Drone drone) {
+		input.setStartOrientation(drone.getOrientation());
 		renderFrame(renderObjects, drone);
 
 		// Return false if the user has attempted to close
@@ -195,7 +196,10 @@ public class Window {
         	if (object.getClass() == Cube.class || object.getClass() == Wheel.class) {
 				program.setUniform("modelMatrix", getModelMatrix(((Polygon) object).getOrientation(), ((Polygon) object).getRelPos(), object.getSize()));
         	} else if (object.getClass() == Tile.class) {
-				program.setUniform("modelMatrix", getModelMatrix(((Tile) object).getPosWithOffset(), object.getSize()));
+				if (((Tile) object).getOrientation().length() > 0)
+					program.setUniform("modelMatrix", getModelMatrix(((Tile) object).getOrientation(), ((Tile) object).getPosWithOffset(), object.getSize()));
+				else
+					program.setUniform("modelMatrix", getModelMatrix(((Tile) object).getPosWithOffset(), object.getSize()));
 			} else {
 				program.setUniform("modelMatrix", getModelMatrix(object.getPos(), object.getSize()));
 			}
