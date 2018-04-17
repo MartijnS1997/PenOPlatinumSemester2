@@ -19,9 +19,9 @@ public class AutopilotTaxiingController extends Controller {
     }
 
     @Override
-    public AutopilotOutputs getControlActions(AutopilotInputs_v2 inputs) {
+    public AutopilotOutputs getControlActions(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs) {
         //set the current inputs
-        this.setCurrentInputs(inputs);
+        //this.updateInputs(inputs);
         //set the current outputs
         ControlOutputs outputs = new ControlOutputs();
 
@@ -75,7 +75,7 @@ public class AutopilotTaxiingController extends Controller {
     private void initialTurn(ControlOutputs outputs){
 
         Vector target = this.getTarget();
-        AutopilotInputs_v2 inputs = this.getCurrentInputs();
+        AutopilotInputs_v2 inputs = null;// this.getCurrentInputs();
         float maxBrake = this.getConfig().getRMax();
         float maxThrust = this.getConfig().getMaxThrust();
         //calculate the angle between the heading vector and the target vector
@@ -134,7 +134,7 @@ public class AutopilotTaxiingController extends Controller {
         //we just brake to the full extent
         float maxBrake = this.getConfig().getRMax();
         //check if we've come to a standstill && reached the target
-        if(droneInStandstill() && targetReached(this.getCurrentInputs())){
+        if(droneInStandstill() && targetReached( null /*this.getCurrentInputs()*/)){
             //do not change the inputs, we're finished
             return;
         }
@@ -159,8 +159,8 @@ public class AutopilotTaxiingController extends Controller {
      * @return true if the total velocity of the drone is <= STANDSTILL_VELOCITY
      */
     private boolean droneInStandstill(){
-        AutopilotInputs_v2 currentInputs = this.getCurrentInputs();
-        AutopilotInputs_v2 prevInputs = this.getPreviousInputs();
+        AutopilotInputs_v2 currentInputs = null; //this.getCurrentInputs();
+        AutopilotInputs_v2 prevInputs = null; //this.getPreviousInputs();
 
         //approx the velocity
         Vector approxVelocity = getVelocityApprox(prevInputs, currentInputs);
@@ -185,8 +185,8 @@ public class AutopilotTaxiingController extends Controller {
     private void moveToTarget(ControlOutputs outputs){
 
         //acquire the current inputs (needed for angle calculation)
-        AutopilotInputs_v2 currentInputs = this.getCurrentInputs();
-        AutopilotInputs_v2 prevInputs = this.getPreviousInputs();
+        AutopilotInputs_v2 currentInputs = null; //this.getCurrentInputs();
+        AutopilotInputs_v2 prevInputs = null; // this.getPreviousInputs();
         //check if we are done with moving
         if(targetReached(currentInputs)){
             //if so, change the state and call the brake method, return afterwards
@@ -453,34 +453,34 @@ public class AutopilotTaxiingController extends Controller {
     }
 
     @Override
-    public boolean hasReachedObjective(AutopilotInputs_v2 inputs) {
+    public boolean hasReachedObjective(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs) {
         return false;
     }
 
-    @Override
-    protected float getMainStableInclination() {
-        return 0;
-    }
-
-    @Override
-    protected float getStabilizerStableInclination() {
-        return 0;
-    }
-
-    @Override
-    protected float getRollThreshold() {
-        return 0;
-    }
-
-    @Override
-    protected float getInclinationAOAErrorMargin() {
-        return 0;
-    }
-
-    @Override
-    protected float getStandardThrust() {
-        return 0;
-    }
+//    @Override
+//    protected float getMainStableInclination() {
+//        return 0;
+//    }
+//
+//    @Override
+//    protected float getStabilizerStableInclination() {
+//        return 0;
+//    }
+//
+//    @Override
+//    protected float getRollThreshold() {
+//        return 0;
+//    }
+//
+//    @Override
+//    protected float getInclinationAOAErrorMargin() {
+//        return 0;
+//    }
+//
+//    @Override
+//    protected float getStandardThrust() {
+//        return 0;
+//    }
 
     /**
      * Getter for the target of the taxiing controller
@@ -577,7 +577,7 @@ public class AutopilotTaxiingController extends Controller {
 //    @Override
 //    public AutopilotOutputs getControlActions(AutopilotInputs_v2 inputs) {
 //
-//        this.setCurrentInputs(inputs);
+//        this.updateInputs(inputs);
 //
 //        AutopilotInputs_v2 currentInputs = getCurrentInputs();
 //        AutopilotInputs_v2 previousInputs = getPreviousInputs();

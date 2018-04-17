@@ -16,27 +16,8 @@ public class AirportNavigationController extends AutopilotFlightController {
     }
 
     @Override
-    public AutopilotOutputs getControlActions(AutopilotInputs_v2 inputs) {
+    public AutopilotOutputs getControlActions(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs) {
         return null;
     }
 
-    @Override
-    protected float getMainStableInclination() {
-        return 0;
-    }
-
-    @Override
-    protected float getStabilizerStableInclination() {
-        return 0;
-    }
-
-    @Override
-    protected float getRollThreshold() {
-        return 0;
-    }
-
-    @Override
-    protected float getInclinationAOAErrorMargin() {
-        return 0;
-    }
 }

@@ -1,13 +1,8 @@
 package internal.Autopilot;
 
-import AutopilotInterfaces.AutopilotInputs;
 import AutopilotInterfaces.AutopilotInputs_v2;
 import AutopilotInterfaces.AutopilotOutputs;
 import internal.Helper.Vector;
-import jdk.nashorn.internal.objects.NativeReferenceError;
-import org.lwjgl.system.CallbackI;
-
-import javax.naming.ldap.Control;
 
 import static java.lang.Math.*;
 
@@ -25,14 +20,14 @@ public class StabilizerController extends Controller {
     }
 
     @Override
-    public AutopilotOutputs getControlActions(AutopilotInputs_v2 inputs) {
-        this.setCurrentInputs(inputs);
+    public AutopilotOutputs getControlActions(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs) {
+//        this.updateInputs(inputs);
         //generate the outputs object to write the control actions to
         ControlOutputs outputs = new ControlOutputs();
         this.getPitchControlActions(outputs);
         this.getRollControlActions(outputs);
         //now check for AOA issues
-        this.angleOfAttackControl(outputs, getPreviousInputs(), getCurrentInputs());
+        //this.angleOfAttackControl(outputs, currentInputs, previousInputs);
         //return the outputs
         return outputs;
     }
@@ -52,8 +47,8 @@ public class StabilizerController extends Controller {
      */
     private void getPitchControlActions(ControlOutputs outputs){
         //get the two inputs
-        AutopilotInputs_v2 currentInputs = this.getCurrentInputs();
-        AutopilotInputs_v2 prevInputs = this.getPreviousInputs();
+        AutopilotInputs_v2 currentInputs = null; //this.getCurrentInputs();
+        AutopilotInputs_v2 prevInputs = null; //this.getPreviousInputs();
         //calculate the passed time between our prev simulation step
         float deltaTime = Controller.getDeltaTime(prevInputs, currentInputs);
         //get the pitch
@@ -63,7 +58,7 @@ public class StabilizerController extends Controller {
         //get the outputs (we want pitch zero so out current pitch is the error)
         float pidOutputs = pitchPid.getPIDOutput(pitch, deltaTime);
         //based on the output set the horizontal rudder, cap it
-        float horizontalInclination = this.getStabilizerStableInclination() - pidOutputs;
+        float horizontalInclination = /*this.getStabilizerStableInclination()*/ - pidOutputs;
         horizontalInclination = signum(horizontalInclination) * min(abs(horizontalInclination), MAX_HOR_STAB_INCL);
         outputs.setHorStabInclination(horizontalInclination);
 
@@ -75,8 +70,8 @@ public class StabilizerController extends Controller {
      */
     private void getRollControlActions(ControlOutputs outputs){
         //get the current and the previous inputs
-        AutopilotInputs_v2 currentInputs = this.getCurrentInputs();
-        AutopilotInputs_v2 prevInputs = this.getPreviousInputs();
+        AutopilotInputs_v2 currentInputs = null; //this.getCurrentInputs();
+        AutopilotInputs_v2 prevInputs = null; // this.getPreviousInputs();
         //get the time passed between two iterations
         float deltaTime = Controller.getDeltaTime(prevInputs, currentInputs);
         //get the current roll
@@ -86,8 +81,8 @@ public class StabilizerController extends Controller {
         //get the output, reference roll is 0, so our current roll is the error
         float pidOutputs = rollPid.getPIDOutput(roll, deltaTime);
         //now set the main wings based on the outputs of the PID controller
-        float rightMainWing = this.getMainStableInclination() + pidOutputs;
-        float leftMainWing = this.getMainStableInclination() - pidOutputs;
+        float rightMainWing = /*this.getMainStableInclination()*/ + pidOutputs;
+        float leftMainWing = /*this.getMainStableInclination()*/ - pidOutputs;
 
         outputs.setRightWingInclination(capMainWingInclination(rightMainWing));
         outputs.setLeftWingInclination(capMainWingInclination(leftMainWing));
@@ -103,8 +98,8 @@ public class StabilizerController extends Controller {
      */
     private float capMainWingInclination(float inclination){
         //first determine the lower cap:
-        float lowerCap = this.getMainStableInclination() - MAIN_INCL_CAP_DELTA;
-        float upperCap = this.getMainStableInclination() + MAIN_INCL_CAP_DELTA;
+        float lowerCap = /*this.getMainStableInclination()*/ - MAIN_INCL_CAP_DELTA;
+        float upperCap = /*this.getMainStableInclination()*/ + MAIN_INCL_CAP_DELTA;
         if(inclination < lowerCap){
             return lowerCap;
         }
@@ -116,13 +111,13 @@ public class StabilizerController extends Controller {
 
 
     @Override
-    public boolean hasReachedObjective(AutopilotInputs_v2 inputs) {
-        float currentTime = inputs.getElapsedTime();
+    public boolean hasReachedObjective(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs) {
+        float currentTime = currentInputs.getElapsedTime();
         float startTime = this.getControlStartElapsedTime();
 
         float controllerTime =  currentTime - startTime;
         //we have reached the stabilizing objective if we are flying stable and have stabilized for long enough
-        return controllerTime > MIN_STABILIZATION_TIME && isStabilized(inputs);
+        return controllerTime > MIN_STABILIZATION_TIME && isStabilized(currentInputs);
     }
 
     /**
@@ -137,31 +132,31 @@ public class StabilizerController extends Controller {
 
         return (roll <= ROLL_STABILITY_TARGET) && (pitch <= PITCH_STABILITY_TARGET);
     }
-
-    @Override
-    protected float getMainStableInclination() {
-        return MAIN_STABLE_INCLINATION;
-    }
-
-    @Override
-    protected float getStabilizerStableInclination() {
-        return STABILIZER_STABLE;
-    }
-
-    @Override
-    protected float getRollThreshold() {
-        return ROLL_THRESHOLD;
-    }
-
-    @Override
-    protected float getInclinationAOAErrorMargin() {
-        return ERROR_MARGIN_AOA_CALC;
-    }
-
-    @Override
-    protected float getStandardThrust() {
-        return STANDARD_THRUST;
-    }
+//
+//    @Override
+//    protected float getMainStableInclination() {
+//        return MAIN_STABLE_INCLINATION;
+//    }
+//
+//    @Override
+//    protected float getStabilizerStableInclination() {
+//        return STABILIZER_STABLE;
+//    }
+//
+//    @Override
+//    protected float getRollThreshold() {
+//        return ROLL_THRESHOLD;
+//    }
+//
+//    @Override
+//    protected float getInclinationAOAErrorMargin() {
+//        return ERROR_MARGIN_AOA_CALC;
+//    }
+//
+//    @Override
+//    protected float getStandardThrust() {
+//        return STANDARD_THRUST;
+//    }
 
     /*
      * Getters and setters

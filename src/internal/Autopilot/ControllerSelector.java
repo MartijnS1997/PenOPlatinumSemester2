@@ -61,7 +61,7 @@ public class ControllerSelector {
 //
 //        //set the current input for the next controller
 //        try {
-//            nextActiveController.setCurrentInputs(inputs);
+//            nextActiveController.updateInputs(inputs);
 //        }catch( NullPointerException e){
 //            //if there is no next active controller it will be set to null, so ignore it
 //        }
@@ -165,7 +165,7 @@ public class ControllerSelector {
         //get the assigned altitude
         float cruisingAlt = communicator.getAssignedCruiseAltitude();
         //TODO get the airport and the runway to check in which direction we need to take off
-        takeoffController.setTarget(new Vector(0,cruisingAlt, 0));
+        //takeoffController.setTarget(new Vector(0,cruisingAlt, 0));
 //        AutoPilot autopilot = this.getAutopilot();
 //        AutopilotInterfaces.Path path = autopilot.getPath();
 //        List<Vector> pathList = Controller.extractPath(path);
@@ -240,82 +240,59 @@ public class ControllerSelector {
             return this.getTaxiingController();
 
         }if(activeController instanceof AutopilotTaxiingController){
-            return new Controller(this.getAutopilot()) {
-                @Override
-                public AutopilotOutputs getControlActions(AutopilotInputs_v2 inputs) {
-                    return new AutopilotOutputs() {
-                        @Override
-                        public float getThrust() {
-                            return 0;
-                        }
-
-                        @Override
-                        public float getLeftWingInclination() {
-                            return 0;
-                        }
-
-                        @Override
-                        public float getRightWingInclination() {
-                            return 0;
-                        }
-
-                        @Override
-                        public float getHorStabInclination() {
-                            return 0;
-                        }
-
-                        @Override
-                        public float getVerStabInclination() {
-                            return 0;
-                        }
-
-                        @Override
-                        public float getFrontBrakeForce() {
-                            return ControllerSelector.this.getAutopilot().getConfig().getRMax();
-                        }
-
-                        @Override
-                        public float getLeftBrakeForce() {
-                            return ControllerSelector.this.getAutopilot().getConfig().getRMax();
-                        }
-
-                        @Override
-                        public float getRightBrakeForce() {
-                            return ControllerSelector.this.getAutopilot().getConfig().getRMax();
-                        }
-                    };
-                }
-
-                @Override
-                public boolean hasReachedObjective(AutopilotInputs_v2 inputs) {
-                    return false;
-                }
-
-                @Override
-                protected float getMainStableInclination() {
-                    return 0;
-                }
-
-                @Override
-                protected float getStabilizerStableInclination() {
-                    return 0;
-                }
-
-                @Override
-                protected float getRollThreshold() {
-                    return 0;
-                }
-
-                @Override
-                protected float getInclinationAOAErrorMargin() {
-                    return 0;
-                }
-
-                @Override
-                protected float getStandardThrust() {
-                    return 0;
-                }
-            };
+            return  null;
+//            new Controller(this.getAutopilot()) {
+//                @Override
+//                public AutopilotOutputs getControlActions(AutopilotInputs_v2 inputs) {
+//                    return new AutopilotOutputs() {
+//                        @Override
+//                        public float getThrust() {
+//                            return 0;
+//                        }
+//
+//                        @Override
+//                        public float getLeftWingInclination() {
+//                            return 0;
+//                        }
+//
+//                        @Override
+//                        public float getRightWingInclination() {
+//                            return 0;
+//                        }
+//
+//                        @Override
+//                        public float getHorStabInclination() {
+//                            return 0;
+//                        }
+//
+//                        @Override
+//                        public float getVerStabInclination() {
+//                            return 0;
+//                        }
+//
+//                        @Override
+//                        public float getFrontBrakeForce() {
+//                            return ControllerSelector.this.getAutopilot().getConfig().getRMax();
+//                        }
+//
+//                        @Override
+//                        public float getLeftBrakeForce() {
+//                            return ControllerSelector.this.getAutopilot().getConfig().getRMax();
+//                        }
+//
+//                        @Override
+//                        public float getRightBrakeForce() {
+//                            return ControllerSelector.this.getAutopilot().getConfig().getRMax();
+//                        }
+//                    };
+//                }
+//
+//                @Override
+//                public boolean hasReachedObjective(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs) {
+//                    return false;
+//                }
+//
+//            };
         }
         else{
             return null;
