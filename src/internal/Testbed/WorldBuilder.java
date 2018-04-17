@@ -4,9 +4,7 @@ package internal.Testbed;
 import java.io.IOException;
 import java.util.List;
 
-import gui.Cube;
-import gui.Tile;
-import internal.Autopilot.PathGenerator;
+
 import internal.Helper.Parser;
 import internal.Helper.Vector;
 /*
@@ -14,6 +12,7 @@ import internal.Helper.Vector;
  * Created by Martijn on 26/10/2017.
  * a class to build a world, set the standard configuration here.
  */
+@Deprecated
 public class WorldBuilder {
 
     public WorldBuilder() {
@@ -21,9 +20,9 @@ public class WorldBuilder {
     }
 
     public World createWorld(String config) throws IOException{
-        World world = new World(World.VISIT_ALL_OBJECTIVE);
+        World world = new World();
     	if (!isPredefWorld()) {
-    		world = this.getWorldGenerator().createWorld();
+    		//world = this.getWorldGenerator().createWorld();
     	}
     	else {
     	    Parser parser = new Parser(this.getPredefDirectory());
@@ -34,22 +33,18 @@ public class WorldBuilder {
                 Vector position = data.get(i);
                 Vector color = data.get(i+1);
                 Block block = new Block(position);
-                Cube cube = new Cube(position.convertToVector3f(), color.convertToVector3f(), true);
-                cube.setSize(5f);
-                block.setAssocatedCube(cube);
-                world.addWorldObject(block);
+
+
     		}
     	}
         
         //world.addWorldObject(block1);
         this.setDrone(new DroneBuilder(true).createDrone(config));
-        world.addWorldObject(this.getDrone());
+        world.addDrone(this.getDrone());
+
         
-        Floor floor = new Floor(new Vector());
-        world.addWorldObject(floor);
-        
-        Airport airport = new Airport(new Vector(0, 0.01f, -0));
-        world.addWorldObject(airport);
+        //WorldAirport airport = new WorldAirport(new Vector(0, 0.01f, -0));
+        //world.addAirport(airport);
 
         return world;
     }

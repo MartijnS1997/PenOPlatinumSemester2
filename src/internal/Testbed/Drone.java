@@ -3,29 +3,23 @@ package internal.Testbed;
 
 import java.io.IOException;
 import java.lang.Math;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.concurrent.Callable;
 
 import AutopilotInterfaces.AutopilotConfig;
 import AutopilotInterfaces.AutopilotOutputs;
-import gui.Cube;
-import gui.GraphicsObject;
-import gui.Wheel;
-import gui.Polygon;
+import TestbedAutopilotInterface.Overseer.DeliveryPackage;
 import internal.Physics.PhysXEngine;
 import internal.Physics.PhysicsEngineState;
 import internal.Helper.Vector;
-import math.Vector3f;
 
 /**
  * @author Anthony Rathé & MartijnSauwens & Bart
  * Immutable variables: maxThrust, engineMass, enginePosition, leftWing, rightWing,
  * 						horizontalStab, verticalStab, inertiaTensor
- * 	note: Orientation = (heading, pitch, roll) (in that order)
+ * 	note: orientation = (heading, pitch, roll) (in that order)
  * 	the orientation has always values in the range [-PI, PI]
  */
-public class Drone implements WorldObject, Callable<Void> {
+public class Drone implements Callable<Void> {
 
 
 	/*
@@ -44,7 +38,6 @@ public class Drone implements WorldObject, Callable<Void> {
 		this(position, velocity, orientation, rotationVector, 0f, 0f, 0f, config);
 		//check if the drone is actually flying
 		if(this.getPhysXEngine().chassisTouchesGround(orientation, position)){
-			//Todo uncomment if the simulator is ready for ground
 			//throw new IllegalStateException("Drone touches ground, cannot initialize");
 		}
 	}
@@ -94,75 +87,6 @@ public class Drone implements WorldObject, Callable<Void> {
 		//PhysXEngine.PhysXOptimisations optimisations = this.getPhysXEngine().createPhysXOptimisations();
 		//this.setVelocity(optimisations.balanceDrone(this.getOrientation(), (float) (7*PI/180), 0.0f)[1]);
 
-		//Todo set the tyreDelta to appropriate initial value
-
-		// the cube associated with the drone
-		try {
-			
-			Cube wings = new Cube(position.convertToVector3f(), new Vector3f(240f, 1f, 1f), false);
-			wings.setSize(new Vector3f(5f, 0.1f, 0.7f).scale(scalingFactor));
-			this.setAssociatedGraphicsObject(wings);
-			
-			Vector3f position2 = new Vector3f(0f, 0f, 1.75f).scale(scalingFactor);
-			Cube middleFrame = new Cube(position2, new Vector3f(240f, 1f, 1f), wings, false);
-			middleFrame.setSize(new Vector3f(0.6f, 0.6f, 2.5f).scale(scalingFactor));
-			this.setAssociatedGraphicsObject(middleFrame);
-			
-			Vector3f position3 = new Vector3f(0f, 0.6f, 4.5f).scale(scalingFactor);
-			Cube verticalStabilizer = new Cube(position3, new Vector3f(240f, 1f, 1f), wings, false);
-			verticalStabilizer.setSize(new Vector3f(0.2f, 1.2f, 0.5f).scale(scalingFactor));
-			this.setAssociatedGraphicsObject(verticalStabilizer);
-			
-			Vector3f position4 = new Vector3f(0f, 1f, 4.5f).scale(scalingFactor);
-			Cube horizontalStabilizer = new Cube(position4, new Vector3f(240f, 1f, 1f), wings, false);
-			horizontalStabilizer.setSize(new Vector3f(1.7f, 0.1f, 0.5f).scale(scalingFactor));
-			this.setAssociatedGraphicsObject(horizontalStabilizer);
-			
-			Vector3f position5 = new Vector3f(0f, 0f, 3.6f).scale(scalingFactor);
-			Cube longFrame = new Cube(position5, new Vector3f(240f, 1f, 1f), wings, false);
-			longFrame.setSize(new Vector3f(0.3f, 0.3f, 1.5f).scale(scalingFactor));
-			this.setAssociatedGraphicsObject(longFrame);
-			
-			Vector3f position6 = new Vector3f(0f, 0.4f, -0.5f).scale(scalingFactor);
-			Cube shortFrame = new Cube(position6, new Vector3f(240f, 1f, 1f), wings, false);
-			shortFrame.setSize(new Vector3f(1f, 1f, 2f).scale(scalingFactor));
-			this.setAssociatedGraphicsObject(shortFrame);
-			
-			Vector3f position7 = new Vector3f(0f, 0f, -1.5f).scale(scalingFactor);
-			Cube front = new Cube(position7, new Vector3f(240f, 1f, 1f), wings, false);
-			front.setSize(new Vector3f(0.8f, 0.5f, 1f).scale(scalingFactor));
-			this.setAssociatedGraphicsObject(front);
-			
-			
-			Vector3f positioncp1 = new Vector3f(0f, 0.8f, -0.5f).scale(scalingFactor);
-			Cube cockpit1 = new Cube(positioncp1, new Vector3f(30f, 1f, 1f), wings, false);
-			cockpit1.setSize(new Vector3f(0.7f, 0.8f, 1f).scale(scalingFactor));
-			this.setAssociatedGraphicsObject(cockpit1);
-			
-//			Vector3f positioncp2 = new Vector3f(0f, 0.8f, -0.5f).scale(scalingFactor);
-//			Wheel cockpitcp2 = new Wheel(positioncp1, new Vector3f(30f, 1f, 1f), wings, 25);
-//			cockpit1.setSize(new Vector3f(0.7f, 0.8f, 1f).scale(scalingFactor));
-//			this.setAssociatedGraphicsObject(cockpit1);
-			
-			Vector3f rearwheel1position = new Vector3f(0.5f, -0.5f, 0f).scale(scalingFactor);
-			Wheel rearwheel1 = new Wheel(rearwheel1position, new Vector3f(0f, 1f, 1f), wings, 25);
-			rearwheel1.setSize(new Vector3f(0.1f, 0.2f, 0.2f).scale(scalingFactor));
-			this.setAssociatedGraphicsObject(rearwheel1);
-			
-			Vector3f rearwheel2position = new Vector3f(-0.5f, -0.5f, 0f).scale(scalingFactor);
-			Wheel rearwheel2 = new Wheel(rearwheel2position, new Vector3f(0f, 1f, 1f), wings, 25);
-			rearwheel2.setSize(new Vector3f(0.1f, 0.2f, 0.2f).scale(scalingFactor));
-			this.setAssociatedGraphicsObject(rearwheel2);
-			
-			Vector3f frontwheelposition = new Vector3f(0f, -0.5f, -1.5f).scale(scalingFactor);
-			Wheel frontwheel = new Wheel(frontwheelposition, new Vector3f(0f, 1f, 1f), wings, 25);
-			frontwheel.setSize(new Vector3f(0.1f, 0.2f, 0.2f).scale(scalingFactor));
-			this.setAssociatedGraphicsObject(frontwheel);
-			
-		}catch(NullPointerException e){
-			this.setAssociatedGraphicsObject(new Cube(position.convertToVector3f(), new Vector3f(240f, 100f, 100f), false));
-		}
-
 		this.setAutopilotConfig(configuration);
 
 	}
@@ -182,9 +106,14 @@ public class Drone implements WorldObject, Callable<Void> {
 	@Override
 	public Void call() throws Exception {
 		float deltaTime = this.getDeltaTime();
-		toNextState(deltaTime);
+		int nbIterations = this.getNbIterations();
+		for(int counter = 0; counter != nbIterations; counter++) {
+			toNextState(deltaTime);
+		}
 		return null;
 	}
+
+
 
 	/**
 	 * advances the drone for a given time step, it changes the position, velocity, orientation and rotation
@@ -194,7 +123,6 @@ public class Drone implements WorldObject, Callable<Void> {
 	 * @throws IOException
 	 * @author Martijn Sauwens & Bart Jacobs
 	 */
-	@Override
 	public void toNextState(float deltaTime) throws IOException {
 		if (!WorldObject.isValidTimeStep(deltaTime))
 			throw new IllegalArgumentException(INVALID_TIMESTEP);
@@ -202,6 +130,8 @@ public class Drone implements WorldObject, Callable<Void> {
 
 		//engage autopilot
 		AutopilotOutputs autopilotOutputs = this.getAutopilotOutputs();
+
+		//System.out.println(extractInputs(autopilotOutputs));
 
 		DroneState state = this.getDroneState();
 		//calculate the next state of the physics engine
@@ -211,14 +141,6 @@ public class Drone implements WorldObject, Callable<Void> {
 		Vector differencePos = (nextState.getPosition()).vectorDifference(this.getPosition());
 
 		// move the cube representing the drone
-
-		try{
-			for (GraphicsObject polygon: this.getAssociatedGraphicsObjects())
-				((Polygon) polygon).update(differencePos.convertToVector3f(), getOrientation().convertToVector3f());
-		}catch(NullPointerException e){
-
-			//let it go
-		}
 
 //		System.out.println("prev left tyre delta: " + state.getPrevRearLeftTyreDelta());
 //		System.out.println("Rear left tyre delta: " + nextState.getRearLeftTyreDelta());
@@ -234,25 +156,29 @@ public class Drone implements WorldObject, Callable<Void> {
 
 	}
 
+	/**
+	 * Extracts the inputs and returns them as a string (used for debugging)
+	 * @param outputs the inputs to generate the string for
+	 * @return a string containing the values of the inputs
+	 */
+	public static String extractInputs(AutopilotOutputs outputs){
+		String thrust = "thrust: " + outputs.getThrust() + "\n";
+		String leftMain = "left main: " + outputs.getLeftWingInclination() + "\n";
+		String rightMain = "right main: " + outputs.getRightWingInclination() + "\n";
+		String horStab = "horizontal stabilizer: " + outputs.getHorStabInclination() + "\n";
+		String verticStab = "vertical stabilizer: " + outputs.getVerStabInclination() + "\n";
+		String frontBrake = "front brake force: " + outputs.getFrontBrakeForce() + "\n";
+		String leftBrake = "left brake force: " + outputs.getLeftBrakeForce() + "\n";
+		String rightBrake = "right brake force: " + outputs.getRightBrakeForce();
+
+		return thrust + leftMain + rightMain + horStab + verticStab + frontBrake + leftBrake + rightBrake;
+	}
+
 	//TODO implement, pass the required arguments to the physXEngine he knows how to handle the request
 	public boolean checkCrash(){
 		Vector orientation = this.getOrientation();
 		Vector position = this.getPosition();
 		return this.getPhysXEngine().checkCrash(orientation, position);
-	}
-
-
-	/*
-	 ############################# Gui configuration methods #############################
-	 */
-
-	public Set<GraphicsObject> getAssociatedGraphicsObjects() {
-		return droneCubes;
-	}
-
-
-	private void setAssociatedGraphicsObject(GraphicsObject droneCube) {
-		this.droneCubes.add(droneCube);
 	}
 
 
@@ -305,7 +231,7 @@ public class Drone implements WorldObject, Callable<Void> {
 	 * @return a vector of the following format: (heading, pitch, roll)
 	 */
 	public Vector getOrientation() {
-		return Orientation;
+		return orientation;
 	}
 
 	/**
@@ -316,7 +242,7 @@ public class Drone implements WorldObject, Callable<Void> {
 	 */
 	public void setOrientation(Vector orientation) {
 		Vector tempOrientation = normalizeOrientation(orientation);
-		Orientation = tempOrientation;
+		this.orientation = tempOrientation;
 	}
 
 	/**
@@ -328,7 +254,7 @@ public class Drone implements WorldObject, Callable<Void> {
 	 * @author Martijn Sauwens
 	 */
 	public void setOrientation(float heading, float pitch, float roll) {
-		this.Orientation = normalizeOrientation(new Vector(heading, pitch, roll));
+		this.orientation = normalizeOrientation(new Vector(heading, pitch, roll));
 	}
 
 	/**
@@ -383,7 +309,6 @@ public class Drone implements WorldObject, Callable<Void> {
 	 *
 	 * @return a vector containing the position
 	 */
-	@Override
 	public Vector getPosition() {
 		return position;
 	}
@@ -460,54 +385,108 @@ public class Drone implements WorldObject, Callable<Void> {
 
 	//Todo add comment
 
+	/**
+	 * Getter for the physics engine, the class used to simulate the next state of the drone,
+	 * used to calculate all the external forces, moments and sum them up providing a
+	 * PhysicsEngine state object in return to read the new drone state form (central part in managing the
+	 * physics of the testbed)
+	 * @return the PhysX engine configured for the drone
+	 */
 	public PhysXEngine getPhysXEngine() {
 		return physXEngine;
 	}
 
-	public void setPhysXEngine(PhysXEngine physXEngine) {
+	/**
+	 * Setter for the physics engine configured for the drone (see getter for more info)
+	 * @param physXEngine the physics engine to set
+	 */
+	private void setPhysXEngine(PhysXEngine physXEngine) {
 		this.physXEngine = physXEngine;
 	}
 
-	public AutopilotOutputs getAutopilotOutputs() {
+	/**
+	 * The current inputs received from the autopilot, containing brake force, wing inclinations
+	 * and such to steer the drone
+	 * @return the commands for the drone in an AutopilotOutputs object
+	 */
+	private AutopilotOutputs getAutopilotOutputs() {
 		return autopilotOutputs;
 	}
 
+	/**
+	 * Setter for the autopilot outputs (see getter for more info)
+	 * @param autopilotOutputs the inputs to set produced by the autopilot
+	 */
 	public void setAutopilotOutputs(AutopilotOutputs autopilotOutputs) {
 		this.autopilotOutputs = autopilotOutputs;
 	}
 
+	/**
+	 * Getter for the configuration of the drone (is the same as the configuration for the autopilot) this
+	 * object can define an entire drone except for its states
+	 * @return the autopilot config that contains the configuration of the drone
+	 */
 	public AutopilotConfig getAutopilotConfig() {
 		return autopilotConfig;
 	}
 
-	public void setAutopilotConfig(AutopilotConfig autopilotConfig) {
+	/**
+	 * Setter for the configuration of the drone (with the autopilotConfig object) --> see getter for more info
+	 * @param autopilotConfig the autopilot config used to configure the drone
+	 */
+	private void setAutopilotConfig(AutopilotConfig autopilotConfig) {
 		this.autopilotConfig = autopilotConfig;
 	}
+
 
 	public void addFlightRecorder(FlightRecorder flightRecorder){
 		this.getPhysXEngine().setFlightRecorder(flightRecorder);
 	}
 
-	public float getPrevFrontTyreDelta() {
+	/**
+	 * Getter for the compression of the front tyre (big D in the assignment) during the previous iteration
+	 * @return the compression of the front tyre
+	 */
+	private float getPrevFrontTyreDelta() {
 		return prevFrontTyreDelta;
 	}
 
+	/**
+	 * Setter for the compression of the front tyre for this iteration (to be used in tyre physics)
+	 * @param prevFrontTyreDelta the front tyre compression
+	 */
 	public void setPrevFrontTyreDelta(float prevFrontTyreDelta) {
 		this.prevFrontTyreDelta = prevFrontTyreDelta;
 	}
 
-	public float getPrevRearLeftTyreDelta() {
+	/**
+	 * Getter for the front tyre compression obtained during the previous iteration
+	 * @return the previous tyre compression
+	 */
+	private float getPrevRearLeftTyreDelta() {
 		return prevRearLeftTyreDelta;
 	}
 
+	/**
+	 * Setter for the previous compression (see getter)
+	 * @param prevRearLeftTyreDelta the compression to be set
+	 */
 	public void setPrevRearLeftTyreDelta(float prevRearLeftTyreDelta) {
 		this.prevRearLeftTyreDelta = prevRearLeftTyreDelta;
 	}
 
-	public float getPrevRearRightTyreDelta() {
+	/**
+	 * Getter fo the previous compression of the rear right tyre
+	 * @return the compression of the rear right tyre obtained in the previous iteration
+	 */
+	private float getPrevRearRightTyreDelta() {
 		return prevRearRightTyreDelta;
 	}
 
+	/**
+	 * Setter for the compression of the rear right tyre (obtained in the tyre physics)
+	 * @param prevRearRightTyreDelta the previous tyre compression
+	 */
 	public void setPrevRearRightTyreDelta(float prevRearRightTyreDelta) {
 		this.prevRearRightTyreDelta = prevRearRightTyreDelta;
 	}
@@ -531,9 +510,95 @@ public class Drone implements WorldObject, Callable<Void> {
 		this.deltaTime = deltaTime;
 	}
 
+	/**
+	 * Checks if the time difference is valid
+	 * @param deltaTime the time difference to be checked
+	 * @return true if and only if the time delta is positive
+	 */
 	private static boolean isValidDeltaTime(float deltaTime) {
 		return deltaTime > 0.f;
 	}
+
+	/**
+	 * Getter for the number of iterations done in one call
+	 * @return an integer representing the number of iterations to do
+	 */
+	private int getNbIterations() {
+		return nbIterations;
+	}
+
+	/**
+	 * Setter for the number of iterations to do in one call
+	 * @param nbIterations the number of iterations to do in one call (integer)
+	 */
+	public void setNbIterations(int nbIterations) {
+		if(nbIterations < 0)
+			throw new IllegalArgumentException("negative iteration number");
+		this.nbIterations = nbIterations;
+	}
+
+	/**
+	 * Getter for the ID of the drone used to identify the drone in the GUI
+	 * @return a string containing the drone ID
+	 */
+	public String getDroneID(){
+		return this.getAutopilotConfig().getDroneID();
+	}
+
+	/**
+	 * Getter for the package to be delivered by the drone (returns null if none has been assigned)
+	 * @return a delivery package object containing the information for delivery
+	 */
+	public DeliveryPackage getDeliveryPackage() {
+		return deliveryPackage;
+	}
+
+
+	/**
+	 * Setter for the package to deliver, can only be set if the previous package has been successfully delivered and the
+	 * new package delivery drone's id matched the drone's id,
+	 * if not this method will throw an illegal state
+	 * @param packageToDeliver the new package to deliver
+	 */
+	public void loadPackage(DeliveryPackage packageToDeliver){
+		//check first if we aren't already delivering a package
+		DeliveryPackage currentPackage = this.getDeliveryPackage();
+
+		//we're not carrying any package if the current package is a null pointer
+		if(currentPackage != null){
+			throw new IllegalStateException("Drone is already carrying package");
+		}
+		//check if the package is assigned the current drone, if not, we may not transport the package
+		String deliveryDroneID = packageToDeliver.getDeliveryDroneID();
+		String droneID = this.getDroneID();
+
+		if(!deliveryDroneID.equals(droneID)) {
+			throw new IllegalStateException("The drone does not match the package");
+		}
+		//if it has the same ID, go ahead and transport it
+		this.deliveryPackage = packageToDeliver;
+	}
+
+	/**
+	 * Unloads the current package (only sets the package to a null pointer)
+	 */
+	public void unloadPackage(){
+		DeliveryPackage deliveryPackage = this.getDeliveryPackage();
+		deliveryPackage.setDelivered();
+		this.deliveryPackage = null;
+	}
+
+	/**
+	 * Checks if the drone is currently transporting a package
+	 * @return true if and only if the drone is carrying a package
+	 */
+	public boolean isDelivering(){
+		return this.deliveryPackage != null;
+	}
+
+	/*
+	Drone instances
+	 */
 
 	/**
 	 * Variable containing the autopilot outputs
@@ -553,7 +618,7 @@ public class Drone implements WorldObject, Callable<Void> {
 	/**
 	 * A variable containing the orientation of the drone, (heading, pitch, roll)
 	 */
-	private Vector Orientation;
+	private Vector orientation;
 
 	/**
 	 * A variable containing the rotation vector of the drone (given in the world axis)
@@ -591,6 +656,16 @@ public class Drone implements WorldObject, Callable<Void> {
 	 */
 	private float deltaTime;
 
+	/**
+	 * A variable containing the number of iterations to do in one call
+	 */
+	private int nbIterations = 1; // a standard value for the nb of iterations
+
+	/**
+	 * The current package the drone is holding to transport to a certain airport
+	 */
+	private DeliveryPackage deliveryPackage;
+
 	/*
 	 * Constants
 	 */
@@ -599,17 +674,7 @@ public class Drone implements WorldObject, Callable<Void> {
 	 */
 	private static float LIGHTSPEED = 300000000;
 
-	/**
-	 * Variable that stores the cubes representing the drone
-	 */
-	private Set<GraphicsObject> droneCubes = new HashSet<>();
 
-
-	/**
-	 * variable used for the size of the drone.
-	 */
-	private static final float scalingFactor = 1f;
-	    
 	/*
 	 * Error Messages:
 	 */
@@ -626,6 +691,15 @@ public class Drone implements WorldObject, Callable<Void> {
 	private final static String INVALID_TIMESTEP = "The provided time needs to be strictly positive";
 	private final static String AUTOPILOT_CONFIG = "the autopilot has already been initialized";
 	public static final String INVALID_TIME = "Invalid Time";
+
+	@Override
+	public String toString() {
+		return "Drone{" +
+				"droneID: " + getDroneID() +
+				"position: " + position +
+				"velocity: " + velocity +
+				'}';
+	}
 }
 	/*
 	code graveyard:
@@ -1123,7 +1197,7 @@ public class Drone implements WorldObject, Callable<Void> {
 //		Vector rotationVelocity = RotationHPR.scalarMult(deltaTime);
 //		Vector rotationAcceleration = angularAccelerationHPR.scalarMult(deltaTime*deltaTime/2.0f);
 //
-//		//return the next Orientation
+//		//return the next orientation
 //		return currentOrientation.vectorSum(rotationVelocity).vectorSum(rotationAcceleration);
 //	}
 //

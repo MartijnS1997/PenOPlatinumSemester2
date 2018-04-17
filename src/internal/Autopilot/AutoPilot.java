@@ -3,7 +3,7 @@ package internal.Autopilot;
 
 import AutopilotInterfaces.*;
 import AutopilotInterfaces.Path;
-import internal.Testbed.FlightRecorder;
+import TestbedAutopilotInterface.Overseer.AutopilotOverseer;
 import internal.Helper.Vector;
 import internal.Physics.PhysXEngine;
 
@@ -20,28 +20,22 @@ public class AutoPilot implements Autopilot_v2{
 
 	/**
 	 * Primary constructor for the AutopilotInterfaces
-	 * @param controllerConfig the controller that will be used during the flight
+	 * @param overseer the autopilot overseer, used to manage package delivery and collision avoidance
 	 */
-	public AutoPilot(String controllerConfig){
+	public AutoPilot(AutopilotOverseer overseer){
 		//first get the controller selector
-		this.setSelector(new ControllerSelector(this));
-
+		//this.setSelector(new ControllerSelector(this));
+		this.stateMachine = new AutopilotFiniteStateMachine(this);
+		this.overseer = overseer;
+		this.communicator = new OverseerCommunication(this, overseer);
 		//may be out commented if the transitions are smooth
-		//this.getSelector().forceActiveController(FlightState.FLIGHT);
+		//this.getSelector().forceActiveController(FlightState.TAXIING_TO_GATE);
 
 	}
 
-	/**
-	 * Default constructor for the autopilot
-	 */
-    public AutoPilot() {
-
-    	// set the flightController of the autopilot
-		//Todo uncomment when normal flightController works again
-    	this(PhysXEngine.GAMMA_MODE);
-    	//this.attackController = new AutoPilotControllerNoAttack(this);
-    }
-
+	public AutoPilot() {
+		this(null);
+	}
 
 	@Override
 	public AutopilotOutputs simulationStarted(AutopilotConfig config, AutopilotInputs_v2 inputs) {
@@ -92,7 +86,7 @@ public class AutoPilot implements Autopilot_v2{
 		//initialize the Physics Engine Optimisations
 		this.setPhysXOptimisations(this.getPhysXEngine().createPhysXOptimisations());
 		//initialize the controllers
-		this.getSelector().setConfig(configuration);
+		//this.getSelector().setConfig(configuration);
 
 
         //Initialize the autopilot camera
@@ -101,7 +95,9 @@ public class AutoPilot implements Autopilot_v2{
         int nbColumns = configuration.getNbColumns();
         float horizViewAngle = configuration.getHorizontalAngleOfView();
         float verticViewAngle = configuration.getVerticalAngleOfView();
-        this.setAPCamera(new AutoPilotCamera(inputImage, horizViewAngle, verticViewAngle, nbRows, nbColumns));
+
+		//this.setAPCamera(new AutoPilotCamera(inputImage, horizViewAngle, verticViewAngle, nbRows, nbColumns));
+
 
         setStartPosition(new Vector(inputs.getX(), inputs.getY(), inputs.getZ()));
 
@@ -114,11 +110,17 @@ public class AutoPilot implements Autopilot_v2{
 	 * @return control outputs for the drone
 	 */
     private AutopilotOutputs getControlOutputs(AutopilotInputs_v2 inputs){
+		//set the current inputs so the communicator can access them
+		this.setCurrentInputs(inputs);
+		//get the overseer
+		OverseerCommunication communicator = this.getCommunicator();
+		communicator.overseerCommunication();
+		//return this.getSelector().getControlActions(inputs);
 
-		return this.getSelector().getControlActions(inputs);
+		//get the outputs from the state machine
+		return this.getStateMachine().getMachineOutput(inputs);
 
 	}
-
 
 
 	/**
@@ -142,6 +144,14 @@ public class AutoPilot implements Autopilot_v2{
 	/*
     Getters & Setters
      */
+
+	/**
+	 * Getter for the ID of the drone that the autopilot is currently simulating
+	 * @return a string containing the ID
+	 */
+	public String getID(){
+		return this.getConfig().getDroneID();
+	}
 
 	/**
 	 * Getter for the controller selector
@@ -185,15 +195,6 @@ public class AutoPilot implements Autopilot_v2{
 		return selector != null && this.getSelector() == null;
 	}
 
-
-
-//	/**
-//	 * Setter for the flight recorder
-//	 */
-//	public void setFlightRecorder(FlightRecorder flightRecorder){
-//		this.getFlightController().setFlightRecorder(flightRecorder);
-//		//this.attackController.setFlightRecorder(flightRecorder);
-//	}
 
 	/**
 	 * The physics engine configured for the autopilot (eg usage of physx optimisations for controller use)
@@ -244,13 +245,6 @@ public class AutoPilot implements Autopilot_v2{
 		this.config = config;
 	}
 
-	/**
-	 * setter for the current mode
-	 * @param newAPMode the autopilot mode
-	 */
-	protected void setAPMode(APModes newAPMode) {
-		this.APMode = newAPMode;
-	}
 
 	/**
 	 * Getter for the path approximation to be followed by the autopilot
@@ -260,12 +254,65 @@ public class AutoPilot implements Autopilot_v2{
 		return path;
 	}
 
-	public Vector getStartPosition() {
+	/**
+	 * Setter for the start position of the drone, this will be used by the controller selector to
+	 * set a target for the taxiing controller (may be omitted later on)
+	 * @return
+	 */
+	protected Vector getStartPosition() {
 		return this.startPosition;
 	}
 
-	public void setStartPosition(Vector position) {
+	/**
+	 * setter for the start position of the drone (see getter for more info)
+	 * @param position the current starting position
+	 *                 todo: add checker to see if the startpos isn't already configured
+	 */
+	private void setStartPosition(Vector position) {
 		this.startPosition = position;
+	}
+
+
+	/**
+	 * Getter for the current inputs of the autopilot (needed by the autopilot overseer communication)
+	 * @return an AutopilotInputs_v2 object that contains the current inputs for the autopilot
+	 */
+	protected AutopilotInputs_v2 getCurrentInputs() {
+		return currentInputs;
+	}
+
+	/**
+	 * Setter for the current inputs of the autopilot (see getter for more info)
+	 * @param currentInputs the current inputs provided by the testbed
+	 */
+	private void setCurrentInputs(AutopilotInputs_v2 currentInputs) {
+		this.currentInputs = currentInputs;
+	}
+
+	/**
+	 * Getter for the overseer communication entity, used to communicate with the overseer
+	 * @return an OverseerCommunication object used to communicate with the overseer
+	 */
+	protected OverseerCommunication getCommunicator() {
+		return communicator;
+	}
+
+	/**
+	 * Getter for the overseer that governs all autopilots
+	 * @return the overseer that regulates the autopilots
+	 */
+	private AutopilotOverseer getOverseer() {
+		return overseer;
+	}
+
+	/**
+	 * Getter for the finite state machine used by the autopilot for getting
+	 * the control actions and controlling the sequence of controllers needed to guide the
+	 * package delivery system
+	 * @return the state machine used to guide the autopilot
+	 */
+	private AutopilotFiniteStateMachine getStateMachine(){
+		return this.stateMachine;
 	}
 
 	/**
@@ -300,20 +347,31 @@ public class AutoPilot implements Autopilot_v2{
 	 * Object that stores the current path to follow
 	 */
 	private Path path;
-	
-	/**
-	 * store current AutoPilot mode:
-	 * 1 = landing mode
-	 * 2 = flight mode
-	 * 3 = takeoff mode
-	 */
-	private APModes APMode;
-
 
 	/**
 	 * Variable for storing the startPosition of the drone, which also serves as the destination position
 	 */
 	private Vector startPosition;
+
+	/**
+	 * The overseer used to coordinate all the autopilots
+	 */
+	private AutopilotOverseer overseer;
+
+	/**
+	 * The inputs currently received by the autopilot
+	 */
+	private AutopilotInputs_v2 currentInputs;
+
+	/**
+	 * The entity that regulates the communication with the overseer
+	 */
+	private OverseerCommunication communicator;
+
+	/**
+	 * The finite state machine used to govern the controllers for the autopilot
+	 */
+	private AutopilotFiniteStateMachine stateMachine;
 
 
     /*
@@ -323,11 +381,6 @@ public class AutoPilot implements Autopilot_v2{
 	public final static String INVALID_CONTROLLER = "The flightController is already initialized";
 
 }
-
-enum APModes{
-	TAKEOFF, FLYING_TO_BLOCKS, WAY_POINT, LANDING, TAXIING
-}
-
 /*
 CODE GRAVEYARD
  */

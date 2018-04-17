@@ -2,6 +2,7 @@ package internal.Testbed;
 
 import AutopilotInterfaces.AutopilotConfig;
 import AutopilotInterfaces.AutopilotOutputs;
+import TestbedAutopilotInterface.SimulationSetup.DroneSpec;
 import internal.Helper.Vector;
 import internal.Physics.PhysXEngine;
 
@@ -77,6 +78,7 @@ public class DroneBuilder_v2 {
      * @param droneState a map containing the position and the heading of the drone
      * @return a list of drones ready for simulation
      */
+    @Deprecated
     public List<Drone> createDrones(Map<Vector, Float> droneState){
        List <Drone> droneList = new ArrayList<>();
        for(Vector position: droneState.keySet()){
@@ -100,6 +102,27 @@ public class DroneBuilder_v2 {
         ConfigureAirborneDrones(flyingDrones);
 
         return droneList; //the references are still intact (ptr) and the drones are now in the correct state
+    }
+
+    /**
+     * Generates all the drones specified in the drone specs
+     * the builder does not perform any validity checks on the drones when they are build (to lower startup latency)
+     * the drones will simply be removed by the world upon the first iteration
+     * @param droneSpecs the specifications of the drones to add
+     * @return a list containing the drones created based on the drone specs
+     */
+    public List<Drone> createDrones(List<DroneSpec> droneSpecs){
+        //just create all the drones, regardless of their position, we are not concerned with the initial velocity
+        //if the user wants to create a flying drone he just sets the velocity and rotation right
+
+        List<Drone> droneList = new ArrayList<>();
+        //run trough all the specs and generate the drones
+        for(DroneSpec spec : droneSpecs){
+            Drone drone = this.generateDrone(spec);
+            droneList.add(drone);
+        }
+
+        return droneList;
     }
 
     /**
@@ -133,6 +156,53 @@ public class DroneBuilder_v2 {
         }
     }
 
+    /**
+     * Generates a drone based on the specifications provided (we do not perform any checks)
+     * @param droneSpec the specs for the drone, used for generation
+     * @return a drone with the exact same state as specified in the specs
+     */
+    private Drone generateDrone(DroneSpec droneSpec){
+        DroneState droneState = new DroneState() {
+            @Override
+            public Vector getPosition() {
+                return droneSpec.getDronePosition();
+            }
+
+            @Override
+            public Vector getVelocity() {
+                return droneSpec.getDroneVelocity();
+            }
+
+            @Override
+            public Vector getOrientation() {
+                return droneSpec.getDroneOrientation();
+            }
+
+            @Override
+            public Vector getRotation() {
+                return droneSpec.getDroneRotation();
+            }
+
+            @Override
+            public float getPrevFrontTyreDelta() {
+                return 0;
+            }
+
+            @Override
+            public float getPrevRearLeftTyreDelta() {
+                return 0;
+            }
+
+            @Override
+            public float getPrevRearRightTyreDelta() {
+                return 0;
+            }
+        };
+
+        return new Drone(droneState, this.createConfig());
+    }
+
+    @Deprecated
     private Drone generateDrone(Vector position, Vector orientation){
         //generate the drone state (until now only the position is determined
         DroneState droneState = new DroneState() {
@@ -202,10 +272,11 @@ public class DroneBuilder_v2 {
      * Aside from the ID, all the drones are the same
      */
     private AutopilotConfig createConfig(){
+        String droneID =  DroneBuilder_v2.this.generateDoneID();
         return new AutopilotConfig() {
             @Override
             public String getDroneID() {
-                return DroneBuilder_v2.this.generateDoneID();
+                return droneID;
             }
 
             @Override

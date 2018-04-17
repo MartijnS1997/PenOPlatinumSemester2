@@ -1,10 +1,6 @@
 package internal.Autopilot;
 
-import AutopilotInterfaces.AutopilotConfig;
-import AutopilotInterfaces.AutopilotInputs;
-import AutopilotInterfaces.AutopilotOutputs;
 import AutopilotInterfaces.AutopilotInputs_v2;
-import internal.Autopilot.Controller.ControlOutputs;
 import internal.Exceptions.NoCubeException;
 import internal.Helper.SquareMatrix;
 import internal.Helper.Vector;
@@ -17,7 +13,7 @@ import static java.lang.Math.*;
  * A flight controller made for the 15Â° AOA assignment
  * TODO: Implement the controller fully
  */
-public class GammaFlightController extends AutoPilotFlightController {
+public class GammaFlightController extends AutopilotFlightController {
 
     public GammaFlightController(AutoPilot autoPilot) {
         super(autoPilot);
@@ -25,18 +21,15 @@ public class GammaFlightController extends AutoPilotFlightController {
     }
 
 
-
-    public ControlOutputs getControlActions(AutopilotInputs_v2 inputs){
-        this.setCurrentInputs(inputs);
+    public ControlOutputs getControlActions(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs){
+//        this.updateInputs(currentInputs);
         ControlOutputs outputs = new ControlOutputs();
         AutoPilotCamera APCamera = this.getAutopilot().getAPCamera();
-        AutopilotInputs_v2 currentInputs = this.getCurrentInputs();
-        AutopilotInputs_v2 prevInputs = this.getPreviousInputs();
         PIDController xPIDController = this.getxPID();
         PIDController yPIDController = this.getyPID();
 
         APCamera.loadNewImage(currentInputs.getImage());
-        float elapsedTime = this.getCurrentInputs().getElapsedTime();
+        float elapsedTime = currentInputs.getElapsedTime();
 
         Vector center;
 
@@ -53,7 +46,7 @@ public class GammaFlightController extends AutoPilotFlightController {
         //System.out.println(center);
         //END FOR DEBUGGING
 
-        float deltaTime = Controller.getDeltaTime(prevInputs, currentInputs);
+        float deltaTime = Controller.getDeltaTime(currentInputs, previousInputs);
         float xPosition = xPIDController.getPIDOutput(-center.getxValue(), deltaTime);
         float yPosition = yPIDController.getPIDOutput(center.getyValue(), deltaTime);
         int nbColumns = APCamera.getNbColumns();
@@ -67,8 +60,8 @@ public class GammaFlightController extends AutoPilotFlightController {
 
         //System.out.println("Outputs Horizontal: " + outputs.getHorStabInclination()*RAD2DEGREE + "; Vertical: " + outputs.getVerStabInclination()*RAD2DEGREE );
 
-        rollControl(outputs, this.getCurrentInputs());
-        angleOfAttackControl(outputs, this.getPreviousInputs(), this.getCurrentInputs());
+       // rollControl(outputs, this.getCurrentInputs());
+       // angleOfAttackControl(outputs, this.getPreviousInputs(), this.getCurrentInputs());
 
         return outputs;
     }
@@ -91,36 +84,36 @@ public class GammaFlightController extends AutoPilotFlightController {
        return correctedVector;
         //return
     }
+//
+//    @Override
+//    protected void rollControl(Controller.ControlOutputs outputs, AutopilotInputs_v2 currentInput){
+//        float roll = currentInput.getRoll();
+//
+//        if(roll >= this.getRollThreshold()&&isSteeringLeft(outputs)){
+//            outputs.setRightWingInclination(this.getMainStableInclination());
+//            outputs.setLeftWingInclination(this.getMainStableInclination());
+//        }
+//        else if(roll <= - this.getRollThreshold()&&isSteeringRight(outputs)){
+//            outputs.setLeftWingInclination(this.getMainStableInclination());
+//            outputs.setRightWingInclination(this.getMainStableInclination());
+//        }else{
+//            // change nothing
+//        }
+//    }
 
-    @Override
-    protected void rollControl(Controller.ControlOutputs outputs, AutopilotInputs_v2 currentInput){
-        float roll = currentInput.getRoll();
-
-        if(roll >= this.getRollThreshold()&&isSteeringLeft(outputs)){
-            outputs.setRightWingInclination(this.getMainStableInclination());
-            outputs.setLeftWingInclination(this.getMainStableInclination());
-        }
-        else if(roll <= - this.getRollThreshold()&&isSteeringRight(outputs)){
-            outputs.setLeftWingInclination(this.getMainStableInclination());
-            outputs.setRightWingInclination(this.getMainStableInclination());
-        }else{
-            // change nothing
-        }
-    }
-
-    private boolean isSteeringRight(Controller.ControlOutputs outputs){
-        return outputs.getRightWingInclination() < this.getMainStableInclination();
-    }
-
-    private boolean isSteeringLeft(Controller.ControlOutputs outputs){
-        return outputs.getRightWingInclination() > this.getMainStableInclination();
-    }
+//    private boolean isSteeringRight(Controller.ControlOutputs outputs){
+//        return outputs.getRightWingInclination() < this.getMainStableInclination();
+//    }
+//
+//    private boolean isSteeringLeft(Controller.ControlOutputs outputs){
+//        return outputs.getRightWingInclination() > this.getMainStableInclination();
+//    }
 
     private void xControlActions(ControlOutputs outputs, float xPos, float cubeCoeff){
         float horizontalStabIncl = STABILIZER_STABLE_INCLINATION;
         float rightMainIncl = MAIN_STABLE_INCLINATION;
         float leftMainIncl = MAIN_STABLE_INCLINATION;
-        float roll = this.getCurrentInputs().getRoll();
+        float roll = 0; //this.getCurrentInputs().getRoll();
         if(xPos > X_THRESHOLD){
             // cube coeff: to increase pitch for faraway objects
             // squared for large corrections if large error
@@ -151,7 +144,7 @@ public class GammaFlightController extends AutoPilotFlightController {
 
     private void setThrustOut(ControlOutputs outputs, float cubeCoeff){
         //Todo implement: write the output to the outputs
-        float pitch = this.getCurrentInputs().getPitch();
+        float pitch = 0; //this.getCurrentInputs().getPitch();
         float maxThrust =  this.getAutopilot().getConfig().getMaxThrust();
         int threshold = Math.round(THRESHOLD_DISTANCE);
         float gravity = this.getAutopilot().getConfig().getGravity();
@@ -160,7 +153,7 @@ public class GammaFlightController extends AutoPilotFlightController {
         float thrust = (float) ((maxThrust/4) + THRUST_FACTOR*this.getTotalMass()*gravity*cubeCoeff);
         //System.out.println("thrust: " + thrust);
         outputs.setThrust(Math.max(Math.min(thrust, maxThrust), 0));
-        if (getVelocityApprox().getzValue() < -50.f){
+        if (getVelocityApprox().getzValue() < -50.f || pitch < 0){
            outputs.setThrust(0f);
         }
     }
@@ -172,9 +165,9 @@ public class GammaFlightController extends AutoPilotFlightController {
      */
     public Vector getVelocityApprox(){
         //get the inputs at moment k - 1 for the derivative
-        AutopilotInputs_v2 prevInputs = this.getPreviousInputs();
+        AutopilotInputs_v2 prevInputs = null; //this.getPreviousInputs();
         //get the inputs at moment k
-        AutopilotInputs_v2 currentInputs = this.getCurrentInputs();
+        AutopilotInputs_v2 currentInputs = null; //this.getCurrentInputs();
         float prevTime = prevInputs.getElapsedTime();
         float currentTime = currentInputs.getElapsedTime();
 
@@ -189,22 +182,22 @@ public class GammaFlightController extends AutoPilotFlightController {
     /*
     Getters and setters
      */
-    @Override
-    protected float getMainStableInclination() {
-        return MAIN_STABLE_INCLINATION;
-    }
-    @Override
-    protected float getStabilizerStableInclination() {
-        return STABILIZER_STABLE_INCLINATION;
-    }
-    @Override
-    protected float getRollThreshold() {
-        return ROLL_THRESHOLD;
-    }
-    @Override
-    protected float getInclinationAOAErrorMargin() {
-        return ERROR_INCLINATION_MARGIN;
-    }
+//    @Override
+//    protected float getMainStableInclination() {
+//        return MAIN_STABLE_INCLINATION;
+//    }
+//    @Override
+//    protected float getStabilizerStableInclination() {
+//        return STABILIZER_STABLE_INCLINATION;
+//    }
+//    @Override
+//    protected float getRollThreshold() {
+//        return ROLL_THRESHOLD;
+//    }
+//    @Override
+//    protected float getInclinationAOAErrorMargin() {
+//        return ERROR_INCLINATION_MARGIN;
+//    }
 
     public PIDController getxPID() {
         return xPID;
@@ -236,7 +229,7 @@ public class GammaFlightController extends AutoPilotFlightController {
     private static final float MAX_CUBE_COEFF = 3f;
     public  static final float STABILIZER_STABLE_INCLINATION = 0.0f;
     //private static final float GRAVITY = 9.81f;
-    private static final float ROLL_THRESHOLD = (float) (PI * 8.5f/180.0f);
+    private static final float ROLL_THRESHOLD = (float) (PI * 4f/180.0f);
     //private static final float RAD2DEGREE = (float) (180f/ PI);
     //private static final float CHECK_INTERVAL = 1/20.f;
     private static final float X_THRESHOLD = 0f;
@@ -346,8 +339,8 @@ public class GammaFlightController extends AutoPilotFlightController {
 //
 //    @Override
 //    public AutopilotOutputs getControlActions(AutopilotInputs inputs) {
-//        this.setCurrentInputs(inputs);
-//        ControlOutputs outputs = this.getPreviousOutputs().copy(); //get a copy from the previous outputs
+//        this.updateInputs(inputs);
+//        ControlOutputs outputs = this.getPreviousOutputs().deepCopy(); //get a deepCopy from the previous outputs
 //        //get the middle of the cubes:
 //        AutoPilotCamera APCamera = this.getAutopilot().getAPCamera();
 //        APCamera.loadNewImage(getCurrentInputs().getImage());
@@ -648,7 +641,7 @@ public class GammaFlightController extends AutoPilotFlightController {
 //     */
 //    @Override
 //    public AutopilotOutputs getControlActions(AutopilotInputs inputs) {
-//        this.setCurrentInputs(inputs);
+//        this.updateInputs(inputs);
 //        ControlOutputs outputs = new ControlOutputs();
 //    	// If all blocks were hit, start landingprocedure
 //    	AutoPilotCamera APCamera = this.getAutopilot().getAPCamera();

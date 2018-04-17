@@ -3,8 +3,7 @@ package internal.Testbed;
 import java.io.IOException;
 import java.util.Set;
 
-import gui.Cube;
-import gui.GraphicsObject;
+import gui.GraphicsObjects.GraphicsObject;
 import internal.Helper.Vector;
 
 /**

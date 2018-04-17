@@ -50,8 +50,17 @@ public class streamtests {
         //then project the difference vector on the heading vector
         Vector headingVector = new Vector(0,0,-1);
         Vector projectedDiff = headingVector.projectOnVector(diffVectorDrone);
+        Vector projectedDiff2 = diffVectorDrone.projectOn(headingVector);
         System.out.println(projectedDiff);
+        System.out.println(projectedDiff2);
         //check the scalar product of the projection, if positive we're behind, if not we're ahead
         System.out.println(projectedDiff.scalarProduct(headingVector) >= 0);
+    }
+
+    @Test
+    public void returnTest(){
+        int integer = 0;
+        System.out.println(integer++);
+        System.out.println(integer++);
     }
 }

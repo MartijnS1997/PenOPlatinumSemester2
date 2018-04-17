@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
-import gui.GraphicsObject;
-import gui.Tile;
+import gui.GraphicsObjects.GraphicsObject;
+import gui.GraphicsObjects.Tile;
 import internal.Helper.Vector;
 
 public class Airport implements WorldObject {
@@ -15,8 +15,8 @@ public class Airport implements WorldObject {
 	private Set<GraphicsObject> airportTiles = new HashSet<>();
 
 	public Airport(Vector position) {
-		this.position = new Vector(0,0.5f,20);
-		createAirport(15, 250);
+		this.position = position;
+		createAirport(15, 280);
 	}
 	
 	@Override

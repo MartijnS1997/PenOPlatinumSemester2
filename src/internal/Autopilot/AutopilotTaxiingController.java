@@ -1,6 +1,7 @@
 package internal.Autopilot;
 
 import AutopilotInterfaces.*;
+import com.sun.istack.internal.Nullable;
 import internal.Helper.Vector;
 import internal.Physics.PhysXEngine;
 
@@ -18,9 +19,9 @@ public class AutopilotTaxiingController extends Controller {
     }
 
     @Override
-    public AutopilotOutputs getControlActions(AutopilotInputs_v2 inputs) {
+    public AutopilotOutputs getControlActions(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs) {
         //set the current inputs
-        this.setCurrentInputs(inputs);
+        //this.updateInputs(inputs);
         //set the current outputs
         ControlOutputs outputs = new ControlOutputs();
 
@@ -29,6 +30,16 @@ public class AutopilotTaxiingController extends Controller {
 
         return outputs;
 
+    }
+
+    /**
+     * Setter for the next target of the taxiing controller
+     * @param location the location to taxi to
+     * @param orientation the direction in which the controller has to be oriented
+     *                    if null the orientation doesn't matter
+     */
+    public void setTarget(Vector location, @Nullable Vector orientation ){
+        //TODO implement
     }
 
     private void getControlActionsActiveState(ControlOutputs outputs){
@@ -64,7 +75,7 @@ public class AutopilotTaxiingController extends Controller {
     private void initialTurn(ControlOutputs outputs){
 
         Vector target = this.getTarget();
-        AutopilotInputs_v2 inputs = this.getCurrentInputs();
+        AutopilotInputs_v2 inputs = null;// this.getCurrentInputs();
         float maxBrake = this.getConfig().getRMax();
         float maxThrust = this.getConfig().getMaxThrust();
         //calculate the angle between the heading vector and the target vector
@@ -123,7 +134,7 @@ public class AutopilotTaxiingController extends Controller {
         //we just brake to the full extent
         float maxBrake = this.getConfig().getRMax();
         //check if we've come to a standstill && reached the target
-        if(droneInStandstill() && targetReached(this.getCurrentInputs())){
+        if(droneInStandstill() && targetReached( null /*this.getCurrentInputs()*/)){
             //do not change the inputs, we're finished
             return;
         }
@@ -148,8 +159,8 @@ public class AutopilotTaxiingController extends Controller {
      * @return true if the total velocity of the drone is <= STANDSTILL_VELOCITY
      */
     private boolean droneInStandstill(){
-        AutopilotInputs_v2 currentInputs = this.getCurrentInputs();
-        AutopilotInputs_v2 prevInputs = this.getPreviousInputs();
+        AutopilotInputs_v2 currentInputs = null; //this.getCurrentInputs();
+        AutopilotInputs_v2 prevInputs = null; //this.getPreviousInputs();
 
         //approx the velocity
         Vector approxVelocity = getVelocityApprox(prevInputs, currentInputs);
@@ -167,15 +178,15 @@ public class AutopilotTaxiingController extends Controller {
   Moving to target constants
    */
 
-    private final static float REFERENCE_VELOCITY = 5f; // reference is 5m/s
+     // reference is 5m/s
     private final static float REACHING_DISTANCE = 10f; // the distance we need to enter before we can call it a day
                                                         // also added a bit of padding for the brakes
 
     private void moveToTarget(ControlOutputs outputs){
 
         //acquire the current inputs (needed for angle calculation)
-        AutopilotInputs_v2 currentInputs = this.getCurrentInputs();
-        AutopilotInputs_v2 prevInputs = this.getPreviousInputs();
+        AutopilotInputs_v2 currentInputs = null; //this.getCurrentInputs();
+        AutopilotInputs_v2 prevInputs = null; // this.getPreviousInputs();
         //check if we are done with moving
         if(targetReached(currentInputs)){
             //if so, change the state and call the brake method, return afterwards
@@ -219,7 +230,7 @@ public class AutopilotTaxiingController extends Controller {
         PIDController velocityController = this.getVelocityController();
         //get the delta time, note this is an extrapolation, we assume the time step stays the same across the simulation
         float deltaTime = Controller.getDeltaTime(prevInputs, currentInputs);
-        float errorVelocity = REFERENCE_VELOCITY - totalVelocityApprox;
+        float errorVelocity = calcRefVelocity(currentInputs) - totalVelocityApprox;
 //        System.out.println(approxVel);
         //now calculate the output of the PID
         float errorVelPID = velocityController.getPIDOutput(-errorVelocity, deltaTime);
@@ -245,6 +256,35 @@ public class AutopilotTaxiingController extends Controller {
 //        System.out.println(outputs);
 //        System.out.println();
     }
+
+    /**
+     * Calculates the reference velocity used by the taxiing controller
+     * slows down when closer to target
+     * @param inputs the current inputs to extract the needed state data from
+     * @return the velocity needed for the reference
+     */
+    private float calcRefVelocity(AutopilotInputs_v2 inputs){
+        Vector target = this.getTarget();
+        //extract the position
+        Vector position = Controller.extractPosition(inputs);
+        //get the distance to the target
+        float distanceToTarget = position.distanceBetween(target);
+
+        return distanceToTarget > LOW_VEL_RADIUS ? HIGH_REF_VELOCITY : LOW_REF_VELOCITY;
+    }
+
+    /**
+     * The high reference velocity
+     */
+    private static float HIGH_REF_VELOCITY = 25f;
+    /**
+     * The low reference velocity
+     */
+    private static float LOW_REF_VELOCITY = 5f;
+    /**
+     * The radius before we go in low velocity mode
+     */
+    private static float LOW_VEL_RADIUS = 150f;
 
     /**
      * Calculates the corrective thrust action needed to keep the velocity up to level
@@ -413,34 +453,34 @@ public class AutopilotTaxiingController extends Controller {
     }
 
     @Override
-    public boolean hasReachedObjective(AutopilotInputs_v2 inputs) {
+    public boolean hasReachedObjective(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs) {
         return false;
     }
 
-    @Override
-    protected float getMainStableInclination() {
-        return 0;
-    }
-
-    @Override
-    protected float getStabilizerStableInclination() {
-        return 0;
-    }
-
-    @Override
-    protected float getRollThreshold() {
-        return 0;
-    }
-
-    @Override
-    protected float getInclinationAOAErrorMargin() {
-        return 0;
-    }
-
-    @Override
-    protected float getStandardThrust() {
-        return 0;
-    }
+//    @Override
+//    protected float getMainStableInclination() {
+//        return 0;
+//    }
+//
+//    @Override
+//    protected float getStabilizerStableInclination() {
+//        return 0;
+//    }
+//
+//    @Override
+//    protected float getRollThreshold() {
+//        return 0;
+//    }
+//
+//    @Override
+//    protected float getInclinationAOAErrorMargin() {
+//        return 0;
+//    }
+//
+//    @Override
+//    protected float getStandardThrust() {
+//        return 0;
+//    }
 
     /**
      * Getter for the target of the taxiing controller
@@ -494,8 +534,12 @@ public class AutopilotTaxiingController extends Controller {
      * The target of the taxiing controller
      */
     //TODO remove standard value if the functionality of the controller is tested and the controller selector can make use of it
-    private Vector target = new Vector(-50, 0,1000);
+    private Vector target = new Vector(-500, 0,1000);
 
+    /**
+     * The reference velocity used by the autopilot cruise control
+     */
+    private float referenceVelocity = 5f;
     /**
      * The PID controller used to determine the force that needs to be exerted on the brakes
      */
@@ -516,7 +560,7 @@ public class AutopilotTaxiingController extends Controller {
      * The current state of the taxiing, first we need to take an initial turn so we are in the right
      * position to taxi to the target, we always start with an init turn
      */
-    private TaxiingState taxiingState = TaxiingState.MOVING_TO_TARGET;
+    private TaxiingState taxiingState = TaxiingState.INIT_TURN;
 
 
     private enum TaxiingState {
@@ -533,7 +577,7 @@ public class AutopilotTaxiingController extends Controller {
 //    @Override
 //    public AutopilotOutputs getControlActions(AutopilotInputs_v2 inputs) {
 //
-//        this.setCurrentInputs(inputs);
+//        this.updateInputs(inputs);
 //
 //        AutopilotInputs_v2 currentInputs = getCurrentInputs();
 //        AutopilotInputs_v2 previousInputs = getPreviousInputs();
