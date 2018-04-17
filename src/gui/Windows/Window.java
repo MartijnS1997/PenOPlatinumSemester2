@@ -168,7 +168,7 @@ public class Window {
 	}
 
 	public void render(Set<GraphicsObject> renderObjects, Drone drone) {
-		input.setStartOrientation(drone.getOrientation());
+		//input.setStartOrientation(drone.getOrientation());
 		renderFrame(renderObjects, drone);
 
 		// Return false if the user has attempted to close
