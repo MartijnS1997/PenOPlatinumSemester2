@@ -310,7 +310,7 @@ public class MapAirport {
      * Getter for the width of the runway
      * @return a float containing the width of the runway
      */
-    protected float getRunwayWidth() {
+    public float getRunwayWidth() {
         return runwayWidth;
     }
 
@@ -318,7 +318,7 @@ public class MapAirport {
      * Getter for the length of the runway
      * @return a float containing the length of the runway
      */
-    protected float getRunwayLength() {
+    public float getRunwayLength() {
         return runwayLength;
     }
 

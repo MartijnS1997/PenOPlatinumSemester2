@@ -85,11 +85,12 @@ public class AutopilotWayPointController extends Controller {
 
     /**
      * The controller has reached its objective if all the way points are passed
-     * @param inputs the current inputs (this is the base of the check)
+     * @param currentInputs the current inputs (this is the base of the check)
+     * @param previousInputs
      * @return
      */
     @Override
-    public boolean hasReachedObjective(AutopilotInputs_v2 inputs) {
+    public boolean hasReachedObjective(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs) {
         //get the way point flag:
          return this.hasReachedFinalWayPoint();
     }
@@ -104,7 +105,7 @@ public class AutopilotWayPointController extends Controller {
         //first get the maximum thrust
         float maxThrust =  this.getConfig().getMaxThrust();
         //also get the current inputs
-        AutopilotInputs_v2 inputs = this.getCurrentInputs();
+        AutopilotInputs_v2 inputs = null; //this.getCurrentInputs();
         //extract the orientation
         Vector orientation = Controller.extractOrientation(inputs);
         //extract the position
@@ -138,8 +139,8 @@ public class AutopilotWayPointController extends Controller {
         WayPoint wayPoint = this.getCurrentWayPoint();
 
         //we need the current inputs
-        AutopilotInputs_v2 currentInputs = this.getCurrentInputs();
-        AutopilotInputs_v2 prevInputs = this.getPreviousInputs();
+        AutopilotInputs_v2 currentInputs = null;// this.getCurrentInputs();
+        AutopilotInputs_v2 prevInputs = null;//this.getPreviousInputs();
 
         //calculate the pitch difference
         float pidInput = this.getPitchDifference();
@@ -153,7 +154,7 @@ public class AutopilotWayPointController extends Controller {
 //        System.out.println("PID output: " + pidResult);
         //if the pid result is positive: the set point is larger than the input -> lower the pitch (pos inclination)
         //if the pid result is negative: the set point is smaller than the input -> increase the pitch (neg inclination)
-        float horizontalInclination = this.getStabilizerStableInclination() + pidResult; //todo change the constants for better result
+        float horizontalInclination = /*this.getStabilizerStableInclination() */+ pidResult; //todo change the constants for better result
         horizontalInclination = signum(horizontalInclination) * min(abs(horizontalInclination), HORIZONTAL_CAP_INCLINATION);
         outputs.setHorStabInclination(horizontalInclination);
     }
@@ -167,8 +168,8 @@ public class AutopilotWayPointController extends Controller {
         //get the current way point
         WayPoint wayPoint = this.getCurrentWayPoint();
         //then get the current inputs
-        AutopilotInputs_v2 currentInputs =  this.getCurrentInputs();
-        AutopilotInputs_v2 prevInputs = this.getPreviousInputs();
+        AutopilotInputs_v2 currentInputs = null;//this.getCurrentInputs();
+        AutopilotInputs_v2 prevInputs = null;//this.getPreviousInputs();
         //extract the current orientation:
         Vector orientation = Controller.extractOrientation(currentInputs);
         //extract the position
@@ -186,8 +187,8 @@ public class AutopilotWayPointController extends Controller {
 
         //System.out.println( "input sign: " + pidInput);
         //and inclining the main wings
-        float mainLeftWingInclination = this.getMainStableInclination() + pidOutput;
-        float mainRightWingInclination = this.getMainStableInclination() - pidOutput;
+        float mainLeftWingInclination = /*this.getMainStableInclination()*/ + pidOutput;
+        float mainRightWingInclination =/* this.getMainStableInclination()*/ - pidOutput;
 
         //put some extra umpf into the horizontal stabilizer
         float surplusHor = outputs.getHorStabInclination()  + BANK_HOR_STAB_EXTRA;
@@ -206,28 +207,30 @@ public class AutopilotWayPointController extends Controller {
      *         the same value as the inclination is returned, if it exceeds the border value, the inclination
      *         is set to the border value
      */
+    //note: replace with main class call cap inclination
     private float capMainWingInclination(float inclination){
-        //first determine the lower cap:
-        float lowerCap = this.getMainStableInclination() - MAIN_CAP_DELTA_INCLINATION;
-        float upperCap = this.getMainStableInclination() + MAIN_CAP_DELTA_INCLINATION;
-        if(inclination < lowerCap){
-            return lowerCap;
-        }
-        if(inclination > upperCap){
-            return upperCap;
-        }
-        return inclination;
+//        //first determine the lower cap:
+//        float lowerCap = this.getMainStableInclination() - MAIN_CAP_DELTA_INCLINATION;
+//        float upperCap = this.getMainStableInclination() + MAIN_CAP_DELTA_INCLINATION;
+//        if(inclination < lowerCap){
+//            return lowerCap;
+//        }
+//        if(inclination > upperCap){
+//            return upperCap;
+//        }
+//        return inclination;
+        return 0;
     }
 
     /**
      * Generates the control actions for the autopilot
-     * @param inputs the inputs of the autopilot
+     * @param currentInputs the inputs of the autopilot
      * @return the control actions
      */
     @Override
-    public AutopilotOutputs getControlActions(AutopilotInputs_v2 inputs){
+    public AutopilotOutputs getControlActions(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs){
         //System.out.println("Current position: " + Controller.extractPosition(inputs));
-        this.setCurrentInputs(inputs);
+        //this.updateInputs(inputs);
         //create a new output object
         Controller.ControlOutputs outputs = new Controller.ControlOutputs();
         this.wayPointControl();
@@ -240,10 +243,10 @@ public class AutopilotWayPointController extends Controller {
         //get the control actions for the roll
         bankControl(outputs);
         //roll control
-        rollControl(outputs, inputs);
+        //rollControl(outputs, currentInputs);
 
         //check if everything is within allowed parameters
-        angleOfAttackControl(outputs, this.getPreviousInputs(), this.getCurrentInputs());
+        //angleOfAttackControl(outputs, currentInputs, previousInputs);
         System.out.println(outputs);
         System.out.println();
         return outputs;
@@ -256,8 +259,8 @@ public class AutopilotWayPointController extends Controller {
 
         PathGenerator pathGenerator = this.getPathGenerator();
         WayPoint currentWayPoint = this.getCurrentWayPoint();
-        AutopilotInputs_v2 currentInputs = this.getCurrentInputs();
-        AutopilotInputs_v2 prevInputs = this.getPreviousInputs();
+        AutopilotInputs_v2 currentInputs = null; //this.getCurrentInputs();
+        AutopilotInputs_v2 prevInputs = null; //this.getPreviousInputs();
 
         System.out.println(this.getCurrentWayPoint());
         if(currentWayPoint == null){
@@ -323,16 +326,16 @@ public class AutopilotWayPointController extends Controller {
     }
 
     @Override
-    protected void rollControl(ControlOutputs outputs, AutopilotInputs_v2 currentInput){
+    protected void rollControl(ControlOutputs outputs, AutopilotInputs_v2 currentInput, float rollThreshold){
         float roll = currentInput.getRoll();
 
-        if(roll >= this.getRollThreshold()&&isSteeringLeft(outputs)){
-            outputs.setRightWingInclination(this.getMainStableInclination());
-            outputs.setLeftWingInclination(this.getMainStableInclination());
+        if(roll >= rollThreshold&&isSteeringLeft(outputs)){
+            outputs.setRightWingInclination(0/* this.getMainStableInclination()*/);
+            outputs.setLeftWingInclination(0 /*this.getMainStableInclination()*/);
         }
-        else if(roll <= - this.getRollThreshold()&&isSteeringRight(outputs)){
-            outputs.setLeftWingInclination(this.getMainStableInclination());
-            outputs.setRightWingInclination(this.getMainStableInclination());
+        else if(roll <= - rollThreshold&&isSteeringRight(outputs)){
+            outputs.setLeftWingInclination(0 /*this.getMainStableInclination()*/);
+            outputs.setRightWingInclination(0 /*this.getMainStableInclination()*/);
 
         }else{
             // change nothing
@@ -346,7 +349,7 @@ public class AutopilotWayPointController extends Controller {
      * @return true if the drone is steering right
      */
     private boolean isSteeringRight(Controller.ControlOutputs outputs){
-        return outputs.getRightWingInclination() < this.getMainStableInclination();
+        return false; //outputs.getRightWingInclination() < this.getMainStableInclination();
     }
 
     /**
@@ -355,7 +358,7 @@ public class AutopilotWayPointController extends Controller {
      * @return true if the drone is steering left
      */
     private boolean isSteeringLeft(Controller.ControlOutputs outputs){
-        return outputs.getRightWingInclination() > this.getMainStableInclination();
+        return false; //outputs.getRightWingInclination() > this.getMainStableInclination();
     }
 
     /**
@@ -366,7 +369,7 @@ public class AutopilotWayPointController extends Controller {
      * the direction sign is determined by the cross product of the heading vector with the reference (negative is right, positive is left)
      */
     private float getHeadingDifference(){
-        AutopilotInputs_v2 inputs = this.getCurrentInputs();
+        AutopilotInputs_v2 inputs = null; //this.getCurrentInputs();
         //get the orientation of the drone
         Vector orientation = Controller.extractOrientation(inputs);
         System.out.println("Current Orientation: " + orientation.scalarMult(RAD2DEGREE));
@@ -419,7 +422,7 @@ public class AutopilotWayPointController extends Controller {
      * @return returns a pos angle if the drone needs to go up, and a negative angle if the drone needs to go down
      */
     private float getPitchDifference(){
-        AutopilotInputs_v2 inputs = this.getCurrentInputs();
+        AutopilotInputs_v2 inputs = null;//this.getCurrentInputs();
         //get the difference vector
         //first get the current way point
         WayPoint currWayPoint = this.getCurrentWayPoint();
@@ -454,30 +457,30 @@ public class AutopilotWayPointController extends Controller {
     }
 
     //TODO implement these methods accordingly
-    @Override
-    protected float getMainStableInclination() {
-        return MAIN_STABLE_INCLINATION;
-    }
-
-    @Override
-    protected float getStabilizerStableInclination() {
-        return HORIZONTAL_STABLE_INCLINATION;
-    }
-
-    @Override
-    protected float getRollThreshold() {
-        return ROLL_THRESHOLD;
-    }
-
-    @Override
-    protected float getInclinationAOAErrorMargin() {
-        return AOA_CALC_ERROR_MARGIN;
-    }
-
-    @Override
-    protected float getStandardThrust() {
-        return 0;
-    }
+//    @Override
+//    protected float getMainStableInclination() {
+//        return MAIN_STABLE_INCLINATION;
+//    }
+//
+//    @Override
+//    protected float getStabilizerStableInclination() {
+//        return HORIZONTAL_STABLE_INCLINATION;
+//    }
+//
+//    @Override
+//    protected float getRollThreshold() {
+//        return ROLL_THRESHOLD;
+//    }
+//
+//    @Override
+//    protected float getInclinationAOAErrorMargin() {
+//        return AOA_CALC_ERROR_MARGIN;
+//    }
+//
+//    @Override
+//    protected float getStandardThrust() {
+//        return 0;
+//    }
 
 //    /**
 //     * getter for the current way point

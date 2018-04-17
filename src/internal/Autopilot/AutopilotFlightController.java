@@ -14,8 +14,10 @@ import static java.lang.Math.*;
  * Created by Martijn on 30/10/2017.
  * Appended and edited by Anthony Rath� on 6/11/2017
  * A class of AutopilotInterfaces Controllers
+ * TODO change the flight controller objective reached method to account for its new functionality
+ * (namely guiding the flight in the assigned airspace)
  */
-public abstract class AutopilotFlightController extends Controller{
+public abstract class AutopilotFlightController extends Controller {
 
 
 	/**
@@ -28,7 +30,7 @@ public abstract class AutopilotFlightController extends Controller{
     }
 
     @Override
-    public boolean hasReachedObjective(AutopilotInputs_v2 inputs) {
+    public boolean hasReachedObjective(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs) {
         //if there are no cubes visible, we have lost visual contact, we start our landing sequence
         //first do the simple check
         //if it fails, we'll do some more calculations
@@ -36,7 +38,7 @@ public abstract class AutopilotFlightController extends Controller{
             return false;
         }
         //there was no drone visible on the camera, see if there are cubes in front of the drone
-        return !cubeInFrontOfDrone(inputs);
+        return !cubeInFrontOfDrone(currentInputs);
     }
 
     /**
@@ -239,11 +241,6 @@ public abstract class AutopilotFlightController extends Controller{
 
 
      */
-
-    @Override
-    protected float getStandardThrust() {
-        return STANDARD_THRUST;
-    }
 
     /**
      * Get the PID used for the corrections on the x-coordinate inputs

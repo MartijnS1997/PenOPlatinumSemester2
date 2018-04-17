@@ -4,17 +4,18 @@ package internal.Autopilot;
 import AutopilotInterfaces.AutopilotConfig;
 import AutopilotInterfaces.AutopilotInputs_v2;
 import AutopilotInterfaces.AutopilotOutputs;
+import TestbedAutopilotInterface.Overseer.MapAirport;
 import internal.Helper.Vector;
 
 
 import static java.lang.Math.*;
 
-import org.omg.CORBA.SetOverrideTypeHelper;
-
 
 /**
  * Created by Martijn on 18/02/2018, extended by Jonathan on 12/3/2018
  * A class of landing controllers, responsible for controlling the landing of the drone
+ * TODO re-implement for the final phase of the assignment (we've change some things in the main controller class
+ * TODO to handle the initialization of the autopilot)
  */
 
 public class AutopilotLandingController extends Controller {
@@ -28,15 +29,16 @@ public class AutopilotLandingController extends Controller {
 
     }
 
+    private MapAirport airport;
     /**
      * Returns true if the plane came to a standstill on the ground
-     * @param inputs the current inputs (this is the base of the check)
+     * @param currentInputs the current inputs (this is the base of the check)
+     * @param previousInputs
      * @return true if the approximate velocity is below velocity threshold
      */
     @Override
-    public boolean hasReachedObjective(AutopilotInputs_v2 inputs) {
-        Vector velocityApprox = this.getVelocityApprox(this.getCurrentInputs(), inputs);
-        return velocityApprox.getSize() <= MAXIMUM_LANDING_VELOCITY;
+    public boolean hasReachedObjective(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs) {
+        return (this.getVelocityApprox(currentInputs, previousInputs).getSize() < GROUND_SPEED);
     }
 
     /**
@@ -46,54 +48,49 @@ public class AutopilotLandingController extends Controller {
      * @return the control actions
      */
     @Override
-    public AutopilotOutputs getControlActions(AutopilotInputs_v2 inputs) {
-        this.setCurrentInputs(inputs);
+    public AutopilotOutputs getControlActions(AutopilotInputs_v2 inputs, AutopilotInputs_v2 previousInputs) {
 
         if(this.isFirstControlCall()){
-            this.setStartElapsedTime(this.getCurrentInputs());
+            this.setStartElapsedTime(inputs);
             this.setFirstControlCall();
         }
 
-        LandingPhases landingPhase = this.getCurrentLandingPhase();
+        LandingPhases landingPhase = this.getCurrentLandingPhase(inputs, previousInputs);
         ControlOutputs outputs = new ControlOutputs();
-
-        AutopilotInputs_v2 prevInputs = this.getPreviousInputs();
-
 //        System.out.println("Current velocity: " + this.getVelocityApprox(prevInputs, getCurrentInputs()));
 
         switch (landingPhase){
             case STABILIZE:
-                this.stabilizeFlight(outputs);
+                this.stabilizeFlight(outputs, inputs, previousInputs);
                 break;
             case RAPID_DESCEND:
-                this.getRapidDescendControls(outputs);
+                this.getRapidDescendControls(outputs, inputs, previousInputs);
 //                System.out.println("rapidDescend");
                 break;
             case SOFT_DESCEND:
 //                System.out.println("soft descend");
-                this.getSoftDescendControls(outputs);
+                this.getSoftDescendControls(outputs, inputs, previousInputs);
                 break;
             case SLOW_DOWN:
 //            	System.out.println("Slowdown");
             	this.slowDown(outputs);
             	break;
         }
-
-        AutopilotInputs_v2 previousInputs = getPreviousInputs();
-        angleOfAttackControl(outputs, previousInputs, inputs);
+        float resultMargin = 0f;
+        angleOfAttackControl(resultMargin, outputs, inputs,  previousInputs);
         // System.out.println(Controller.extractPosition(inputs).getyValue());
 
         //System.out.println(outputs);
         return outputs;
-
     }
+    
 
-    private LandingPhases getCurrentLandingPhase(){
-        AutopilotInputs_v2 currentInputs = this.getCurrentInputs();
+
+    private LandingPhases getCurrentLandingPhase(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 prevInputs){
         //check if the rapid descend phase was started
         if(!this.isHasStartedRapidDescend()){
             //check if the flight is stable
-        	if(!slowEnough(currentInputs)){
+        	if(!slowEnough(currentInputs,prevInputs)){
         		return LandingPhases.SLOW_DOWN;
         	}
         	else if(!mayInitializeLanding(currentInputs)){
@@ -146,9 +143,7 @@ public class AutopilotLandingController extends Controller {
      * Generates the outputs for the rapid descend phase of the landing
      * @param outputs the outputs to write to
      */
-    private void getRapidDescendControls(ControlOutputs outputs){
-        AutopilotInputs_v2 currentInputs = this.getCurrentInputs();
-        AutopilotInputs_v2 prevInputs = this.getPreviousInputs();
+    private void getRapidDescendControls(ControlOutputs outputs,AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 prevInputs){
         //set the setpoint
         PIDController pitchPID = this.getPitchPIDController();
         pitchPID.setSetPoint(RAPID_DESCEND_PHASE_REF_PITCH);
@@ -164,10 +159,8 @@ public class AutopilotLandingController extends Controller {
      * Generates the control outputs for the soft landing phase
      * @param outputs the soft landing phase
      */
-    private void getSoftDescendControls(ControlOutputs outputs){
+    private void getSoftDescendControls(ControlOutputs outputs, AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 prevInputs){
 //        System.out.println("querying soft descend");
-        AutopilotInputs_v2 currentInputs = this.getCurrentInputs();
-        AutopilotInputs_v2 prevInputs = this.getPreviousInputs();
         AutopilotConfig config = this.getConfig();
         //set the setPoint
 //        PIDController pitchPID = this.getPitchPIDController();
@@ -193,7 +186,7 @@ public class AutopilotLandingController extends Controller {
      * @return true if and only if the drone is stabilized and has stabilized for at least minimal stabilizing time
      */
     private boolean mayInitializeLanding(AutopilotInputs_v2 inputs) {
-        return (this.getCurrentInputs().getElapsedTime() - this.getStartElapsedTime()) > MINIMAL_STABILIZING_TIME && this.isStabilized(inputs);
+        return (inputs.getElapsedTime() - this.getStartElapsedTime()) > MINIMAL_STABILIZING_TIME && this.isStabilized(inputs);
     }
 
 
@@ -201,13 +194,11 @@ public class AutopilotLandingController extends Controller {
      * Stabilizes the flight before commencing the landing sequence
      * @param outputs the output object to write the control actions to
      */
-    private void stabilizeFlight(ControlOutputs outputs){
+    private void stabilizeFlight(ControlOutputs outputs,AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 prevInputs){
         //get the current and previous inputs
-        AutopilotInputs_v2 currentInputs = this.getCurrentInputs();
-        AutopilotInputs_v2 prevInputs = this.getPreviousInputs();
 
         //stabilize the pitch and the roll
-        //super.rollControl(outputs, currentInputs);
+        //super.rollControl(outputs, currentInputs);//TODO Is dit nodig?
         pitchStabilizer(outputs, currentInputs, prevInputs);
         rollStabilizer(outputs, currentInputs, prevInputs);
        	outputs.setThrust(STABILIZING_THURST);
@@ -324,12 +315,13 @@ public class AutopilotLandingController extends Controller {
     }
 
     //TODO
-    private boolean slowEnough(AutopilotInputs_v2 inputs){
-    	return (this.getVelocityApprox(this.getPreviousInputs(), getCurrentInputs()).getzValue() > LANDING_SPEED);
+    private boolean slowEnough(AutopilotInputs_v2 inputs, AutopilotInputs_v2 prevInputs){
+    	return (this.getVelocityApprox(inputs, prevInputs).getSize() > LANDING_SPEED);
     }
 
 
     private final float LANDING_SPEED = -40f;
+    private final float GROUND_SPEED = -5f;
 
 //    private void setHorizontalStabilizer(ControlOutputs outputs){
 //        //we want to go for zero (stable inclination of the horizontal stabilizer is zero), so the corrective action needs also to be zero
@@ -426,7 +418,6 @@ public class AutopilotLandingController extends Controller {
 
 
     private Vector referenceVelocity = new Vector(0,0,-STOP_VELOCITY);
-    private VectorPID orientationPID = new VectorPID(1.0f, 0f, 0f);
     private Vector referenceOrientation = new Vector();
     private PIDController altitudePID = new PIDController(1.0f, 0.1f,0.2f);
     private float referenceAltitude = 10f;
@@ -530,10 +521,6 @@ public class AutopilotLandingController extends Controller {
 //        return this.velocityPID;
 //    }
 
-    private VectorPID getOrientationPID() {
-        return orientationPID;
-    }
-
     private PIDController getAltitudePID() {
         return altitudePID;
     }
@@ -562,32 +549,40 @@ public class AutopilotLandingController extends Controller {
     }
 
     //TODO implement these methods accordingly
-    @Override
+//    @Override
     protected float getMainStableInclination() {
         return MAIN_STABLE;
     }
-
-    @Override
+//
+//    @Override
     protected float getStabilizerStableInclination() {
         return STABILIZER_STABLE;
     }
+//
+//    @Override
+//    protected float getRollThreshold() {
+//        return ROLL_THRESHOLD;
+//    }
+//
+//    @Override
+//    protected float getInclinationAOAErrorMargin() {
+//        return INCLINATION_AOA_ERROR_MARGIN;
+//    }
+//
+//    @Override
+//    protected float getStandardThrust() {
+//        return STANDARD_THRUST;
+//    }
 
-    @Override
-    protected float getRollThreshold() {
-        return ROLL_THRESHOLD;
-    }
+    public MapAirport getAirport() {
+		return airport;
+	}
 
-    @Override
-    protected float getInclinationAOAErrorMargin() {
-        return INCLINATION_AOA_ERROR_MARGIN;
-    }
+	public void setAirport(MapAirport airport) {
+		this.airport = airport;
+	}
 
-    @Override
-    protected float getStandardThrust() {
-        return STANDARD_THRUST;
-    }
-
-    /**
+	/**
      * Enumerations for the landing phases
      */
     private enum LandingPhases {
