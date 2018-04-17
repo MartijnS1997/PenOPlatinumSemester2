@@ -4,6 +4,7 @@ package internal.Autopilot;
 import AutopilotInterfaces.AutopilotConfig;
 import AutopilotInterfaces.AutopilotInputs_v2;
 import AutopilotInterfaces.AutopilotOutputs;
+import TestbedAutopilotInterface.Overseer.MapAirport;
 import internal.Helper.Vector;
 
 
@@ -28,6 +29,7 @@ public class AutopilotLandingController extends Controller {
 
     }
 
+    private MapAirport airport;
     /**
      * Returns true if the plane came to a standstill on the ground
      * @param currentInputs the current inputs (this is the base of the check)
@@ -36,7 +38,7 @@ public class AutopilotLandingController extends Controller {
      */
     @Override
     public boolean hasReachedObjective(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs) {
-        return true;
+        return (this.getVelocityApprox(currentInputs, previousInputs).getSize() < GROUND_SPEED);
     }
 
     /**
@@ -48,51 +50,47 @@ public class AutopilotLandingController extends Controller {
     @Override
     public AutopilotOutputs getControlActions(AutopilotInputs_v2 inputs, AutopilotInputs_v2 previousInputs) {
 
-//        if(this.isFirstControlCall()){
-//            this.setStartElapsedTime(this.getCurrentInputs());
-//            this.setFirstControlCall();
-//        }
-//
-//        LandingPhases landingPhase = this.getCurrentLandingPhase();
-//        ControlOutputs outputs = new ControlOutputs();
-//
-//        AutopilotInputs_v2 prevInputs = this.getPreviousInputs();
-//
-////        System.out.println("Current velocity: " + this.getVelocityApprox(prevInputs, getCurrentInputs()));
-//
-//        switch (landingPhase){
-//            case STABILIZE:
-//                this.stabilizeFlight(outputs);
-//                break;
-//            case RAPID_DESCEND:
-//                this.getRapidDescendControls(outputs);
-////                System.out.println("rapidDescend");
-//                break;
-//            case SOFT_DESCEND:
-////                System.out.println("soft descend");
-//                this.getSoftDescendControls(outputs);
-//                break;
-//            case SLOW_DOWN:
-////            	System.out.println("Slowdown");
-//            	this.slowDown(outputs);
-//            	break;
-//        }
-//
-//        AutopilotInputs_v2 previousInputs = getPreviousInputs();
-//        angleOfAttackControl(outputs, previousInputs, inputs);
-//        // System.out.println(Controller.extractPosition(inputs).getyValue());
-//
-//        //System.out.println(outputs);
-//        return outputs;
-        return null;
-    }
+        if(this.isFirstControlCall()){
+            this.setStartElapsedTime(inputs);
+            this.setFirstControlCall();
+        }
 
-    private LandingPhases getCurrentLandingPhase(){
-        AutopilotInputs_v2 currentInputs = null; //this.getCurrentInputs();
+        LandingPhases landingPhase = this.getCurrentLandingPhase(inputs, previousInputs);
+        ControlOutputs outputs = new ControlOutputs();
+//        System.out.println("Current velocity: " + this.getVelocityApprox(prevInputs, getCurrentInputs()));
+
+        switch (landingPhase){
+            case STABILIZE:
+                this.stabilizeFlight(outputs, inputs, previousInputs);
+                break;
+            case RAPID_DESCEND:
+                this.getRapidDescendControls(outputs, inputs, previousInputs);
+//                System.out.println("rapidDescend");
+                break;
+            case SOFT_DESCEND:
+//                System.out.println("soft descend");
+                this.getSoftDescendControls(outputs, inputs, previousInputs);
+                break;
+            case SLOW_DOWN:
+//            	System.out.println("Slowdown");
+            	this.slowDown(outputs);
+            	break;
+        }
+        float resultMargin = 0f;
+        angleOfAttackControl(resultMargin, outputs, inputs,  previousInputs);
+        // System.out.println(Controller.extractPosition(inputs).getyValue());
+
+        //System.out.println(outputs);
+        return outputs;
+    }
+    
+
+
+    private LandingPhases getCurrentLandingPhase(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 prevInputs){
         //check if the rapid descend phase was started
         if(!this.isHasStartedRapidDescend()){
             //check if the flight is stable
-        	if(!slowEnough(currentInputs)){
+        	if(!slowEnough(currentInputs,prevInputs)){
         		return LandingPhases.SLOW_DOWN;
         	}
         	else if(!mayInitializeLanding(currentInputs)){
@@ -145,9 +143,7 @@ public class AutopilotLandingController extends Controller {
      * Generates the outputs for the rapid descend phase of the landing
      * @param outputs the outputs to write to
      */
-    private void getRapidDescendControls(ControlOutputs outputs){
-        AutopilotInputs_v2 currentInputs = null;//this.getCurrentInputs();
-        AutopilotInputs_v2 prevInputs = null;// this.getPreviousInputs();
+    private void getRapidDescendControls(ControlOutputs outputs,AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 prevInputs){
         //set the setpoint
         PIDController pitchPID = this.getPitchPIDController();
         pitchPID.setSetPoint(RAPID_DESCEND_PHASE_REF_PITCH);
@@ -163,10 +159,8 @@ public class AutopilotLandingController extends Controller {
      * Generates the control outputs for the soft landing phase
      * @param outputs the soft landing phase
      */
-    private void getSoftDescendControls(ControlOutputs outputs){
+    private void getSoftDescendControls(ControlOutputs outputs, AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 prevInputs){
 //        System.out.println("querying soft descend");
-        AutopilotInputs_v2 currentInputs = null; //this.getCurrentInputs();
-        AutopilotInputs_v2 prevInputs = null;// this.getPreviousInputs();
         AutopilotConfig config = this.getConfig();
         //set the setPoint
 //        PIDController pitchPID = this.getPitchPIDController();
@@ -192,7 +186,7 @@ public class AutopilotLandingController extends Controller {
      * @return true if and only if the drone is stabilized and has stabilized for at least minimal stabilizing time
      */
     private boolean mayInitializeLanding(AutopilotInputs_v2 inputs) {
-        return false;//(this.getCurrentInputs().getElapsedTime() - this.getStartElapsedTime()) > MINIMAL_STABILIZING_TIME && this.isStabilized(inputs);
+        return (inputs.getElapsedTime() - this.getStartElapsedTime()) > MINIMAL_STABILIZING_TIME && this.isStabilized(inputs);
     }
 
 
@@ -200,13 +194,11 @@ public class AutopilotLandingController extends Controller {
      * Stabilizes the flight before commencing the landing sequence
      * @param outputs the output object to write the control actions to
      */
-    private void stabilizeFlight(ControlOutputs outputs){
+    private void stabilizeFlight(ControlOutputs outputs,AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 prevInputs){
         //get the current and previous inputs
-        AutopilotInputs_v2 currentInputs = null; //this.getCurrentInputs();
-        AutopilotInputs_v2 prevInputs = null;// this.getPreviousInputs();
 
         //stabilize the pitch and the roll
-        //super.rollControl(outputs, currentInputs);
+        //super.rollControl(outputs, currentInputs);//TODO Is dit nodig?
         pitchStabilizer(outputs, currentInputs, prevInputs);
         rollStabilizer(outputs, currentInputs, prevInputs);
        	outputs.setThrust(STABILIZING_THURST);
@@ -239,7 +231,7 @@ public class AutopilotLandingController extends Controller {
         float PIDControlActions =  pitchPid.getPIDOutput(pitch, deltaTime);
         //System.out.println("Pitch result PID" + PIDControlActions);
         //adjust the horizontal stabilizer
-        float horizontalInclination = 0;//this.getStabilizerStableInclination() - PIDControlActions;
+        float horizontalInclination = this.getStabilizerStableInclination() - PIDControlActions;
         horizontalInclination = signum(horizontalInclination) * min(abs(horizontalInclination), HOR_STABILIZER_MAX);
         outputs.setHorStabInclination(horizontalInclination);
     }
@@ -256,8 +248,8 @@ public class AutopilotLandingController extends Controller {
         PIDController rollPid = this.getRollPIDController();
         float deltaTime = Controller.getDeltaTime(prevInputs, currentInputs);
         float PIDControlActions = rollPid.getPIDOutput(roll, deltaTime);
-        float rightMainWing = 0; //this.getMainStableInclination() + PIDControlActions;
-        float leftMainWing = 0; // this.getMainStableInclination() - PIDControlActions;
+        float rightMainWing = this.getMainStableInclination() + PIDControlActions;
+        float leftMainWing = this.getMainStableInclination() - PIDControlActions;
 
         outputs.setRightWingInclination(capMainWingInclination(rightMainWing));
         outputs.setLeftWingInclination(capMainWingInclination(leftMainWing));
@@ -273,8 +265,8 @@ public class AutopilotLandingController extends Controller {
      */
     private float capMainWingInclination(float inclination){
         //first determine the lower cap:
-        float lowerCap = 0;//this.getMainStableInclination() - MAIN_CAP_DELTA_INCLINATION;
-        float upperCap = 0;//this.getMainStableInclination() + MAIN_CAP_DELTA_INCLINATION;
+        float lowerCap = this.getMainStableInclination() - MAIN_CAP_DELTA_INCLINATION;
+        float upperCap = this.getMainStableInclination() + MAIN_CAP_DELTA_INCLINATION;
         if(inclination < lowerCap){
             return lowerCap;
         }
@@ -323,12 +315,13 @@ public class AutopilotLandingController extends Controller {
     }
 
     //TODO
-    private boolean slowEnough(AutopilotInputs_v2 inputs){
-    	return false;//(this.getVelocityApprox(this.getPreviousInputs(), getCurrentInputs()).getzValue() > LANDING_SPEED);
+    private boolean slowEnough(AutopilotInputs_v2 inputs, AutopilotInputs_v2 prevInputs){
+    	return (this.getVelocityApprox(inputs, prevInputs).getSize() > LANDING_SPEED);
     }
 
 
     private final float LANDING_SPEED = -40f;
+    private final float GROUND_SPEED = -5f;
 
 //    private void setHorizontalStabilizer(ControlOutputs outputs){
 //        //we want to go for zero (stable inclination of the horizontal stabilizer is zero), so the corrective action needs also to be zero
@@ -557,14 +550,14 @@ public class AutopilotLandingController extends Controller {
 
     //TODO implement these methods accordingly
 //    @Override
-//    protected float getMainStableInclination() {
-//        return MAIN_STABLE;
-//    }
+    protected float getMainStableInclination() {
+        return MAIN_STABLE;
+    }
 //
 //    @Override
-//    protected float getStabilizerStableInclination() {
-//        return STABILIZER_STABLE;
-//    }
+    protected float getStabilizerStableInclination() {
+        return STABILIZER_STABLE;
+    }
 //
 //    @Override
 //    protected float getRollThreshold() {
@@ -581,7 +574,15 @@ public class AutopilotLandingController extends Controller {
 //        return STANDARD_THRUST;
 //    }
 
-    /**
+    public MapAirport getAirport() {
+		return airport;
+	}
+
+	public void setAirport(MapAirport airport) {
+		this.airport = airport;
+	}
+
+	/**
      * Enumerations for the landing phases
      */
     private enum LandingPhases {

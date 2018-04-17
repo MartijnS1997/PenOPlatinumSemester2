@@ -3,6 +3,8 @@ package internal.Autopilot;
 import AutopilotInterfaces.AutopilotConfig;
 import AutopilotInterfaces.AutopilotInputs_v2;
 import AutopilotInterfaces.AutopilotOutputs;
+import TestbedAutopilotInterface.Overseer.MapAirport;
+import internal.Helper.Vector;
 
 import static internal.Autopilot.AutopilotState.*;
 
@@ -225,6 +227,14 @@ public class AutopilotFiniteStateMachine {
      * @param inputs the inputs  to configure the controller with
      */
     private void configureLanding(AutopilotInputs_v2 inputs){
+    	//Set airport where to land
+    	int airportID = this.getAutopilot().getCommunicator().getCurrentRequest().getDestinationAirport();
+    	MapAirport airport = this.getAutopilot().getCommunicator().getAirportByID(airportID);
+    	AutopilotLandingController landingController = this.getLandingController();
+    	landingController.setAirport(airport);
+    	//Set configuration of the autopilot
+    	AutopilotConfig config = this.getAutopilot().getConfig();
+        landingController.setConfig(config);
         //TODO implement, use the landing information contained in the overseer (and the delivery package)
         //TODO to get the right angle for the landing, we may also ship the "get in place" functionality
         //TODO to the flight controller. To access the package use the api chain this.getAutopilot().getCommunicator().getCurrentRequest()
