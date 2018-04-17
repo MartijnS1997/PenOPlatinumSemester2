@@ -19,6 +19,8 @@ import static java.lang.Math.*;
  * TODO the AOA
  *
  * TODO revisit the AOA with the newly found formula's for AOA (may not work because the approx only works for stationary velocity)
+ *
+ * TODO implement reset mechanism such that controllers can be re-used after their phase is over
  */
 public abstract class Controller {
 

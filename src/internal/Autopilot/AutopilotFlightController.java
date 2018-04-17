@@ -14,6 +14,8 @@ import static java.lang.Math.*;
  * Created by Martijn on 30/10/2017.
  * Appended and edited by Anthony Rath� on 6/11/2017
  * A class of AutopilotInterfaces Controllers
+ * TODO change the flight controller objective reached method to account for its new functionality
+ * (namely guiding the flight in the assigned airspace)
  */
 public abstract class AutopilotFlightController extends Controller {
 
