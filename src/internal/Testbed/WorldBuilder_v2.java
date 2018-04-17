@@ -3,10 +3,12 @@ package internal.Testbed;
 import AutopilotInterfaces.Path;
 import gui.Cube;
 import internal.Autopilot.AutopilotLandingController;
+import internal.Autopilot.PathGenerator;
 import internal.Helper.Vector;
 import internal.Physics.PhysXEngine;
 import math.Vector3f;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -198,6 +200,45 @@ public class WorldBuilder_v2 {
         Vector startCubes = new Vector(0, 30f, -700f);
         World world = generator.createWorld(startCubes, World.FLIGHT_OBJECTIVE);
         world.addWorldObject(this.getDroneBuilder_v2().createTestBounceDrone());
+        
+        /*
+         * FOR TESTING PURPOSES
+         */
+        PathGenerator pathGenerator = new PathGenerator();
+        Vector startPos = new Vector(0,10,0);
+        Vector startVelocity = new Vector(3,0,0);
+        Vector destinationPos = new Vector(40, 0, -200);
+        pathGenerator.generateLandingPath(startPos, startVelocity, destinationPos);
+        List<Vector> path = pathGenerator.getPath();
+        ArrayList<Vector> allColors = generator.colorGenerator();
+        Vector clr = allColors.get(1);
+        Vector secondClr = allColors.get(2);
+        
+        Block startBlock = new Block(startPos);
+		Cube startCube = new Cube(startPos.convertToVector3f(), secondClr.convertToVector3f(), true);
+		startCube.setSize(2f);
+		startBlock.setAssocatedCube(startCube);
+
+		world.addWorldObject(startBlock);
+		
+		Block destinationBlock = new Block(destinationPos);
+		Cube destinationCube = new Cube(destinationPos.convertToVector3f(), secondClr.convertToVector3f(), true);
+		destinationCube.setSize(2f);
+		destinationBlock.setAssocatedCube(destinationCube);
+
+		world.addWorldObject(destinationBlock);
+        
+        for (Vector pos : path) {
+        	Block block = new Block(pos);
+			Cube cube = new Cube(pos.convertToVector3f(), clr.convertToVector3f(), true);
+			cube.setSize(2f);
+			block.setAssocatedCube(cube);
+
+			world.addWorldObject(block);
+        }
+        /*
+         * END FOR TESTING PURPOSES
+         */
 
         initSurroundings(world);
 

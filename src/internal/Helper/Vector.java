@@ -170,7 +170,12 @@ public class Vector {
 		// the denominator is a product of the 2-norms of the vectors
 		float denominator = this.getSize()*other.getSize();
 		
-		return (float)Math.acos(numerator/denominator);
+		double breuk = numerator/denominator;
+		
+		
+		if (Math.abs(breuk) > 1f && Math.abs(breuk)*PRECISION < 1f)breuk = 1*Math.signum(breuk);
+		
+		return (float)Math.acos(breuk);
 	}
 	
 	
@@ -567,5 +572,6 @@ public class Vector {
 	Constants
 	 */
 	public final static int VECTOR_SIZE = 3;
+	public final static float PRECISION = 0.99999f;
 
 }
