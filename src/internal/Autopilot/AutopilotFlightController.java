@@ -34,12 +34,11 @@ public abstract class AutopilotFlightController extends Controller {
         //if there are no cubes visible, we have lost visual contact, we start our landing sequence
         //first do the simple check
         //if it fails, we'll do some more calculations
-        if(this.cubeVisibleOnCamera()){
-            return false;
-        }
-        //there was no drone visible on the camera, see if there are cubes in front of the drone
-        return !cubeInFrontOfDrone(currentInputs);
+        //TODO implement
+        return false;
     }
+
+    abstract void setCruisingAltitude(float cruisingAltitude);
 
     /**
      * Checks if there are any cubes that can be reached in front of the drone (checks if there are in front of it)

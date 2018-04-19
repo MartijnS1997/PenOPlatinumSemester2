@@ -73,7 +73,7 @@ public abstract class Controller {
 
         //calculate the control actions
         float requiredThrust = calcRequiredThrust(outputs,currentInputs, previousInputs, PIDOutput);
-        System.out.println("Required thrust: " + requiredThrust);
+//        System.out.println("Required thrust: " + requiredThrust);
         //set to the possible thrust
         float thrust  = this.capThrust(requiredThrust);
         //write the calculated thrust to the outputs
@@ -520,6 +520,16 @@ public abstract class Controller {
         return inputs.getY();
     }
 
+    /**
+     * extracts the x-z coordinates of the drone from the inputs
+     * these are the coordinates of the drone in the xz-plane for y=0 (the ground)
+     * @param inputs the inputs to extract the ground position from
+     * @return a vector containing the x and z coordinates specified in the input
+     *         the format = vector(inputs.getX(), 0, inputs.getZ())
+     */
+    protected static Vector extractGroundPosition(AutopilotInputs_v2 inputs){
+        return new Vector(inputs.getX(), 0, inputs.getZ());
+    }
 
     /**
      * Extracts a list of vectors (representing the path) from the list of vectors

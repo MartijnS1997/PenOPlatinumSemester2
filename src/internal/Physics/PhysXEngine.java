@@ -2,6 +2,7 @@ package internal.Physics;
 
 import AutopilotInterfaces.AutopilotConfig;
 import AutopilotInterfaces.AutopilotOutputs;
+import internal.Autopilot.AutopilotTurn;
 import internal.Helper.SquareMatrix;
 import internal.Testbed.DroneState;
 import internal.Testbed.FlightRecorder;
@@ -337,6 +338,19 @@ public class PhysXEngine {
 //        return transpose.matrixVectorProduct(vector);
         SquareMatrix transform = SquareMatrix.getWorldOnDroneTransformMatrix(orientation);
         return transform.matrixVectorProduct(vector);
+    }
+
+    /**
+     * Transforms the vector given in the heading axis system to the world axis system
+     * @param vector the vector to transform to the world axis system
+     * @param orientation the orientation of the drone, used to extract the heading angle from
+     * @return a vector containing the provided vector transformed to the world axis system
+     */
+    public static Vector headingOnWorld(Vector vector, Vector orientation){
+        //get the transformation matrix for transforming a vector in the heading axis system to the
+        //world axis system
+        SquareMatrix headingToWorld = SquareMatrix.getHeadingTransformMatrix(orientation.getxValue());
+        return headingToWorld.matrixVectorProduct(vector);
     }
 
     /**
@@ -1281,7 +1295,7 @@ public class PhysXEngine {
             // nothing to construct
         }
 
-
+        @Deprecated
         public Vector[] balanceDrone(Vector orientation, float mainWingStable, float stabWingStable){
             PhysXEngine.this.getMainLeft().setWingInclination(mainWingStable);
             PhysXEngine.this.getMainRight().setWingInclination(mainWingStable);
@@ -1390,7 +1404,7 @@ public class PhysXEngine {
             }, DUMMY_OUTPUTS, FRAMERATE).getzValue();
             return new Vector[]{new Vector(0,0,desiredThrust), new Vector(0,0, -velocity)};
         }
-
+        @Deprecated
         private float findZero(Vector orientation, float lowerBound, float upperBound, float frameRate){
             float droneYCoord = 20f;
             float epsilon = 1E-6f;
@@ -1612,6 +1626,30 @@ public class PhysXEngine {
             return (float) atan2(numerator, abs(denominator));
         }
 
+        /**
+         * Calculates the velocity needed to fly in a straight line when the pitch & roll are zero
+         * @param mainWingInclination the inclination of the main wings
+         * @return a float containing the required velocity in m/s to fly level
+         */
+        public float calcStableZeroPitchVelocity(float mainWingInclination){
+            //acquire the parameters needed for the calculation
+            AutopilotConfig config = PhysXEngine.this.getPhysXEngineConfig();
+            float gravity = config.getGravity();
+            float mass = PhysXEngine.this.getTotalMass();
+            float mainLiftSlope = config.getWingLiftSlope();
+
+            float numerator = (float) sqrt(2*gravity*mass);
+            float denominator = (float) (2*sqrt(mainLiftSlope*mainWingInclination*cos(mainWingInclination)));
+
+            System.out.println("velocity denominator: " + denominator);
+            System.out.println("velocity numerator: " + numerator);
+
+            return numerator/denominator;
+        }
+
+
+
+
         private float FRAMERATE = 1/20f;
         private float DRONE_YCOORD = 20f;
 
@@ -1657,6 +1695,99 @@ public class PhysXEngine {
             }
         };
 
+    }
+
+    public TurnPhysX createTurnPhysics(){
+        return new TurnPhysX();
+    }
+
+    /**
+     * A class that supplies the physics methods needed to make a banked turn
+     */
+    public class TurnPhysX{
+
+        /**
+         * Default constructor for a turn physics object
+         * this class is used by all the controllers that have to make banking turns
+         */
+        public TurnPhysX() {
+
+        }
+
+        /**
+         * Calculates the banking angle needed to make the specified turn in the autopilot turn object
+         * @param turn the specifications of the turn to make
+         * @param mainWingStableInclination the stable inclination of the main wings of the drone employed
+         *                                  by the controller making the turn
+         * @return the angle to make for banking
+         * note: this is an approximation for the banking angle because in the calculation we assumed that the drone is
+         *       flying level with the xz-plane, the controller has to guarantee the behavior (albeit by oscillating)
+         */
+        public float getBankingAngle(AutopilotTurn turn, float mainWingStableInclination){
+            //get the parameters needed to calculate the banking angle
+            AutopilotConfig config = PhysXEngine.this.getPhysXEngineConfig();
+            float mainWingLiftSlope = config.getWingLiftSlope();
+            float mass = PhysXEngine.this.getTotalMass();
+            float radius = turn.getTurnRadius();
+
+            //calculate the angle itself
+            float denominator = (float) (2*mainWingLiftSlope*radius*mainWingStableInclination*cos(mainWingStableInclination));
+            float arcSinArg = mass/denominator;
+            return (float) asin(arcSinArg);
+        }
+
+        /**
+         * Returns the velocity needed to stabilize around a turn with a given roll and a given main wing
+         * stable inclination
+         * @param roll the roll of the drone
+         * @param mainInclination the inclination of the main wing
+         * @return the velocity needed to cancel out the y-force component during a turn
+         * important note: the solution for the equation is a complex root this means that there is no real
+         * solution that satisfies the equation, this will give oscillations in the behavior of the drone
+         * but is the best we can do --> the controller must handle the overshoot
+         */
+        public float calcTurnVelocity(float roll, float mainInclination){
+            //get the parameters needed for the calculation
+            AutopilotConfig config = PhysXEngine.this.getPhysXEngineConfig();
+            float gravity = config.getGravity();
+            float mass = PhysXEngine.this.getTotalMass();
+            float mainLiftSlope = config.getWingLiftSlope();
+
+            float numerator = (float) sqrt(2*gravity*mass);
+            float denominator = (float) (2*sqrt(mainLiftSlope*mainInclination*cos(mainInclination)*cos(roll)));
+
+            return numerator/denominator;
+        }
+
+        /**
+         * rotates the given turn vector along the given angle in the xz-plane
+         * if the angle is positive the turn vector is rotated anti-clockwise
+         * if the angle is negative the turn vector is rotated clockwise
+         * @param turnVector the vector to rotate for the given angle
+         * @param angle the angle to rotate the turn vector for (in radians)
+         * @return a vector that is rotated as described above
+         */
+        public Vector rotateTurnVector(Vector turnVector, float angle){
+            //create a new square matrix
+            float[] matrixArray = new float[]{(float) cos(angle), 0, (float) -sin(angle),
+                                            0,1,0,
+                                            (float) sin(angle), 0, (float) cos(angle)};
+            SquareMatrix rotationMatrix = new SquareMatrix(matrixArray);
+            //transform
+            return rotationMatrix.matrixVectorProduct(turnVector);
+        }
+
+        /**
+         * Wrapper method for the method with the same name in the physics engine optimisation class
+         * calculates the velocity wherefore the airfoils generate no lift in the y-direction
+         * for the case where the drone has no roll and no pitch
+         * @param mainWingInclination the standard inclination of the main wings in radians
+         * @return the velocity where fore getAirborneForces() returns 0 in the y-component
+         *         the velocity is specified in m/s
+         */
+        public float calcStableZeroPitchVelocity(float mainWingInclination){
+            return new PhysXOptimisations().calcStableZeroPitchVelocity(mainWingInclination);
+        }
     }
 
 }

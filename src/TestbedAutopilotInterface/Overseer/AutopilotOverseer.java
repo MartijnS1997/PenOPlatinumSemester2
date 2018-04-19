@@ -84,7 +84,7 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void>, Packa
         //first get the list of all packages
         Set<DeliveryPackage> submittedDeliveries = this.getSubmittedPackages();
         //get the map of the drones and their current assigned deliveries
-        Map<String, List<DeliveryPackage>> assignedDeliveries = this.getUndeliveredPackgesPerDrone();
+        Map<String, List<DeliveryPackage>> assignedDeliveries = this.getUndeliveredPackagesPerDrone();
         //get the map of the drones and their current positions
         Map<String, Vector> autopilotPositions = this.getAutopilotPositions();
         //initialize the search
@@ -170,7 +170,7 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void>, Packa
      * containing the deliveries for each drone
      * @return a map containing the drone ID as the keys and the corresponding deliveries as lists for the value
      */
-    private synchronized Map<String, List<DeliveryPackage>> getUndeliveredPackgesPerDrone(){
+    private synchronized Map<String, List<DeliveryPackage>> getUndeliveredPackagesPerDrone(){
         //first get for each drone the packages that it still needs to deliver
         Map<String, ConcurrentLinkedQueue<DeliveryPackage>> assignedDeliveries = this.getDeliveryRequests();
         //initialize the map that will contain the undelivered packages
