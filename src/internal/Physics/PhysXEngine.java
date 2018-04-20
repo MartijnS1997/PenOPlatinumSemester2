@@ -7,6 +7,7 @@ import internal.Helper.SquareMatrix;
 import internal.Testbed.DroneState;
 import internal.Testbed.FlightRecorder;
 import internal.Helper.Vector;
+import tests.SquareMatrixTest;
 
 import static java.lang.Math.*;
 
@@ -351,6 +352,52 @@ public class PhysXEngine {
         //world axis system
         SquareMatrix headingToWorld = SquareMatrix.getHeadingTransformMatrix(orientation.getxValue());
         return headingToWorld.matrixVectorProduct(vector);
+    }
+
+    /**
+     * Transforms the provided vector in the pitch axis system to the world axis system
+     * @param vector the vector to transform
+     * @param orientation the orientation of the drone used to configure the transformation matrices
+     * @return a vector in the world axis system
+     */
+    public static Vector pitchOnWorld(Vector vector, Vector orientation){
+        SquareMatrix pitchOnWorld = getPitchToWorldMatrix(orientation);
+        return pitchOnWorld.matrixVectorProduct(vector);
+    }
+
+    /**
+     * Transforms a vector in the world axis system to a vector in the pitch axis system of the drone
+     * @param vector the vector to transform
+     * @param orientation the orientation of the drone
+     * @return the provided vector transformed to the pitch axis system
+     */
+    public static Vector worldOnPitch(Vector vector, Vector orientation){
+        SquareMatrix pitchOnWorld = getPitchToWorldMatrix(orientation);
+        //the transpose is the same as the inverse for transformation matrices
+        SquareMatrix worldOnPitch = pitchOnWorld.transpose();
+
+        //do matrix vector product to wrap it all up
+        return worldOnPitch.matrixVectorProduct(vector);
+    }
+
+    /**
+     * Getter for the transformation matrix that transforms a given vector in the pitch axis system to the world
+     * axis system. The pitch axis system is the same as the drone axis system except that the roll of the drone
+     * is zero
+     * @param orientation the orientation of the drone axis system
+     * @return a 3x3 square matrix containing the transformation matrix to go from the pitch axis system to the
+     *         world axis system
+     */
+    private static SquareMatrix getPitchToWorldMatrix(Vector orientation) {
+        float heading = orientation.getxValue();
+        float pitch = orientation.getyValue();
+
+        //get both matrices needed to perform the calculation
+        SquareMatrix headingMatrix = SquareMatrix.getHeadingTransformMatrix(heading);
+        SquareMatrix pitchMatrix = SquareMatrix.getPitchTransformMatrix(pitch);
+
+        //calculate the transformation matrix
+        return headingMatrix.matrixProduct(pitchMatrix);
     }
 
     /**
@@ -1791,40 +1838,3 @@ public class PhysXEngine {
     }
 
 }
-
-/*
-    // tried to use multi threading for the calculation heaviest application, but too much overhead
-    //calculate the next arguments concurrently
-    ExecutorService executor = Executors.newFixedThreadPool(2);
-
-    Callable<Vector> accelerationCall = new Callable<Vector>() {
-        @Override
-        public Vector call() throws Exception {
-            return calcAcceleration(thrustVector, orientation, rotation, velocity);
-        }
-    };
-
-    Callable<Vector> angularAccelerationCall = new Callable<Vector>() {
-        @Override
-        public Vector call() throws Exception {
-            return calcAngularAcceleration(orientation, rotation, velocity);
-        }
-    };
-
-    //execute both concurrently
-    Future<Vector> angularFuture = executor.submit(angularAccelerationCall);
-    Future<Vector> accelerationFuture = executor.submit(accelerationCall);
-
-    //initialize the vectors
-    Vector acceleration = new Vector();
-    Vector angularAcceleration = new Vector();
-
-        try {
-                acceleration = accelerationFuture.get();
-                angularAcceleration = angularFuture.get();
-                } catch (InterruptedException | ExecutionException e) {
-                e.printStackTrace();
-                }
-
-                executor.shutdown();
-*/

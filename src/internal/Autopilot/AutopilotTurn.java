@@ -17,7 +17,8 @@ public interface AutopilotTurn {
     Vector getTurnCenter();
 
     /**
-     * Getter for the entry point of the turn, this is the point where the drone has to fly to to make the turn
+     * Getter for the entry point of the turn relative to the center of the turn
+     * this is the point where the drone has to fly to to make the turn, specified in the world axis system
      * @return the entry point of the turn (vector with coordinates in meters)
      */
     Vector getEntryPoint();
