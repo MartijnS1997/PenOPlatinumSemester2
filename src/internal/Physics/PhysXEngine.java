@@ -1688,9 +1688,6 @@ public class PhysXEngine {
             float numerator = (float) sqrt(2*gravity*mass);
             float denominator = (float) (2*sqrt(mainLiftSlope*mainWingInclination*cos(mainWingInclination)));
 
-            System.out.println("velocity denominator: " + denominator);
-            System.out.println("velocity numerator: " + numerator);
-
             return numerator/denominator;
         }
 

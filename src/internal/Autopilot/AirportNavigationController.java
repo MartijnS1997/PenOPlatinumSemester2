@@ -5,10 +5,8 @@ import AutopilotInterfaces.AutopilotOutputs;
 import internal.Helper.Vector;
 import internal.Physics.PhysXEngine;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
+import java.util.List;
 
 import static java.lang.Math.*;
 
@@ -18,7 +16,7 @@ import static java.lang.Math.*;
  * TODO implement the methods to handle multiple turns in a row and to fly to the next one
  * TODO split the turn control and in between control into two separate private classes
  * matlab commands to plot the flight path:
- * M = dlmread('turnlog.txt',';')
+ * M = dlmread('trajectoryLog.txt',';')
  * plot3(M(:,1), M(:,2), M(:,3))
  * with the current folder the project folder of this project
  *
@@ -31,50 +29,255 @@ public class AirportNavigationController extends AutopilotFlightController {
         super(autopilot);
     }
 
-    @Override
-    public AutopilotOutputs getControlActions(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs) {
-        //generate the outputs object to write the control actions to
-        //get the bank controls: note this controller will have two states in the future, first the banking controls
-        //and second the navigation to the next turn entry point
-        turnLog(currentInputs);
-        TurnControl turn = this.getTurnControl();
-        ControlOutputs outputs = turn.getControlActions(currentInputs, previousInputs);
-        //System.out.println("Navigator outputs: " + outputs);
-        return outputs;
-    }
-
     /**
-     * Debugging method used to save data to a .txt file
-     * @param currentInputs the outputs to write
+     * Generates the control actions of the navigator for the given inputs and the currently active state
+     * (see the navigator state interface)
+     * @param currentInputs the inputs most recently received from the testbed
+     * @param previousInputs the inputs previously received from the testbed
+     * @return the control outputs needed to steer the drone to the next airport
      */
-    private void turnLog(AutopilotInputs_v2 currentInputs){
-        Vector position = extractPosition(currentInputs);
-        String logstring = position.getxValue() + ";" + position.getyValue() + ";" + position.getzValue() + "\n";
-        try {
-            Files.write(Paths.get("turnLog.txt"), logstring.getBytes(), StandardOpenOption.APPEND);
-        }catch (IOException e) {
-            //exception handling left as an exercise for the reader
+    public AutopilotOutputs getControlActions(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs){
+        //get the current state of the controller
+        NavigatorState currentState = this.getNavigatorState();
+        //get the next state to generate outputs for
+        NavigatorState nextState = this.getNextState(currentInputs, previousInputs);
+        //check if the same state as previous one
+        if(nextState != currentState){
+            System.out.println();
+            //if not configure the controller
+            configureStateController(nextState, currentInputs, previousInputs);
+            //and save the state
+            this.setNavigatorState(nextState);
+            //note: we only have to save the next state if the state is indeed changed, if not we would be doing
+            //duplicate work
+            System.out.println("switched state from: " + currentState +  ", to: " + nextState);
         }
+
+        //TODO remove once done debugging
+        trajectoryLog(currentInputs);
+        //errorLog(currentInputs.getRoll());
+
+//        trajectoryLog(currentInputs);
+        //get the control actions needed for the next state (we always use the next state in case it is changed)
+        return getStateControls(nextState, currentInputs, previousInputs);
+
     }
-
-
 
     /**
-     * A controller designed to handle the flight in between two turns
-     * @param outputs the outputs to write the control actions to
-     * @param currentInputs the latest inputs received from the testbed
-     * @param previousInputs the inputs previously received from the
+     * Initializes the airport navigation controller
+     * --> creates the turn physX object needed to do the physics calculations
+     * @param currentInputs the inputs most recently received from the testbed
+     * @param previousInputs the inputs previously received from the testbed
      */
-    private void navigateToNextTurnControl(ControlOutputs outputs, AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs){
+    private void initializeNavigation(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs){
+        PhysXEngine.TurnPhysX turnPhysX = this.getAutopilot().getPhysXEngine().createTurnPhysics();
+        //save the turn physX
+        this.setTurnPhysX(turnPhysX);
+    }
+
+    /**
+     * Getter for the next turn on the trajectory of the drone to navigate to the airport
+     * TODO now it is just configured for testing but once finished, hook it up to the path generator
+     * @param currentInputs the inputs most recently received from the testbed
+     * @param previousInputs the inputs previously received from the testbed
+     * @return an AutopilotTurn object containing all the specifications to do the next turn
+     */
+    private AutopilotTurn getNextTurn(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs){
+        //TODO implement
+        //TODO make call to the path generator & delete the dummy
+
+        if(firstCall) {
+            generateCurcuit(currentInputs);
+        }
+
+
+        AutopilotTurn currentTurn = turns.get(floorMod(turnCount++,2));
+        System.out.println("current turn center: " + currentTurn.getTurnCenter() + "entry point: " + currentTurn.getEntryPoint());
+        return currentTurn;
 
     }
 
+    /**
+     * debugging method, remove if ready hook == first turning angle is zero, causing the drone to fly straight
+     * after takeoff
+     */
+    private void generateHook(AutopilotInputs_v2 currentInputs){
+        //to getNextTurn if the second controller can fly level
+        float turnRadius = 1000;
+        float turnDistance = 4000; //distance between both turn centers
+        float turnAngle = -(float) PI; //both turns go 180 degrees clockwise
+        Vector xHeading = new Vector(1, 0, 0);
+        Vector zHeading = new Vector(0,0,-1);
+        Vector currentGroundPos = extractGroundPosition(currentInputs);
+        Vector currentOrientation = extractOrientation(currentInputs);
+        //calculate the turn centers
+        //for the first turn, place it to the right of the drone at 1000m distance
+        Vector relCenter1GroundHa = xHeading.scalarMult(turnRadius); // location of first turn in heading axis on ground
+        // relative in heading axis in the air
+        Vector relCenter1 = PhysXEngine.headingOnWorld(relCenter1GroundHa, currentOrientation);
+        Vector center1 = relCenter1.vectorSum(currentGroundPos);
+        Vector entry1 = currentGroundPos.vectorDifference(center1); //the entry point
 
-    private void navigatorStateControl(){
-    //TODO configure the controllers when the state is switched (or upon initialization)
-    //TODO call the currently active controls
-    //TODO create (and implement) a turn generator interface (for testing & real use)
+        // the translation of the center of the first turn along the negative z-axis in the heading axis system
+        Vector center1ZTransHa = zHeading.scalarMult(turnDistance);
+        Vector center1ZTrans = PhysXEngine.headingOnWorld(center1ZTransHa, currentOrientation);
+        Vector center2 = center1.vectorSum(center1ZTrans);
+
+        //now translate the exit point along center1ZTrans to get the entry point of the first turn
+        Vector entry2abs = currentGroundPos.vectorSum(center1ZTrans);
+        Vector entry2rel = entry2abs.vectorDifference(center2);
+
+        //generate the turns
+        AutopilotTurn turn1 = new AutopilotTurn() {
+            @Override
+            public Vector getTurnCenter() {
+                return center1;
+            }
+
+            @Override
+            public Vector getEntryPoint() {
+                return entry1;
+            }
+
+            @Override
+            public float getTurnRadius() {
+                return turnRadius;
+            }
+
+            @Override
+            public float getTurnAngle() {
+                return 0;
+            }
+        };
+
+        AutopilotTurn turn2 = new AutopilotTurn() {
+            @Override
+            public Vector getTurnCenter() {
+                return center2;
+            }
+
+            @Override
+            public Vector getEntryPoint() {
+                return entry2rel;
+            }
+
+            @Override
+            public float getTurnRadius() {
+                return turnRadius;
+            }
+
+            @Override
+            public float getTurnAngle() {
+                return turnAngle;
+            }
+        };
+
+        turns.add(turn1);
+        turns.add(turn2);
+
+        firstCall = false;
+        System.out.println("Turn data, turn 1 center: " + turn1.getTurnCenter() + ", entry: " + turn1.getEntryPoint());
+        System.out.println("Turn data, turn 2 center: " + turn2.getTurnCenter() + ", entry: " + turn2.getEntryPoint());
     }
+
+    /**
+     * for debugging, remove once ready --> the shape of the generated path is like a running track
+     */
+    private void generateCurcuit(AutopilotInputs_v2 currentInputs){
+        //to getNextTurn if the second controller can fly level
+        float turnRadius = 1000;
+        float turnDistance = 4000; //distance between both turn centers
+        float turnAngle = -(float) PI; //both turns go 180 degrees clockwise
+        Vector xHeading = new Vector(1, 0, 0);
+        Vector zHeading = new Vector(0,0,1);
+        Vector altitude = new Vector(0, this.getCruisingAltitude(),0);
+        Vector currentGroundPos = extractGroundPosition(currentInputs);
+        Vector currentOrientation = extractOrientation(currentInputs);
+        //calculate the turn centers
+        //for the first turn, place it to the right of the drone at 1000m distance
+        Vector relCenter1GroundHa = xHeading.scalarMult(turnRadius); // location of first turn in heading axis on ground
+        // relative in heading axis in the air
+        Vector relCenter1 = PhysXEngine.headingOnWorld(relCenter1GroundHa, currentOrientation);
+        Vector center1 = relCenter1.vectorSum(currentGroundPos);
+        Vector entry1 = currentGroundPos.vectorDifference(center1); //the entry point
+
+        //for the second turn we also need to go backwards (along pos z-axis of heading axis) to place the center
+        //we can use the first center and sum the relative displacement
+
+        // the translation of the center of the first turn along the z-axis in the heading axis system
+        Vector center1ZTransHa = zHeading.scalarMult(turnDistance);
+        Vector center1ZTrans = PhysXEngine.headingOnWorld(center1ZTransHa, currentOrientation);
+        Vector center2 = center1.vectorSum(center1ZTrans);
+
+        //calculate the entry point of the second turn
+        //first get the exit point of the first turn
+        Vector relExit1GroundHa = xHeading.scalarMult(turnRadius*2); //the exit at ground level in heading axis
+        Vector relExit1 = PhysXEngine.headingOnWorld(relExit1GroundHa, currentOrientation); //exit relative to drone in world
+        Vector absExit1 = currentGroundPos.vectorSum(relExit1); //absolute exit point
+
+        //now translate the exit point along center1ZTrans to get the entry point of the first turn
+        Vector entry2abs = absExit1.vectorSum(center1ZTrans);
+        Vector entry2rel = entry2abs.vectorDifference(center2);
+
+        //generate the turns
+        AutopilotTurn turn1 = new AutopilotTurn() {
+            @Override
+            public Vector getTurnCenter() {
+                return center1;
+            }
+
+            @Override
+            public Vector getEntryPoint() {
+                return entry1;
+            }
+
+            @Override
+            public float getTurnRadius() {
+                return turnRadius;
+            }
+
+            @Override
+            public float getTurnAngle() {
+                return turnAngle;
+            }
+        };
+
+        AutopilotTurn turn2 = new AutopilotTurn() {
+            @Override
+            public Vector getTurnCenter() {
+                return center2;
+            }
+
+            @Override
+            public Vector getEntryPoint() {
+                return entry2rel;
+            }
+
+            @Override
+            public float getTurnRadius() {
+                return turnRadius;
+            }
+
+            @Override
+            public float getTurnAngle() {
+                return turnAngle;
+            }
+        };
+
+        turns.add(turn1);
+        turns.add(turn2);
+
+        firstCall = false;
+        System.out.println("Turn data, turn 1 center: " + turn1.getTurnCenter() + ", entry: " + turn1.getEntryPoint());
+        System.out.println("Turn data, turn 2 center: " + turn2.getTurnCenter() + ", entry: " + turn2.getEntryPoint());
+    }
+
+    //TODO remove after path generator is ready
+    private int turnCount = 0;
+    private boolean firstCall = true;
+    private List<AutopilotTurn> turns = new ArrayList<>();
+
+
 
     /**
      * Getter for the state that will be active during the next iteration of control generation
@@ -87,6 +290,11 @@ public class AirportNavigationController extends AutopilotFlightController {
         NavigatorState currentState = this.getNavigatorState();
         //open a switch to check which controls are next
         switch(currentState){
+            case INIT:
+                //when we're initializing we'll only need to return that we'll be turning next
+                //but first initialize the controller
+                this.initializeNavigation(currentInputs, previousInputs);
+                return NavigatorState.TURNING;
             case TURNING:
                 //check if we've finished the turn, if so we have to navigate to the next turn, if not keep turning
                 TurnControl turnController = this.getTurnControl();
@@ -96,83 +304,109 @@ public class AirportNavigationController extends AutopilotFlightController {
                 ToNextTurnControl toNextTurnControl = this.getToNextTurnControl();
                 return toNextTurnControl.hasReachedEntryPoint(currentInputs) ? NavigatorState.TURNING : NavigatorState.TO_NEXT_TURN;
             default:
+                //gets called if the next state is null...this is the case when the controller is initializing
                 return NavigatorState.TURNING;
         }
     }
 
-
     /**
-     * Checks if the current turn has finished and if needed to call the path generator to get the next turn
-     * if there is a new turn to make, the controller is configured for the next turn
+     * Generates the control actions for the drone based on the currently active state based on the
+     * current inputs and the previous inputs
+     * @param navigatorState the state of the airport navigator, used to select the controller and its actions
+     * @param currentInputs the inputs most recently received from the testbed
+     * @param previousInputs the inputs previously received from the testbed
+     * @return a control outputs object containing the control actions for the drone for the current state
      */
-    private void turnStateControl(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs){
-
-        PhysXEngine.TurnPhysX turnPhysX = this.getTurnPhysX();
-
-        //first check if the turn physics are configured
-        if(turnPhysX == null){
-            //if not configure the turn physics
-            turnPhysX = this.getAutopilot().getPhysXEngine().createTurnPhysics();
-            //save the newly created physics
-            this.setTurnPhysX(turnPhysX);
-        }
-
-        TurnControl turn = this.getTurnControl();
-
-        //check first of all if there is a turn set (init)
-        if(turn == null){
-            //set the turn:
-            //TODO make call to the path generator & delete the dummy
-            //dummy configuration to test the turning controller
-            //create a circle 1000m to the right of the drone
-            //1000m on the x-axis in the heading axis system
-            float turnRadius = 1000;
-            Vector xHeading = new Vector(turnRadius, 0,0);
-            Vector currentGroundPos = Controller.extractGroundPosition(currentInputs);
-            Vector orientation = Controller.extractOrientation(currentInputs);
-            Vector xWorld = PhysXEngine.headingOnWorld(xHeading, orientation);
-            //sum them both
-            Vector turnCenter = currentGroundPos.vectorSum(xWorld);
-            Vector entryPoint = currentGroundPos;
-            AutopilotTurn currentTurn = new AutopilotTurn() {
-                @Override
-                public Vector getTurnCenter() {
-                    return turnCenter;
-                }
-
-                @Override
-                public float getTurnRadius() {
-                    return turnRadius;
-                }
-
-                @Override
-                public float getTurnAngle() {
-                    //for now we'll make a 360° turn around the turn center left
-                    return (float) (-2*PI);
-                }
-                @Override
-                public Vector getEntryPoint(){
-                    return entryPoint;
-                }
-            };
-            System.out.println("Turn center: " + turnCenter +", drone position: " + currentGroundPos);
-
-            //create the turn control needed to make the current turn
-            TurnControl newTurn = new TurnControl(currentTurn, turnPhysX);
-            //set the current turn, it will configure all we need
-            this.setTurnControl(newTurn);
-            //set the turn to prevent null pointer for the check
-            turn = newTurn;
-        }
-        //TODO implement the connection with the path generator
-        //check if the current turn has finished
-        if(turn.hasFinishedTurn(currentInputs, previousInputs)){
-            //get next turn
-            //for the moment, do nothing, just print something
-            System.out.println("Turn finished");
+    private AutopilotOutputs getStateControls(NavigatorState navigatorState, AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs){
+        //open a switch to pass the inputs to the right controller
+        switch(navigatorState){
+            case TURNING:
+                TurnControl turnControl = this.getTurnControl();
+                return turnControl.getControlActions(currentInputs, previousInputs);
+            case TO_NEXT_TURN:
+                ToNextTurnControl toNextTurnControl = this.getToNextTurnControl();
+                return toNextTurnControl.getControlActions(currentInputs, previousInputs);
+            default:
+                throw new IllegalStateException("An illegal state was entered, please check the possible states to select from");
         }
     }
 
+    /**
+     * Configures the controller responsible for the provided state
+     * this method should be called every time the finite state machine switches state
+     * @param navigatorState the state to configure the corresponding controller for
+     * @param currentInputs the inputs most recently received from the testbed
+     * @param previousInputs the inputs previously received from the testbed
+     */
+    private void configureStateController(NavigatorState navigatorState, AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs){
+        //open a switch to call the configurators
+        switch(navigatorState){
+            case TURNING:
+                //call the configuration method
+                configureTurningController(currentInputs, previousInputs);
+                break;
+            case TO_NEXT_TURN:
+                //call the configuration method
+                configureToNextTurnController(currentInputs, previousInputs);
+                break;
+        }
+    }
+
+    /**
+     * Configures the turn controller for the next turn that has to be made
+     * method should be called every time the controller is switched to a turn controller
+     * @param currentInputs the inputs most recently received from the testbed
+     * @param previousInputs the inputs previously received from the testbed
+     */
+    private void configureTurningController(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs){
+        //get the turn physics
+        PhysXEngine.TurnPhysX turnPhysX = this.getTurnPhysX();
+        //generate the next turn
+        NavigatorState state = this.getNavigatorState();
+        AutopilotTurn nextTurn;
+        //the controller needs a turn to do, in the case that the navigator was initializing
+        //we need to generate a new turn, otherwise the next turn can be extracted from the to next turn controller
+        //that was responsible for flying to the turn
+        switch(state){
+            case INIT:
+                nextTurn = this.getNextTurn(currentInputs, previousInputs);
+                break;
+            default:
+                ToNextTurnControl toNextTurnControl = this.getToNextTurnControl();
+                nextTurn = toNextTurnControl.getNextTurn();
+        }
+
+        //then generate the next turn controller
+        TurnControl nextTurnControl = new TurnControl(nextTurn, turnPhysX);
+        //after generation save the newly generated controller
+        this.setTurnControl(nextTurnControl);
+    }
+
+    /**
+     * Configures the to next turn controller
+     * this method should be called every time the state is switched to the to next turn controller
+     * --> generates a new controller configured to fly to the next turn
+     * @param currentInputs the inputs most recently received from the testbed
+     * @param previousInputs the inputs previously received from the testbed
+     * note: this method relies on the previously active controller being the turning controller
+     *       if we decide to start with the to next turn controller this method should be changed & make use
+     *       of a dummy turn to begin with
+     */
+    private void configureToNextTurnController(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs){
+        //get the turn physics
+        PhysXEngine.TurnPhysX turnPhysX = this.getTurnPhysX();
+        //get the previous turn from the previous turning controller
+        TurnControl previousTurnControl = this.getTurnControl();
+        AutopilotTurn previousTurn = previousTurnControl.getTurn();
+
+        //generate the next turn
+        AutopilotTurn nextTurn = this.getNextTurn(currentInputs, previousInputs);
+
+        //generate and set the controller
+        ToNextTurnControl toNextTurnControl = new ToNextTurnControl(nextTurn, previousTurn, turnPhysX);
+        this.setToNextTurnControl(toNextTurnControl);
+
+    }
 
     /*
     Controller instances
@@ -230,7 +464,7 @@ public class AirportNavigationController extends AutopilotFlightController {
      * @return the control turn specified for the current turn
      */
     private TurnControl getTurnControl() {
-        return TurnControl;
+        return turnControl;
     }
 
     /**
@@ -238,7 +472,7 @@ public class AirportNavigationController extends AutopilotFlightController {
      * @param turnControl the next turn to make with the navigation controller
      */
     private void setTurnControl(TurnControl turnControl) {
-        this.TurnControl = turnControl;
+        this.turnControl = turnControl;
     }
 
     /**
@@ -286,12 +520,21 @@ public class AirportNavigationController extends AutopilotFlightController {
     }
 
     /**
-     * Getter for the maximum horizontal delta inclinaton (same semantics as the main delta inclination)
+     * Getter for the maximum horizontal delta inclination (same semantics as the main delta inclination)
      * the available range for the horizontal stabilizer is: [HORIZONTAL_STABLE -HOR_MAX, HORIZONTAL_STABLE + HOR_MAX]
      * @return the maximum deviation in the horizontal inclination from the stable value
      */
     private static float getHorizontalDeltaIncl() {
         return HORIZONTAL_DELTA_INCL;
+    }
+
+    /**
+     * Getter for the stable inclination of the vertical stabilizer, this is the reference inclination that is used
+     * as a default if the controls do not specify the vertical stabilizer inclination
+     * @return the stable vertical stabilizer inclination
+     */
+    private static float getVerticalStable() {
+        return VERTICAL_STABLE;
     }
 
     /**
@@ -356,7 +599,7 @@ public class AirportNavigationController extends AutopilotFlightController {
      * --> 2. fly to next turn
      * --> goto 1. until we're landing
      */
-    private NavigatorState navigatorState = NavigatorState.TURNING;
+    private NavigatorState navigatorState = NavigatorState.INIT;
 
     /**
      * The cruising altitude assigned to the drone by the overseer, this is the reference altitude for the
@@ -378,7 +621,7 @@ public class AirportNavigationController extends AutopilotFlightController {
      * --> save the specifications of the turn we're currently making
      * --> calculates the control actions needed to make the turn
      */
-    private TurnControl TurnControl;
+    private TurnControl turnControl;
 
     /**
      * The control object used to manage all the in between turn state and checks used
@@ -460,8 +703,9 @@ public class AirportNavigationController extends AutopilotFlightController {
      * The states for the airport navigator finite state machine
      * --> sates may be added in the future if needed
      */
+    //TODO ADD WRAP UP CONTROLS FOR WHEN THE TOTAL CONTROLS ARE FINISHED FOR THIS NAVIGATION
     private enum NavigatorState{
-        TURNING, TO_NEXT_TURN
+        INIT, TURNING, TO_NEXT_TURN
     }
 
 
@@ -497,18 +741,27 @@ public class AirportNavigationController extends AutopilotFlightController {
             this.setTurnVelocity(velocity);
         }
 
-        private ControlOutputs getControlActions(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs){
-            return null;
-        }
+        /**
+         * Getter for the control actions for the turn controller
+         * the control outputs contain the commands for the drone to make the specified turn
+         * @param currentInputs the inputs most recently received from the testbed
+         * @param previousInputs the inputs previously received from the testbed
+         * @return a control outputs object containing the outputs for the drone to make the turn
+         */
+        private AutopilotOutputs getControlActions(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs){
+            //create the control outputs object to store the control actions for the drone
+            ControlOutputs outputs = new ControlOutputs(AirportNavigationController.this.getStandardOutputs());
 
-
-        private void bankControl(ControlOutputs outputs, AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs){
+            //get all the control actions needed to make the turn
             rollControl(outputs, currentInputs, previousInputs);
-            altitudeControl(outputs, currentInputs, previousInputs);
+            pitchControl(outputs, currentInputs, previousInputs);
             angleOfAttackControl(getAoaErrorMargin(), outputs, currentInputs, previousInputs);
             thrustControl(outputs, currentInputs, previousInputs);
 
+            outputs.capInclinations(getMainDeltaIncl(), getMainDeltaIncl(), getHorizontalDeltaIncl(), 0);
+            return outputs;
         }
+
 
         /**
          * Calculates the thrust outputs for maintaining the reference velocity
@@ -521,36 +774,8 @@ public class AirportNavigationController extends AutopilotFlightController {
         private void thrustControl(ControlOutputs outputs, AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs){
             //get the parameters needed to call the cruise control
             float referenceVelocity = this.getTurnVelocity();
-            PIDController thrustPID = this.getBankingThrustController();
+            PIDController thrustPID = this.getThrustController();
             AirportNavigationController.this.flightCruiseControl(outputs, currentInputs, previousInputs, thrustPID, referenceVelocity);
-        }
-
-
-        /**
-         * Generates the control actions for maintaining the altitude of the drone
-         * @param outputs the outputs to write the altitude controls to
-         * @param currentInputs the inputs the most recent received by the autopilot from the testbed
-         * @param previousInputs the inputs previously received by the drone
-         */
-        private void altitudeControl(ControlOutputs outputs, AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs){
-            //get the assigned cruising altitude
-            float cruisingAltitude = AirportNavigationController.this.getCruisingAltitude();
-            float currentAltitude = extractAltitude(currentInputs);
-
-            //get the difference in altitude (the error in the altitude)
-            float altitudeDiff = cruisingAltitude - currentAltitude;
-
-            //get the pid and the other parameters needed (eg delta time)
-            float deltaTime = getDeltaTime(currentInputs, previousInputs);
-            PIDController altitudeController  = this.getBankingAltitudeController();
-            float pidOutput = altitudeController.getPIDOutput(altitudeDiff, deltaTime);
-
-            //now adjust for the error that was made
-            float desiredHorizontal = pidOutput + getHorizontalStable();
-            float horizontalInclination = capInclination(desiredHorizontal,getHorizontalStable(), getHorizontalDeltaIncl());
-
-            outputs.setHorStabInclination(horizontalInclination);
-
         }
 
         /**
@@ -595,6 +820,14 @@ public class AirportNavigationController extends AutopilotFlightController {
             outputs.setLeftWingInclination(cappedLeftMain);
         }
 
+        /**
+         * Method to correct the reference roll of the drone to account for deviation in the current radius of
+         * the circle the drone is flying in and the desired radius
+         * @param referenceRoll the reference roll to correct, this is the roll that is used as a reference for the
+         *                      roll controller
+         * @param currentInputs the inputs most recently received from the testbed
+         * @return the corrected roll
+         */
         private float correctReferenceRoll(float referenceRoll, AutopilotInputs_v2 currentInputs){
             //get the current turn
             AutopilotTurn currentTurn = this.getTurn();
@@ -610,6 +843,99 @@ public class AirportNavigationController extends AutopilotFlightController {
             //get the error ratio, if the the drone is currently to far from the center we have to roll harder
             //if we're to close we may loosen the roll a bit
             return referenceRoll*((turnRadius + error *0.1f)/turnRadius);
+        }
+
+        /**
+         * Getter for the control actions needed to keep the drone at the cruising altitude during the turn
+         * @param outputs the outputs of the drone to write the result to
+         * @param currentInputs the inputs most recently received from the testbed
+         * @param previousInputs the inputs previously received from the testbed
+         */
+        private void pitchControl(ControlOutputs outputs, AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs){
+            //get the reference value
+            Vector pitchReferencePoint = this.getPitchReferencePoint(currentInputs);
+            float pitchError = this.getPitchError(currentInputs, pitchReferencePoint);
+            float deltaTime = getDeltaTime(currentInputs, previousInputs);
+            //feed the results into the pid controller
+            PIDController pitchPid = this.getPitchController();
+            float pidResult = pitchPid.getPIDOutput(pitchError, deltaTime);
+            //if the pid result is positive: the set point is larger than the input -> lower the pitch (pos inclination)
+            //if the pid result is negative: the set point is smaller than the input -> increase the pitch (neg inclination)
+            float horizontalInclination = getHorizontalStable() + pidResult;
+            horizontalInclination = capInclination(horizontalInclination, getHorizontalStable(), getHorizontalDeltaIncl());
+            outputs.setHorStabInclination(horizontalInclination);
+        }
+
+        /**
+         * Calculates the reference point used for the pitch controller, this controller is used to maintain the cruising altitude
+         * the reference point is generated in front of the drone with coordinates (0, cruisingAltitude, - lookaheadDistance)
+         * (coordinates are specified in the heading axis system, the axis system where roll and pitch are zero)
+         * @param currentInputs the latest inputs received by the autopilot from the testbed
+         * @return the reference point for the pitch in the world axis system
+         * note: this method must be called every time the pitch controls are calculated because the reference point
+         *       changes on every iteration
+         */
+        private Vector getPitchReferencePoint(AutopilotInputs_v2 currentInputs){
+            //grab the parameters needed to calculate the reference point
+            Vector dronePositionGround = extractGroundPosition(currentInputs);
+            Vector droneOrientation = extractOrientation(currentInputs);
+            Vector headingDroneHa = new Vector(0,0,-1); // the heading vector of the drone is heading axis
+            float cruisingAltitude = AirportNavigationController.this.getCruisingAltitude();
+            Vector altitudeVector = new Vector(0,cruisingAltitude, 0);
+            float lookaheadDistance = this.getLookaheadDistance();
+
+            //first calculate the position of the reference point in the heading axis system
+            Vector referencePitchGroundHa = headingDroneHa.scalarMult(lookaheadDistance); //reference in heading axis at ground level
+            //also add the cruising altitude so that we factor the reference altitude in
+            Vector referencePitchHa = referencePitchGroundHa.vectorSum(altitudeVector);
+            //transform the reference point to the world axis system, this vector is now relative to the position
+            //of the drone in the world, so we have to add the ground coordinates (since the altitude is our target)
+            Vector referenceWorldRel = PhysXEngine.headingOnWorld(referencePitchHa, droneOrientation);
+
+            //sum the ground coordinates to make the reference point absolute
+            return dronePositionGround.vectorSum(referenceWorldRel);
+
+        }
+
+        /**
+         * Calculates the error on the pitch of the drone against the reference point of the flight
+         * the pitch error is the angle between the heading vector (zero roll) in the pitch axis system
+         * and the vector pointing from the drone to the reference point ( =difference vector) projected onto
+         * the yz-plane of the pitch axis system
+         * @param currentInputs the inputs most recently received from the testbed
+         * @param referencePoint the reference point to calculate the pitch error for
+         * @return the angle as described above with the sign indicating the direction of the error
+         *         if the pitch error is positive, extra pitch is required (steering upwards)
+         *         if the pitch error is negative, lesser pitch is required (steering downwards)
+         */
+        private float getPitchError(AutopilotInputs_v2 currentInputs, Vector referencePoint){
+            //grab the parameters needed fo the calculation
+            Vector droneHeadingPa = new Vector(0,0,-1); //the heading vector of the drone in pitch axis
+            Vector yzNormalPa = new Vector(1,0,0); // normal of the yz-plane in pitch axis
+            Vector dronePosition = extractPosition(currentInputs);
+            Vector droneOrientation = extractOrientation(currentInputs);
+
+            //calculate the difference vector and transform it to the pitch axis system
+            //difference vector points from the drone position to the reference point
+            Vector diffVector =  referencePoint.vectorDifference(dronePosition);
+            Vector diffPa = PhysXEngine.worldOnPitch(diffVector, droneOrientation);
+
+            //project the diff vector in pitch axis system onto the yz plane of the pitch axis
+            Vector projDiffPa = diffPa.orthogonalProjection(yzNormalPa);
+
+            //calculate the angle between the heading vector and the projected diff vector
+            float pitchErrorAngle = projDiffPa.getAngleBetween(droneHeadingPa);
+
+            //also calculate the direction of the error, take the vector product of the heading and the diff vector
+            //if the x-component is positive the drone has to pitch upwards, if it is negative the drone has
+            //to pitch downwards to reach the desired altitude/pitch
+            float direction = signum(droneHeadingPa.crossProduct(projDiffPa).getxValue());
+
+            //multiply to get the error
+            float pitchError = direction*abs(pitchErrorAngle);
+
+            //return the result while checking for NaN, if so return harmless (?) value
+            return Float.isNaN(pitchError) ? 0 : pitchError;
         }
 
         /**
@@ -785,7 +1111,22 @@ public class AirportNavigationController extends AutopilotFlightController {
             this.turnVelocity = turnVelocity;
         }
 
+        /**
+         * Getter for the lookahead distance, the distance between the drone and the pitch reference point
+         * expressed in ground coordinates (the distance in the xz-plane)
+         * @return the lookahead distance used to generate the pitch reference point in meters
+         */
+        private float getLookaheadDistance() {
+            return lookaheadDistance;
+        }
 
+        /**
+         * Setter for the lookahead distance of the drone (see getter for more info)
+         * @param lookaheadDistance the distance used to generate the reference point in meters
+         */
+        private void setLookaheadDistance(float lookaheadDistance) {
+            this.lookaheadDistance = lookaheadDistance;
+        }
 
         /**
          * The turn that the turn state is specifying
@@ -808,11 +1149,20 @@ public class AirportNavigationController extends AutopilotFlightController {
         private float turnVelocity;
 
         /**
+         * The distance between the drone and the pitch reference point measured in ground coordinates
+         * this distance is used to generate the pitch reference point for the drone
+         */
+        private float lookaheadDistance = 100f;
+
+        /**
          * The turn PhysX object used by the autopilot to make turns
          * --> calculates banking angles and such
          */
         private final PhysXEngine.TurnPhysX turnPhysX;
 
+        /*
+        Controllers for the flight
+         */
 
         /**
          * Controllers needed for banking the drone for a given radius
@@ -828,8 +1178,8 @@ public class AirportNavigationController extends AutopilotFlightController {
          * to the cruise control method implemented in the main controller class
          * @return a pid controller tuned to maintain the reference velocity of the autopilot
          */
-        private PIDController getBankingThrustController() {
-            return bankingThrustController;
+        private PIDController getThrustController() {
+            return thrustController;
         }
 
         /**
@@ -841,29 +1191,31 @@ public class AirportNavigationController extends AutopilotFlightController {
             return bankingRollController;
         }
 
+
         /**
-         * Getter for the altitude controller, this controller is responsible for maintaining the reference altitude
-         * in this case the assigned cruising altitude by the autopilot overseer
-         * @return the PID controller tuned for maintaining the assigned altitude during the banking turn
+         * Getter for the pitch controller of the turning controller, this is the controller for maintaining
+         * the reference altitude during the turn (the reference altitude is defined as the cruising altitude, assigned
+         * by the autopilot overseer)
+         * @return the PID controller tuned for controlling the pitch
          */
-        private PIDController getBankingAltitudeController() {
-            return bankingAltitudeController;
+        private PIDController getPitchController() {
+            return pitchController;
         }
 
         private final static float THRUST_GAIN = 1.0f;
-        private final static float THRUST_INTEGRAL = 0.1f ;
+        private final static float THRUST_INTEGRAL = 0.2f ;
         private final static float THRUST_DERIVATIVE = 0.1f;
-        private PIDController bankingThrustController = new PIDController(THRUST_GAIN, THRUST_INTEGRAL, THRUST_DERIVATIVE);
+        private final PIDController thrustController = new PIDController(THRUST_GAIN, THRUST_INTEGRAL, THRUST_DERIVATIVE);
 
-        private final static float ROLL_GAIN = 0.02f;
+        private final static float ROLL_GAIN = 0.04f;
         private final static float ROLL_INTEGRAL = 0.01f;
-        private final static float ROLL_DERIVATIVE = 0f;
-        private PIDController bankingRollController = new PIDController(ROLL_GAIN, ROLL_INTEGRAL, ROLL_DERIVATIVE);
+        private final static float ROLL_DERIVATIVE = 0.02f;
+        private final PIDController bankingRollController = new PIDController(ROLL_GAIN, ROLL_INTEGRAL, ROLL_DERIVATIVE);
 
-        private final static float ALTITUDE_GAIN = 0.0008f;
-        private final static float ALTITUDE_INTEGRAL = 0.00008f;
-        private final static float ALTITUDE_DERIVATIVE = 0.006f;
-        private PIDController bankingAltitudeController = new PIDController(ALTITUDE_GAIN, ALTITUDE_INTEGRAL, ALTITUDE_DERIVATIVE);
+        private final static float PITCH_GAIN = 1.0f;
+        private final static float PITCH_INTEGRAL = 0.6f;
+        private final static float PITCH_DERIVATIVE = 0.7f;
+        private final PIDController pitchController = new PIDController(PITCH_GAIN, PITCH_INTEGRAL, PITCH_DERIVATIVE);
     }
 
     /**
@@ -882,6 +1234,7 @@ public class AirportNavigationController extends AutopilotFlightController {
             this.nextTurn = nextTurn;
             this.previousTurn = previousTurn;
             this.turnPhysX = turnPhysX;
+            configureToNextTurn(nextTurn, previousTurn, turnPhysX);
         }
 
         /**
@@ -892,7 +1245,7 @@ public class AirportNavigationController extends AutopilotFlightController {
          * @param previousTurn the previous turn that the drone made (needed to calculate the proper exit point)
          * @param turnPhysX the turn physics used to calculate the parameters
          */
-        private void configureInterTurnFlight(AutopilotTurn nextTurn, AutopilotTurn previousTurn, PhysXEngine.TurnPhysX turnPhysX){
+        private void configureToNextTurn(AutopilotTurn nextTurn, AutopilotTurn previousTurn, PhysXEngine.TurnPhysX turnPhysX){
             //get the parameters needed to calculate the velocity needed for a flight with constant altitude
             float mainWingStable = getMainStable();
             //calculate the reference velocity
@@ -901,9 +1254,9 @@ public class AirportNavigationController extends AutopilotFlightController {
 
             //calculate the connection vector for this flight, used to calculate a reference
             //first calculate the exit point relative to the turn center of the previous turn
-            Vector prevEntryPoint = previousTurn.getEntryPoint();
+            Vector prevEntryPointRel = previousTurn.getEntryPoint();
             float prevTurnAngle = previousTurn.getTurnAngle();
-            Vector prevExitPointRel = turnPhysX.rotateTurnVector(prevEntryPoint, prevTurnAngle);
+            Vector prevExitPointRel = turnPhysX.rotateTurnVector(prevEntryPointRel, prevTurnAngle);
             //now get the absolute exit point
             Vector prevTurnCenter = previousTurn.getTurnCenter();
             Vector prevExitPointAbs = prevExitPointRel.vectorSum(prevTurnCenter);
@@ -927,15 +1280,18 @@ public class AirportNavigationController extends AutopilotFlightController {
          * @param previousInputs the previous inputs received from the testbed
          * @return the control actions necessary to steer the drone to the entry point of the next turn
          */
-        private ControlOutputs getControlActions(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs){
+        private AutopilotOutputs getControlActions(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs){
             //create the control outputs object to write the control actions to
             ControlOutputs outputs = new ControlOutputs(AirportNavigationController.this.getStandardOutputs());
             //get the reference point needed to calculate the control actions
             Vector referencePoint = this.calculateReferencePoint(currentInputs);
+//            System.out.println("Reference point" + referencePoint);
             //get the control actions on the heading pitch and roll
             this.headingControl(outputs, currentInputs, previousInputs, referencePoint);
             this.pitchControl(outputs, currentInputs, previousInputs, referencePoint);
-            this.rollControl(outputs, currentInputs);
+            //this.rollControl(outputs, currentInputs);
+            //this.headingControlVertical(outputs, currentInputs, previousInputs, referencePoint);
+            this.rollControl(outputs, currentInputs, previousInputs);
 
             //adjust such that there won't appear any AOA errors
             float aoaResMargin = AirportNavigationController.this.getAoaErrorMargin();
@@ -944,6 +1300,7 @@ public class AirportNavigationController extends AutopilotFlightController {
             //get the thrust control actions
             this.thrustControl(outputs, currentInputs, previousInputs);
 
+            outputs.capInclinations(getMainDeltaIncl(), getMainDeltaIncl(), getHorizontalDeltaIncl(), 0);
             return outputs;
         }
 
@@ -1028,11 +1385,12 @@ public class AirportNavigationController extends AutopilotFlightController {
         private void headingControl(ControlOutputs outputs, AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs, Vector referencePoint){
             //get the error on the heading and the delta time
             float headingError = this.getHeadingError(currentInputs, referencePoint);
+            headingError = abs(headingError) < 10E-3 ? 0 : headingError; //to counter oscillating behavior
             float deltaTime = Controller.getDeltaTime(currentInputs, previousInputs);
             //get the heading PID
-            Controller.PIDController bankControl = this.getHeadingPid();
+            PIDController bankControl = this.getHeadingPid();
             float pidOutput = bankControl.getPIDOutput(headingError, deltaTime);
-
+            errorLog((float) (atan(headingError)*this.getLookaheadDistance()));
             //and inclining the main wings
             float mainLeftWingInclination = getMainStable() + pidOutput;
             float mainRightWingInclination = getMainStable() - pidOutput;
@@ -1045,31 +1403,42 @@ public class AirportNavigationController extends AutopilotFlightController {
             outputs.setRightWingInclination(mainRightWingInclination);
         }
 
+
+
         /**
-         * Controls the roll of the drone during the flight from turn to turn
-         * If the specified roll threshold (see getRollThreshold())  is breached, the drone is 'locked' into
-         * the current roll by keeping the main wings at the same inclination, the drone can become 'unlocked' if
-         * the controller tries to roll in a different direction
-         *
-         * @param outputs the outputs object to write the control actions to
-         * @param currentInput the most recently received inputs from the testbed
+         * Getter for the control actions needed on the drone to steer to the next target
+         * objective of this contoller is to keep the drone as straight as possible
+         * @param outputs the outputs to write the control actions to
+         * @param currentInputs the inputs most recently received from the testbed
+         * @param previousInputs the inputs previously received from the testbed
          */
-        private void rollControl(ControlOutputs outputs, AutopilotInputs_v2 currentInput){
-            float rollThreshold = this.getRollThreshold();
-            float roll = extractRoll(currentInput);
-
-            if(roll >= rollThreshold&&isSteeringLeft(outputs)){
-                outputs.setRightWingInclination(getMainStable());
-                outputs.setLeftWingInclination(getMainStable());
+        private void rollControl(ControlOutputs outputs, AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs){
+            //get the current roll (the error) & the other variables needed to calculate the control actions
+            float roll = extractRoll(currentInputs);
+            float deltaTime = getDeltaTime(currentInputs, previousInputs);
+            if(abs(roll) < 1*PI/180){
+                return;
             }
-            else if(roll <= - rollThreshold&&isSteeringRight(outputs)){
-                outputs.setLeftWingInclination(getMainStable());
-                outputs.setRightWingInclination(getMainStable());
 
-            }else{
-                // change nothing
-            }
+            //get the PID controller used to steer for the roll
+            PIDController rollPid = this.getRollPID();
+            //get the outputs based on the error (the roll itself is the error on the wanted situation)
+            float pidResult = rollPid.getPIDOutput(roll, deltaTime);
+            //if we need to roll to the left the roll is negative & the error generated will be positive
+            //thus we need to lift the right main wing a larger inclination than the left one if we want to go to the left
+            //the converse for a negative error we need to steer to the right (left wing larger than right)
+            float leftWingInclination = getMainStable() - pidResult;
+            float rightWingInclination = getMainStable() + pidResult;
+
+            //cap the results
+            leftWingInclination = capInclination(outputs.getLeftWingInclination() + leftWingInclination, getMainStable(), getMainDeltaIncl());
+            rightWingInclination = capInclination(outputs.getRightWingInclination() + rightWingInclination, getMainStable(), getMainDeltaIncl());
+
+            //save the results
+            outputs.setLeftWingInclination(leftWingInclination);
+            outputs.setRightWingInclination(rightWingInclination);
         }
+
 
 
         /**
@@ -1078,7 +1447,7 @@ public class AirportNavigationController extends AutopilotFlightController {
          * @return true if the drone is steering right
          */
         private boolean isSteeringRight(Controller.ControlOutputs outputs){
-            return false; //outputs.getRightWingInclination() < this.getMainStableInclination();
+            return outputs.getRightWingInclination() < getMainStable();
         }
 
         /**
@@ -1087,7 +1456,7 @@ public class AirportNavigationController extends AutopilotFlightController {
          * @return true if the drone is steering left
          */
         private boolean isSteeringLeft(Controller.ControlOutputs outputs){
-            return false; //outputs.getRightWingInclination() > this.getMainStableInclination();
+            return outputs.getRightWingInclination() > getMainStable();
         }
 
 
@@ -1121,33 +1490,40 @@ public class AirportNavigationController extends AutopilotFlightController {
             Vector prevExitPoint = this.getPreviousExitPoint();
             Vector connectionVector = this.getConnectionVector();
             Vector previousTurnCenter = this.getPreviousTurn().getTurnCenter();
+            Vector dronePosition = extractPosition(currentInputs);
             float lookaheadDistance = this.getLookaheadDistance();
             float refAltitude = AirportNavigationController.this.getCruisingAltitude();
+            Vector altitudeVector = new Vector(0,refAltitude,0);
 
-            //calculate the position of the drone relative to the exit point of the previous turn
-            //get the ground position of the drone
-            Vector droneGroundPos = extractGroundPosition(currentInputs);
-            //calculate the absolute position of the exit point in world axis system
-            Vector absPrevExitPoint = prevExitPoint.vectorSum(previousTurnCenter);
-            //calculate the position of the drone relative to the exit point of the previous turn
-            Vector droneRelExit = droneGroundPos.vectorDifference(absPrevExitPoint);
+//            System.out.println();
+//            System.out.println("Previous turn exit point: " + prevExitPoint);
+//            System.out.println("Connection vector: " + connectionVector);
+//            System.out.println("next turn entry: " + nextTurn.getEntryPoint());
 
-            //calculate the set point itself by the orthogonal projection of the vector pointing from
-            //exit point to the drone onto the connection vector and then adding lookahead distance this projection
-            Vector connectionDronePos = droneRelExit.projectOn(connectionVector);
+            //we want to calculate the reference point as the orthogonal projection of the drone position
+            //relative to the ideal path start point onto the vector indicating the ideal path
+
+            //first calculate the absolute position of the exit point
+            Vector exitPointGround = prevExitPoint.vectorSum(previousTurnCenter);
+            Vector exitPoint = exitPointGround.vectorSum(altitudeVector); //the exit point at the given altitude
+
+            //get the drone position relative to the exit point (is relative to the reference altitude)
+            Vector exitRelativeDrone = dronePosition.vectorDifference(exitPoint);
+
+            //project the relative drone position onto the ideal path (connection vector) to get the progress relative
+            //to the end point (ideal path is of form (x, 0, z)
+            Vector idealDronePos = exitRelativeDrone.projectOn(connectionVector);
+
+            //we need a reference point for the ideal path of the drone therefore we place a reference point
+            //lookahead distance meters away from the projection along the ideal path
             Vector lookaheadVector = connectionVector.normalizeToLength(lookaheadDistance);
 
-            //the set point itself in ground coordinates relative to the exit point of the previous turn
-            Vector relSetPointGround = connectionDronePos.vectorSum(lookaheadVector);
+            //then we add the lookahead vector to the ideal drone position (giving a vector of form (x, 0, z)
+            Vector referenceRelToExit = idealDronePos.vectorSum(lookaheadVector);
 
-            //we need to add the reference altitude into the mix (for controlling the pitch)
-            Vector altitudeVector = new Vector(0, refAltitude, 0);
-
-            //the sum of both is the position of the set point relative to the exit point of the previous turn
-            Vector relSetPoint = relSetPointGround.vectorSum(altitudeVector);
-
-             //add the absolute position (in world axis) to the relative set point & return
-            return relSetPoint.vectorSum(absPrevExitPoint);
+            //finally set the reference point to absolute values by adding the exit point
+            //(our calculations were relative against this point)
+            return referenceRelToExit.vectorSum(exitPoint);
         }
 
         /**
@@ -1398,6 +1774,14 @@ public class AirportNavigationController extends AutopilotFlightController {
         }
 
         /**
+         * Getter for the maximum deviation from the stable inclination for the vertical stabilizer
+         * @return the maximum inclination deviance from te stable vertical inclination in radians
+         */
+        private float getVerticalDelta() {
+            return verticalDelta;
+        }
+
+        /**
          * Getter for the pid controller that is used to correct the pitch of the drone during the flight between
          * two turns
          * @return the pid controller tuned for the error on the pitch of the drone
@@ -1423,6 +1807,15 @@ public class AirportNavigationController extends AutopilotFlightController {
             return thrustPID;
         }
 
+
+        /**
+         * Getter for the roll PID, used to control the roll during the flight to the next point
+         * @return a pid controller tuned for keeping the roll to the reference point
+         */
+        private PIDController getRollPID() {
+            return rollPID;
+        }
+
         /**
          * The roll that the drone may maximally experience during the flight to the next turn
          * this parameter is used to 'lock' the drone into a banking angle
@@ -1431,21 +1824,27 @@ public class AirportNavigationController extends AutopilotFlightController {
         private float rollThreshold = (float) (5*PI/180f);
 
         /**
+         * The maximum deviance in the vertical stabilizer inclination from the stable inclination
+         * TODO beta usage, verify correct functioning
+         */
+        private float verticalDelta = (float) (5*PI/180);
+
+        /**
          * The control parameters & the pitch pid for controlling the pitch of the drone
          * during the flight in between two turns
          */
         private final static float PITCH_GAIN = 1.0f;
-        private final static float PITCH_INTEGRAL  = 0f;
-        private final static float PITCH_DERIVATIVE = 0f;
+        private final static float PITCH_INTEGRAL  = 0.4f;
+        private final static float PITCH_DERIVATIVE = 0.2f;
         private PIDController pitchPid = new PIDController(PITCH_GAIN, PITCH_INTEGRAL, PITCH_DERIVATIVE);
 
         /**
          * The control parameters & the heading pid for controlling the heading of the drone
          * during the flight between two turns
          */
-        private final static float HEADING_GAIN = 1.0f;
-        private final static float HEADING_INTEGRAL = 0f;
-        private final static float HEADING_DERIVATIVE = 0f ;
+        private final static float HEADING_GAIN = 0.8f;
+        private final static float HEADING_INTEGRAL = 0.0f;
+        private final static float HEADING_DERIVATIVE = 1.0f ;
         private PIDController headingPid = new PIDController(HEADING_GAIN, HEADING_INTEGRAL, HEADING_DERIVATIVE);
 
         /**
@@ -1458,5 +1857,132 @@ public class AirportNavigationController extends AutopilotFlightController {
         private PIDController thrustPID = new PIDController(THRUST_GAIN, THRUST_INTEGRAL, THRUST_DERIVATIVE);
 
 
+
+
+        /**
+         * Control parameters & the roll PID for controlling the roll of the drone (beta function)
+         */
+        private final static float ROLL_GAIN = 1.0f;
+        private final static float ROLL_INTEGRAL = 0.4f;
+        private final static float ROLL_DERIVATIVE = 0.3f;
+        private final PIDController rollPID = new PIDController(ROLL_GAIN, ROLL_INTEGRAL, ROLL_DERIVATIVE);
     }
 }
+
+/*
+Code graveyard for the turning controller
+ */
+
+
+//    /**
+//     * Generates the control actions for maintaining the altitude of the drone
+//     * @param outputs the outputs to write the altitude controls to
+//     * @param currentInputs the inputs the most recent received by the autopilot from the testbed
+//     * @param previousInputs the inputs previously received by the drone
+//     */
+//    @Deprecated
+//    private void altitudeControl(ControlOutputs outputs, AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs){
+//        //get the assigned cruising altitude
+//        float cruisingAltitude = AirportNavigationController.this.getCruisingAltitude();
+//        float currentAltitude = extractAltitude(currentInputs);
+//
+//        //get the difference in altitude (the error in the altitude)
+//        float altitudeDiff = cruisingAltitude - currentAltitude;
+//
+//        //get the pid and the other parameters needed (eg delta time)
+//        float deltaTime = getDeltaTime(currentInputs, previousInputs);
+//        PIDController altitudeController  = this.getBankingAltitudeController();
+//        float pidOutput = altitudeController.getPIDOutput(altitudeDiff, deltaTime);
+//
+//        //now adjust for the error that was made
+//        float desiredHorizontal = pidOutput + getHorizontalStable();
+//        float horizontalInclination = capInclination(desiredHorizontal,getHorizontalStable(), getHorizontalDeltaIncl());
+//
+//        outputs.setHorStabInclination(horizontalInclination);
+//
+//    }
+//    /**
+//     * Getter for the altitude controller, this controller is responsible for maintaining the reference altitude
+//     * in this case the assigned cruising altitude by the autopilot overseer
+//     * @return the PID controller tuned for maintaining the assigned altitude during the banking turn
+//     */
+//    @Deprecated
+//    private PIDController getBankingAltitudeController() {
+//        return bankingAltitudeController;
+//    }
+//private final static float ALTITUDE_GAIN = 0.0008f;
+//    private final static float ALTITUDE_INTEGRAL = 0.00008f;
+//    private final static float ALTITUDE_DERIVATIVE = 0.006f;
+//    @Deprecated
+//    private final PIDController bankingAltitudeController = new PIDController(ALTITUDE_GAIN, ALTITUDE_INTEGRAL, ALTITUDE_DERIVATIVE);
+
+/*
+Code graveyard for the to next turn controller
+ */
+//    /**
+//     * A controller that generates control actions for the heading of the drone via steering with the
+//     * vertical stabilizer (beta function)
+//     * @param outputs  the outputs object to write the result of the calculations to
+//     * @param currentInputs the inputs most recently received from the testbed
+//     * @param previousInputs the inputs previously received from the testbed
+//     * @param referencePoint the reference point used to calculate the heading error from
+//     */
+//    private void headingControlVertical(ControlOutputs outputs, AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs, Vector referencePoint){
+//        //get the current heading error
+//        float headingError = this.getHeadingError(currentInputs, referencePoint);
+//        float deltaTime = Controller.getDeltaTime(currentInputs, previousInputs);
+//        errorLog(headingError);
+//        //get the controller responsible for the vertical stabilizer
+//        PIDController verticalPid = this.getVerticalPID();
+//        //get the outputs for the PID controller
+//        float pidOutputs = verticalPid.getPIDOutput(headingError, deltaTime);
+//        //generate the control actions (inclinations) based on the error
+//        //if the inclination of the vertical stabilizer is positive the drone will steer to the left
+//        //if the heading error is positive (and the pid outputs thus negative) we'll have to steer to the left
+//        //change the sign of the pid outputs before passing them to the outputs
+//        float verticalInclination = getVerticalStable() - pidOutputs;
+//        //cap the result
+//        verticalInclination = capInclination(verticalInclination, getVerticalStable(), getVerticalDelta());
+//        //save it
+//        outputs.setVerStabInclination(verticalInclination);
+//    }
+//    /**
+//     * Controls the roll of the drone during the flight from turn to turn
+//     * If the specified roll threshold (see getRollThreshold())  is breached, the drone is 'locked' into
+//     * the current roll by keeping the main wings at the same inclination, the drone can become 'unlocked' if
+//     * the controller tries to roll in a different direction
+//     *
+//     * @param outputs the outputs object to write the control actions to
+//     * @param currentInput the most recently received inputs from the testbed
+//     */
+//    private void rollControl(ControlOutputs outputs, AutopilotInputs_v2 currentInput){
+//        float rollThreshold = this.getRollThreshold();
+//        float roll = extractRoll(currentInput);
+//
+//        if(roll >= rollThreshold&&isSteeringLeft(outputs)){
+//            outputs.setRightWingInclination(getMainStable());
+//            outputs.setLeftWingInclination(getMainStable());
+//        }
+//        else if(roll <= - rollThreshold&&isSteeringRight(outputs)){
+//            outputs.setLeftWingInclination(getMainStable());
+//            outputs.setRightWingInclination(getMainStable());
+//
+//        }else{
+//            // change nothing
+//        }
+//    }
+//    /**
+//     * Getter for the vertical PID, the pid controller that is tuned for generating the error factor for
+//     * the vertical stabilizer of the drone
+//     * @return a pid controller tuned for the vertical stabilizer
+//     */
+//    private PIDController getVerticalPID() {
+//        return verticalPID;
+//    }
+//    /**
+//     * Control parameters & the vertical stabilizer PID for controlling the heading of the drone (beta function)
+//     */
+//    private final static float VERTICAL_GAIN = 1.0f;
+//    private final static float VERTICAL_INTEGRAL = 0.0f;
+//    private final static float VERTICAL_DERIVATIVE = 0.0f;
+//    private final PIDController verticalPID = new PIDController(VERTICAL_GAIN, VERTICAL_INTEGRAL, VERTICAL_DERIVATIVE);

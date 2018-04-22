@@ -27,6 +27,7 @@ public class AutopilotStabilization extends Controller {
     @Override
     public AutopilotOutputs getControlActions(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs) {
         //create the control outputs
+        //Controller.trajectoryLog(currentInputs);
         ControlOutputs outputs = new ControlOutputs(this.getStandardOutputs());
         stabilizePitchControls(outputs, currentInputs, previousInputs);
         angleOfAttackControl(getAoaErrorMargin(), outputs, currentInputs, previousInputs);
@@ -405,9 +406,10 @@ public class AutopilotStabilization extends Controller {
     /**
      * The tunings for the PID responsible for stabilizing the pitch
      */
-    private final static float STABLE_PITCH_GAIN = 1.0f;
-    private final static float STABLE_PITCH_DERIVATIVE = 0.3f;
-    private final static float STABLE_PITCH_INTEGRAL = 0.5f;
+    private final static float STABLE_PITCH_GAIN = 1.4f;
+    private final static float STABLE_PITCH_INTEGRAL = 0.0f;
+    private final static float STABLE_PITCH_DERIVATIVE = 0.7f;
+
 
     private PIDController pitchStabilizerPID = new PIDController(STABLE_PITCH_GAIN, STABLE_PITCH_INTEGRAL,STABLE_PITCH_DERIVATIVE);
 
