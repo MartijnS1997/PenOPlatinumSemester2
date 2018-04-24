@@ -201,6 +201,9 @@ public class DescendController extends Controller {
             public float getTurnAngle() {
                 return turnAngle;
             }
+
+            @Override
+            public Vector getExitPoint(){return new Vector();}
         };
 
     }

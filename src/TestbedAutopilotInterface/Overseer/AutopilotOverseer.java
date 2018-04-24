@@ -44,12 +44,12 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void>, Packa
     @Override
     public Void call() throws Exception {
         //only start the delivery if all drones to spread the deliveries across have been added
-//        while(this.getActiveAutopilots().size() != this.getInitNbOfAutopilots()){
-//            //do nothing
-//        }
-//
-//        //call the main loop
-//        overseerMainLoop();
+        while(this.getActiveAutopilots().size() != this.getInitNbOfAutopilots()){
+            //do nothing
+        }
+
+        //call the main loop
+        overseerMainLoop();
 
         return null;
     }
@@ -64,7 +64,7 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void>, Packa
         //loop until the simulation has been ended by the testbed
 //        while(!this.isSimulationEnded()){
             //distribute the packages
-            distributePackages();
+        distributePackages();
             //then wait until one of the drone's queues is empty
 //            while(!hasIdleDrone()){
                 //TODO we may also use the autopilots to wake the overseer thread if they spot that their queue is empty

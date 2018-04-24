@@ -7,7 +7,7 @@ import internal.Helper.Vector;
 
 /**
  * Class for generating (landing) paths
- * @author Anthony Rathé
+ * @author Anthony Rathe
  *
  */
 public class PathGenerator_v2 {

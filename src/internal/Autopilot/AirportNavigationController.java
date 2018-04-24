@@ -2,6 +2,7 @@ package internal.Autopilot;
 
 import AutopilotInterfaces.AutopilotInputs_v2;
 import AutopilotInterfaces.AutopilotOutputs;
+import TestbedAutopilotInterface.Overseer.MapAirport;
 import internal.Helper.Vector;
 import internal.Physics.PhysXEngine;
 
@@ -27,6 +28,18 @@ public class AirportNavigationController extends AutopilotFlightController {
 
     public AirportNavigationController(AutoPilot autopilot) {
         super(autopilot);
+    }
+
+    /**
+     * Resets the state of the navigator, this method should be called every time
+     * the finite state machine transitions to the navigator state (we need to reconfigure)
+     */
+    public void reset(){
+        this.navigatorState = NavigatorState.INIT;
+        this.pathGenerator = null;
+        this.sourceAirport = null;
+        this.destinationAirport = null;
+        this.turnPhysX = null;
     }
 
     /**
@@ -73,6 +86,19 @@ public class AirportNavigationController extends AutopilotFlightController {
         PhysXEngine.TurnPhysX turnPhysX = this.getAutopilot().getPhysXEngine().createTurnPhysics();
         //save the turn physX
         this.setTurnPhysX(turnPhysX);
+        //initialize the path generator
+        //extract the orientation and the location of the drone
+        Vector dronePos = extractPosition(currentInputs);
+        Vector droneOrientation = extractOrientation(currentInputs);
+
+        //extract the info needed about the airport
+        MapAirport destinationAirport = this.getDestinationAirport();
+        Vector airportLocation = destinationAirport.getLocation();
+        Vector airportHeading = destinationAirport.getHeadingVector();
+
+        //generate the new path planner
+        PathGenerator_v2 pathGenerator = new PathGenerator_v2(dronePos, droneOrientation, airportLocation, airportHeading);
+        this.setPathGenerator(pathGenerator);
     }
 
     /**
@@ -83,17 +109,21 @@ public class AirportNavigationController extends AutopilotFlightController {
      * @return an AutopilotTurn object containing all the specifications to do the next turn
      */
     private AutopilotTurn getNextTurn(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs){
-        //TODO implement
-        //TODO make call to the path generator & delete the dummy
+        //get the path generator
+        PathGenerator_v2 pathGenerator = this.getPathGenerator();
+        return pathGenerator.getNextTurn();
 
-        if(firstCall) {
-            generateCurcuit(currentInputs);
-        }
-
-
-        AutopilotTurn currentTurn = turns.get(floorMod(turnCount++,2));
-        System.out.println("current turn center: " + currentTurn.getTurnCenter() + "entry point: " + currentTurn.getEntryPoint());
-        return currentTurn;
+//        //TODO implement
+//        //TODO make call to the path generator & delete the dummy
+//
+//        if(firstCall) {
+//            generateCurcuit(currentInputs);
+//        }
+//
+//
+//        AutopilotTurn currentTurn = turns.get(floorMod(turnCount++,2));
+//        System.out.println("current turn center: " + currentTurn.getTurnCenter() + "entry point: " + currentTurn.getEntryPoint());
+//        return currentTurn;
 
     }
 
@@ -148,6 +178,9 @@ public class AirportNavigationController extends AutopilotFlightController {
             public float getTurnAngle() {
                 return 0;
             }
+
+            @Override
+            public Vector getExitPoint(){return new Vector();}
         };
 
         AutopilotTurn turn2 = new AutopilotTurn() {
@@ -170,6 +203,9 @@ public class AirportNavigationController extends AutopilotFlightController {
             public float getTurnAngle() {
                 return turnAngle;
             }
+
+            @Override
+            public Vector getExitPoint(){return new Vector();}
         };
 
         turns.add(turn1);
@@ -240,6 +276,9 @@ public class AirportNavigationController extends AutopilotFlightController {
             public float getTurnAngle() {
                 return turnAngle;
             }
+
+            @Override
+            public Vector getExitPoint(){return new Vector();}
         };
 
         AutopilotTurn turn2 = new AutopilotTurn() {
@@ -262,6 +301,9 @@ public class AirportNavigationController extends AutopilotFlightController {
             public float getTurnAngle() {
                 return turnAngle;
             }
+
+            @Override
+            public Vector getExitPoint(){return new Vector();}
         };
 
         turns.add(turn1);
@@ -411,6 +453,61 @@ public class AirportNavigationController extends AutopilotFlightController {
     /*
     Controller instances
      */
+
+
+    /**
+     * Getter for the destination airport for this navigation, this is the airport the controller has to guide
+     * the drone to
+     * note this destination airport should be re initiated every flight
+     * @return a map airport containing all the information necessary for path generation (target)
+     */
+    private MapAirport getDestinationAirport() {
+        return destinationAirport;
+    }
+
+    /**
+     * Setter for the destination airport of the navigation
+     * --> call this method every package delivery
+     * @param destinationAirport the destination airport data
+     * note: needs to be called by the autopilot finite state machine every time a new package is delivered (airports change)
+     */
+    public void setDestinationAirport(MapAirport destinationAirport) {
+        this.destinationAirport = destinationAirport;
+    }
+
+    /**
+     * Getter for the source airport of the delivery, this is the airport where from the drone is coming
+     * @return the source airport
+     */
+    private MapAirport getSourceAirport() {
+        return sourceAirport;
+    }
+
+    /**
+     * Setter for the source airport, this is the airport the drone is coming from (takeoff)
+     * @param sourceAirport the source airport
+     * note: must be called by the autopilot finite state machine every time a new package is delivered (airports change)
+     */
+    public void setSourceAirport(MapAirport sourceAirport) {
+        this.sourceAirport = sourceAirport;
+    }
+
+    /**
+     * Getter for the path generator, this generator is used to query the next turns for the controller to follow
+     * the generator should be re-initialized for each new flight to a new airport
+     * @return the path generator used by the drone
+     */
+    private PathGenerator_v2 getPathGenerator() {
+        return pathGenerator;
+    }
+
+    /**
+     * Setter for the path generator, generates the turns for the navigator (more info see getter)
+     * @param pathGenerator the generator to set
+     */
+    private void setPathGenerator(PathGenerator_v2 pathGenerator) {
+        this.pathGenerator = pathGenerator;
+    }
 
 
     /**
@@ -600,6 +697,24 @@ public class AirportNavigationController extends AutopilotFlightController {
      * --> goto 1. until we're landing
      */
     private NavigatorState navigatorState = NavigatorState.INIT;
+
+    /**
+     * The path generator used to generates the turns to follow by the controller
+     * the turns connect between the current position of the drone and the next airport to visit
+     */
+    private PathGenerator_v2 pathGenerator;
+
+    /**
+     * The airport the drone has to fly to for delivering the package, this variable is used for initializing
+     * the path generator
+     */
+    private MapAirport destinationAirport;
+
+    /**
+     * The source airport, the airport the drone comes from (where the takeoff occurred)
+     */
+    private MapAirport sourceAirport;
+
 
     /**
      * The cruising altitude assigned to the drone by the overseer, this is the reference altitude for the
@@ -1692,7 +1807,6 @@ public class AirportNavigationController extends AutopilotFlightController {
             return Float.isNaN(pitchError) ? 0 : pitchError;
 
         }
-
 
         /**
          * Getter for the next turn that has to be made, will be used to configure the controller for the flight

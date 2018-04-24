@@ -3,6 +3,7 @@ package internal.Autopilot;
 import AutopilotInterfaces.AutopilotConfig;
 import AutopilotInterfaces.AutopilotInputs_v2;
 import AutopilotInterfaces.AutopilotOutputs;
+import TestbedAutopilotInterface.Overseer.DeliveryPackage;
 import TestbedAutopilotInterface.Overseer.MapAirport;
 import com.sun.org.apache.bcel.internal.generic.LAND;
 
@@ -204,8 +205,26 @@ public class AutopilotFiniteStateMachine {
      */
     private void configureFlight(AutopilotInputs_v2 inputs){
 
-        this.getFlightController().setConfig(this.getAutopilot().getConfig());
-        this.getFlightController().setCruisingAltitude(this.getAutopilot().getCommunicator().getAssignedCruiseAltitude());
+        AirportNavigationController navigationController = this.getFlightController();
+
+        //first we need to clear the controller
+        navigationController.reset();
+
+        AutoPilot autopilot = this.getAutopilot();
+        OverseerCommunication communicator = autopilot.getCommunicator();
+        navigationController.setConfig(autopilot.getConfig());
+        navigationController.setCruisingAltitude(communicator.getAssignedCruiseAltitude());
+
+        //get the data about the package that we currently need to deliver
+        DeliveryPackage currentDelivery = communicator.getCurrentRequest();
+        int sourceID = currentDelivery.getSourceAirport();
+        MapAirport sourceAirport = communicator.getAirportByID(sourceID);
+        int destinationID = currentDelivery.getDestinationAirport();
+        MapAirport destinationAirport = communicator.getAirportByID(destinationID);
+
+        //set the airport data
+        navigationController.setSourceAirport(sourceAirport);
+        navigationController.setDestinationAirport(destinationAirport);
 
 
         //TODO implement, use the information available on the packages to set the parameters needed to fly to
@@ -360,7 +379,7 @@ public class AutopilotFiniteStateMachine {
      * drone's flight to the next airport
      * @return the controller to guide the flight
      */
-    private AutopilotFlightController getFlightController() {
+    private AirportNavigationController getFlightController() {
         return flightController;
     }
 
@@ -455,7 +474,7 @@ public class AutopilotFiniteStateMachine {
      */
     private AutopilotTakeoffController takeoffController;
     private AutopilotStabilization takeoffStabilizerController;
-    private AutopilotFlightController flightController;
+    private AirportNavigationController flightController;
     private DescendController descendController;
     private AutopilotLandingController landingController;
     private AutopilotTaxiingController taxiingController;

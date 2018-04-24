@@ -334,7 +334,7 @@ public class MapAirport {
      * Getter for the heading vector of the first runway of the airport
      * @return the heading of runway number one (normalized)
      */
-    protected Vector getHeadingVector() {
+    public Vector getHeadingVector() {
         return headingVector;
     }
 
