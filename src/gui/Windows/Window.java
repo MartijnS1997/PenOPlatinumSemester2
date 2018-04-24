@@ -321,9 +321,11 @@ public class Window {
 		case DRONE_CHASE_CAM: 
 			this.viewMatrix = getView(droneState, new Vector3f(1f, 0f, 0f), new Vector3f(-1f, 0f, -1f).scale(13f));
 			break;
-		default: 
-			this.viewMatrix = input.getViewMatrix(setting);
-			this.cameraposition = input.getPosition();
+		case DRONE_SIDE_CAM:
+			this.viewMatrix = getView(droneState, new Vector3f(1f, 0f, 0f), new Vector3f(-1f, 0f, -1f).scale(100f), new Vector3f((float) Math.PI/2, 0f, 0f));
+			break;
+		case DRONE_TOP_DOWN_CAM:
+			this.viewMatrix = getView2(droneState, new Vector3f((float) Math.PI/2, (float) -Math.PI/2, 0f), new Vector3f(0, -1f, 0).scale(100f));
 			break;
 		}
 	}
@@ -341,6 +343,39 @@ public class Window {
         
         Vector3f position = dronePosition.add(look.scale(camPosition));
         this.cameraposition = position;
+		return Matrix4f.viewMatrix(right, up, look, position);
+	}
+
+	public Matrix4f getView(DroneGuiState droneState, Vector3f camOrientation, Vector3f camPosition, Vector3f addOrientation) {
+		Vector3f orientation = droneState.getOrientation().convertToVector3f().scale(camOrientation).add(addOrientation);
+		Vector3f dronePosition = droneState.getPosition().convertToVector3f();
+
+		Matrix3f transformationMatrix = Matrix3f.transformationMatrix(orientation).transpose();
+
+		Vector3f right = transformationMatrix.multiply(new Vector3f(1,0,0));
+		Vector3f up = transformationMatrix.multiply(new Vector3f(0,1,0));
+		Vector3f look = transformationMatrix.multiply(new Vector3f(0,0,-1));
+
+
+		Vector3f position = dronePosition.add(look.scale(camPosition));
+		this.cameraposition = position;
+		return Matrix4f.viewMatrix(right, up, look, position);
+	}
+
+	public Matrix4f getView2(DroneGuiState droneState, Vector3f camOrientation, Vector3f camPosition) {
+		Vector3f dronePosition = droneState.getPosition().convertToVector3f();
+
+		float yaw = camOrientation.x;
+		float pitch = camOrientation.y;
+//		float roll = droneState.getOrientation().getxValue();
+
+		Vector3f right = new Vector3f((float) Math.cos(yaw), 0, (float) -Math.sin(yaw));
+		Vector3f up = new Vector3f((float) (Math.sin(pitch)*Math.sin(yaw)), (float) Math.cos(pitch), (float) (Math.sin(pitch)*Math.cos(yaw)));
+		Vector3f look = up.cross(right);
+
+
+		Vector3f position = dronePosition.add(look.scale(camPosition));
+		this.cameraposition = position;
 		return Matrix4f.viewMatrix(right, up, look, position);
 	}
 	
