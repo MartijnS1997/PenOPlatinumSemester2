@@ -348,7 +348,7 @@ public class PathGenerator_v2 {
 	}
 	
 	private float getStandardRadius() {
-		return MINIMUM_RADIUS*1.2f;
+		return MINIMUM_RADIUS;
 	}
 	
 	private float getLandingAngle() {
