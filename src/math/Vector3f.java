@@ -27,6 +27,8 @@ import java.nio.FloatBuffer;
 
 import internal.Helper.Vector;
 
+import static java.lang.Math.signum;
+
 /**
  * This class represents a (x,y,z)-Vector. GLSL equivalent to vec3.
  *
@@ -213,4 +215,34 @@ public class Vector3f {
 	public static Vector3f ArrayToVector3f(float[] array) {
 		return new Vector3f(array[0], array[1], array[2]);
 	}
+
+    public float getAngleBetween(Vector3f other) throws NullPointerException{
+
+        if(other == null){
+            throw new NullPointerException();
+        }
+
+        // the numerator is a scalar product of the two vectors
+        float numerator = this.dot(other);
+        // the denominator is a product of the 2-norms of the vectors
+        float denominator = this.length()*other.length();
+
+        return (float)Math.acos(numerator/denominator);
+    }
+
+    public static float getHeadingAngle(Vector3f headingVector){
+        //calculate the angle between the heading vector and the negative Z-axis to get the heading angle
+        //for the drone
+        Vector3f negZ = new Vector3f(0,0,-1);
+        float angle = negZ.getAngleBetween(headingVector);
+        //also get the sign from the y component, negative sign is right, positive is left (do negZ x HeadingVector)
+        float sign =  signum(negZ.cross(headingVector).y);
+
+        //check for NaN in the angle
+        if(Float.isNaN(angle)){
+            return 0;
+        }
+
+        return angle*sign;
+    }
 }

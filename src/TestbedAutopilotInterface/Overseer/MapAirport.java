@@ -310,7 +310,7 @@ public class MapAirport {
      * Getter for the width of the runway
      * @return a float containing the width of the runway
      */
-    protected float getRunwayWidth() {
+    public float getRunwayWidth() {
         return runwayWidth;
     }
 
@@ -318,7 +318,7 @@ public class MapAirport {
      * Getter for the length of the runway
      * @return a float containing the length of the runway
      */
-    protected float getRunwayLength() {
+    public float getRunwayLength() {
         return runwayLength;
     }
 
@@ -365,6 +365,16 @@ public class MapAirport {
     }
 
     /**
+     * Getter for the gate position with the corresponding gate index
+     * @param gateIndex the index of the gate to get the location for
+     * @return a vector containing the location of the gate in world axis system
+     * note: the gates have number 0 to 1, if index out of range an exception will be thrown
+     */
+    public Vector getGateLocation(int gateIndex){
+        return gates.get(gateIndex);
+    }
+
+    /**
      * The width of the runways, the same of all runways on the airport
      */
     private float runwayWidth;
@@ -397,6 +407,7 @@ public class MapAirport {
      * the unique identifier of the airport
      */
     private int airportID;
+
     /**
      * a map containing the id of the specified gate and its corresponding location
      */

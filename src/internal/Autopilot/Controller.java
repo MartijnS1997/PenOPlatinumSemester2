@@ -6,6 +6,10 @@ import AutopilotInterfaces.AutopilotOutputs;
 import internal.Physics.PhysXEngine;
 import internal.Helper.Vector;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -26,6 +30,34 @@ public abstract class Controller {
 
     public Controller(AutoPilot autopilot){
         this.autopilot = autopilot;
+    }
+
+    /**
+     * Debugging method used to save data to a .txt file
+     * @param currentInputs the outputs to write
+     */
+    protected static void trajectoryLog(AutopilotInputs_v2 currentInputs){
+        Vector position = extractPosition(currentInputs);
+        String logString = position.getxValue() + ";" + position.getyValue() + ";" + position.getzValue() + "\n";
+        try {
+            Files.write(Paths.get("trajectoryLog.txt"), logString.getBytes(), StandardOpenOption.APPEND);
+        }catch (IOException e) {
+            //exception handling left as an exercise for the reader
+        }
+    }
+
+    /**
+     * Debugging method used to save data to a .txt file
+     * @param error the error to write to the file
+     */
+    protected static void errorLog(float error){
+
+        String logString = error + "\n";
+        try {
+            Files.write(Paths.get("errorLog.txt"), logString.getBytes(), StandardOpenOption.APPEND);
+        }catch (IOException e) {
+            //exception handling left as an exercise for the reader
+        }
     }
 
     /**
@@ -73,7 +105,7 @@ public abstract class Controller {
 
         //calculate the control actions
         float requiredThrust = calcRequiredThrust(outputs,currentInputs, previousInputs, PIDOutput);
-        System.out.println("Required thrust: " + requiredThrust);
+//        System.out.println("Required thrust: " + requiredThrust);
         //set to the possible thrust
         float thrust  = this.capThrust(requiredThrust);
         //write the calculated thrust to the outputs
@@ -206,11 +238,11 @@ public abstract class Controller {
      * @param currentInputs the most recent inputs received from the testbed
      * @param previousInputs the previously received inputs from the testbed
      */
-    protected void angleOfAttackControl(float resultMargin, ControlOutputs controlOutputs, AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs){
+    protected void angleOfAttackControl(float resultMargin, ControlOutputs controlOutputs, AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs) {
 
         //first check if the current and the previous steps are initialized, if not so delete all control actions
         //and set to standard value
-        if(currentInputs == null || previousInputs == null){
+        if (currentInputs == null || previousInputs == null) {
             controlOutputs.reset();
             return;
         }
@@ -224,13 +256,13 @@ public abstract class Controller {
 
         //change until the controls fit
         boolean stable = false;
-        while(!stable) {
-            //keep adjusting the control outputs until we are stable (no controls have been changed by the aoa controls
+//        while(!stable) {
+        //keep adjusting the control outputs until we are stable (no controls have been changed by the aoa controls
             stable = AOAControlMainLeft(controlOutputs, optimisations, angleOfAttack, resultMargin, orientation, rotation, velocity);
-            stable = stable&&AOAControlMainRight(controlOutputs, optimisations, angleOfAttack, resultMargin, orientation, rotation, velocity);
-            stable = stable&&AOAControlHorStabilizer(controlOutputs, optimisations, angleOfAttack, resultMargin, orientation, rotation, velocity);
-            stable = stable&&AOAControlVerStabilizer(controlOutputs, optimisations, angleOfAttack, resultMargin, orientation, rotation, velocity);
-        }
+            stable = stable && AOAControlMainRight(controlOutputs, optimisations, angleOfAttack, resultMargin, orientation, rotation, velocity);
+            stable = stable && AOAControlHorStabilizer(controlOutputs, optimisations, angleOfAttack, resultMargin, orientation, rotation, velocity);
+            stable = stable && AOAControlVerStabilizer(controlOutputs, optimisations, angleOfAttack, resultMargin, orientation, rotation, velocity);
+//        }
     }
 
     /**
@@ -520,6 +552,16 @@ public abstract class Controller {
         return inputs.getY();
     }
 
+    /**
+     * extracts the x-z coordinates of the drone from the inputs
+     * these are the coordinates of the drone in the xz-plane for y=0 (the ground)
+     * @param inputs the inputs to extract the ground position from
+     * @return a vector containing the x and z coordinates specified in the input
+     *         the format = vector(inputs.getX(), 0, inputs.getZ())
+     */
+    protected static Vector extractGroundPosition(AutopilotInputs_v2 inputs){
+        return new Vector(inputs.getX(), 0, inputs.getZ());
+    }
 
     /**
      * Extracts a list of vectors (representing the path) from the list of vectors
@@ -654,6 +696,33 @@ public abstract class Controller {
             copy.setRightBrakeForce(this.getRightBrakeForce());
 
             return copy;
+        }
+
+        /**
+         * Cap all the inclinations of the control outputs
+         * the inclinations are set within range [standardValue - delta, standardValue + delta]
+         * @param leftWingDelta the max deviation on the left wing inclination
+         * @param rightWingDelta the max deviation on the right wing inclination
+         * @param horizontalDelta the max deviation on the horizontal stabilizer inclination
+         * @param verticalDelta the max deviation on the vertical stabilizer inclination
+         */
+        protected void capInclinations(float leftWingDelta, float rightWingDelta, float horizontalDelta, float verticalDelta){
+            float leftIncl = this.getLeftWingInclination();
+            float rightIncl = this.getRightWingInclination();
+            float horizontalIncl = this.getHorStabInclination();
+            float verticalIncl = this.getVerStabInclination();
+
+            StandardOutputs standardOutputs = this.getStandardOutputs();
+
+            float standardLeft = standardOutputs.getStandardLeftMainInclination();
+            float standardRight = standardOutputs.getStandardRightMainInclination();
+            float standardHorizontal = standardOutputs.getStandardHorizontalStabilizerInclination();
+            float standardVertical = standardOutputs.getStandardVerticalStabilizerInclination();
+
+            this.setLeftWingInclination(capInclination(leftIncl, standardLeft, leftWingDelta));
+            this.setRightWingInclination(capInclination(rightIncl, standardRight, rightWingDelta));
+            this.setHorStabInclination(capInclination(horizontalIncl, standardHorizontal, horizontalDelta));
+            this.setVerStabInclination(capInclination(verticalIncl, standardVertical, verticalDelta));
         }
 
         /**

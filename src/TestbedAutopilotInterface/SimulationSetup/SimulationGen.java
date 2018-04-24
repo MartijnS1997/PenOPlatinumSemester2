@@ -125,6 +125,10 @@ public class SimulationGen {
         //get source and destination airport
         int sourceIndex = random.nextInt(nbAirports);
         int destIndex = random.nextInt(nbAirports);
+        //the destination index must be different from the source index
+        while(sourceIndex == destIndex){
+            destIndex = random.nextInt(nbAirports);
+        }
 
         //get source and destination gates
         int sourceGateID = random.nextInt(maxGateID);

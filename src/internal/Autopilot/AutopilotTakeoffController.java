@@ -2,6 +2,8 @@ package internal.Autopilot;
 
 import AutopilotInterfaces.AutopilotInputs_v2;
 import AutopilotInterfaces.AutopilotOutputs;
+import internal.Helper.Vector;
+import internal.Physics.PhysXEngine;
 
 import static java.lang.Math.*;
 
@@ -82,8 +84,96 @@ public class AutopilotTakeoffController extends Controller {
         PIDController thrustControl = this.getThrustController();
         //get the reference velocity used by the controller
         float referenceVelocity = this.getReferenceVelocity();
+        //check if the reference velocity is already configured
+        if(referenceVelocity < 0){
+            //calculate the reference velocity
+            referenceVelocity = this.getAutopilot().getPhysXOptimisations().calcStableZeroPitchVelocity(STANDARD_MAIN);
+            //save the reference velocity
+            this.setReferenceVelocity(referenceVelocity);
+        }
         //then get the outputs from the standard cruise control implemented in the main controller class
         this.flightCruiseControl(outputs,currentInputs, previousInputs, thrustControl, referenceVelocity);
+    }
+
+    private void stabilizePitchControls(ControlOutputs outputs, AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs){
+        //get the pitch difference
+        float pitchDiffAngle = this.getRefPitchDiff(currentInputs);
+        Vector orientation = Controller.extractOrientation(currentInputs);
+        float pitchAngle = -this.getRefPitchDiff(currentInputs);
+        //the pitch should be 0;
+        //System.out.println(pitch);
+        PIDController pitchPid = this.getPitchStabilizerPID();
+        float deltaTime = Controller.getDeltaTime(currentInputs, previousInputs);
+        float PIDControlActions =  pitchPid.getPIDOutput(pitchAngle,  deltaTime);
+        //System.out.println("Pitch result PID" + PIDControlActions);
+        //adjust the horizontal stabilizer
+        float horizontalInclination = STANDARD_HORIZONTAL - PIDControlActions;
+        horizontalInclination = signum(horizontalInclination) * min(abs(horizontalInclination), MAX_HORIZONTAL);
+        outputs.setHorStabInclination(horizontalInclination);
+    }
+
+    /**
+     * Calculates the pitch difference, the angle between the reference vector (the vector between
+     * the pitch reference point and the position of the drone) transformed to the drone axis system and
+     * projected onto the yz plane in the drone axis system, and the heading vector (0,0,-1) in the drone axis system.
+     * The direction is determined by the cross product of the heading vector and the projected and transformed reference
+     * vector.
+     * @return returns a pos angle if the drone needs to go up, and a negative angle if the drone needs to go down
+     */
+    private float getRefPitchDiff(AutopilotInputs_v2 currentInputs){
+        //get the difference vector
+        //get the position of the drone
+        Vector dronePos = Controller.extractPosition(currentInputs);
+        //get the position of the way point
+        Vector pitchRefPoint = this.getPitchReference(currentInputs);
+        //get the ref vector
+        Vector ref = pitchRefPoint.vectorDifference(dronePos);
+        //transform it to the drone axis system
+        //first get the current orientation
+        Vector orientation = Controller.extractOrientation(currentInputs);
+        Vector refDrone = PhysXEngine.worldOnDrone(ref, orientation);
+        //then project it onto the yz plane: normal vector (1,0,0)
+        Vector normalYZ = new Vector(1,0,0);
+        Vector projRefDrone = refDrone.orthogonalProjection(normalYZ);
+        //calculate the angle between the heading vector (0,0,-1) and the reference
+        Vector headingVect = new Vector(0,0,-1);
+        float angle = abs(projRefDrone.getAngleBetween(headingVect));
+
+        //then get the vector product for the direction(the x-component)
+        float direction = headingVect.crossProduct(projRefDrone).getxValue();
+
+        float res = angle*signum(direction);
+        //check for NaN
+        if(Float.isNaN(res)){
+            return 0; // NaN comes from the angle
+        }
+        //else return the result
+        return res;
+
+    }
+
+    /**
+     * Get the reference point for the pitch used by the takeoff controller
+     * @param currentInputs the inputs most recently received from the testbed used to infer the parameters from
+     * @return a vector containing a reference point for the drone in the world axis system
+     */
+    private Vector getPitchReference(AutopilotInputs_v2 currentInputs){
+        //get the position & orientation of the drone
+        Vector position = extractPosition(currentInputs);
+        Vector orientation = extractOrientation(currentInputs);
+        float cruisingAltitude = this.getCruisingAltitude();
+        //get the relative distance for the reference point (located on the negative z-axis in the
+        //heading axis system
+        float pitchReferenceDistance = this.getPitchRefDistance();
+        Vector refPointHeadingAxis = new Vector(0,0,-pitchReferenceDistance);
+        //transform the reference point to the world axis system (relative to drone position)
+        Vector refPointWorldAxisRel = PhysXEngine.headingOnWorld(refPointHeadingAxis, orientation);
+        //add the x and z position of the drone to the heading vector and there after add
+        //the cruising altitude to get the real set point
+        Vector relativePos = new Vector(position.getxValue(), cruisingAltitude, position.getzValue());
+        Vector refPointWorldAxis = refPointWorldAxisRel.vectorSum(relativePos);
+
+        return refPointWorldAxis;
     }
 
     /**
@@ -143,6 +233,9 @@ public class AutopilotTakeoffController extends Controller {
      * @param referencePitch a float within range[-PI/2, PI/2]
      */
     public void setReferencePitch(float referencePitch) {
+        if(!isValidReferencePitch(referencePitch)){
+            throw new IllegalArgumentException("the reference pitch is not in range [-PI/2, PI/2]");
+        }
         this.referencePitch = referencePitch;
     }
 
@@ -168,7 +261,11 @@ public class AutopilotTakeoffController extends Controller {
      * Setter for the reference velocity of the controller (for more info see getter)
      * @param referenceVelocity the reference velocity of the drone (must be > 0)
      */
-    public void setReferenceVelocity(float referenceVelocity) {
+    private void setReferenceVelocity(float referenceVelocity) {
+        System.out.println("reference velocity: " + referenceVelocity);
+        if(!isValidReferenceVelocity(referenceVelocity)){
+            throw new IllegalArgumentException("velocity is not strictly positive");
+        }
         this.referenceVelocity = referenceVelocity;
     }
 
@@ -209,6 +306,13 @@ public class AutopilotTakeoffController extends Controller {
         return standardOutputs;
     }
 
+    /**
+     * Getter for the distance the reference point is located from the drone in the heading axis
+     * @return a float containing the distance from the origin of the drone to the reference point (virtual ref point)
+     */
+    public float getPitchRefDistance() {
+        return pitchRefDistance;
+    }
 
     /**
      * Getter for the error margin on the aoa control calculations
@@ -227,6 +331,15 @@ public class AutopilotTakeoffController extends Controller {
     }
 
     /**
+     * The PID used to stabilize the pitch after a successful takeoff, the drone stabilizes itself
+     * so the next controller may have it easier
+     * @return the pid tuned to stabilize the pitch of the drone
+     */
+    public PIDController getPitchStabilizerPID() {
+        return pitchStabilizerPID;
+    }
+
+    /**
      * The cruising altitude of the drone used as a milestone to check if we've reached the correct height
      * during the takeoff
      */
@@ -242,14 +355,22 @@ public class AutopilotTakeoffController extends Controller {
     /**
      * The reference velocity, used during the takeoff to cap the maxiumum velocity for the next part of the flight
      * (must be fed into the cruise controller as a reference)
+     * upon init the value is set to -1f to indicate that the velocity is not yet configured
+     * will be set upon first actual call of the controller
      */
-    private float referenceVelocity = 50f;
+    private float referenceVelocity = -1f;
 
     /**
      * The margin on the angle of attack control used to account for the imperfect approx of the velocity
      * of the drone
      */
     private float AOAMargin = (float) (2*PI/180);
+
+    /**
+     * The distance from the drone to the reference pitch point. This point is used by the takeoff controller
+     * to stabilize the flight after initialization
+     */
+    private float pitchRefDistance = 100f;
 
     /*
     Constants used to steer the drone
@@ -296,7 +417,19 @@ public class AutopilotTakeoffController extends Controller {
     private final static float THRUST_DERIVATIVE = 0.0f;
     private PIDController thrustController = new PIDController(THRUST_GAIN, THRUST_INTEGRAL, THRUST_DERIVATIVE);
 
-   //standard outputs
+
+    /**
+     * The tunings for the PID responsible for stabilizing the pitch of the takeoff controller
+     * is invoked before the next controller is invoked, once the pitch is stabilized the next controller is invoked
+     */
+    private final static float STABLE_PITCH_GAIN = 1.0f;
+    private final static float STABLE_PITCH_DERIVATIVE = 0.2f;
+    private final static float STABLE_PITCH_INTEGRAL = 0.5f;
+
+    private PIDController pitchStabilizerPID = new PIDController(STABLE_PITCH_GAIN, STABLE_PITCH_INTEGRAL,STABLE_PITCH_DERIVATIVE);
+
+
+    //standard outputs
 
     /**
      * The standard outputs for this controller, is used to initialize the control outputs of the drone

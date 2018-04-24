@@ -128,13 +128,13 @@ public class Cube implements Polygon {
 	}
 
 	public void update(Vector3f position, Vector3f orientation) {
-		this.orientation  = orientation.negate();
+		this.orientation  = orientation;
 		this.position = position;
 	}
 	
 	public Vector3f getRelPos() {
 		Vector3f pos = this.position;
-		Matrix3f transformation = Matrix3f.transformationMatrix(this.orientation.negate()).transpose();
+		Matrix3f transformation = Matrix3f.transformationMatrix(this.orientation).transpose();
 		Vector3f difference = transformation.multiply(relativePosition);
 		pos = pos.add(difference);
 		return pos;
@@ -150,6 +150,10 @@ public class Cube implements Polygon {
 
 	public Vector getPosition(){
 		return Vector.vector3fToVector(this.getPos());
+	}
+
+	public Vector3f getOrientation() {
+		return this.orientation;
 	}
 	
 	public Vector3f getSize() {

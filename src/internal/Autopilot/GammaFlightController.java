@@ -20,6 +20,10 @@ public class GammaFlightController extends AutopilotFlightController {
         System.out.println("using gamma controller");
     }
 
+    @Override
+    void setCruisingAltitude(float cruisingAltitude) {
+
+    }
 
     public ControlOutputs getControlActions(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs){
 //        this.updateInputs(currentInputs);

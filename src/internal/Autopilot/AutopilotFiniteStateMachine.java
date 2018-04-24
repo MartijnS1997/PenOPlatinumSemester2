@@ -3,6 +3,9 @@ package internal.Autopilot;
 import AutopilotInterfaces.AutopilotConfig;
 import AutopilotInterfaces.AutopilotInputs_v2;
 import AutopilotInterfaces.AutopilotOutputs;
+import TestbedAutopilotInterface.Overseer.MapAirport;
+import internal.Helper.Vector;
+import internal.Physics.PhysXEngine;
 
 import static internal.Autopilot.AutopilotState.*;
 
@@ -23,6 +26,7 @@ public class AutopilotFiniteStateMachine {
     public AutopilotFiniteStateMachine(AutoPilot autopilot){
         //create all the controllers
         this.takeoffController = new AutopilotTakeoffController(autopilot);
+        this.takeoffStabilizerController = new AutopilotStabilization(autopilot);
         this.flightController = new AirportNavigationController(autopilot);
         this.landingController = new AutopilotLandingController(autopilot);
         this.taxiingController = new AutopilotTaxiingController(autopilot);
@@ -50,58 +54,13 @@ public class AutopilotFiniteStateMachine {
         return outputs;
     }
 
-    //
-//        //TODO delete once we implemented the controllers, sole purpose of the dummy is to make sure we didn't break stuff
-//        return new AutopilotOutputs() {
-//            @Override
-//            public float getThrust() {
-//                return 1000;
-//            }
-//
-//            @Override
-//            public float getLeftWingInclination() {
-//                return (float) (5*PI/180);
-//            }
-//
-//            @Override
-//            public float getRightWingInclination() {
-//                return (float)(5*PI/180);
-//            }
-//
-//            @Override
-//            public float getHorStabInclination() {
-//                return (float) (-5*PI/180);
-//            }
-//
-//            @Override
-//            public float getVerStabInclination() {
-//                return 0;
-//            }
-//
-//            @Override
-//            public float getFrontBrakeForce() {
-//                return 0;
-//            }
-//
-//            @Override
-//            public float getLeftBrakeForce() {
-//                return 0;
-//            }
-//
-//            @Override
-//            public float getRightBrakeForce() {
-//                return 0;
-//            }
-//        };
-
-
 
     /**
      * Getter for the state that will be active during the next iteration (not the logically next state)
-     * @param inputs the inputs used to determine the next state
+     * @param currentInputs the inputs used to determine the next state
      * @return the next active state of the autopilot
      */
-    private AutopilotState getNextActiveState(AutopilotInputs_v2 inputs){
+    private AutopilotState getNextActiveState(AutopilotInputs_v2 currentInputs){
         //get the current state
         AutopilotState state = this.getState();
         //get the previous inputs
@@ -110,28 +69,32 @@ public class AutopilotFiniteStateMachine {
         switch(state){
             case INIT_FLIGHT:
                 //check if we've already passed a single iteration (needed to configure the autopilot)
-                return this.getInitController().hasReachedObjective(inputs, previousInputs) ? TAKEOFF : INIT_FLIGHT;
+                return this.getInitController().hasReachedObjective(currentInputs, previousInputs) ? TAKEOFF : INIT_FLIGHT;
             case TAKEOFF:
                 //get the takeoff controller
                 AutopilotTakeoffController takeoffController = this.getTakeoffController();
                 //check if it has reached its objective, if so return the next state, if not continue the takeoff
-                return takeoffController.hasReachedObjective(inputs, previousInputs ) ? FLIGHT : TAKEOFF;
+                return takeoffController.hasReachedObjective(currentInputs, previousInputs ) ? STABILIZE_TAKEOFF : TAKEOFF;
+            case STABILIZE_TAKEOFF:
+                //get the takeoff stabilization controller
+                AutopilotStabilization stabilizationController = this.getTakeoffStabilizerController();
+                return stabilizationController.hasReachedObjective(currentInputs, previousInputs) ? FLIGHT : STABILIZE_TAKEOFF;
             case FLIGHT:
                 AutopilotFlightController flightController = this.getFlightController();
                 //check if the controller has finished doing its job
-                return flightController.hasReachedObjective(inputs, previousInputs) ? LANDING : FLIGHT;
+                return flightController.hasReachedObjective(currentInputs, previousInputs) ? LANDING : FLIGHT;
             case LANDING:
                 AutopilotLandingController landingController = this.getLandingController();
                 //check if we're on ground, if not continue landing, otherwise, start taxiing
-                return landingController.hasReachedObjective(inputs, previousInputs) ? TAXIING_TO_GATE : LANDING;
+                return landingController.hasReachedObjective(currentInputs, previousInputs) ? TAXIING_TO_GATE : LANDING;
             case TAXIING_TO_GATE:
                 AutopilotTaxiingController taxiingControllerGate = this.getTaxiingController();
                 //check if we've reached the gate, if not keep on going, if so start taxiing to the runway
-                return taxiingControllerGate.hasReachedObjective(inputs, previousInputs) ? TAXIING_TO_RUNWAY : TAXIING_TO_GATE;
+                return taxiingControllerGate.hasReachedObjective(currentInputs, previousInputs) ? TAXIING_TO_RUNWAY : TAXIING_TO_GATE;
             case TAXIING_TO_RUNWAY:
                 AutopilotTaxiingController taxiingControllerRunway = this.getTaxiingController();
                 //check if we've reached the runway, if so start the takeoff, if not keep taxiing
-                return taxiingControllerRunway.hasReachedObjective(inputs, previousInputs) ? TAKEOFF : TAXIING_TO_RUNWAY;
+                return taxiingControllerRunway.hasReachedObjective(currentInputs, previousInputs) ? TAKEOFF : TAXIING_TO_RUNWAY;
             default:
                 //Default action, may change later (determine based on the inputs which state should be appropriate
                 return TAKEOFF;
@@ -177,6 +140,8 @@ public class AutopilotFiniteStateMachine {
             case TAKEOFF:
                 configureTakeoff(inputs);
                 break;
+            case STABILIZE_TAKEOFF:
+                configureTakeoffStabilization(inputs);
             case FLIGHT:
                 configureFlight(inputs);
                 break;
@@ -210,11 +175,32 @@ public class AutopilotFiniteStateMachine {
     }
 
     /**
+     * Configures the stabilization controller responsible for stabilizing the drone after a takeoff
+     * must be called every time the state switches to takeoff stabilization
+     * @param inputs the inputs used to configure the stabilizer
+     */
+    private void configureTakeoffStabilization(AutopilotInputs_v2 inputs){
+        //set the cruising altitude
+        float cruisingAlt = this.getAutopilot().getCommunicator().getAssignedCruiseAltitude();
+        AutopilotStabilization stabilization = this.getTakeoffStabilizerController();
+        stabilization.setCruisingAltitude(cruisingAlt);
+
+        //set the config for the controller
+        AutopilotConfig config = this.getAutopilot().getConfig();
+        stabilization.setConfig(config);
+    }
+
+    /**
      * Configures the flight controller, must be called every time the controller is switched to the
      * flight controller --> used to configure for the flight to the next airport
      * @param inputs the inputs  to configure the controller with
      */
     private void configureFlight(AutopilotInputs_v2 inputs){
+
+        this.getFlightController().setConfig(this.getAutopilot().getConfig());
+        this.getFlightController().setCruisingAltitude(this.getAutopilot().getCommunicator().getAssignedCruiseAltitude());
+
+
         //TODO implement, use the information available on the packages to set the parameters needed to fly to
         //TODO next airport for delivery --> all the info needed is in the autopilot communicator class
         //TODO can be accessed via api chain: this.getAutopilot().getCommunicator();
@@ -225,6 +211,14 @@ public class AutopilotFiniteStateMachine {
      * @param inputs the inputs  to configure the controller with
      */
     private void configureLanding(AutopilotInputs_v2 inputs){
+    	//Set airport where to land
+    	int airportID = this.getAutopilot().getCommunicator().getCurrentRequest().getDestinationAirport();
+    	MapAirport airport = this.getAutopilot().getCommunicator().getAirportByID(airportID);
+    	AutopilotLandingController landingController = this.getLandingController();
+    	landingController.setAirport(airport);
+    	//Set configuration of the autopilot
+    	AutopilotConfig config = this.getAutopilot().getConfig();
+        landingController.setConfig(config);
         //TODO implement, use the landing information contained in the overseer (and the delivery package)
         //TODO to get the right angle for the landing, we may also ship the "get in place" functionality
         //TODO to the flight controller. To access the package use the api chain this.getAutopilot().getCommunicator().getCurrentRequest()
@@ -267,6 +261,8 @@ public class AutopilotFiniteStateMachine {
             case INIT_FLIGHT:
                 return TAKEOFF;
             case TAKEOFF:
+                return STABILIZE_TAKEOFF;
+            case STABILIZE_TAKEOFF:
                 return FLIGHT;
             case FLIGHT:
                 return LANDING;
@@ -292,6 +288,8 @@ public class AutopilotFiniteStateMachine {
                 return this.getInitController();
             case TAKEOFF:
                 return this.getTakeoffController();
+            case STABILIZE_TAKEOFF:
+                return this.getTakeoffStabilizerController();
             case FLIGHT:
                 return this.getFlightController();
             case LANDING:
@@ -323,6 +321,15 @@ public class AutopilotFiniteStateMachine {
      */
     private AutopilotTakeoffController getTakeoffController() {
         return takeoffController;
+    }
+
+    /**
+     * Getter for the takeoff stabilizer controller, this controller is responsible for stabilizing the drone
+     * after takeoff
+     * @return the controller used to guide the stabilization of the drone after takeoff
+     */
+    private AutopilotStabilization getTakeoffStabilizerController() {
+        return takeoffStabilizerController;
     }
 
     /**
@@ -415,6 +422,7 @@ public class AutopilotFiniteStateMachine {
      * The controllers used by the finite state machine to generate the control actions
      */
     private AutopilotTakeoffController takeoffController;
+    private AutopilotStabilization takeoffStabilizerController;
     private AutopilotFlightController flightController;
     private AutopilotLandingController landingController;
     private AutopilotTaxiingController taxiingController;

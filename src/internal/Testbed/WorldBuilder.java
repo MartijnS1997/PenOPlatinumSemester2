@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.List;
 
 
+import internal.Autopilot.AutopilotTurn;
 import internal.Helper.Parser;
 import internal.Helper.Vector;
 /*
