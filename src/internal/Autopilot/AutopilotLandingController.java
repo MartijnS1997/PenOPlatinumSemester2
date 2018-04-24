@@ -423,7 +423,7 @@ public class AutopilotLandingController extends Controller {
     private boolean hasStartedSoftDescend = false;
 
     //rapid descend phase constants and controllers
-    private final static float RAPID_DESCEND_PHASE_REF_PITCH = (float) (-15*PI/180);
+    private final static float RAPID_DESCEND_PHASE_REF_PITCH = (float) (-10*PI/180);
     private final static float RAPID_DESCEND_THRUST = 0f;
 
     //soft descend constants
