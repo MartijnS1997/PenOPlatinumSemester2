@@ -62,17 +62,18 @@ public class AutopilotLandingController extends Controller {
         switch (landingPhase){
             case STABILIZE:
                 this.stabilizeFlight(outputs, inputs, previousInputs);
+                //System.out.println("stabilize");
                 break;
             case RAPID_DESCEND:
                 this.getRapidDescendControls(outputs, inputs, previousInputs);
-//                System.out.println("rapidDescend");
+                //System.out.println("rapidDescend");
                 break;
             case SOFT_DESCEND:
-//                System.out.println("soft descend");
+                //System.out.println("soft descend");
                 this.getSoftDescendControls(outputs, inputs, previousInputs);
                 break;
             case SLOW_DOWN:
-//            	System.out.println("Slowdown");
+            	//System.out.println("Slowdown");
             	this.slowDown(outputs);
             	break;
         }
@@ -227,7 +228,7 @@ public class AutopilotLandingController extends Controller {
         float pitch = orientation.getyValue();
 //        System.out.println(pitch);
         PIDController pitchPid =this.getPitchPIDController();
-        float deltaTime = Controller.getDeltaTime(prevInputs, currentInputs);
+        float deltaTime = Controller.getDeltaTime(currentInputs, prevInputs);
         float PIDControlActions =  pitchPid.getPIDOutput(pitch, deltaTime);
         //System.out.println("Pitch result PID" + PIDControlActions);
         //adjust the horizontal stabilizer
@@ -246,7 +247,7 @@ public class AutopilotLandingController extends Controller {
         Vector orientation = Controller.extractOrientation(currentInputs);
         float roll = orientation.getzValue();
         PIDController rollPid = this.getRollPIDController();
-        float deltaTime = Controller.getDeltaTime(prevInputs, currentInputs);
+        float deltaTime = Controller.getDeltaTime(currentInputs, prevInputs);
         float PIDControlActions = rollPid.getPIDOutput(roll, deltaTime);
         float rightMainWing = this.getMainStableInclination() + PIDControlActions;
         float leftMainWing = this.getMainStableInclination() - PIDControlActions;
