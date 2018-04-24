@@ -62,15 +62,15 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void>, Packa
         this.setPlanner(planner);
 
         //loop until the simulation has been ended by the testbed
-        while(!this.isSimulationEnded()){
+//        while(!this.isSimulationEnded()){
             //distribute the packages
             distributePackages();
             //then wait until one of the drone's queues is empty
-            while(!hasIdleDrone()){
+//            while(!hasIdleDrone()){
                 //TODO we may also use the autopilots to wake the overseer thread if they spot that their queue is empty
                 //TODO make mechanism that the planner is not invoked if there are no packages to deliver
-            }
-        }
+//            }
+//        }
     }
 
     /**
