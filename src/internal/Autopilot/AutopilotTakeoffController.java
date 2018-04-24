@@ -350,7 +350,7 @@ public class AutopilotTakeoffController extends Controller {
      * this pitch should be reached as soon as possible by the autopilot and is used as the error measurement
      * for the PID controller
      */
-    private float referencePitch = (float) (8f*PI/180);
+    private float referencePitch = (float) (15f*PI/180);
 
     /**
      * The reference velocity, used during the takeoff to cap the maxiumum velocity for the next part of the flight
