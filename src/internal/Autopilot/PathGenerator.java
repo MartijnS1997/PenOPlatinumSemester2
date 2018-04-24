@@ -11,6 +11,7 @@ import internal.Helper.Vector;
  * @author Anthony Rathe
  *
  */
+@Deprecated
 public class PathGenerator {
 
 	public PathGenerator() {
@@ -73,7 +74,7 @@ public class PathGenerator {
 		
 	}
 	
-	public int finalpathIndex(List<List<Vector>> queue, Vector originalOrientation, Vector goalPosition, Vector goalOrientation) {
+	public int finalPathIndex(List<List<Vector>> queue, Vector originalOrientation, Vector goalPosition, Vector goalOrientation) {
 		int size = queue.size();
 		for (int i = 0; i < size; i++) {
 			List<Vector> path = queue.get(i);

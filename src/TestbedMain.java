@@ -299,13 +299,8 @@ public class TestbedMain implements Runnable{
         World world =  builder.createWorld(droneConfig);
         //World world = builder.createFlightTestWorld();
         //World world = builder.createTakeoffWorld();
-<<<<<<< HEAD
-        World world = builder.createTotalFlightWorld();
-        
-=======
         //World world = builder.createTotalFlightWorld();
         //World world = builder.createTotalFlightWorld();
->>>>>>> ed8570171e44be9fc07046e96a35f70253bea9d5
         //World world  = builder.createLandingWorld();
         this.setWorld(world);
         Drone drone =(Drone)(world.getDroneSet().toArray())[0]; //only one drone is present

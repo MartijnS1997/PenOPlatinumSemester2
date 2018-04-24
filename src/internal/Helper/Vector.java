@@ -193,6 +193,17 @@ public class Vector {
 	}
 	
 	/**
+	 * If, traversing along direction, going from this towards other, we would have to go backwards, then the sign of signDistanceBetween is negative.
+	 * @author Anthony Rathe
+	 */
+	public float distanceBetween(Vector other, Vector direction){
+		float distance = this.distanceBetween(other);
+		if (direction.getAngleBetween(other.vectorDifference(this)) >= Math.PI)distance = -distance;
+		return distance;
+		
+	}
+	
+	/**
 	 * Sets y-value of vector to zero
 	 * @author Anthony Rathe
 	 */
