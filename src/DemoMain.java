@@ -7,6 +7,7 @@ import java.util.concurrent.*;
 /**
  * Created by Martijn on 14/12/2017.
  */
+@Deprecated
 public class DemoMain {
     private final static String CONNECTION_NAME = "localhost";
     private final static int CONNECTION_PORT = 21212;

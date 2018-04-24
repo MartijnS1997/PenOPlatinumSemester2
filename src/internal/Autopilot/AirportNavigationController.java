@@ -54,7 +54,7 @@ public class AirportNavigationController extends AutopilotFlightController {
         }
 
         //TODO remove once done debugging
-        trajectoryLog(currentInputs);
+        //trajectoryLog(currentInputs);
         //errorLog(currentInputs.getRoll());
 
 //        trajectoryLog(currentInputs);
@@ -714,8 +714,6 @@ public class AirportNavigationController extends AutopilotFlightController {
      * to make the specified turn given the current and previous inputs of the autopilot
      * note: on every new turn a new turn controller has to be initialized
      */
-    //TODO improve the performance of the altitude controller by using a pitch control system based on targets
-    //TODO instead of altitude
     private class TurnControl {
 
         public TurnControl(AutopilotTurn turn, PhysXEngine.TurnPhysX turnPhysX) {
@@ -856,7 +854,7 @@ public class AirportNavigationController extends AutopilotFlightController {
             float percentageCap = this.getRollReferenceCorrectCapPercentage();
             correctedReference = percentageCap(correctedReference, referenceRoll, percentageCap);
             //errorLog(correctedReference);
-            errorLog(errorInput);
+            //errorLog(errorInput);
             //get the error ratio, if the the drone is currently to far from the center we have to roll harder
             //if we're to close we may loosen the roll a bit
             return correctedReference;
@@ -1483,7 +1481,7 @@ public class AirportNavigationController extends AutopilotFlightController {
             //and inclining the main wings
             float mainLeftWingInclination = getMainStable() + pidOutput;
             float mainRightWingInclination = getMainStable() - pidOutput;
-            errorLog(headingError);
+            //errorLog((float) (headingError*180/PI));
 
             //get the cap on the inclinations (prevent over steering)
             mainLeftWingInclination = capInclination(mainLeftWingInclination, getMainStable(), getMainDeltaIncl());
@@ -1506,7 +1504,7 @@ public class AirportNavigationController extends AutopilotFlightController {
             //get the current roll (the error) & the other variables needed to calculate the control actions
             float roll = extractRoll(currentInputs);
             float deltaTime = getDeltaTime(currentInputs, previousInputs);
-            if(abs(roll) < 1*PI/180){
+            if(abs(roll) < 1.0f*PI/180){
                 return;
             }
 
@@ -1949,8 +1947,8 @@ public class AirportNavigationController extends AutopilotFlightController {
          * Control parameters & the roll PID for controlling the roll of the drone (beta function)
          */
         private final static float ROLL_GAIN = 1.0f;
-        private final static float ROLL_INTEGRAL = 0.4f;
-        private final static float ROLL_DERIVATIVE = 0.3f;
+        private final static float ROLL_INTEGRAL = 1.0f;
+        private final static float ROLL_DERIVATIVE =1.0f;
         private final PIDController rollPID = new PIDController(ROLL_GAIN, ROLL_INTEGRAL, ROLL_DERIVATIVE);
     }
 }

@@ -11,6 +11,7 @@ import java.io.*;
  * Created by Martijn on 13/11/2017.
  * and supervised by Bart
  */
+@Deprecated
 public class SocketMain {
     public static void main(String[] args) throws IOException, InterruptedException {
         //System.out.println(PhysXEngine.GAMMA_MODE);

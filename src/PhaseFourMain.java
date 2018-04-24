@@ -31,7 +31,7 @@ public class PhaseFourMain {
         //set the seed so we generate the same world
         generator.setRandomSeed(0);
         //create the simulation environment
-        SimulationEnvironment environment = generator.generateGridWorld(gridWorldRows, gridworldColumns);
+        SimulationEnvironment environment = generator.generateGridWorld(gridWorldRows, gridWorldColumns);
         //print the environment
         System.out.println(SimulationGen.environmentToString(environment));
         //generate the overseer
@@ -162,11 +162,11 @@ public class PhaseFourMain {
     //specify world parameters
     private static float worldXSize = 5000;
     private static float worldZSize = 5000;
-    private static int nbDrones = 12;
+    private static int nbDrones = 1;
     private static int nbAirports = 6;
     private static int nbPackages = 9;
     private static int gridWorldRows = 2;
-    private static int gridworldColumns = 3;
+    private static int gridWorldColumns = 3;
     //TODO add/implement the packages
     private static Set<DeliveryPackage> getDeliveries(){
         return null;

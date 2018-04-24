@@ -4,8 +4,7 @@ import AutopilotInterfaces.AutopilotConfig;
 import AutopilotInterfaces.AutopilotInputs_v2;
 import AutopilotInterfaces.AutopilotOutputs;
 import TestbedAutopilotInterface.Overseer.MapAirport;
-import internal.Helper.Vector;
-import internal.Physics.PhysXEngine;
+import com.sun.org.apache.bcel.internal.generic.LAND;
 
 import static internal.Autopilot.AutopilotState.*;
 
@@ -28,6 +27,7 @@ public class AutopilotFiniteStateMachine {
         this.takeoffController = new AutopilotTakeoffController(autopilot);
         this.takeoffStabilizerController = new AutopilotStabilization(autopilot);
         this.flightController = new AirportNavigationController(autopilot);
+        this.descendController = new DescendController(autopilot);
         this.landingController = new AutopilotLandingController(autopilot);
         this.taxiingController = new AutopilotTaxiingController(autopilot);
         this.autopilot = autopilot;
@@ -82,7 +82,11 @@ public class AutopilotFiniteStateMachine {
             case FLIGHT:
                 AutopilotFlightController flightController = this.getFlightController();
                 //check if the controller has finished doing its job
-                return flightController.hasReachedObjective(currentInputs, previousInputs) ? LANDING : FLIGHT;
+                return flightController.hasReachedObjective(currentInputs, previousInputs) ? DESCEND : FLIGHT;
+            case DESCEND:
+                DescendController descendController = this.getDescendController();
+                //check if the controller is done doing its job
+                return descendController.hasReachedObjective(currentInputs, previousInputs) ? LANDING : DESCEND;
             case LANDING:
                 AutopilotLandingController landingController = this.getLandingController();
                 //check if we're on ground, if not continue landing, otherwise, start taxiing
@@ -144,6 +148,9 @@ public class AutopilotFiniteStateMachine {
                 configureTakeoffStabilization(inputs);
             case FLIGHT:
                 configureFlight(inputs);
+                break;
+            case DESCEND:
+                configureDescend(inputs);
                 break;
             case LANDING:
                 configureLanding(inputs);
@@ -207,6 +214,18 @@ public class AutopilotFiniteStateMachine {
     }
 
     /**
+     * Configures the descend controller for the drone this is the controller used to descend to a landing
+     * friendly altitude once an airport has been reached, will be skipped if the altitude reaches a certain
+     * threshold --> should always be called if the controller is used for another descend
+     * @param inputs_v2 the inputs used to configure the controller with
+     */
+    private void configureDescend(AutopilotInputs_v2 inputs_v2){
+        //always reset before usage
+        this.getDescendController().reset();
+        this.getDescendController().setConfig(this.getAutopilot().getConfig());
+    }
+
+    /**
      * Configures the landing controller to safely land at the airport at which the next package needs to be delivered
      * @param inputs the inputs  to configure the controller with
      */
@@ -265,6 +284,8 @@ public class AutopilotFiniteStateMachine {
             case STABILIZE_TAKEOFF:
                 return FLIGHT;
             case FLIGHT:
+                return DESCEND;
+            case DESCEND:
                 return LANDING;
             case LANDING:
                 return TAXIING_TO_GATE;
@@ -292,6 +313,8 @@ public class AutopilotFiniteStateMachine {
                 return this.getTakeoffStabilizerController();
             case FLIGHT:
                 return this.getFlightController();
+            case DESCEND:
+                return this.getDescendController();
             case LANDING:
                 return this.getLandingController();
             case TAXIING_TO_GATE:
@@ -339,6 +362,15 @@ public class AutopilotFiniteStateMachine {
      */
     private AutopilotFlightController getFlightController() {
         return flightController;
+    }
+
+    /**
+     * Getter for the descend controller of the drone, used to descend to a specified value (usually 75m)
+     * for a better landing. This is achieved by making a turn & lowering the altitude of the drone
+     * @return the descend controller
+     */
+    private DescendController getDescendController(){
+        return descendController;
     }
 
     /**
@@ -424,6 +456,7 @@ public class AutopilotFiniteStateMachine {
     private AutopilotTakeoffController takeoffController;
     private AutopilotStabilization takeoffStabilizerController;
     private AutopilotFlightController flightController;
+    private DescendController descendController;
     private AutopilotLandingController landingController;
     private AutopilotTaxiingController taxiingController;
 

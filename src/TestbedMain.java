@@ -33,6 +33,7 @@ import static org.lwjgl.glfw.GLFW.glfwGetVideoMode;
  * Created by Martijn on 13/11/2017.
  * supervised by Bart
  */
+@Deprecated
 public class TestbedMain implements Runnable{
 
     /**

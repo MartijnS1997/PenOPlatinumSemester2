@@ -96,6 +96,7 @@ public class World {
             //TODO uncomment if ready to handle crashes properly
             //now check for a crash
             //checkForCrashes(droneSet);
+			collisionDetection(droneSet);
 
         }
 //		System.out.println("Drone velocity after" + this.getDroneSet());
@@ -469,6 +470,44 @@ public class World {
 				droneSet.remove(drone);
 			}
 		}
+	}
+
+	/**
+	 * Checks the drone set for colliding drones a drone collides if the centers of two drones are within
+	 * the specified crash distance of 5 meters (see static variable CRASH_DISTANCE)
+	 * @param droneSet the set of drones to check for crashes
+	 * @return the set of drones that have collided
+	 */
+	private Set<Drone> collisionDetection(Set<Drone> droneSet){
+		//convert the set of drones to an array list
+		List<Drone> droneList = new ArrayList<>(droneSet);
+		Set<Drone> crashedDrones = new HashSet<>();
+
+		int nbDrones = droneList.size();
+		//cycle trough all the drones and check if they have crashed
+		for(int i = 0; i != nbDrones; i++){
+			//get the current drone
+			Drone drone1 = droneList.get(i);
+			//check if the drone hasn't already crashed
+			if(crashedDrones.contains(drone1)){
+				//if so, we do not need to check it
+				continue;
+			}
+			Vector posDrone1 = drone1.getPosition();
+			for(int j = i+1; j < nbDrones; j++){
+				Drone drone2 = droneList.get(j);
+				Vector posDrone2 = drone2.getPosition();
+				float distance = posDrone2.distanceBetween(posDrone1);
+				if(distance <= CRASH_DISTANCE){
+					crashedDrones.add(drone1);
+					crashedDrones.add(drone2);
+					//because the upper drone has crashed so we do not need to check
+					break;
+				}
+			}
+		}
+
+		return crashedDrones;
 	}
 
 	/**
