@@ -614,7 +614,7 @@ public class TestbedServer implements Runnable {
      * The amount of frames the testbed may go ahead of the renderer before issuing a pause, this
      * prevents the queue from becoming to large
      */
-    private final static int MAX_FRAMES_AHEAD = 5000; //1000 ahead gives approx of 100mb data on heap --> gui utilizes about 150mb so seems fair
+    private final static int MAX_FRAMES_AHEAD = 1000; //1000 ahead gives approx of 100mb data on heap --> gui utilizes about 150mb so seems fair
 
     /*
     Message strings

@@ -89,6 +89,26 @@ public class OverseerCommunication {
     }
 
     /**
+     * Requests permission to land on the specified airport
+     * if the request is declined returns false
+     * @param airportID the id of the airport to request landing for
+     * @return true if the request is accepted, false is not
+     */
+    protected boolean requestLanding(int airportID){
+        AutopilotOverseer overseer = this.getOverseer();
+        return overseer.reserveAirport(this.getAutopilot(), airportID);
+    }
+
+    /**
+     * Deletes the reservation that was previously made by the drone
+     * note: must be called after every takeoff
+     */
+    protected void removeRequest(){
+        AutopilotOverseer overseer = this.getOverseer();
+        overseer.releaseAirport(this.getAutopilot());
+    }
+
+    /**
      * Getter for the overseer that this class will communicate with, the overseer
      * provides data about the other autopilots that are sharing the airspace with the drone
      * @return the overseer that is currently guiding all the drones

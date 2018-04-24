@@ -792,7 +792,7 @@ public class AirportNavigationController extends AutopilotFlightController {
             //calculate the roll needed to make the turn
             float bankingRoll = this.getBankingTurnRoll();
             //correct the banking roll for the error on the turn radius
-            float correctedBanking = correctReferenceRoll(bankingRoll, currentInputs);
+            float correctedBanking = correctReferenceRoll(bankingRoll, currentInputs, previousInputs);
             //get the PID and the parameters needed to get the errorOutput
             float roll = extractRoll(currentInputs);
             float rollError = correctedBanking - roll; // the error on the roll of the drone
@@ -826,9 +826,10 @@ public class AirportNavigationController extends AutopilotFlightController {
          * @param referenceRoll the reference roll to correct, this is the roll that is used as a reference for the
          *                      roll controller
          * @param currentInputs the inputs most recently received from the testbed
+         * @param previousInputs  the inputs previously received from the testbed
          * @return the corrected roll
          */
-        private float correctReferenceRoll(float referenceRoll, AutopilotInputs_v2 currentInputs){
+        private float correctReferenceRoll(float referenceRoll, AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs){
             //get the current turn
             AutopilotTurn currentTurn = this.getTurn();
             float turnRadius = currentTurn.getTurnRadius();
@@ -838,11 +839,52 @@ public class AirportNavigationController extends AutopilotFlightController {
             Vector turnCenter = currentTurn.getTurnCenter();
             Vector radiusVector = droneGroundPos.vectorDifference(turnCenter);
             float actualRadius =  radiusVector.getSize();
-            float error = actualRadius-turnRadius;
+            float errorInput = actualRadius-turnRadius;
+            float deltaTime = getDeltaTime(currentInputs, previousInputs);
+            PIDController rollCorrectionPID = this.getRollCorrectController();
 
+
+            float errorOutput = rollCorrectionPID.getPIDOutput(errorInput, deltaTime);
+            //if we're making the turn too sharp the error input will be negative (the output positive)
+            //if the turn is too shallow we the error input will be positive (the output negative)
+            //thus if the output is positive the reference roll must become smaller (we're steering to sharp)
+            //and if the output is negative the roll must become sharper
+            float scalingFactor = this.getCorrectRollFactor();
+            //get the correction based on the error and a scaling factor
+            float correctedReference = (referenceRoll  -  errorOutput*scalingFactor);
+            //log the error TODO remove after debugging
+            float percentageCap = this.getRollReferenceCorrectCapPercentage();
+            correctedReference = percentageCap(correctedReference, referenceRoll, percentageCap);
+            //errorLog(correctedReference);
+            errorLog(errorInput);
             //get the error ratio, if the the drone is currently to far from the center we have to roll harder
             //if we're to close we may loosen the roll a bit
-            return referenceRoll*((turnRadius + error *0.1f)/turnRadius);
+            return correctedReference;
+        }
+
+        /**
+         * Caps the input within an percentage error of the reference
+         * the acceptable range is defined as (reference*(1-maxErrorPercent), (reference*(1+maxErrorPercent))
+         * @param input the inputs to cap
+         * @param reference the reference point, this is the point where the borders are calculated from
+         * @param maxErrorPercentage the error percentage
+         * @return if the input is within range (reference*(1-maxErrorPercent), (reference*(1+maxErrorPercent)) it is
+         *         returned unchanged, if it lies outside of the range, returns the closest border point of the range
+         */
+        private float percentageCap(float input, float reference, float maxErrorPercentage){
+            //establish borders
+            float lower = reference*(1-maxErrorPercentage);
+            float upper = reference*(1+maxErrorPercentage);
+
+            //cap the actual input, if it lies outside of the range, bring it to the closest border
+            if(input > upper){
+                return upper;
+            }
+            if(input < lower){
+                return lower;
+            }
+
+            return input;
         }
 
         /**
@@ -1129,6 +1171,24 @@ public class AirportNavigationController extends AutopilotFlightController {
         }
 
         /**
+         * Getter for the percentage cap on the reference roll
+         * the correction is used to counter an error in radius of the turn that the drone is currently making
+         * in respect to the current turn
+         * @return the reference correction correction cap range (0,1)
+         */
+        private float getRollReferenceCorrectCapPercentage() {
+            return rollReferenceCorrectCapPercentage;
+        }
+
+        /**
+         * Getter for the correction factor on the roll, used to scale the error on the roll
+         * @return the scale factor for correcting the roll
+         */
+        private float getCorrectRollFactor() {
+            return correctRollFactor;
+        }
+
+        /**
          * The turn that the turn state is specifying
          */
         private final AutopilotTurn turn;
@@ -1159,6 +1219,21 @@ public class AirportNavigationController extends AutopilotFlightController {
          * --> calculates banking angles and such
          */
         private final PhysXEngine.TurnPhysX turnPhysX;
+
+        /**
+         * The variable that indicates a percentage cap on the correction that is made on the roll reference
+         * of the drone
+         */
+        private final float rollReferenceCorrectCapPercentage = 0.10f;
+
+
+        /**
+         * The factor used to scale the roll factor correction
+         * 100 in denominator = error distance in meters
+         * 100 in numerator = for converting the error against the error distance to percent
+         * PI/180 = to convert an angle from degree to radians
+         */
+        private final float correctRollFactor = (float) ((100*PI)/(100*180));
 
         /*
         Controllers for the flight
@@ -1202,20 +1277,36 @@ public class AirportNavigationController extends AutopilotFlightController {
             return pitchController;
         }
 
+        /**
+         * Controller for altering the reference roll such that the drone keeps a distance equal to the radius
+         * of the turn from the center
+         * @return the controller tuned for correcting the reference roll
+         */
+        private PIDController getRollCorrectController(){
+            return rollCorrectController;
+        }
+
         private final static float THRUST_GAIN = 1.0f;
         private final static float THRUST_INTEGRAL = 0.2f ;
         private final static float THRUST_DERIVATIVE = 0.1f;
         private final PIDController thrustController = new PIDController(THRUST_GAIN, THRUST_INTEGRAL, THRUST_DERIVATIVE);
 
-        private final static float ROLL_GAIN = 0.04f;
-        private final static float ROLL_INTEGRAL = 0.01f;
-        private final static float ROLL_DERIVATIVE = 0.02f;
+        private final static float ROLL_GAIN = 1.0f;
+        private final static float ROLL_INTEGRAL = 0.0f;
+        private final static float ROLL_DERIVATIVE = 0.5f;
         private final PIDController bankingRollController = new PIDController(ROLL_GAIN, ROLL_INTEGRAL, ROLL_DERIVATIVE);
 
         private final static float PITCH_GAIN = 1.0f;
         private final static float PITCH_INTEGRAL = 0.6f;
         private final static float PITCH_DERIVATIVE = 0.7f;
         private final PIDController pitchController = new PIDController(PITCH_GAIN, PITCH_INTEGRAL, PITCH_DERIVATIVE);
+
+
+        //TODO try other approach to correct for the roll
+        private final static float ROLL_CORRECT_GAIN = 0.3f;
+        private final static float ROLL_CORRECT_INTEGRAL = 0.f;
+        private final static float ROLL_CORRECT_DERIVATIVE = 1.0f;
+        private final PIDController rollCorrectController = new PIDController(ROLL_CORRECT_GAIN, ROLL_CORRECT_INTEGRAL, ROLL_CORRECT_DERIVATIVE);
     }
 
     /**
@@ -1289,8 +1380,6 @@ public class AirportNavigationController extends AutopilotFlightController {
             //get the control actions on the heading pitch and roll
             this.headingControl(outputs, currentInputs, previousInputs, referencePoint);
             this.pitchControl(outputs, currentInputs, previousInputs, referencePoint);
-            //this.rollControl(outputs, currentInputs);
-            //this.headingControlVertical(outputs, currentInputs, previousInputs, referencePoint);
             this.rollControl(outputs, currentInputs, previousInputs);
 
             //adjust such that there won't appear any AOA errors
@@ -1365,6 +1454,7 @@ public class AirportNavigationController extends AutopilotFlightController {
             float deltaTime = getDeltaTime(currentInputs, previousInputs);
             //feed the results into the pid controller
             PIDController pitchPid = this.getPitchPid();
+            //errorLog(pitchError);
             float pidResult = pitchPid.getPIDOutput(pitchError, deltaTime);
             //if the pid result is positive: the set point is larger than the input -> lower the pitch (pos inclination)
             //if the pid result is negative: the set point is smaller than the input -> increase the pitch (neg inclination)
@@ -1385,15 +1475,15 @@ public class AirportNavigationController extends AutopilotFlightController {
         private void headingControl(ControlOutputs outputs, AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs, Vector referencePoint){
             //get the error on the heading and the delta time
             float headingError = this.getHeadingError(currentInputs, referencePoint);
-            headingError = abs(headingError) < 10E-3 ? 0 : headingError; //to counter oscillating behavior
+            //headingError = abs(headingError) < 10E-3 ? 0 : headingError; //to counter oscillating behavior
             float deltaTime = Controller.getDeltaTime(currentInputs, previousInputs);
             //get the heading PID
             PIDController bankControl = this.getHeadingPid();
             float pidOutput = bankControl.getPIDOutput(headingError, deltaTime);
-            errorLog((float) (atan(headingError)*this.getLookaheadDistance()));
             //and inclining the main wings
             float mainLeftWingInclination = getMainStable() + pidOutput;
             float mainRightWingInclination = getMainStable() - pidOutput;
+            errorLog(headingError);
 
             //get the cap on the inclinations (prevent over steering)
             mainLeftWingInclination = capInclination(mainLeftWingInclination, getMainStable(), getMainDeltaIncl());
@@ -1495,11 +1585,6 @@ public class AirportNavigationController extends AutopilotFlightController {
             float refAltitude = AirportNavigationController.this.getCruisingAltitude();
             Vector altitudeVector = new Vector(0,refAltitude,0);
 
-//            System.out.println();
-//            System.out.println("Previous turn exit point: " + prevExitPoint);
-//            System.out.println("Connection vector: " + connectionVector);
-//            System.out.println("next turn entry: " + nextTurn.getEntryPoint());
-
             //we want to calculate the reference point as the orthogonal projection of the drone position
             //relative to the ideal path start point onto the vector indicating the ideal path
 
@@ -1513,6 +1598,7 @@ public class AirportNavigationController extends AutopilotFlightController {
             //project the relative drone position onto the ideal path (connection vector) to get the progress relative
             //to the end point (ideal path is of form (x, 0, z)
             Vector idealDronePos = exitRelativeDrone.projectOn(connectionVector);
+//            errorLog(idealDronePos.distanceBetween(exitRelativeDrone));
 
             //we need a reference point for the ideal path of the drone therefore we place a reference point
             //lookahead distance meters away from the projection along the ideal path
@@ -1833,9 +1919,9 @@ public class AirportNavigationController extends AutopilotFlightController {
          * The control parameters & the pitch pid for controlling the pitch of the drone
          * during the flight in between two turns
          */
-        private final static float PITCH_GAIN = 1.0f;
-        private final static float PITCH_INTEGRAL  = 0.4f;
-        private final static float PITCH_DERIVATIVE = 0.2f;
+        private final static float PITCH_GAIN = 1f;
+        private final static float PITCH_INTEGRAL  = 4.0f;
+        private final static float PITCH_DERIVATIVE = 0.1f;
         private PIDController pitchPid = new PIDController(PITCH_GAIN, PITCH_INTEGRAL, PITCH_DERIVATIVE);
 
         /**

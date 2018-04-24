@@ -428,6 +428,32 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void>, Packa
     }
 
     /**
+     * Tries to reserve the airport with the corresponding airport ID for the specified autopilot
+     * returns false if such reservation was not possible
+     * @param autopilot the autopilot to reserve the airport for
+     * @param airportID the id of the airport the drone wants to reserve
+     * @return true if the overseer was able to reserve the airport
+     *         false if the airport is already reserved by another drone
+     */
+    public synchronized boolean reserveAirport(AutoPilot autopilot, int airportID){
+        OverseerAirportMap airportMap = this.getAirportMap();
+        String autopilotID = autopilot.getID();
+        return airportMap.reserveAirport(autopilotID, airportID);
+    }
+
+    /**
+     * Cancels the reservation made by the specified autopilot.
+     * A reservation cancellation makes the airport available for other drones to land on
+     * @param autopilot the autopilot to release the reservation for
+     */
+    public synchronized void releaseAirport(AutoPilot autopilot){
+        OverseerAirportMap airportMap = this.getAirportMap();
+        String autopilotID = autopilot.getID();
+        airportMap.cancelReservation(autopilotID);
+    }
+
+
+    /**
      * Getter for the active autopilot conditions, the active autopilots are identified by their ID and pass their
      * current input every time they are invoked
      * @return a map containing all the autopilot id's as values and their inputs
