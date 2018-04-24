@@ -106,7 +106,7 @@ public class TestbedGUI implements Runnable{
         this.getChaseView().initWindow(Settings.DRONE_CHASE_CAM);
         this.getSideView().initWindow(Settings.DRONE_SIDE_CAM);
 
-        this.getGraphics().makeTextWindow("Stats", getMonitorWidth()/2, getMonitorHeight()/3, getMonitorWidth()/2, getMonitorHeight()*2/3, Objects.getDrones().get(Objects.getMainDroneID()));
+        this.getGraphics().makeTextWindow("Stats", getMonitorWidth()/2, getMonitorHeight()/3, getMonitorWidth()/2, getMonitorHeight()*2/3, Objects.getDroneGuiStates().get(Objects.getMainDroneID()));
     }
 
     /**

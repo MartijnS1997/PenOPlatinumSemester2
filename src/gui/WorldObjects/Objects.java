@@ -53,9 +53,9 @@ public class Objects {
         updateStates(queueElement);
 
         for (String droneID : getDroneGuiStates().keySet()) {
-            if (getDrones().containsKey(droneID))
+            if (getDrones().containsKey(droneID)) {
                 getDrones().get(droneID).updateObjects(getDroneGuiStates().get(droneID));
-            else {
+            } else {
                 getDrones().put(droneID, new Drone(getDroneGuiStates().get(droneID)));
                 addWorldObject(getDrones().get(droneID));
             }
@@ -72,7 +72,7 @@ public class Objects {
 
     public static void renderAll() {
         updateGraphicsObjects();
-        getGraphics().renderWindows(getObjectSet(), getDrones().get(getMainDroneID()));
+        getGraphics().renderWindows(getObjectSet(), getDroneGuiStates().get(getMainDroneID()));
     }
 
     /**
