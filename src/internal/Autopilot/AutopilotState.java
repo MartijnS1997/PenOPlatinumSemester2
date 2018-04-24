@@ -10,14 +10,21 @@ package internal.Autopilot;
  * TAXIINg: the autopilot objective is taxiing to a specified point on the ground
  */
 public enum AutopilotState {
-    INIT_FLIGHT, TAKEOFF, FLIGHT, LANDING, TAXIING_TO_GATE, TAXIING_TO_RUNWAY;
+    INIT_FLIGHT, TAKEOFF, STABILIZE_TAKEOFF, FLIGHT, LANDING, TAXIING_TO_GATE, TAXIING_TO_RUNWAY;
 
+    /**
+     * Converts the provided state into a string describing that state
+     * @param state the state to convert to a string
+     * @return a string containing a description of the provided state
+     */
     public static String getString(AutopilotState state){
         switch(state){
             case INIT_FLIGHT:
                 return INIT_FLIGHT_STRING;
             case TAKEOFF:
                 return TAKEOFF_STRING;
+            case STABILIZE_TAKEOFF:
+                return STABILIZE_TAKEOFF_STRING;
             case FLIGHT:
                 return FLIGHT_STRING;
             case LANDING:
@@ -34,6 +41,7 @@ public enum AutopilotState {
 
     private final static String INIT_FLIGHT_STRING = "initializing flight" ;
     private final static String TAKEOFF_STRING = "takeoff" ;
+    private final static String STABILIZE_TAKEOFF_STRING = "stabilizing after takeoff";
     private final static String FLIGHT_STRING = "flight" ;
     private final static String LANDING_STRING = "landing" ;
     private final static String TAXIING_TO_GATE_STRING = "taxiing to gate" ;

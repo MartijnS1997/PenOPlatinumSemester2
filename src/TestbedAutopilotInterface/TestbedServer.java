@@ -222,6 +222,10 @@ public class TestbedServer implements Runnable {
         renderQueue.add(newFrame);
         //check if the queue size is smaller than the maximum allowed, if not, wait
         while(renderQueue.size() > MAX_FRAMES_AHEAD){
+            if(!guiBNsignaled){
+                System.out.println("buffer full");
+                guiBNsignaled = true;
+            }
 //
             //if not, sleep for the time one frame needs to be rendered
             try {
@@ -233,6 +237,8 @@ public class TestbedServer implements Runnable {
 
         }
     }
+
+    private boolean guiBNsignaled = false;
 
     /*
     Initialization methods for the testbed server
@@ -608,7 +614,7 @@ public class TestbedServer implements Runnable {
      * The amount of frames the testbed may go ahead of the renderer before issuing a pause, this
      * prevents the queue from becoming to large
      */
-    private final static int MAX_FRAMES_AHEAD = 60; //1000 ahead gives approx of 100mb data on heap --> gui utilizes about 150mb so seems fair
+    private final static int MAX_FRAMES_AHEAD = 1000; //1000 ahead gives approx of 100mb data on heap --> gui utilizes about 150mb so seems fair
 
     /*
     Message strings

@@ -84,7 +84,7 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void>, Packa
         //first get the list of all packages
         Set<DeliveryPackage> submittedDeliveries = this.getSubmittedPackages();
         //get the map of the drones and their current assigned deliveries
-        Map<String, List<DeliveryPackage>> assignedDeliveries = this.getUndeliveredPackgesPerDrone();
+        Map<String, List<DeliveryPackage>> assignedDeliveries = this.getUndeliveredPackagesPerDrone();
         //get the map of the drones and their current positions
         Map<String, Vector> autopilotPositions = this.getAutopilotPositions();
         //initialize the search
@@ -170,7 +170,7 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void>, Packa
      * containing the deliveries for each drone
      * @return a map containing the drone ID as the keys and the corresponding deliveries as lists for the value
      */
-    private synchronized Map<String, List<DeliveryPackage>> getUndeliveredPackgesPerDrone(){
+    private synchronized Map<String, List<DeliveryPackage>> getUndeliveredPackagesPerDrone(){
         //first get for each drone the packages that it still needs to deliver
         Map<String, ConcurrentLinkedQueue<DeliveryPackage>> assignedDeliveries = this.getDeliveryRequests();
         //initialize the map that will contain the undelivered packages
@@ -426,6 +426,32 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void>, Packa
 
         altitudeMap.put(autopilotID, assignedAltitude);
     }
+
+    /**
+     * Tries to reserve the airport with the corresponding airport ID for the specified autopilot
+     * returns false if such reservation was not possible
+     * @param autopilot the autopilot to reserve the airport for
+     * @param airportID the id of the airport the drone wants to reserve
+     * @return true if the overseer was able to reserve the airport
+     *         false if the airport is already reserved by another drone
+     */
+    public synchronized boolean reserveAirport(AutoPilot autopilot, int airportID){
+        OverseerAirportMap airportMap = this.getAirportMap();
+        String autopilotID = autopilot.getID();
+        return airportMap.reserveAirport(autopilotID, airportID);
+    }
+
+    /**
+     * Cancels the reservation made by the specified autopilot.
+     * A reservation cancellation makes the airport available for other drones to land on
+     * @param autopilot the autopilot to release the reservation for
+     */
+    public synchronized void releaseAirport(AutoPilot autopilot){
+        OverseerAirportMap airportMap = this.getAirportMap();
+        String autopilotID = autopilot.getID();
+        airportMap.cancelReservation(autopilotID);
+    }
+
 
     /**
      * Getter for the active autopilot conditions, the active autopilots are identified by their ID and pass their

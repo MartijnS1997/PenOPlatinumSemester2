@@ -7,6 +7,8 @@ import TestbedAutopilotInterface.SimulationSetup.SimulationEnvironment;
 import TestbedAutopilotInterface.SimulationSetup.SimulationGen;
 import internal.Helper.Vector;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -21,6 +23,9 @@ import static java.lang.Math.signum;
 public class PhaseFourMain {
 
     public static void main(String[] args) throws Exception {
+        //clear the logs by writing empty lines
+        Files.write(Paths.get("errorLog.txt"), "".getBytes());
+        Files.write(Paths.get("trajectoryLog.txt"), "".getBytes());
         //create a simulation generator
         SimulationGen generator = new SimulationGen(worldXSize, worldZSize, nbDrones, nbAirports, nbPackages);
         //set the seed so we generate the same world
@@ -157,7 +162,7 @@ public class PhaseFourMain {
     //specify world parameters
     private static float worldXSize = 5000;
     private static float worldZSize = 5000;
-    private static int nbDrones = 2;
+    private static int nbDrones = 1;
     private static int nbAirports = 6;
     private static int nbPackages = 9;
     private static int gridWorldRows = 2;
