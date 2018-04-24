@@ -3,7 +3,7 @@ package internal.Autopilot;
 import internal.Helper.Vector;
 
 /**
- * Created by Martijn on 17/04/2018.
+ * Created by Martijn on 17/04/2018. Appended by Anthony on 24/4/2018
  * Specifies a turn to be made by the autopilot airport navigation controller
  */
 public interface AutopilotTurn {
@@ -37,6 +37,12 @@ public interface AutopilotTurn {
      */
     float getTurnAngle();
 
+    /**
+     * Getter for the exit point of the turn. Implicitly defined by the turnAngle, 
+     * turnEntryPoint and turnCenter.
+     * @return the exit point of the turn
+     */
+    Vector getExitPoint();
 
 
 }

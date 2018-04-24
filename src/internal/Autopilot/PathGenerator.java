@@ -15,9 +15,10 @@ import internal.Helper.Vector;
 public class PathGenerator {
 
 	public PathGenerator() {
-		pathUnlock();
+		//pathUnlock();
 	}
 
+	/*
 	public List<Vector> getPath(){
 		return this.path;
 	}
@@ -44,6 +45,7 @@ public class PathGenerator {
 		
 		
 	}
+	
 	
 	public void beamSearch(Vector position, Vector orientation, Vector goalPosition, Vector goalOrientation) {
 		// Make sure we are working in the horizontal plane
@@ -247,6 +249,7 @@ public class PathGenerator {
 		if (length >= 2)orientation = path.get(length-2).vectorDifference(path.get(length-1));
 		return orientation;
 	}
+	/*
 
 	
 
@@ -278,6 +281,7 @@ public class PathGenerator {
 	 * @param destination
 	 * @author Anthony Rathe
 	 */
+    /*
 	private static float forwardDistanceBetween(Vector position, Vector direction, Vector destination) {
 		Vector horizontalDirection = direction.makeHorizontal();
 		Vector horizontalPosition = position.makeHorizontal();
@@ -290,6 +294,7 @@ public class PathGenerator {
 		return Math.signum(alfa)*d;
 
 	}
+	*/
 
 	/**
 	 * Generates a vector that is oriented perpendicularly on the horizontal cord between the two given points.
@@ -298,6 +303,7 @@ public class PathGenerator {
 	 * @param position2
 	 * @return
 	 */
+    /*
 	private static Vector parallelHorizontalVector(Vector position1, Vector position2) {
 		position1 = position1.makeHorizontal();
 		position2 = position2.makeHorizontal();
@@ -305,7 +311,7 @@ public class PathGenerator {
 		Vector distanceBetween = position1.vectorDifference(position2);
 		return distanceBetween.rotateAroundYAxis((float)Math.PI/2);
 
-	}
+	}*/
 
 	/**
 	 * Method for retrieving the next waypoint we should reach
@@ -314,10 +320,11 @@ public class PathGenerator {
 	 * @param destination
 	 * @return
 	 */
+    /*
 	public Vector getNextWaypoint(Vector position, Vector velocity, Vector destination) {
 		if (!hasPathLocked())generateLandingPath(position, velocity, destination);
 		return getPath().get(0);
-	}
+	}*/
 
 	/**
 	 * Method for retrieving the next waypoint we should reach, after having just reached one
@@ -326,6 +333,7 @@ public class PathGenerator {
 	 * @param destination
 	 * @return
 	 */
+    /*
 	public Vector getNextWaypointSuccess(Vector position, Vector velocity, Vector destination) {
 		if (!hasPathLocked()) {
 			// Generate a path if none was generated
@@ -343,7 +351,7 @@ public class PathGenerator {
 		}
 		return getPath().get(0);
 
-	}
+	}*/
 
 	/**
 	 * Method for retrieving the next waypoint we should reach, after having missed one.
@@ -352,12 +360,12 @@ public class PathGenerator {
 	 * @param velocity
 	 * @param destination
 	 * @return
-	 */
+	 *//*
 	public Vector getNextWaypointMissed(Vector position, Vector velocity, Vector destination) {
 		// Always generate a new path
 		generateLandingPath(position, velocity, destination);
 		return getPath().get(0);
-	}
+	}*/
 
 
 	private static final float DISTANCE_BETWEEN_LANDING_BLOCKS = 20f;

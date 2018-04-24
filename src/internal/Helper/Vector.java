@@ -178,6 +178,21 @@ public class Vector {
 		return (float)Math.acos(breuk);
 	}
 	
+	/**
+	 * Makes given vectors horizontal an calculates angle going from this to other.
+	 * Positive angles mean a counterclockwise rotation (going from this to other)
+	 * @param other
+	 * @return
+	 */
+	public float getSignedAngleBetween(Vector other) {
+		Vector origin = new Vector(0f,0f,0f);
+		Vector thisVector = this.makeHorizontal();
+		Vector otherVector = other.makeHorizontal();
+		
+		if (other.toTheRightOf(origin, thisVector))return -Math.abs(thisVector.getAngleBetween(otherVector));
+		return Math.abs(thisVector.getAngleBetween(otherVector));
+	}
+	
 	
 	/**
 	 * @author anthonyrathe
