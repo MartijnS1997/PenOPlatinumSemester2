@@ -170,7 +170,27 @@ public class Vector {
 		// the denominator is a product of the 2-norms of the vectors
 		float denominator = this.getSize()*other.getSize();
 		
-		return (float)Math.acos(numerator/denominator);
+		double breuk = numerator/denominator;
+		
+		
+		if (Math.abs(breuk) > 1f && Math.abs(breuk)*PRECISION < 1f)breuk = 1*Math.signum(breuk);
+		
+		return (float)Math.acos(breuk);
+	}
+	
+	/**
+	 * Makes given vectors horizontal an calculates angle going from this to other.
+	 * Positive angles mean a counterclockwise rotation (going from this to other)
+	 * @param other
+	 * @return
+	 */
+	public float getSignedAngleBetween(Vector other) {
+		Vector origin = new Vector(0f,0f,0f);
+		Vector thisVector = this.makeHorizontal();
+		Vector otherVector = other.makeHorizontal();
+		
+		if (other.toTheRightOf(origin, thisVector))return -Math.abs(thisVector.getAngleBetween(otherVector));
+		return Math.abs(thisVector.getAngleBetween(otherVector));
 	}
 	
 	
@@ -185,6 +205,17 @@ public class Vector {
 		else{
 			return (float)Math.sqrt(Math.pow(this.getxValue()-other.getxValue(), 2) + Math.pow(this.getyValue()-other.getyValue(), 2) + Math.pow(this.getzValue()-other.getzValue(), 2));
 		}
+	}
+	
+	/**
+	 * If, traversing along direction, going from this towards other, we would have to go backwards, then the sign of signDistanceBetween is negative.
+	 * @author Anthony Rathe
+	 */
+	public float distanceBetween(Vector other, Vector direction){
+		float distance = this.distanceBetween(other);
+		if (direction.getAngleBetween(other.vectorDifference(this)) >= Math.PI)distance = -distance;
+		return distance;
+		
 	}
 	
 	/**
@@ -581,5 +612,6 @@ public class Vector {
 	Constants
 	 */
 	public final static int VECTOR_SIZE = 3;
+	public final static float PRECISION = 0.99999f;
 
 }

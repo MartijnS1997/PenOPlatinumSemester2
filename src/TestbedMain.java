@@ -308,6 +308,7 @@ public class TestbedMain implements Runnable{
         //System.out.println("drone: " + drone);
         this.setDrone(drone);
         drone.addFlightRecorder(this.getFlightRecorder());
+        
 
 //        // drone builder covers all the stuff involving building the drone, adjust parameters there
 //        WorldBuilder worldBuilder = new WorldBuilder();
