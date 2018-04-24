@@ -8,6 +8,7 @@ import TestbedAutopilotInterface.SimulationSetup.AirportSpec;
 import TestbedAutopilotInterface.SimulationSetup.DroneSpec;
 import internal.Exceptions.AngleOfAttackException;
 import internal.Exceptions.SimulationEndedException;
+import internal.Helper.SquareMatrix;
 import internal.Testbed.Drone;
 import internal.Testbed.World;
 import internal.Testbed.WorldBuilder_v2;
@@ -511,7 +512,8 @@ public class TestbedServer implements Runnable {
      * Getter for the list containing all the connections maintained by the testbed
      * @return the set of all current connections
      */
-    private Set<TestbedConnection> getServerTestbedConnections() {
+    private Set<TestbedConnection> getServerTestbedConnections()
+    {
         return serverTestbedConnections;
     }
 
@@ -614,7 +616,7 @@ public class TestbedServer implements Runnable {
      * The amount of frames the testbed may go ahead of the renderer before issuing a pause, this
      * prevents the queue from becoming to large
      */
-    private final static int MAX_FRAMES_AHEAD = 1000; //1000 ahead gives approx of 100mb data on heap --> gui utilizes about 150mb so seems fair
+    private final static int MAX_FRAMES_AHEAD = 1; //1000 ahead gives approx of 100mb data on heap --> gui utilizes about 150mb so seems fair
 
     /*
     Message strings

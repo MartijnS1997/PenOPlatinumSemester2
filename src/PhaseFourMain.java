@@ -162,7 +162,7 @@ public class PhaseFourMain {
     //specify world parameters
     private static float worldXSize = 5000;
     private static float worldZSize = 5000;
-    private static int nbDrones = 1;
+    private static int nbDrones = 12;
     private static int nbAirports = 6;
     private static int nbPackages = 9;
     private static int gridWorldRows = 2;

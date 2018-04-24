@@ -11,6 +11,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SpringLayout;
 
+import TestbedAutopilotInterface.GUI.DroneGuiState;
 import gui.WorldObjects.Drone;
 import math.Vector3f;
 
@@ -27,38 +28,40 @@ public class TextWindow extends JPanel implements ActionListener{
 	SpringLayout layout;
 	private static Graphics graphics;
 	byte counter = 0;
+	float totalDistance = 0;
+	Vector3f lastPosition = new Vector3f();
     
-    public void update(Drone drone) {
+    public void update(DroneGuiState droneState) {
 
     	counter++;
     	counter %= 5;
     	if (counter == 0) {
 	    	contentPane.removeAll();
-	    	addToContentPane(drone);
+	    	addToContentPane(droneState);
 	    	addButtons();
 	    	contentPane.revalidate();
 	    	frame.repaint();
     	}
     }
     
-    private void addToContentPane(Drone drone) {
+    private void addToContentPane(DroneGuiState droneState) {
     	Vector3f velocity = new Vector3f();
     	Vector3f position = new Vector3f();
     	Vector3f orientation = new Vector3f();
     	float heading = 0;
     	float pitch = 0;
     	float roll = 0;
-    	float totalDistance = 0;
     	float distanceOrigin = 0;
 
-    	velocity = drone.getVelocity();
-        position = drone.getPosition();
-        orientation = drone.getOrientation();
+    	velocity = droneState.getVelocity().convertToVector3f();
+    	lastPosition = position;
+        position = droneState.getPosition().convertToVector3f();
+        totalDistance += position.subtract(lastPosition).length();
+        orientation = droneState.getOrientation().convertToVector3f();
         heading = orientation.x;
         pitch = orientation.y;
         roll = orientation.z;
-		distanceOrigin = drone.getPosition().length();
-		totalDistance = drone.getDistanceTraveled();
+		distanceOrigin = droneState.getPosition().convertToVector3f().length();
 
     	
     	JLabel velocityLabel = new JLabel("Velocity: ");
@@ -199,7 +202,7 @@ public class TextWindow extends JPanel implements ActionListener{
     	layout.putConstraint(SpringLayout.NORTH, button4, 10, SpringLayout.NORTH, contentPane);
     }
 
-    public static TextWindow createAndShowWindow(Graphics graphics, String title, int xDimension, int yDimension, int xPos, int yPos, Drone drone) {
+    public static TextWindow createAndShowWindow(Graphics graphics, String title, int xDimension, int yDimension, int xPos, int yPos, DroneGuiState droneState) {
     	
     	TextWindow.graphics = graphics;
     	
@@ -210,7 +213,7 @@ public class TextWindow extends JPanel implements ActionListener{
         
         contentPane = frame.getContentPane();
         TextWindow window = new TextWindow();
-        window.addToContentPane(drone);
+        window.addToContentPane(droneState);
         window.initButtons();
         frame.setContentPane(contentPane);
  
