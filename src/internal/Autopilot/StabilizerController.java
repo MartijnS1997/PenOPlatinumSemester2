@@ -9,6 +9,7 @@ import static java.lang.Math.*;
 /**
  * Created by Martijn on 21/03/2018.
  */
+@Deprecated
 public class StabilizerController extends Controller {
 
     /**

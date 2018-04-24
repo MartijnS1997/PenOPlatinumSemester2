@@ -35,6 +35,36 @@ public class OverseerAirportMap {
     }
 
     /**
+     * A method for reserving an aiport
+     * This method reserves an airport for a single drone for a landing and a takeoff session
+     * @param autopilotId  the autopilot ID of the drone that is trying to reserve the airport
+     * @param airportID the airport to place a lock on
+     * @return true if the airport could be locked false if another drone has already locked an airport
+     */
+    protected synchronized boolean reserveAirport(String autopilotId, int airportID){
+        //get the map consisting of all the current reservations
+        Map<String, Integer> reservations = this.getReservations();
+        //check if the airport is already reserved
+        if(reservations.values().contains(airportID)){
+            //if the airport is in the values of the map, there is a reservation
+            return false;
+        }
+        //if not reserve the airport
+        reservations.put(autopilotId, airportID);
+        return true;
+    }
+
+    /**
+     * Removes the reservation from the airport made by the drone specified
+     * @param droneID the drone wherefore the reservation must be cancelled
+     */
+    protected synchronized void cancelReservation(String droneID){
+        //get the map consisting of all the current reservations
+        Map<String, Integer> reservations = this.getReservations();
+        reservations.remove(droneID);
+    }
+
+    /**
      * Creates an airport at the given center and with the given heading for the first runway
      * and adds it to the airport map
      * @param center the center of the airport
@@ -201,6 +231,14 @@ public class OverseerAirportMap {
     }
 
     /**
+     * Getter for the map that contains all the airport reservations made by the drones
+     * @return the map containing all the reservations, keys are the drone id's and values the airport id's
+     */
+    private Map<String, Integer> getReservations() {
+        return reservations;
+    }
+
+    /**
      * The width of all the runways of all the airports on the map (as specified in the assignment)
      */
     private float runwayWidth;
@@ -214,6 +252,13 @@ public class OverseerAirportMap {
      * The map containing all the airports currently present in the world (and that the overseer knows of)
      */
     private Map<Integer, MapAirport> airportMap = new HashMap<>();
+
+    /**
+     * a map containing the reservations for the airports
+     * with as key the drone that reserves the airport and as value the id of the airport it is currently
+     * reserving
+     */
+    private Map<String, Integer> reservations = new HashMap<>();
 
     /**
      * The next available airport ID, given to the airport when added to the Map
