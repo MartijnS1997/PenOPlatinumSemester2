@@ -11,6 +11,7 @@ import internal.Helper.Vector;
 import static java.lang.Math.*;
 
 
+
 /**
  * Created by Martijn on 18/02/2018, extended by Jonathan on 12/3/2018
  * A class of landing controllers, responsible for controlling the landing of the drone
@@ -62,19 +63,23 @@ public class AutopilotLandingController extends Controller {
         switch (landingPhase){
             case STABILIZE:
                 this.stabilizeFlight(outputs, inputs, previousInputs);
-                //System.out.println("stabilize");
+                System.out.println("stabilize");
                 break;
             case RAPID_DESCEND:
                 this.getRapidDescendControls(outputs, inputs, previousInputs);
-                //System.out.println("rapidDescend");
+                System.out.println("rapidDescend");
                 break;
             case SOFT_DESCEND:
-                //System.out.println("soft descend");
+                System.out.println("soft descend");
                 this.getSoftDescendControls(outputs, inputs, previousInputs);
                 break;
             case SLOW_DOWN:
-            	//System.out.println("Slowdown");
+            	System.out.println("Slowdown");
             	this.slowDown(outputs);
+            	break;
+            case BRAKE:
+            	this.brake(outputs,inputs, previousInputs);
+            	System.out.println("Brake");
             	break;
         }
         float resultMargin = 0f;
@@ -87,7 +92,8 @@ public class AutopilotLandingController extends Controller {
     
 
 
-    private LandingPhases getCurrentLandingPhase(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 prevInputs){
+
+	private LandingPhases getCurrentLandingPhase(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 prevInputs){
         //check if the rapid descend phase was started
         if(!this.isHasStartedRapidDescend()){
             //check if the flight is stable
@@ -120,9 +126,11 @@ public class AutopilotLandingController extends Controller {
 //            System.out.println("Soft Started: " + currentInputs.getY());
 
             return LandingPhases.SOFT_DESCEND;
-        }else{
+        }else if(currentInputs.getY() > 2f){
 //            System.out.println("CurrentS y: " + currentInputs.getY());
             return LandingPhases.SOFT_DESCEND;
+        }else{
+        	return LandingPhases.BRAKE;
         }
     }
 
@@ -164,14 +172,15 @@ public class AutopilotLandingController extends Controller {
 //        System.out.println("querying soft descend");
         AutopilotConfig config = this.getConfig();
         //set the setPoint
-//        PIDController pitchPID = this.getPitchPIDController();
-//        pitchPID.setSetPoint(SOFT_DESCEND_PHASE_REF_PITCH);
+        PIDController pitchPID = this.getPitchPIDController();
+        pitchPID.setSetPoint(SOFT_DESCEND_PHASE_REF_PITCH);
         //call the pitch and roll PID
         this.pitchStabilizer(outputs, currentInputs, prevInputs);
         this.rollStabilizer(outputs, currentInputs, prevInputs);
+        
         //change the main wing inclination
-        outputs.setRightWingInclination(outputs.getRightWingInclination() - SOFT_DESCEND_PHASE_MAIN_WING_INCLINATION_DELTA);
-        outputs.setLeftWingInclination(outputs.getLeftWingInclination() - SOFT_DESCEND_PHASE_MAIN_WING_INCLINATION_DELTA);
+//        outputs.setRightWingInclination(outputs.getRightWingInclination() - SOFT_DESCEND_PHASE_MAIN_WING_INCLINATION_DELTA);
+//        outputs.setLeftWingInclination(outputs.getLeftWingInclination() - SOFT_DESCEND_PHASE_MAIN_WING_INCLINATION_DELTA);
         outputs.setThrust(SOFT_DESCEND_THRUST);
         outputs.setRightBrakeForce(config.getRMax());
         outputs.setLeftBrakeForce(config.getRMax());
@@ -214,6 +223,23 @@ public class AutopilotLandingController extends Controller {
 	    outputs.setLeftWingInclination(MAIN_MAX_INCLINATION);
 
     }
+    
+
+    private void brake(ControlOutputs outputs, AutopilotInputs_v2 inputs, AutopilotInputs_v2 previousInputs) {
+        AutopilotConfig config = this.getConfig();
+
+        this.rollStabilizer(outputs, inputs, previousInputs);
+        PIDController pitchPID = this.getPitchPIDController();
+        pitchPID.setSetPoint(SOFT_DESCEND_PHASE_REF_PITCH/2);
+        //change the main wing inclination
+//        outputs.setRightWingInclination(MAIN_STABLE);
+//        outputs.setLeftWingInclination(MAIN_STABLE);
+        outputs.setThrust(SOFT_DESCEND_THRUST);
+        outputs.setRightBrakeForce(config.getRMax());
+        outputs.setLeftBrakeForce(config.getRMax());
+        outputs.setFrontBrakeForce(config.getRMax());
+		
+	}
 
     /**
      * Stabilizes the pitch of the drone
@@ -397,14 +423,14 @@ public class AutopilotLandingController extends Controller {
     private boolean hasStartedSoftDescend = false;
 
     //rapid descend phase constants and controllers
-    private final static float RAPID_DESCEND_PHASE_REF_PITCH = (float) (-10*PI/180);
+    private final static float RAPID_DESCEND_PHASE_REF_PITCH = (float) (-15*PI/180);
     private final static float RAPID_DESCEND_THRUST = 0f;
 
     //soft descend constants
-    private final static float SOFT_DESCEND_PHASE_REF_PITCH = (float) (-2*PI/180);
+    private final static float SOFT_DESCEND_PHASE_REF_PITCH = (float) (-5*PI/180);
     private final static float SOFT_DESCEND_PHASE_MAIN_WING_INCLINATION_DELTA = (float)(-4*PI/180);
     private final static float SOFT_DESCEND_THRUST = 0f;
-    private final static float SOFT_DESCEND_MIN_START_HEIGHT = 5f;
+    private final static float SOFT_DESCEND_MIN_START_HEIGHT = 20f;
     //Bartje was hier :)
 
     /**
@@ -587,7 +613,7 @@ public class AutopilotLandingController extends Controller {
      * Enumerations for the landing phases
      */
     private enum LandingPhases {
-        STABILIZE,RAPID_DESCEND, SOFT_DESCEND, SLOW_DOWN;
+        STABILIZE,RAPID_DESCEND, SOFT_DESCEND, SLOW_DOWN, BRAKE;
     }
 }
 
