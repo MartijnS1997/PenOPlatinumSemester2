@@ -19,6 +19,8 @@ import java.io.IOException;
 import java.nio.*;
 import java.util.Set;
 
+import static java.lang.Math.cos;
+import static java.lang.Math.sin;
 import static org.lwjgl.glfw.Callbacks.*;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
@@ -292,6 +294,7 @@ public class Window {
 	}
 	
 	public Matrix4f getModelMatrix(Vector3f orientation, Vector3f position, Vector3f size) {
+//		orientation = new Vector3f(orientation.x, orientation.z, orientation.y);
 		return Matrix4f.translate(position).multiply(Matrix4f.rotate(orientation)).multiply(Matrix4f.scale(size));
 	}
 	
