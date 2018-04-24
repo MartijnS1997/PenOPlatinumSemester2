@@ -25,7 +25,7 @@ public class Drone implements WorldObject{
     }
 
     public void setState(DroneGuiState droneGuiState) {
-        setOrientation(droneGuiState.getOrientation().convertToVector3f());
+        setOrientation(new Vector3f(droneGuiState.getOrientation().getxValue(), droneGuiState.getOrientation().getyValue(), droneGuiState.getOrientation().getzValue()));
         setPosition(droneGuiState.getPosition().convertToVector3f());
         setVelocity(droneGuiState.getVelocity().convertToVector3f());
     }

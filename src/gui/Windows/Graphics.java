@@ -16,6 +16,7 @@ import static org.lwjgl.glfw.GLFW.glfwTerminate;
 import static org.lwjgl.glfw.GLFW.glfwWindowHint;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
+import TestbedAutopilotInterface.GUI.DroneGuiState;
 import gui.GraphicsObjects.GraphicsObject;
 import gui.WorldObjects.Drone;
 import org.lwjgl.glfw.GLFWErrorCallback;
@@ -52,29 +53,29 @@ public class Graphics {
 		windows.put(key, window);
 	}
 	
-	public void makeTextWindow(String title, int width, int height, int xPos, int yPos, Drone drone) {
+	public void makeTextWindow(String title, int width, int height, int xPos, int yPos, DroneGuiState droneState) {
 		
-		this.textWindow = TextWindow.createAndShowWindow(this, title, width, height, xPos, yPos, drone);
+		this.textWindow = TextWindow.createAndShowWindow(this, title, width, height, xPos, yPos, droneState);
 	}
 	
 	public void makeButtonWindow() {
 		ButtonWindow.createAndShowWindow(this);
 	}
 	
-	public void renderWindows(Set<GraphicsObject> renderObjects, Drone drone) {
+	public void renderWindows(Set<GraphicsObject> renderObjects, DroneGuiState droneState) {
 		// Poll for window events. The key callback above will only be
 		// invoked during this call.
 		glfwPollEvents();
 		
 		if (this.textWindow != null)
-			this.textWindow.update(drone);
+			this.textWindow.update(droneState);
 		
 		for (String key: windows.keySet()) {
 			Window window = windows.get(key);
 			
 			// Make the OpenGL context current
 			glfwMakeContextCurrent(window.getHandler());
-			window.render(renderObjects, drone);
+			window.render(renderObjects, droneState);
 			if (window.isTerminated()) {
 				windows.remove(key);
 				break;
@@ -85,7 +86,7 @@ public class Graphics {
 			terminate();	
 	}
 	
-	public void renderWindow(String key, Set<GraphicsObject> renderObjects, Drone drone) {
+	public void renderWindow(String key, Set<GraphicsObject> renderObjects, DroneGuiState droneState) {
 		// Poll for window events. The key callback above will only be
 		// invoked during this call.
 		glfwPollEvents();
@@ -94,7 +95,7 @@ public class Graphics {
 		if (window != null) {
 			// Make the OpenGL context current
 			glfwMakeContextCurrent(window.getHandler());
-			window.render(renderObjects, drone);
+			window.render(renderObjects, droneState);
 			if (window.isTerminated())
 				windows.remove(key);
 			glfwMakeContextCurrent(NULL);

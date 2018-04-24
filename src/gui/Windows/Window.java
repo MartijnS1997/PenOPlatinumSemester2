@@ -1,5 +1,6 @@
 package gui.Windows;
 
+import TestbedAutopilotInterface.GUI.DroneGuiState;
 import gui.GL.ShaderProgram;
 import gui.GraphicsObjects.*;
 import gui.IO.Input;
@@ -18,6 +19,8 @@ import java.io.IOException;
 import java.nio.*;
 import java.util.Set;
 
+import static java.lang.Math.cos;
+import static java.lang.Math.sin;
 import static org.lwjgl.glfw.Callbacks.*;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
@@ -167,9 +170,9 @@ public class Window {
 		glfwMakeContextCurrent(NULL);
 	}
 
-	public void render(Set<GraphicsObject> renderObjects, Drone drone) {
+	public void render(Set<GraphicsObject> renderObjects, DroneGuiState droneState) {
 		//input.setStartOrientation(drone.getOrientation());
-		renderFrame(renderObjects, drone);
+		renderFrame(renderObjects, droneState);
 
 		// Return false if the user has attempted to close
 		// the window or has pressed the ESCAPE key.
@@ -179,19 +182,19 @@ public class Window {
 //		checkError();
 	}
 	
-	private void renderFrame(Set<GraphicsObject> renderObjects, Drone drone) {
+	private void renderFrame(Set<GraphicsObject> renderObjects, DroneGuiState droneState) {
 		GL.setCapabilities(capabilities);
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the buffers
 
-		updateMatrices(drone);
+		updateMatrices(droneState);
 	
 		program.bind();
         program.setUniform("projectionMatrix", projectionMatrix);
         program.setUniform("viewMatrix", viewMatrix);
         
         float viewingDistance = 500;
-		input.nextPosition(drone.getPosition());
+		input.nextPosition(droneState.getPosition().convertToVector3f());
         for (GraphicsObject object: renderObjects) {
         	if (object.getClass() == Cube.class || object.getClass() == Wheel.class) {
 				program.setUniform("modelMatrix", getModelMatrix(((Polygon) object).getOrientation(), ((Polygon) object).getRelPos(), object.getSize()));
@@ -265,7 +268,7 @@ public class Window {
 		return windowHandle;
 	}
 	
-	public void updateMatrices(Drone drone) {
+	public void updateMatrices(DroneGuiState droneState) {
 		if (Input.isKeyPressed(GLFW_KEY_R))
 			this.setting = Settings.DRONE_CAM;
 		else if (Input.isKeyPressed(GLFW_KEY_T))
@@ -281,7 +284,7 @@ public class Window {
 		
 		if (getSetting() == Settings.INDEPENDENT_CAM)
 			input.processInput();
-		updateViewMatrix(setting, drone);
+		updateViewMatrix(setting, droneState);
 		
 		projectionMatrix = getProjectionMatrix();
 	}
@@ -291,16 +294,17 @@ public class Window {
 	}
 	
 	public Matrix4f getModelMatrix(Vector3f orientation, Vector3f position, Vector3f size) {
+//		orientation = new Vector3f(orientation.x, orientation.z, orientation.y);
 		return Matrix4f.translate(position).multiply(Matrix4f.rotate(orientation)).multiply(Matrix4f.scale(size));
 	}
 	
-	public void updateViewMatrix(Drone drone) {
+	public void updateViewMatrix(DroneGuiState droneState) {
 		switch (getSetting()) {
 		case DRONE_CAM: 
-			this.viewMatrix = getView(drone, new Vector3f(1f, 1f, 1f), new Vector3f(1f, 1f, 1f).scale(3f));
+			this.viewMatrix = getView(droneState, new Vector3f(1f, 1f, 1f), new Vector3f(1f, 1f, 1f).scale(3f));
 			break;
 		case DRONE_CHASE_CAM: 
-			this.viewMatrix = getView(drone, new Vector3f(1f, 0f, 0f), new Vector3f(-1f, 0f, -1f).scale(10f));
+			this.viewMatrix = getView(droneState, new Vector3f(1f, 0f, 0f), new Vector3f(-1f, 0f, -1f).scale(10f));
 			break;
 		default: 
 			this.viewMatrix = input.getViewMatrix(getSetting());
@@ -309,24 +313,26 @@ public class Window {
 		}
 	}
 	
-	public void updateViewMatrix(Settings setting, Drone drone) {
+	public void updateViewMatrix(Settings setting, DroneGuiState droneState) {
 		switch (setting) {
 		case DRONE_CAM: 
-			this.viewMatrix = getView(drone, new Vector3f(1f, 1f, 1f), new Vector3f(1f, 1f, 1f).scale(3f));
+			this.viewMatrix = getView(droneState, new Vector3f(1f, 1f, 1f), new Vector3f(1f, 1f, 1f).scale(3f));
 			break;
 		case DRONE_CHASE_CAM: 
-			this.viewMatrix = getView(drone, new Vector3f(1f, 0f, 0f), new Vector3f(-1f, 0f, -1f).scale(13f));
+			this.viewMatrix = getView(droneState, new Vector3f(1f, 0f, 0f), new Vector3f(-1f, 0f, -1f).scale(13f));
 			break;
-		default: 
-			this.viewMatrix = input.getViewMatrix(setting);
-			this.cameraposition = input.getPosition();
+		case DRONE_SIDE_CAM:
+			this.viewMatrix = getView(droneState, new Vector3f(1f, 0f, 0f), new Vector3f(-1f, 0f, -1f).scale(100f), new Vector3f((float) Math.PI/2, 0f, 0f));
+			break;
+		case DRONE_TOP_DOWN_CAM:
+			this.viewMatrix = getView2(droneState, new Vector3f((float) Math.PI/2, (float) -Math.PI/2, 0f), new Vector3f(0, -1f, 0).scale(100f));
 			break;
 		}
 	}
 	
-	public Matrix4f getView(Drone drone, Vector3f camOrientation, Vector3f camPosition) {
-		Vector3f orientation = drone.getOrientation().scale(camOrientation);
-		Vector3f dronePosition = drone.getPosition();
+	public Matrix4f getView(DroneGuiState droneState, Vector3f camOrientation, Vector3f camPosition) {
+		Vector3f orientation = droneState.getOrientation().convertToVector3f().scale(camOrientation);
+		Vector3f dronePosition = droneState.getPosition().convertToVector3f();
         
         Matrix3f transformationMatrix = Matrix3f.transformationMatrix(orientation).transpose();
         
@@ -337,6 +343,39 @@ public class Window {
         
         Vector3f position = dronePosition.add(look.scale(camPosition));
         this.cameraposition = position;
+		return Matrix4f.viewMatrix(right, up, look, position);
+	}
+
+	public Matrix4f getView(DroneGuiState droneState, Vector3f camOrientation, Vector3f camPosition, Vector3f addOrientation) {
+		Vector3f orientation = droneState.getOrientation().convertToVector3f().scale(camOrientation).add(addOrientation);
+		Vector3f dronePosition = droneState.getPosition().convertToVector3f();
+
+		Matrix3f transformationMatrix = Matrix3f.transformationMatrix(orientation).transpose();
+
+		Vector3f right = transformationMatrix.multiply(new Vector3f(1,0,0));
+		Vector3f up = transformationMatrix.multiply(new Vector3f(0,1,0));
+		Vector3f look = transformationMatrix.multiply(new Vector3f(0,0,-1));
+
+
+		Vector3f position = dronePosition.add(look.scale(camPosition));
+		this.cameraposition = position;
+		return Matrix4f.viewMatrix(right, up, look, position);
+	}
+
+	public Matrix4f getView2(DroneGuiState droneState, Vector3f camOrientation, Vector3f camPosition) {
+		Vector3f dronePosition = droneState.getPosition().convertToVector3f();
+
+		float yaw = camOrientation.x;
+		float pitch = camOrientation.y;
+//		float roll = droneState.getOrientation().getxValue();
+
+		Vector3f right = new Vector3f((float) Math.cos(yaw), 0, (float) -Math.sin(yaw));
+		Vector3f up = new Vector3f((float) (Math.sin(pitch)*Math.sin(yaw)), (float) Math.cos(pitch), (float) (Math.sin(pitch)*Math.cos(yaw)));
+		Vector3f look = up.cross(right);
+
+
+		Vector3f position = dronePosition.add(look.scale(camPosition));
+		this.cameraposition = position;
 		return Matrix4f.viewMatrix(right, up, look, position);
 	}
 	
