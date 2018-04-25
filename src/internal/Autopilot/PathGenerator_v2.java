@@ -323,6 +323,7 @@ public class PathGenerator_v2 {
 		AutopilotTurn firstTurn = new Turn(firstEntry, firstTurnCenter, firstExit, firstAngle, R);
 		AutopilotTurn secondTurn = new Turn(secondEntry, secondTurnCenter, secondExit, secondAngle, R);
 		
+		
 		addTurn(firstTurn);
 		addTurn(secondTurn);
 	}
