@@ -12,10 +12,17 @@ import internal.Helper.Vector;
  */
 public class PathGenerator_v2 {
 	
+	/**
+	 * Initialize a path generator without any variables. Variables should be provided with the 'updateVariables' method.
+	 */
 	public PathGenerator_v2() {
 		
 	}
 	
+	/**
+	 * Initialize a path generator and provide it with the required variables.
+	 * (see updateVariables for meaning of variables)
+	 */
 	public PathGenerator_v2(Vector position, Vector orientation, Vector landingPosition, Vector landingOrientation) {
 		setPosition(position);
 		setOrientation(orientation);
@@ -28,12 +35,21 @@ public class PathGenerator_v2 {
 	private Vector landingPosition;
 	private Vector landingOrientation;
 	
+	/**
+	 * Updates all variables required for generating a useable path.
+	 * @param position: current drone position
+	 * @param orientation: current drone orientation (only x- and z- components will be considered)
+	 * @param landingPosition: the desired touchdown position
+	 * @param landingOrientation: the orientation of the landing strip (pointing in the landing direction)(only x- and z- components will be considered)
+	 */
 	public void updateVariables(Vector position, Vector orientation, Vector landingPosition, Vector landingOrientation) {
 		setPosition(position);
 		setOrientation(orientation);
 		setLandingPosition(landingPosition);
 		setLandingOrientation(landingOrientation);
 	}
+	
+	// Getters and setters
 	
 	public Vector getPosition() {
 		return this.position;
@@ -67,7 +83,15 @@ public class PathGenerator_v2 {
 		this.landingOrientation = landingOrientation;
 	}
 	
-	public Vector getDescentStartPosition() {
+	// Useful methods
+	
+	/**
+	 * Generates the position starting from which the plane should start
+	 * descending in a straight line and under an angle of 10 degrees
+	 * in order to touch down on the required position.
+	 * @return
+	 */
+	private Vector getDescentStartPosition() {
 		Vector position = getPosition();
 		Vector landingPosition = getLandingPosition();
 		float heightDifference = position.getyValue()-landingPosition.getyValue();
@@ -77,13 +101,19 @@ public class PathGenerator_v2 {
 		return landingPosition.vectorSum(landingVector);
 	}
 	
-	public Vector getLandingVector() {
+	/**
+	 * Generates the descent vector: a normalized vector 
+	 * that has an angle with the horizon of 10 degrees and points upwards
+	 */
+	private Vector getLandingVector() {
 		Vector landingOrientation = getLandingOrientation().makeHorizontal().normalizeToLength(-1f);
 		float r = landingOrientation.getSize();
 		return new Vector(landingOrientation.getxValue(), (float)(r*Math.tan((float)getLandingAngle())), landingOrientation.getzValue()).normalizeVector();
 	}
 	
-	public Vector getPointOfIntersection() {
+	/*
+	 * PURE CHaos
+	private Vector getPointOfIntersection() {
 		Vector position = getPosition().makeHorizontal();
 		Vector landingPosition = getLandingPosition().makeHorizontal();
 		Vector orientation = getOrientation().makeHorizontal();
@@ -117,8 +147,6 @@ public class PathGenerator_v2 {
 		
 	}
 	
-	/*
-	 * PURE CHAOS
 	public void generatePath() {
 		Vector position = getPosition().makeHorizontal();
 		Vector orientation = getOrientation().makeHorizontal();
@@ -235,6 +263,11 @@ public class PathGenerator_v2 {
 		
 	}*/
 	
+	/**
+	 * Generates the turns the drone should make. Turns are accessible through the method 'getNextTurn'.
+	 * This method will only work properly if the required variables were provided,
+	 * either through the appropriate constructor or through the updateVariables method.
+	 */
 	public void generatePath() {
 		
 		getTurns().clear();
@@ -323,6 +356,7 @@ public class PathGenerator_v2 {
 		AutopilotTurn firstTurn = new Turn(firstEntry, firstTurnCenter, firstExit, firstAngle, R);
 		AutopilotTurn secondTurn = new Turn(secondEntry, secondTurnCenter, secondExit, secondAngle, R);
 		
+		
 		addTurn(firstTurn);
 		addTurn(secondTurn);
 	}
@@ -335,6 +369,11 @@ public class PathGenerator_v2 {
 		this.turns.add(turn);
 	}
 	
+	/**
+	 * Returns a turn object corresponding with the next turn the drone should make.
+	 * Returns null if there are no more turns.
+	 * @return
+	 */
 	public AutopilotTurn getNextTurn() {
 		
 		if (getTurns().size() == 0) {
