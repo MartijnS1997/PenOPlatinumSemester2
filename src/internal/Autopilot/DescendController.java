@@ -37,8 +37,6 @@ public class DescendController extends Controller {
             configureController(currentInputs);
         }
 
-        trajectoryLog(currentInputs);
-
         //update the angle to go
         AutopilotTurn turn = this.getTurn();
         updateAngleToGo(currentInputs, previousInputs, turn);
@@ -288,7 +286,6 @@ public class DescendController extends Controller {
         float errorInput = actualRadius-turnRadius;
         float deltaTime = getDeltaTime(currentInputs, previousInputs);
         PIDController rollCorrectionPID = this.getRollCorrectController();
-        errorLog(errorInput);
         float errorOutput = rollCorrectionPID.getPIDOutput(errorInput, deltaTime);
         //if we're making the turn too sharp the error input will be negative (the output positive)
         //if the turn is too shallow we the error input will be positive (the output negative)

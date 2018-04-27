@@ -65,7 +65,7 @@ public class TextWindow extends JPanel implements ActionListener{
 			position = droneState.getPosition().convertToVector3f();
 		}
         totalDistance += position.subtract(lastPosition).length();
-        System.out.println(position.subtract(lastPosition).length());
+        //System.out.println(position.subtract(lastPosition).length());
         orientation = droneState.getOrientation().convertToVector3f();
         heading = orientation.x;
         pitch = orientation.y;

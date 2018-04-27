@@ -1813,9 +1813,9 @@ public class PhysXEngine {
          */
         public Vector rotateTurnVector(Vector turnVector, float angle){
             //create a new square matrix
-            float[] matrixArray = new float[]{(float) cos(angle), 0, (float) -sin(angle),
+            float[] matrixArray = new float[]{(float) cos(angle), 0, (float) sin(angle),
                                             0,1,0,
-                                            (float) sin(angle), 0, (float) cos(angle)};
+                                            (float) -sin(angle), 0, (float) cos(angle)};
             SquareMatrix rotationMatrix = new SquareMatrix(matrixArray);
             //transform
             return rotationMatrix.matrixVectorProduct(turnVector);

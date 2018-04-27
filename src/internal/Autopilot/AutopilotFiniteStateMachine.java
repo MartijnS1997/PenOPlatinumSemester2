@@ -3,6 +3,7 @@ package internal.Autopilot;
 import AutopilotInterfaces.AutopilotConfig;
 import AutopilotInterfaces.AutopilotInputs_v2;
 import AutopilotInterfaces.AutopilotOutputs;
+import TestbedAutopilotInterface.Overseer.AutopilotDelivery;
 import TestbedAutopilotInterface.Overseer.DeliveryPackage;
 import TestbedAutopilotInterface.Overseer.MapAirport;
 import com.sun.org.apache.bcel.internal.generic.LAND;
@@ -216,7 +217,7 @@ public class AutopilotFiniteStateMachine {
         navigationController.setCruisingAltitude(communicator.getAssignedCruiseAltitude());
 
         //get the data about the package that we currently need to deliver
-        DeliveryPackage currentDelivery = communicator.getCurrentRequest();
+        AutopilotDelivery currentDelivery = communicator.getCurrentRequest();
         int sourceID = currentDelivery.getSourceAirport();
         MapAirport sourceAirport = communicator.getAirportByID(sourceID);
         int destinationID = currentDelivery.getDestinationAirport();

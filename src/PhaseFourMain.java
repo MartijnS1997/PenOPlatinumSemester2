@@ -26,12 +26,14 @@ public class PhaseFourMain {
         //clear the logs by writing empty lines
         Files.write(Paths.get("errorLog.txt"), "".getBytes());
         Files.write(Paths.get("trajectoryLog.txt"), "".getBytes());
+        Files.write(Paths.get("vectorErrorLog.txt"), "".getBytes());
+
         //create a simulation generator
         SimulationGen generator = new SimulationGen(worldXSize, worldZSize, nbDrones, nbAirports, nbPackages);
         //set the seed so we generate the same world
         generator.setRandomSeed(0);
         //create the simulation environment
-        SimulationEnvironment environment = generator.generateGridWorld(gridWorldRows, gridWorldColumns);
+        SimulationEnvironment environment = generator.generate2AirportWorld();//generator.generateGridWorld(gridWorldRows, gridWorldColumns);
         //print the environment
         System.out.println(SimulationGen.environmentToString(environment));
         //generate the overseer
@@ -160,13 +162,13 @@ public class PhaseFourMain {
     }
 
     //specify world parameters
-    private static float worldXSize = 10000;
-    private static float worldZSize = 10000;
+    private static float worldXSize = 4000;
+    private static float worldZSize = 4000;
     private static int nbDrones = 1;
-    private static int nbAirports = 6;
-    private static int nbPackages = 9;
-    private static int gridWorldRows = 2;
-    private static int gridWorldColumns = 3;
+    private static int nbAirports = 2;
+    private static int nbPackages = 1;
+    private static int gridWorldRows = 1;
+    private static int gridWorldColumns = 2;
     //TODO add/implement the packages
     private static Set<DeliveryPackage> getDeliveries(){
         return null;

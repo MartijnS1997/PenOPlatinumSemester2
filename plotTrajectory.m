@@ -1,8 +1,9 @@
 close all
 M = dlmread('trajectoryLog.txt',';');
 N = dlmread('errorLog.txt');
+% O = dlmread('vectorErrorLog.txt', ';');
 %plot the whole trajectory
-plot3(M(:,1), M(:,2), M(:,3));
+plot3(M(:,1), M(:,2), -M(:,3));
 figure 
 %plot the error on the altitude
 title('altitude error')
@@ -19,10 +20,13 @@ figure
 % plot(x, z, '--');
 % hold on
 title('flight path top view')
-plot(M(:,1), M(:,3), '-');
+plot(M(:,1), -M(:,3), '-');
 
 figure
 plot(N)
 title('error log')
-
+% 
+% figure
+% plot3(O(:,1), O(:,2), -O(:,3));
+% title('Vector error log')
 

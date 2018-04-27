@@ -8,6 +8,7 @@ import java.util.concurrent.Callable;
 import AutopilotInterfaces.AutopilotConfig;
 import AutopilotInterfaces.AutopilotOutputs;
 import TestbedAutopilotInterface.Overseer.DeliveryPackage;
+import TestbedAutopilotInterface.Overseer.WorldDelivery;
 import internal.Physics.PhysXEngine;
 import internal.Physics.PhysicsEngineState;
 import internal.Helper.Vector;
@@ -549,7 +550,7 @@ public class Drone implements Callable<Void> {
 	 * Getter for the package to be delivered by the drone (returns null if none has been assigned)
 	 * @return a delivery package object containing the information for delivery
 	 */
-	public DeliveryPackage getDeliveryPackage() {
+	public WorldDelivery getDeliveryPackage() {
 		return deliveryPackage;
 	}
 
@@ -560,9 +561,9 @@ public class Drone implements Callable<Void> {
 	 * if not this method will throw an illegal state
 	 * @param packageToDeliver the new package to deliver
 	 */
-	public void loadPackage(DeliveryPackage packageToDeliver){
+	public void loadPackage(WorldDelivery packageToDeliver){
 		//check first if we aren't already delivering a package
-		DeliveryPackage currentPackage = this.getDeliveryPackage();
+		WorldDelivery currentPackage = this.getDeliveryPackage();
 
 		//we're not carrying any package if the current package is a null pointer
 		if(currentPackage != null){
@@ -583,7 +584,7 @@ public class Drone implements Callable<Void> {
 	 * Unloads the current package (only sets the package to a null pointer)
 	 */
 	public void unloadPackage(){
-		DeliveryPackage deliveryPackage = this.getDeliveryPackage();
+		WorldDelivery deliveryPackage = this.getDeliveryPackage();
 		deliveryPackage.setDelivered();
 		this.deliveryPackage = null;
 	}
@@ -664,7 +665,7 @@ public class Drone implements Callable<Void> {
 	/**
 	 * The current package the drone is holding to transport to a certain airport
 	 */
-	private DeliveryPackage deliveryPackage;
+	private WorldDelivery deliveryPackage;
 
 	/*
 	 * Constants

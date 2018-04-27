@@ -60,6 +60,15 @@ public abstract class Controller {
         }
     }
 
+    protected static void vectorErrorLog(Vector errorVector){
+        String logString = errorVector.getxValue() + ";" + errorVector.getyValue() + ";" + errorVector.getzValue() + "\n";
+        try {
+            Files.write(Paths.get("vectorErrorLog.txt"), logString.getBytes(), StandardOpenOption.APPEND);
+        }catch (IOException e) {
+            //exception handling left as an exercise for the reader
+        }
+    }
+
     /**
      * Generates the control actions for the autopilot
      * based on the current and the previous inputs

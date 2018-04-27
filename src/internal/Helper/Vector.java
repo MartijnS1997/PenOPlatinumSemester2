@@ -177,7 +177,8 @@ public class Vector {
 		
 		return (float)Math.acos(breuk);
 	}
-	
+
+
 	/**
 	 * Makes given vectors horizontal an calculates angle going from this to other.
 	 * Positive angles mean a counterclockwise rotation (going from this to other)

@@ -4,9 +4,9 @@ import TestbedAutopilotInterface.GUI.AirportGuiState;
 import TestbedAutopilotInterface.GUI.CubeGuiState;
 import TestbedAutopilotInterface.GUI.DroneGuiState;
 import TestbedAutopilotInterface.GUI.GUIQueueElement;
-import TestbedAutopilotInterface.Overseer.AutopilotOverseer;
 import TestbedAutopilotInterface.Overseer.DeliveryPackage;
 import TestbedAutopilotInterface.Overseer.PackageService;
+import TestbedAutopilotInterface.Overseer.WorldDelivery;
 import internal.Exceptions.AngleOfAttackException;
 import internal.Exceptions.SimulationEndedException;
 import internal.Helper.Vector;
@@ -25,6 +25,8 @@ import java.util.stream.Collectors;
  */
 
 //TODO check if the drone is on the tarmac or not
+//TODO use more resource friendly query for the packages --> now every time a shallow copy of the main set is made
+//TODO only access the package service when new deliveries are available (use flags to communicate)
 public class World {
 	
 	public World(){
@@ -181,7 +183,7 @@ public class World {
 		PackageService packageService = this.getPackageService();
 		//get all the packages that need to be delivered and are assigned a drone (these are the only
 		//ones that need to be loaded and unloaded
-		Set<DeliveryPackage> packages = packageService.getAllUndeliveredAssignedPackages();
+		Set<WorldDelivery> packages = packageService.getAllUndeliveredAssignedWorldDeliveries();
 		//first check if all the drones can unload their packages
 		unloadPackages(new HashSet<>(drones.values()));
 		//then load all the packages
@@ -213,11 +215,11 @@ public class World {
 	 * @param drones the map of drones to check for
 	 * @param packages the set of packages to check for
 	 */
-	private void loadPackages(Map<String, Drone> drones, Set<DeliveryPackage> packages){
+	private void loadPackages(Map<String, Drone> drones, Set<WorldDelivery> packages){
 		//cycle trough all the packages, filter for all the packages that are not
 		//delivered yet
-		Set<DeliveryPackage> unDelivered = packages.stream().filter(p -> !p.isDelivered()).collect(Collectors.toSet());
-		for(DeliveryPackage delivery: unDelivered){
+		Set<WorldDelivery> unDelivered = packages.stream().filter(p -> !p.isDelivered()).collect(Collectors.toSet());
+		for(WorldDelivery delivery: unDelivered){
 			//now check for the drone with the corresponding ID
 			String deliveryDroneID = delivery.getDeliveryDroneID();
 			//check if null, if so continue:
@@ -389,7 +391,7 @@ public class World {
 			return false;
 		}
 		//first get the package
-		DeliveryPackage delivery = drone.getDeliveryPackage();
+		WorldDelivery delivery = drone.getDeliveryPackage();
 		int destinationAirportID = delivery.getDestinationAirport();
 		int destinationGateNumber = delivery.getDestinationAirportGate();
 		//get the position of the gate
@@ -408,7 +410,7 @@ public class World {
 	 * @return true if the package delivery drone ID and the drone ID match and the drone has met
 	 * the required position and landing velocity to deliver the package
 	 */
-	private boolean canPickUpPackage(Drone drone, DeliveryPackage delivery){
+	private boolean canPickUpPackage(Drone drone, WorldDelivery delivery){
 		//check first if the drone is already delivering a package
 		if(drone.isDelivering()){
 			return false;
@@ -567,8 +569,8 @@ public class World {
 	 */
 	private boolean allPackagesDelivered(){
 		PackageService service = this.getPackageService();
-		Set<DeliveryPackage> packages = service.getAllUndeliveredPackages();
-		for(DeliveryPackage delivery : packages){
+		Set<WorldDelivery> packages = service.getAllUndeliveredWorldDeliveries();
+		for(WorldDelivery delivery : packages){
 			if(!delivery.isDelivered()){
 				return false;
 			}

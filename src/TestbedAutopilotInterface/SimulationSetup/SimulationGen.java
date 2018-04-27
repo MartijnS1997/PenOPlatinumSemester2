@@ -86,6 +86,133 @@ public class SimulationGen {
         return simulationEnvironment;
     }
 
+    public SimulationEnvironment generate2AirportWorld(){
+        float xPosAirport1 = this.getWorldXSize();
+        float xPosAirport2 = - xPosAirport1;
+        float zPosAirport1 = -this.getWorldZSize();
+        float zPosAirport2 = -zPosAirport1;
+
+        Vector airport1Pos = new Vector(xPosAirport1, 0, zPosAirport1);
+        Vector airport2Pos = new Vector(xPosAirport2, 0, zPosAirport2);
+
+        //the first airport in the upper right corner faces to the left with the main runway
+        float airportRunwayLength = this.getAirportRunwayLength();
+        float airportRunwayWidth = this.getAirportRunwayWidth();
+        Vector heading1 = new Vector(-airportRunwayLength, 0,0);
+        //the second airport in the lower left corner faces upward
+        Vector heading2 = new Vector(0,0, -airportRunwayLength);
+
+        //generate the airport specs
+        List<AirportSpec> airports = new ArrayList<>();
+        AirportSpec airport1 = new AirportSpec() {
+            @Override
+            public Vector getPosition() {
+                return airport1Pos;
+            }
+
+            @Override
+            public Vector getPrimaryRunWay() {
+                return heading1;
+            }
+
+            @Override
+            public float getRunwayWidth() {
+                return airportRunwayWidth;
+            }
+
+            @Override
+            public float getRunwayLength() {
+                return airportRunwayLength;
+            }
+        };
+
+        AirportSpec airport2 = new AirportSpec() {
+            @Override
+            public Vector getPosition() {
+                return airport2Pos;
+            }
+
+            @Override
+            public Vector getPrimaryRunWay() {
+                return heading2;
+            }
+
+            @Override
+            public float getRunwayWidth() {
+                return airportRunwayWidth;
+            }
+
+            @Override
+            public float getRunwayLength() {
+                return airportRunwayLength;
+            }
+        };
+        airports.add(airport1);
+        airports.add(airport2);
+
+        //place the package & the drone: dest airport 2 & drone airport = 1
+        Vector droneOrientation = new Vector(getHeadingAngle(heading1),0,0);
+        Vector dronePos = airport1Pos.vectorSum(getDroneYPos());
+        DroneSpec drone = new DroneSpec() {
+            @Override
+            public Vector getDronePosition() {
+                return dronePos;
+            }
+
+            @Override
+            public Vector getDroneOrientation(){
+                return droneOrientation;
+            }
+        };
+
+        DeliverySpec delivery = new DeliverySpec() {
+            @Override
+            public int getSourceAirport() {
+                return 0;
+            }
+
+            @Override
+            public int getSourceAirportGate() {
+                return 0;
+            }
+
+            @Override
+            public int getDestinationAirport() {
+                return 1;
+            }
+
+            @Override
+            public int getDestinationAirportGate() {
+                return 0;
+            }
+        };
+
+        //generate the lists
+        List<DroneSpec> drones = new ArrayList<>();
+        drones.add(drone);
+        Set<DeliverySpec> deliveries = new HashSet<>();
+        deliveries.add(delivery);
+
+        return new SimulationEnvironment() {
+            @Override
+            public List<DroneSpec> getDroneSpecifications() {
+                return drones;
+            }
+
+            @Override
+            public List<AirportSpec> getAirportSpecifications() {
+                return airports;
+            }
+
+            @Override
+            public Set<DeliverySpec> getDeliveryPackages() {
+                return deliveries;
+            }
+        };
+
+
+    }
+
     /**
      * Generates the deliveries for the simulation environment based on the airports that are present in the world
      * The deliveries are distributed randomly across all the airports in the world
@@ -204,8 +331,8 @@ public class SimulationGen {
 
     /**
      * Adds two drones to the specified airport (drones are added as drone specs and they are generated on the specified
-     * loacation) along the two specified runways, both with a given offset to the center (see generation offset)
-     * and oriented along the heading of the primary runway
+     * location) along the two specified runways, both with a given offset to the center (see generation offset)
+     * and oriented along the heading of the primary runway & are both placed in gate 1 and zero respectively
      * @param drones the list of drones to add the result to
      * @param airport the airport to add the two drones at (the locations)
      */
@@ -217,13 +344,21 @@ public class SimulationGen {
         //get the center of the airport
         Vector airportCenter = airport.getPosition();
 
+        //we'll also need the width of the airport
+        float runwayWidth = this.getAirportRunwayWidth();
+
+        //get the position of the gates
+        Vector gateZero = this.getGateZeroPosition(airportCenter, runwayZeroHeading, runwayWidth);
+        Vector gateOne = this.getGateOnePosition(airportCenter, runwayOneHeading, runwayWidth);
+
         //generate the drone specs by calling addDroneToAirport
-        addDroneToAirport(drones, airportCenter, runwayZeroHeading);
-        addDroneToAirport(drones, airportCenter, runwayOneHeading);
+        addDroneToAirport(drones, gateZero, runwayZeroHeading);
+        addDroneToAirport(drones, gateOne, runwayOneHeading);
     }
 
     /**
      * Adds a single drone to the specified airport aligned with the primary runway (runway zero)
+     * and place it in gate zero (the gate on the left of the primary runway)
      * (we don't randomize the runway itself because the orientation of the airport itself is randomized)
      * @param drones the list of drone specifications to add the drone to
      * @param airport the airport to place the drone at
@@ -233,10 +368,72 @@ public class SimulationGen {
         Vector location = airport.getPosition();
         Vector runwayZeroHeading = airport.getPrimaryRunWay();
 
+        //also get the width of the airport, we'll need it to calculate the position of the gate
+        float runwayWidth = this.getAirportRunwayWidth();
+
+        //calculate the position of gate zero
+        Vector gateZero = this.getGateZeroPosition(location, runwayZeroHeading, runwayWidth);
+
         //add the drone based on the runway orientation and the location of the airport
-        addDroneToAirport(drones, location, runwayZeroHeading);
+        addDroneToAirport(drones, gateZero, runwayZeroHeading);
     }
 
+    /**
+     * Getter for the position of gate zero
+     * @param airportLocation the location of the airport
+     * @param headingVector the heading vector of the airport, this is the orientation of runway zero
+     * @param airportRunwayWidth the width of the airport
+     * @return the location of gate zero in ground coordinates (x, 0, z) & absolute
+     */
+    private Vector getGateZeroPosition(Vector airportLocation, Vector headingVector, float airportRunwayWidth){
+        //gate zero is located to the left of the heading of the airport
+        Vector leftOrthogonal = this.getLeftOrthogonal(headingVector);
+        //scale it to half the runway width, this gives the relative position
+        Vector relPosGateZero = leftOrthogonal.scalarMult(airportRunwayWidth/2.0f);
+        //sum with the airport location to get the absolute position
+        return airportLocation.vectorSum(relPosGateZero);
+
+    }
+
+    /**
+     * Getter for the position of gate one
+     * @param airportLocation the location of the airport
+     * @param headingVector the heading vector of the airport, this is the orientation of runway zero
+     * @param airportRunwayWidth the width of the airport
+     * @return the location of gate one in ground coordinates (x, 0, z) & absolute
+     */
+    private Vector getGateOnePosition(Vector airportLocation, Vector headingVector, float airportRunwayWidth){
+        //gate one is located to the right of the heading of the airport
+        Vector rightOrthogonal = this.getRightOrthogonal(headingVector);
+        //scale it to half, the width of the runway, this gives the relative position
+        Vector relPosGateOne = rightOrthogonal.scalarMult(airportRunwayWidth/2.0f);
+        //sum the relative position with the center of the airport, gives the absolute position
+        return airportLocation.vectorSum(relPosGateOne);
+    }
+
+    /**
+     * Gets the vector orthogonal and left to the heading vector of the airport
+     * @param headingVector  the heading vector of the airport
+     * @return a normalized vector orthogonal and to the left of the heading vector of the airport
+     */
+    private Vector getLeftOrthogonal(Vector headingVector){
+        //if heading is (x1, 0, z1) then scalar product with (z1,0,-x1) will result in a zero
+        //the orthogonal will always be located on the left of the heading vector (see drawings)
+        Vector leftOrthogonal = new Vector(headingVector.getzValue(),0, -headingVector.getxValue());
+        return leftOrthogonal.normalizeVector();
+    }
+
+    /**
+     * Gets the vector orthogonal and right to the heading vector of the airport
+     * @param headingVector  the heading vector of the airport
+     * @return a normalized vector orthogonal and to the right of the heading vector of the airport
+     */
+    private Vector getRightOrthogonal(Vector headingVector){
+        //if heading is (x1, 0, z1) then scalar product with (-z1, 0, x1) will give zero
+        //the orthogonal will always be located to the right of the heading vector
+        Vector secondOrthogonal = new Vector(-headingVector.getzValue(),0, headingVector.getxValue());
+        return secondOrthogonal.normalizeVector();
+    }
     /**
      * Adds a drone to at the given airport along the given runway heading
      * (the airport is implicitly defined by its location and the runway is selected by specifying the heading vector)

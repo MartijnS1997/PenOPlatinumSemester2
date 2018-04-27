@@ -4,7 +4,7 @@ package TestbedAutopilotInterface.Overseer;
  * Created by Martijn on 27/03/2018.
  * A class of packages to deliver with the drones to the airport
  */
-public class DeliveryPackage {
+public class DeliveryPackage implements AutopilotDelivery, WorldDelivery, PlannerDelivery {
 
     /**
      * Constructor for a package to deliver
@@ -79,18 +79,36 @@ public class DeliveryPackage {
      * Setter for the ID of the drone that is assigned to deliver the package
      * @param deliveryDroneID a string with the ID of the drone that has to delivered said package
      */
-    protected void setDeliveryDroneID(String deliveryDroneID) {
+    public void setDeliveryDroneID(String deliveryDroneID) {
         this.deliveryDroneID = deliveryDroneID;
+    }
+
+    /**
+     * Checks if the package is loaded onto the drone or not, if it is, it means that the drone should navigate
+     * to the destination airport, if not, the drone should navigate to the source airport
+     * @return true if the drone is carrying a package
+     */
+    public boolean isPickedUp() {
+        return pickedUp;
+    }
+
+    /**
+     * Setter for the is loaded flag, indicates if the package is already picked up
+     * --> can only be invoked once and should only be invoked by the
+     */
+    public void setPickedUp() {
+        this.pickedUp = pickedUp;
     }
 
     /**
      * The sources and destinations of the packet
      */
-    private int sourceAirport;
-    private int sourceAirportGate;
-    private int destinationAirport;
-    private int destinationAirportGate;
+    private final int sourceAirport;
+    private final int sourceAirportGate;
+    private final int destinationAirport;
+    private final int destinationAirportGate;
     private String deliveryDroneID;
+
 
     /*
      * Packet flags
@@ -100,6 +118,10 @@ public class DeliveryPackage {
      * Flag that indicates if the package is already on its destination
      */
     private boolean delivered = false;
+    /**
+     * Flag that indicates if the package is already picked up from the source airport
+     */
+    private boolean pickedUp = false;
 
     @Override
     public String toString() {

@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="ab07285b-2edd-4382-80f2-64434c6c0194" name="Default" comment="temporary commit (isn't working yet)">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Testbed/DroneBuilder_v2$3.class" />
+    <list default="true" id="ab07285b-2edd-4382-80f2-64434c6c0194" name="Default" comment="">
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/TestbedAutopilotInterface/Overseer/AutopilotDelivery.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/TestbedAutopilotInterface/Overseer/PlannerDelivery.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/TestbedAutopilotInterface/Overseer/WorldDelivery.java" />
       <change type="DELETED" beforePath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/AccuracyMain.class" afterPath="" />
       <change type="DELETED" beforePath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/AutopilotConnection.class" afterPath="" />
       <change type="DELETED" beforePath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/AutopilotInitializer.class" afterPath="" />
@@ -31,39 +33,42 @@
       <change type="DELETED" beforePath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Autopilot/AlphaFlightController.class" afterPath="" />
       <change type="DELETED" beforePath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Autopilot/AutoPilotControllerNoAttack$ControlOutputs.class" afterPath="" />
       <change type="DELETED" beforePath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Autopilot/AutoPilotControllerNoAttack.class" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Autopilot/AutopilotLandingController$1.class" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Autopilot/AutopilotPathGenerator.class" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Autopilot/AutopilotWayPointController$WayPoint.class" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Autopilot/AutopilotWayPointController$dummyWayPointGenerator.class" afterPath="" />
       <change type="DELETED" beforePath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Autopilot/Autopilot_v2Implementation.class" afterPath="" />
       <change type="DELETED" beforePath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Autopilot/BetaFlightController.class" afterPath="" />
       <change type="DELETED" beforePath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Autopilot/Controller$1.class" afterPath="" />
       <change type="DELETED" beforePath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Autopilot/Controller$VectorPID.class" afterPath="" />
       <change type="DELETED" beforePath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Autopilot/ControllerSelector$1$1.class" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Autopilot/ControllerSelector$1.class" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Autopilot/ControllerSelector$2.class" afterPath="" />
       <change type="DELETED" beforePath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Autopilot/FlightState.class" afterPath="" />
       <change type="DELETED" beforePath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Autopilot/Pathfinding$1.class" afterPath="" />
       <change type="DELETED" beforePath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Autopilot/Pathfinding$N.class" afterPath="" />
       <change type="DELETED" beforePath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Testbed/WorldBuilder_v2$1.class" afterPath="" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/DemoMain.class" afterPath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/DemoMain.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/SocketMain$1.class" afterPath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/SocketMain$1.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/SocketMain.class" afterPath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/SocketMain.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/TestbedMain$1.class" afterPath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/TestbedMain$1.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/TestbedMain$MainAutopilotInputs.class" afterPath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/TestbedMain$MainAutopilotInputs.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/TestbedMain.class" afterPath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/TestbedMain.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Autopilot/AutoPilot.class" afterPath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Autopilot/AutoPilot.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Autopilot/AutoPilotFlightController.class" afterPath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Autopilot/AutoPilotFlightController.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Autopilot/AutopilotLandingController$1.class" afterPath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Autopilot/AutopilotLandingController$1.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Autopilot/AutopilotLandingController$LandingPhases.class" afterPath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Autopilot/AutopilotLandingController$LandingPhases.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Autopilot/AutopilotLandingController.class" afterPath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Autopilot/AutopilotLandingController.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Autopilot/AutopilotTakeoffController.class" afterPath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Autopilot/AutopilotTakeoffController.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Autopilot/AutopilotTaxiingController$1.class" afterPath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Autopilot/AutopilotTaxiingController$1.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Autopilot/AutopilotTaxiingController$TaxiingState.class" afterPath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Autopilot/AutopilotTaxiingController$TaxiingState.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Autopilot/AutopilotTaxiingController.class" afterPath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Autopilot/AutopilotTaxiingController.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Autopilot/AutopilotWayPointController$WayPoint.class" afterPath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Autopilot/AutopilotWayPointController$WayPoint.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Autopilot/AutopilotWayPointController$dummyWayPointGenerator.class" afterPath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Autopilot/AutopilotWayPointController$dummyWayPointGenerator.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Autopilot/AutopilotWayPointController.class" afterPath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Autopilot/AutopilotWayPointController.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Autopilot/Controller$ControlOutputs.class" afterPath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Autopilot/Controller$ControlOutputs.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Autopilot/Controller$PIDController.class" afterPath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Autopilot/Controller$PIDController.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Autopilot/Controller.class" afterPath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Autopilot/Controller.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Autopilot/ControllerSelector$1.class" afterPath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Autopilot/ControllerSelector$1.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Autopilot/ControllerSelector$2.class" afterPath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Autopilot/ControllerSelector$2.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Autopilot/ControllerSelector.class" afterPath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Autopilot/ControllerSelector.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Autopilot/GammaFlightController.class" afterPath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Autopilot/GammaFlightController.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Autopilot/PathGenerator.class" afterPath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Autopilot/PathGenerator.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Autopilot/Pathfinding.class" afterPath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Autopilot/Pathfinding.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Autopilot/StabilizerController.class" afterPath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Autopilot/StabilizerController.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Helper/SquareMatrix.class" afterPath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Helper/SquareMatrix.class" />
@@ -85,6 +90,7 @@
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Testbed/Drone.class" afterPath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Testbed/Drone.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Testbed/DroneBuilder_v2$1.class" afterPath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Testbed/DroneBuilder_v2$1.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Testbed/DroneBuilder_v2$2.class" afterPath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Testbed/DroneBuilder_v2$2.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Testbed/DroneBuilder_v2$3.class" afterPath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Testbed/DroneBuilder_v2$3.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Testbed/DroneBuilder_v2$4.class" afterPath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Testbed/DroneBuilder_v2$4.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Testbed/DroneBuilder_v2.class" afterPath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Testbed/DroneBuilder_v2.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Testbed/Floor.class" afterPath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/internal/Testbed/Floor.class" />
@@ -101,14 +107,27 @@
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/tests/streamtests.class" afterPath="$PROJECT_DIR$/out/production/PenOPlatinumSemester2/tests/streamtests.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/plotTrajectory.m" afterPath="$PROJECT_DIR$/plotTrajectory.m" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/PhaseFourMain.java" afterPath="$PROJECT_DIR$/src/PhaseFourMain.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/TestMain.java" afterPath="$PROJECT_DIR$/src/TestMain.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/TestbedAutopilotInterface/Overseer/AutopilotOverseer.java" afterPath="$PROJECT_DIR$/src/TestbedAutopilotInterface/Overseer/AutopilotOverseer.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/TestbedAutopilotInterface/Overseer/DeliveryPackage.java" afterPath="$PROJECT_DIR$/src/TestbedAutopilotInterface/Overseer/DeliveryPackage.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/TestbedAutopilotInterface/Overseer/DeliveryPlanner.java" afterPath="$PROJECT_DIR$/src/TestbedAutopilotInterface/Overseer/DeliveryPlanner.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/TestbedAutopilotInterface/Overseer/MapAirport.java" afterPath="$PROJECT_DIR$/src/TestbedAutopilotInterface/Overseer/MapAirport.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/TestbedAutopilotInterface/Overseer/OverseerAirportMap.java" afterPath="$PROJECT_DIR$/src/TestbedAutopilotInterface/Overseer/OverseerAirportMap.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/TestbedAutopilotInterface/Overseer/PackageService.java" afterPath="$PROJECT_DIR$/src/TestbedAutopilotInterface/Overseer/PackageService.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/TestbedAutopilotInterface/SimulationSetup/SimulationGen.java" afterPath="$PROJECT_DIR$/src/TestbedAutopilotInterface/SimulationSetup/SimulationGen.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/TestbedAutopilotInterface/TestbedServer.java" afterPath="$PROJECT_DIR$/src/TestbedAutopilotInterface/TestbedServer.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/gui/Windows/TextWindow.java" afterPath="$PROJECT_DIR$/src/gui/Windows/TextWindow.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/internal/Autopilot/AirportNavigationController.java" afterPath="$PROJECT_DIR$/src/internal/Autopilot/AirportNavigationController.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/internal/Autopilot/AutopilotFiniteStateMachine.java" afterPath="$PROJECT_DIR$/src/internal/Autopilot/AutopilotFiniteStateMachine.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/internal/Autopilot/Controller.java" afterPath="$PROJECT_DIR$/src/internal/Autopilot/Controller.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/internal/Autopilot/DescendController.java" afterPath="$PROJECT_DIR$/src/internal/Autopilot/DescendController.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/internal/Autopilot/OverseerCommunication.java" afterPath="$PROJECT_DIR$/src/internal/Autopilot/OverseerCommunication.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/internal/Autopilot/StabilizerController.java" afterPath="$PROJECT_DIR$/src/internal/Autopilot/StabilizerController.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/internal/Autopilot/PathGenerator_v2.java" afterPath="$PROJECT_DIR$/src/internal/Autopilot/PathGenerator_v2.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/internal/Helper/Vector.java" afterPath="$PROJECT_DIR$/src/internal/Helper/Vector.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/internal/Physics/PhysXEngine.java" afterPath="$PROJECT_DIR$/src/internal/Physics/PhysXEngine.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/internal/Testbed/Drone.java" afterPath="$PROJECT_DIR$/src/internal/Testbed/Drone.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/internal/Testbed/World.java" afterPath="$PROJECT_DIR$/src/internal/Testbed/World.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/tests/searchTests.java" afterPath="$PROJECT_DIR$/src/tests/searchTests.java" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -124,8 +143,8 @@
       <file leaf-file-name="AirportNavigationController.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/internal/Autopilot/AirportNavigationController.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="29631">
-              <caret line="1519" column="8" lean-forward="false" selection-start-line="1519" selection-start-column="8" selection-end-line="1519" selection-end-column="8" />
+            <state relative-caret-position="-150">
+              <caret line="95" column="0" lean-forward="false" selection-start-line="95" selection-start-column="0" selection-end-line="95" selection-end-column="0" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -133,105 +152,21 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="TestbedServer.java" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/TestbedAutopilotInterface/TestbedServer.java">
+      <file leaf-file-name="errorLog.txt" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/errorLog.txt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="347">
-              <caret line="616" column="52" lean-forward="false" selection-start-line="616" selection-start-column="52" selection-end-line="616" selection-end-column="52" />
+            <state relative-caret-position="0">
+              <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Controller.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/internal/Autopilot/Controller.java">
+      <file leaf-file-name="WorldDelivery.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/TestbedAutopilotInterface/Overseer/WorldDelivery.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="17535">
-              <caret line="907" column="14" lean-forward="false" selection-start-line="907" selection-start-column="14" selection-end-line="907" selection-end-column="14" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="MapAirport.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/TestbedAutopilotInterface/Overseer/MapAirport.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="7392">
-              <caret line="375" column="0" lean-forward="false" selection-start-line="375" selection-start-column="0" selection-end-line="375" selection-end-column="0" />
-              <folding>
-                <element signature="imports" expanded="false" />
-                <element signature="e#10731#10732#0" expanded="false" />
-                <element signature="e#10793#10794#0" expanded="false" />
-                <element signature="e#11041#11042#0" expanded="false" />
-                <element signature="e#11087#11088#0" expanded="false" />
-                <element signature="e#11414#11415#0" expanded="false" />
-                <element signature="e#11460#11461#0" expanded="false" />
-                <element signature="e#11676#11677#0" expanded="false" />
-                <element signature="e#11737#11738#0" expanded="false" />
-                <element signature="e#14451#14452#0" expanded="false" />
-                <element signature="e#14485#14486#0" expanded="false" />
-                <element signature="e#14641#14642#0" expanded="false" />
-                <element signature="e#14676#14677#0" expanded="false" />
-                <element signature="e#14823#14824#0" expanded="false" />
-                <element signature="e#14854#14855#0" expanded="false" />
-                <element signature="e#15046#15047#0" expanded="false" />
-                <element signature="e#15082#15083#0" expanded="false" />
-                <element signature="e#15212#15213#0" expanded="false" />
-                <element signature="e#15244#15245#0" expanded="false" />
-                <element signature="e#16097#16098#0" expanded="false" />
-                <element signature="e#16140#16141#0" expanded="false" />
-                <element signature="e#16605#16606#0" expanded="false" />
-                <element signature="e#16633#16634#0" expanded="false" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="OverseerAirportMap.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/TestbedAutopilotInterface/Overseer/OverseerAirportMap.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="651">
-              <caret line="36" column="0" lean-forward="false" selection-start-line="36" selection-start-column="0" selection-end-line="36" selection-end-column="0" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="StabilizerController.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/internal/Autopilot/StabilizerController.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="483">
-              <caret line="29" column="34" lean-forward="false" selection-start-line="29" selection-start-column="34" selection-end-line="29" selection-end-column="34" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="OverseerCommunication.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/internal/Autopilot/OverseerCommunication.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2016">
-              <caret line="105" column="35" lean-forward="false" selection-start-line="105" selection-start-column="35" selection-end-line="105" selection-end-column="35" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="SimulationEnvironment.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/TestbedAutopilotInterface/SimulationSetup/SimulationEnvironment.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="189">
-              <caret line="10" column="17" lean-forward="false" selection-start-line="10" selection-start-column="17" selection-end-line="10" selection-end-column="17" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="SimulationGen.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/TestbedAutopilotInterface/SimulationSetup/SimulationGen.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2352">
-              <caret line="127" column="71" lean-forward="false" selection-start-line="127" selection-start-column="71" selection-end-line="127" selection-end-column="71" />
+            <state relative-caret-position="21">
+              <caret line="6" column="17" lean-forward="false" selection-start-line="6" selection-start-column="17" selection-end-line="6" selection-end-column="17" />
               <folding />
             </state>
           </provider>
@@ -242,6 +177,76 @@
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="0">
               <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="plotTrajectory.m" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/plotTrajectory.m">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="294">
+              <caret line="14" column="25" lean-forward="true" selection-start-line="14" selection-start-column="25" selection-end-line="14" selection-end-column="25" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="replay_pid240.log" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/replay_pid240.log">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="0">
+              <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="PackageService.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/TestbedAutopilotInterface/Overseer/PackageService.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="234">
+              <caret line="15" column="50" lean-forward="false" selection-start-line="15" selection-start-column="50" selection-end-line="15" selection-end-column="50" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="AutopilotOverseer.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/TestbedAutopilotInterface/Overseer/AutopilotOverseer.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="315">
+              <caret line="533" column="60" lean-forward="false" selection-start-line="533" selection-start-column="60" selection-end-line="533" selection-end-column="60" />
+              <folding>
+                <element signature="e#23037#23038#0" expanded="true" />
+                <element signature="e#23105#23106#0" expanded="true" />
+                <element signature="e#23471#23472#0" expanded="true" />
+                <element signature="e#23511#23512#0" expanded="true" />
+                <element signature="e#24111#24112#0" expanded="true" />
+                <element signature="e#24166#24167#0" expanded="true" />
+                <element signature="e#24368#24369#0" expanded="true" />
+                <element signature="e#24433#24434#0" expanded="true" />
+                <element signature="e#25912#25960#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="World.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/internal/Testbed/World.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="210">
+              <caret line="28" column="99" lean-forward="false" selection-start-line="28" selection-start-column="99" selection-end-line="28" selection-end-column="99" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="AutopilotDelivery.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/TestbedAutopilotInterface/Overseer/AutopilotDelivery.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="294">
+              <caret line="14" column="27" lean-forward="false" selection-start-line="14" selection-start-column="27" selection-end-line="14" selection-end-column="27" />
               <folding />
             </state>
           </provider>
@@ -259,36 +264,36 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>println</find>
-      <find>toDel</find>
-      <find>current</find>
-      <find>public</find>
-      <find>a</find>
-      <find>autio</find>
-      <find>auti</find>
-      <find>autis</find>
-      <find>ade</find>
-      <find>force</find>
-      <find>system.out.println(</find>
-      <find>configureF</find>
-      <find>extract</find>
-      <find>cruise</find>
-      <find>turnstateC</find>
-      <find>pitch_g</find>
-      <find>turnlog</find>
-      <find>tras</find>
-      <find>logging</find>
-      <find>referencePoi</find>
-      <find>pitchRe</find>
-      <find>entry point</find>
-      <find>previous ex</find>
+      <find>e</find>
+      <find>er</find>
+      <find>sy</find>
+      <find>syst</find>
+      <find>system</find>
       <find>system.out</find>
-      <find>reference</find>
+      <find>rightOr</find>
+      <find>droneOrient</find>
+      <find>referencePoint</find>
+      <find>trajectory</find>
       <find>log</find>
-      <find>Reference point</find>
-      <find>velocity den</find>
-      <find>errorlog</find>
       <find>errorLog</find>
+      <find>calcErroD</find>
+      <find>angle</find>
+      <find>rotateTurn</find>
+      <find>droneY</find>
+      <find>rotateT</find>
+      <find>tran</find>
+      <find>hasFinis</find>
+      <find>generator</find>
+      <find>nbOfTurns</find>
+      <find>orthogonal</find>
+      <find>gateLocat</find>
+      <find>deliveryPackage</find>
+      <find>from</find>
+      <find>package</find>
+      <find>submitted</find>
+      <find>AutopilotDel</find>
+      <find>erro</find>
+      <find>trajec</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -302,36 +307,17 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/src/TestbedAutopilotInterface/TestbedConnection.java" />
-        <option value="$PROJECT_DIR$/src/TestbedAutopilotInterface/SimulGen.java" />
-        <option value="$PROJECT_DIR$/src/TestbedAutopilotInterface/SimulEnvironment.java" />
-        <option value="$PROJECT_DIR$/src/TestbedAutopilotInterface/AutopilotOverseer.java" />
-        <option value="$PROJECT_DIR$/src/TestbedAutopilotInterface/SimulationEnvironment.java" />
-        <option value="$PROJECT_DIR$/src/TestbedAutopilotInterface/DeliverySpec.java" />
-        <option value="$PROJECT_DIR$/src/TestbedAutopilotInterface/SimulationGen.java" />
-        <option value="$PROJECT_DIR$/src/TestbedAutopilotInterface/GUI/TestbedGUI.java" />
-        <option value="$PROJECT_DIR$/src/TestbedAutopilotInterface/Overseer/PackageService.java" />
-        <option value="$PROJECT_DIR$/src/internal/Testbed/WorldBuilder_v2.java" />
-        <option value="$PROJECT_DIR$/src/tests/searchTests.java" />
-        <option value="$PROJECT_DIR$/src/TestbedAutopilotInterface/AutopilotConnection.java" />
-        <option value="$PROJECT_DIR$/src/TestbedAutopilotInterface/AutopilotInitializer.java" />
         <option value="$PROJECT_DIR$/src/internal/Autopilot/AutoPilot.java" />
-        <option value="$PROJECT_DIR$/src/TestbedAutopilotInterface/Overseer/DeliveryPackage.java" />
-        <option value="$PROJECT_DIR$/src/internal/Testbed/World.java" />
         <option value="$PROJECT_DIR$/src/TestbedAutopilotInterface/Overseer/DeliveryPlanning.java" />
-        <option value="$PROJECT_DIR$/src/TestbedAutopilotInterface/Overseer/DeliveryPlanner.java" />
         <option value="$PROJECT_DIR$/src/internal/Autopilot/DeprecatedController.java" />
         <option value="$PROJECT_DIR$/src/internal/Autopilot/StandardOutputs.java" />
         <option value="$PROJECT_DIR$/src/internal/Autopilot/Autopilot_v2Implementation.java" />
         <option value="$PROJECT_DIR$/src/internal/Autopilot/AutopilotLandingController.java" />
         <option value="$PROJECT_DIR$/src/internal/Autopilot/AutopilotTaxiingController.java" />
-        <option value="$PROJECT_DIR$/src/internal/Autopilot/AutopilotWayPointController.java" />
-        <option value="$PROJECT_DIR$/src/internal/Autopilot/ControllerSelector.java" />
         <option value="$PROJECT_DIR$/src/internal/Testbed/WorldBuilder.java" />
         <option value="$PROJECT_DIR$/src/internal/Autopilot/AutopilotState.java" />
         <option value="$PROJECT_DIR$/src/internal/Physics/TurnConfig.java" />
         <option value="$PROJECT_DIR$/src/internal/Physics/TurnPhysX.java" />
-        <option value="$PROJECT_DIR$/src/internal/Autopilot/AutopilotFiniteStateMachine.java" />
         <option value="$PROJECT_DIR$/src/internal/Autopilot/AutopilotTakeoffController.java" />
         <option value="$PROJECT_DIR$/src/internal/Autopilot/AutopilotFlightController.java" />
         <option value="$PROJECT_DIR$/src/internal/Autopilot/GammaFlightController.java" />
@@ -339,20 +325,39 @@
         <option value="$PROJECT_DIR$/src/internal/Autopilot/AutopilotTurn.java" />
         <option value="$PROJECT_DIR$/turnlog.txt" />
         <option value="$PROJECT_DIR$/src/internal/Autopilot/AutopilotStabilization.java" />
-        <option value="$PROJECT_DIR$/src/internal/Physics/WingPhysX.java" />
-        <option value="$PROJECT_DIR$/src/internal/Physics/PhysXEngine.java" />
-        <option value="$PROJECT_DIR$/src/PhaseFourMain.java" />
-        <option value="$PROJECT_DIR$/errorLog.txt" />
-        <option value="$PROJECT_DIR$/src/internal/Autopilot/Controller.java" />
-        <option value="$PROJECT_DIR$/src/TestbedAutopilotInterface/SimulationSetup/SimulationGen.java" />
-        <option value="$PROJECT_DIR$/src/TestbedAutopilotInterface/Overseer/MapAirport.java" />
         <option value="$PROJECT_DIR$/src/TestbedAutopilotInterface/Overseer/OverseerAirportMap.java" />
-        <option value="$PROJECT_DIR$/src/TestbedAutopilotInterface/Overseer/AutopilotOverseer.java" />
         <option value="$PROJECT_DIR$/src/internal/Autopilot/StabilizerController.java" />
-        <option value="$PROJECT_DIR$/src/internal/Autopilot/OverseerCommunication.java" />
-        <option value="$PROJECT_DIR$/trajectoryLog.txt" />
-        <option value="$PROJECT_DIR$/src/internal/Autopilot/AirportNavigationController.java" />
+        <option value="$PROJECT_DIR$/src/internal/Autopilot/AutopilotWayPointController.java" />
+        <option value="$PROJECT_DIR$/src/internal/Autopilot/ControllerSelector.java" />
+        <option value="$PROJECT_DIR$/src/internal/Autopilot/DescendController.java" />
+        <option value="$PROJECT_DIR$/src/gui/Windows/TextWindow.java" />
         <option value="$PROJECT_DIR$/src/TestbedAutopilotInterface/TestbedServer.java" />
+        <option value="$PROJECT_DIR$/src/internal/Helper/Vector.java" />
+        <option value="$PROJECT_DIR$/src/internal/Physics/WingPhysX.java" />
+        <option value="$PROJECT_DIR$/src/internal/Autopilot/Controller.java" />
+        <option value="$PROJECT_DIR$/src/PhaseFourMain.java" />
+        <option value="$PROJECT_DIR$/src/internal/Physics/PhysXEngine.java" />
+        <option value="$PROJECT_DIR$/src/internal/Autopilot/testPathGen.java" />
+        <option value="$PROJECT_DIR$/src/internal/Autopilot/PathGenerator_v2.java" />
+        <option value="$PROJECT_DIR$/src/TestbedAutopilotInterface/Overseer/MapAirport.java" />
+        <option value="$PROJECT_DIR$/src/TestbedAutopilotInterface/Overseer/AutopilotDelivery.java" />
+        <option value="$PROJECT_DIR$/src/TestbedAutopilotInterface/Overseer/WorldDelivery.java" />
+        <option value="$PROJECT_DIR$/src/TestbedAutopilotInterface/Overseer/DeliveryPackage.java" />
+        <option value="$PROJECT_DIR$/src/tests/searchTests.java" />
+        <option value="$PROJECT_DIR$/src/TestMain.java" />
+        <option value="$PROJECT_DIR$/src/TestbedAutopilotInterface/Overseer/OverseerDelivery.java" />
+        <option value="$PROJECT_DIR$/src/TestbedAutopilotInterface/Overseer/PlannerDelivery.java" />
+        <option value="$PROJECT_DIR$/src/internal/Testbed/Drone.java" />
+        <option value="$PROJECT_DIR$/src/internal/Autopilot/AutopilotFiniteStateMachine.java" />
+        <option value="$PROJECT_DIR$/src/TestbedAutopilotInterface/SimulationSetup/SimulationGen.java" />
+        <option value="$PROJECT_DIR$/src/TestbedAutopilotInterface/Overseer/DeliveryPlanner.java" />
+        <option value="$PROJECT_DIR$/src/internal/Autopilot/OverseerCommunication.java" />
+        <option value="$PROJECT_DIR$/src/internal/Testbed/World.java" />
+        <option value="$PROJECT_DIR$/src/TestbedAutopilotInterface/Overseer/AutopilotOverseer.java" />
+        <option value="$PROJECT_DIR$/src/TestbedAutopilotInterface/Overseer/PackageService.java" />
+        <option value="$PROJECT_DIR$/src/internal/Autopilot/AirportNavigationController.java" />
+        <option value="$PROJECT_DIR$/trajectoryLog.txt" />
+        <option value="$PROJECT_DIR$/errorLog.txt" />
       </list>
     </option>
   </component>
@@ -360,9 +365,10 @@
     <treeState />
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="-7" />
-    <option name="width" value="1259" />
-    <option name="height" value="1047" />
+    <option name="x" value="-9" />
+    <option name="y" value="-9" />
+    <option name="width" value="1938" />
+    <option name="height" value="1048" />
   </component>
   <component name="ProjectView">
     <navigator currentView="ProjectPane" proportions="" version="1">
@@ -379,7 +385,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
+      <pane id="PackagesPane" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -624,14 +630,98 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="gui" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="PenOPlatinumSemester2" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="PenOPlatinumSemester2" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="gui" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="Windows" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="PenOPlatinumSemester2" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="PenOPlatinumSemester2" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="gui" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="IO" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="PenOPlatinumSemester2" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="PenOPlatinumSemester2" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="gui" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="GraphicsObjects" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="PenOPlatinumSemester2" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="PenOPlatinumSemester2" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
               <option name="myItemId" value="resources" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
         </subPane>
       </pane>
-      <pane id="PackagesPane" />
       <pane id="Scratches" />
+      <pane id="Scope" />
       <pane id="AndroidView" />
     </panes>
   </component>
@@ -1065,13 +1155,17 @@
       <option name="project" value="LOCAL" />
       <updated>1524427520519</updated>
     </task>
-    <option name="localTasksCounter" value="17" />
+    <task id="LOCAL-00017" summary="integrated the path generator but is not working (yet)">
+      <created>1524602423875</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1524602423875</updated>
+    </task>
+    <option name="localTasksCounter" value="18" />
     <servers />
   </component>
   <component name="TestHistory">
-    <history-entry file="searchTests_testSearch - 2018.04.12 at 22h 53m 48s.xml">
-      <configuration name="searchTests.testSearch" configurationId="JUnit" />
-    </history-entry>
     <history-entry file="searchTests_testSearch - 2018.04.12 at 22h 54m 03s.xml">
       <configuration name="searchTests.testSearch" configurationId="JUnit" />
     </history-entry>
@@ -1099,27 +1193,31 @@
     <history-entry file="searchTests_testSearch - 2018.04.13 at 14h 15m 37s.xml">
       <configuration name="searchTests.testSearch" configurationId="JUnit" />
     </history-entry>
+    <history-entry file="searchTests_testSearch - 2018.04.27 at 22h 26m 15s.xml">
+      <configuration name="searchTests.testSearch" configurationId="JUnit" />
+    </history-entry>
   </component>
   <component name="ToolWindowManager">
-    <frame x="-7" y="0" width="1259" height="1047" extended-state="0" />
+    <frame x="-9" y="-9" width="1938" height="1048" extended-state="6" />
     <editor active="true" />
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3261105" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3250283" sideWeight="0.4978678" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Palette&#9;" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.34088334" sideWeight="0.5171858" order="7" side_tool="true" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3250283" sideWeight="0.5181237" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32975295" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32827735" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="WINDOWED" visible="true" show_stripe_button="true" weight="0.3261105" sideWeight="0.4828142" order="2" side_tool="false" content_ui="tabs" x="1131" y="38" width="903" height="1008" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32827735" sideWeight="0.4978678" order="8" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3250283" sideWeight="0.48187634" order="2" side_tool="false" content_ui="tabs" x="301" y="31" width="1553" height="1003" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.38884193" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.16541353" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3250283" sideWeight="0.49785176" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.19442096" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.24973147" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="5" side_tool="true" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.398641" sideWeight="0.49785176" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3975085" sideWeight="0.4936034" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -1129,38 +1227,8 @@
       <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Thumbnails" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32936078" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32713348" sideWeight="0.49785176" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Theme Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
     </layout>
-    <layout-to-restore>
-      <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.34088334" sideWeight="0.5171858" order="7" side_tool="true" content_ui="tabs" />
-      <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32975295" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
-      <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
-      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.24973147" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.398641" sideWeight="0.49785176" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3261105" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
-      <window_info id="Palette&#9;" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="Image Layers" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
-      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.34019503" sideWeight="0.4828142" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32842582" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
-      <window_info id="Thumbnails" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32936078" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.27558637" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3272933" sideWeight="0.49785176" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="5" side_tool="true" content_ui="tabs" />
-      <window_info id="Theme Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-    </layout-to-restore>
   </component>
   <component name="Vcs.Log.Tabs.Properties">
     <option name="TAB_STATES">
@@ -1209,11 +1277,13 @@
     <MESSAGE value="temporary commit (used to save progress)&#10;start of implementation for the between turn navigation controls" />
     <MESSAGE value="Airport navigation controller is working&#10;only need to implement exit conditions and hook it up to the path generator" />
     <MESSAGE value="airport navigator tuned" />
-    <option name="LAST_COMMIT_MESSAGE" value="airport navigator tuned" />
+    <MESSAGE value="integrated the path generator but is not working (yet)" />
+    <MESSAGE value="fixed the path generator&#10;split delivery into interfaces for clearer boundaries&#10;tried to fix nullpointer issue for ending conditions with airport navigation&#10;but not completely ready" />
+    <option name="LAST_COMMIT_MESSAGE" value="fixed the path generator&#10;split delivery into interfaces for clearer boundaries&#10;tried to fix nullpointer issue for ending conditions with airport navigation&#10;but not completely ready" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="7" />
+      <option name="time" value="14" />
     </breakpoint-manager>
     <watches-manager>
       <configuration name="JUnit">
@@ -1229,273 +1299,10 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/internal/Autopilot/AutopilotLandingController.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="85">
-          <caret line="17" column="3" lean-forward="true" selection-start-line="17" selection-start-column="3" selection-end-line="17" selection-end-column="3" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/internal/Autopilot/AutopilotPathGenerator.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="136">
-          <caret line="8" column="17" lean-forward="false" selection-start-line="8" selection-start-column="17" selection-end-line="8" selection-end-column="17" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/internal/Autopilot/AutopilotTaxiingController.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="680">
-          <caret line="458" column="0" lean-forward="true" selection-start-line="458" selection-start-column="0" selection-end-line="458" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://C:/Program Files/Java/jdk1.8.0_144/src.zip!/java/lang/Override.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="459">
-          <caret line="50" column="18" lean-forward="false" selection-start-line="50" selection-start-column="18" selection-end-line="50" selection-end-column="18" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/internal/Autopilot/Path.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="68">
-          <caret line="6" column="13" lean-forward="false" selection-start-line="6" selection-start-column="13" selection-end-line="6" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/internal/Autopilot/Pathfinding.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="204">
-          <caret line="20" column="13" lean-forward="false" selection-start-line="20" selection-start-column="13" selection-end-line="20" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/internal/Autopilot/PathGenerator.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="153">
-          <caret line="13" column="13" lean-forward="false" selection-start-line="13" selection-start-column="13" selection-end-line="13" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/internal/Autopilot/TestFlightController.java" />
-    <entry file="file://$PROJECT_DIR$/src/AutopilotInterfaces/AutopilotOutputsWriter.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="204">
-          <caret line="12" column="0" lean-forward="false" selection-start-line="12" selection-start-column="0" selection-end-line="12" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/internal/Autopilot/ControllerSelector.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="442">
-          <caret line="294" column="16" lean-forward="false" selection-start-line="294" selection-start-column="16" selection-end-line="294" selection-end-column="16" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/AutopilotInterfaces/AutopilotOutputs.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="34">
-          <caret line="2" column="17" lean-forward="false" selection-start-line="2" selection-start-column="17" selection-end-line="2" selection-end-column="17" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/TestbedAutopilotInterface/AutopilotConnection.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2940">
-          <caret line="149" column="35" lean-forward="false" selection-start-line="149" selection-start-column="35" selection-end-line="149" selection-end-column="35" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/internal/Testbed/WorldBuilder.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="675">
-          <caret line="87" column="0" lean-forward="true" selection-start-line="87" selection-start-column="0" selection-end-line="87" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/internal/Testbed/World.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="260">
-          <caret line="173" column="60" lean-forward="false" selection-start-line="173" selection-start-column="57" selection-end-line="173" selection-end-column="60" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/internal/Autopilot/AutoPilot.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2040">
-          <caret line="130" column="0" lean-forward="false" selection-start-line="130" selection-start-column="0" selection-end-line="130" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/AutopilotInterfaces/AutopilotConfig.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="68">
-          <caret line="4" column="10" lean-forward="false" selection-start-line="4" selection-start-column="10" selection-end-line="4" selection-end-column="10" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/internal/Autopilot/AutopilotState.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="425">
-          <caret line="25" column="35" lean-forward="false" selection-start-line="25" selection-start-column="35" selection-end-line="25" selection-end-column="35" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/internal/Testbed/WorldBuilder_v2.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="136">
-          <caret line="15" column="13" lean-forward="false" selection-start-line="15" selection-start-column="13" selection-end-line="15" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/internal/Testbed/DroneBuilder_v2.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="136">
-          <caret line="20" column="13" lean-forward="false" selection-start-line="20" selection-start-column="13" selection-end-line="20" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/internal/Physics/TurnConfig.java" />
-    <entry file="file://$PROJECT_DIR$/src/internal/Physics/TurnPhysX.java" />
-    <entry file="file://$PROJECT_DIR$/src/internal/Helper/SquareMatrix.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="136">
-          <caret line="9" column="13" lean-forward="false" selection-start-line="9" selection-start-column="13" selection-end-line="9" selection-end-column="13" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/internal/Autopilot/AutopilotFiniteStateMachine.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-2125">
-          <caret line="201" column="0" lean-forward="false" selection-start-line="201" selection-start-column="0" selection-end-line="201" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/internal/Autopilot/GammaFlightController.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="272">
-          <caret line="21" column="0" lean-forward="false" selection-start-line="21" selection-start-column="0" selection-end-line="21" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/internal/Autopilot/AutopilotFlightController.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="544">
-          <caret line="40" column="62" lean-forward="false" selection-start-line="40" selection-start-column="62" selection-end-line="40" selection-end-column="62" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Todo">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="51">
-          <caret line="3" column="121" lean-forward="false" selection-start-line="3" selection-start-column="121" selection-end-line="3" selection-end-column="121" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/internal/Physics/PhysicsEngineState.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="168">
-          <caret line="8" column="17" lean-forward="false" selection-start-line="8" selection-start-column="17" selection-end-line="8" selection-end-column="17" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/internal/Testbed/DroneState.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="168">
-          <caret line="8" column="17" lean-forward="false" selection-start-line="8" selection-start-column="17" selection-end-line="8" selection-end-column="17" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/internal/Autopilot/AutopilotTurn.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="420">
-          <caret line="20" column="7" lean-forward="false" selection-start-line="20" selection-start-column="7" selection-end-line="20" selection-end-column="7" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/internal/Helper/Vector.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="9114">
-          <caret line="446" column="18" lean-forward="false" selection-start-line="446" selection-start-column="18" selection-end-line="446" selection-end-column="18" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/replay_pid240.log">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/internal/Autopilot/AutopilotTakeoffController.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2919">
-          <caret line="146" column="29" lean-forward="false" selection-start-line="146" selection-start-column="29" selection-end-line="146" selection-end-column="29" />
-          <folding>
-            <element signature="imports" expanded="false" />
-            <element signature="e#477#478#0" expanded="false" />
-            <element signature="e#509#510#0" expanded="false" />
-            <element signature="e#10646#10647#0" expanded="false" />
-            <element signature="e#10685#10686#0" expanded="false" />
-            <element signature="e#11401#11402#0" expanded="false" />
-            <element signature="e#11444#11445#0" expanded="false" />
-            <element signature="e#12840#12841#0" expanded="false" />
-            <element signature="e#12880#12881#0" expanded="false" />
-            <element signature="e#13672#13673#0" expanded="false" />
-            <element signature="e#13716#13717#0" expanded="false" />
-            <element signature="e#14054#14055#0" expanded="false" />
-            <element signature="e#14092#14093#0" expanded="false" />
-            <element signature="e#14436#14437#0" expanded="false" />
-            <element signature="e#14475#14476#0" expanded="false" />
-            <element signature="e#14941#14942#0" expanded="false" />
-            <element signature="e#14979#14980#0" expanded="false" />
-            <element signature="e#15253#15254#0" expanded="false" />
-            <element signature="e#15292#15293#0" expanded="false" />
-            <element signature="e#15449#15450#0" expanded="false" />
-            <element signature="e#15481#15482#0" expanded="false" />
-            <element signature="e#15666#15667#0" expanded="false" />
-            <element signature="e#15708#15709#0" expanded="false" />
-            <element signature="e#15989#15990#0" expanded="false" />
-            <element signature="e#16030#16031#0" expanded="false" />
-            <element signature="e#20022#20023#0" expanded="false" />
-            <element signature="e#20066#20067#0" expanded="false" />
-            <element signature="e#20141#20142#0" expanded="false" />
-            <element signature="e#20185#20186#0" expanded="false" />
-            <element signature="e#20272#20273#0" expanded="false" />
-            <element signature="e#20322#20323#0" expanded="false" />
-            <element signature="e#20407#20408#0" expanded="false" />
-            <element signature="e#20455#20456#0" expanded="false" />
-            <element signature="e#20517#20518#0" expanded="false" />
-            <element signature="e#20549#20550#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://C:/Program Files/Java/jdk1.8.0_144/jre/lib/rt.jar!/sun/util/calendar/CalendarUtils.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="284">
-          <caret line="53" column="28" lean-forward="false" selection-start-line="53" selection-start-column="28" selection-end-line="53" selection-end-column="28" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/PhaseFourMain.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="187">
-          <caret line="27" column="67" lean-forward="false" selection-start-line="27" selection-start-column="67" selection-end-line="27" selection-end-column="67" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/internal/Autopilot/AutopilotStabilization.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="5219">
           <caret line="353" column="7" lean-forward="false" selection-start-line="353" selection-start-column="7" selection-end-line="353" selection-end-column="7" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1506,213 +1313,377 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/internal/Autopilot/AutopilotWayPointController.java">
+    <entry file="file://$PROJECT_DIR$/src/TestbedAutopilotInterface/SimulationSetup/SimulationEnvironment.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="9911">
-          <caret line="609" column="53" lean-forward="false" selection-start-line="609" selection-start-column="53" selection-end-line="609" selection-end-column="53" />
+        <state relative-caret-position="189">
+          <caret line="10" column="17" lean-forward="false" selection-start-line="10" selection-start-column="17" selection-end-line="10" selection-end-column="17" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/internal/Physics/PhysXEngine.java">
+    <entry file="file://$PROJECT_DIR$/src/TestbedAutopilotInterface/Overseer/OverseerAirportMap.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="26486">
-          <caret line="1689" column="0" lean-forward="false" selection-start-line="1689" selection-start-column="0" selection-end-line="1689" selection-end-column="0" />
+        <state relative-caret-position="651">
+          <caret line="36" column="0" lean-forward="false" selection-start-line="36" selection-start-column="0" selection-end-line="36" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/internal/Autopilot/StabilizerController.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="483">
+          <caret line="29" column="34" lean-forward="false" selection-start-line="29" selection-start-column="34" selection-end-line="29" selection-end-column="34" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/internal/Autopilot/AutopilotPathGenerator.java" />
+    <entry file="file://$PROJECT_DIR$/src/internal/Autopilot/AutopilotTurn.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="136">
+          <caret line="8" column="17" lean-forward="false" selection-start-line="8" selection-start-column="17" selection-end-line="8" selection-end-column="17" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/internal/Autopilot/PathGenerator.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="170">
+          <caret line="14" column="13" lean-forward="false" selection-start-line="14" selection-start-column="13" selection-end-line="14" selection-end-column="13" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/internal/Autopilot/AutopilotWayPointController.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="323">
+          <caret line="27" column="27" lean-forward="false" selection-start-line="27" selection-start-column="27" selection-end-line="27" selection-end-column="27" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/internal/Autopilot/ControllerSelector.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="7769">
+          <caret line="460" column="0" lean-forward="false" selection-start-line="16" selection-start-column="0" selection-end-line="460" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://C:/Program Files/Java/jdk1.8.0_144/src.zip!/java/util/concurrent/ThreadPoolExecutor.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="199">
+          <caret line="623" column="0" lean-forward="false" selection-start-line="623" selection-start-column="0" selection-end-line="623" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/internal/Autopilot/DescendController.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="164">
+          <caret line="38" column="0" lean-forward="false" selection-start-line="38" selection-start-column="0" selection-end-line="38" selection-end-column="0" />
           <folding>
             <element signature="imports" expanded="false" />
-            <element signature="e#5893#5894#0" expanded="false" />
-            <element signature="e#5995#5996#0" expanded="false" />
-            <element signature="e#6060#6061#0" expanded="false" />
-            <element signature="e#6162#6163#0" expanded="false" />
-            <element signature="e#6425#6426#0" expanded="false" />
-            <element signature="e#6527#6528#0" expanded="false" />
-            <element signature="e#36235#36236#0" expanded="false" />
-            <element signature="e#36282#36283#0" expanded="false" />
-            <element signature="e#36347#36348#0" expanded="false" />
-            <element signature="e#36394#36395#0" expanded="false" />
-            <element signature="e#36462#36463#0" expanded="false" />
-            <element signature="e#36512#36513#0" expanded="false" />
-            <element signature="e#36577#36578#0" expanded="false" />
-            <element signature="e#36624#36625#0" expanded="false" />
-            <element signature="e#36698#36699#0" expanded="false" />
-            <element signature="e#36738#36739#0" expanded="false" />
-            <element signature="e#36815#36816#0" expanded="false" />
-            <element signature="e#36855#36856#0" expanded="false" />
-            <element signature="e#36933#36934#0" expanded="false" />
-            <element signature="e#36973#36974#0" expanded="false" />
-            <element signature="e#37105#37106#0" expanded="false" />
-            <element signature="e#37145#37146#0" expanded="false" />
-            <element signature="e#37220#37221#0" expanded="false" />
-            <element signature="e#37260#37261#0" expanded="false" />
-            <element signature="e#37336#37337#0" expanded="false" />
-            <element signature="e#37376#37377#0" expanded="false" />
-            <element signature="e#37450#37451#0" expanded="false" />
-            <element signature="e#37490#37491#0" expanded="false" />
-            <element signature="e#37564#37565#0" expanded="false" />
-            <element signature="e#37604#37605#0" expanded="false" />
-            <element signature="e#37675#37676#0" expanded="false" />
-            <element signature="e#37715#37716#0" expanded="false" />
-            <element signature="e#37785#37786#0" expanded="false" />
-            <element signature="e#37825#37826#0" expanded="false" />
-            <element signature="e#37896#37897#0" expanded="false" />
-            <element signature="e#37936#37937#0" expanded="false" />
-            <element signature="e#49954#49955#0" expanded="false" />
-            <element signature="e#49991#49992#0" expanded="false" />
-            <element signature="e#51948#51949#0" expanded="false" />
-            <element signature="e#51988#51989#0" expanded="false" />
-            <element signature="e#52599#52600#0" expanded="false" />
-            <element signature="e#52657#52658#0" expanded="false" />
-            <element signature="e#52845#52846#0" expanded="false" />
-            <element signature="e#52881#52882#0" expanded="false" />
-            <element signature="e#53064#53065#0" expanded="false" />
-            <element signature="e#53096#53097#0" expanded="false" />
-            <element signature="e#53309#53310#0" expanded="false" />
-            <element signature="e#53351#53352#0" expanded="false" />
-            <element signature="e#53542#53543#0" expanded="false" />
-            <element signature="e#53573#53574#0" expanded="false" />
-            <element signature="e#53782#53783#0" expanded="false" />
-            <element signature="e#53822#53823#0" expanded="false" />
-            <element signature="e#54028#54029#0" expanded="false" />
-            <element signature="e#54071#54072#0" expanded="false" />
-            <element signature="e#54569#54570#0" expanded="false" />
-            <element signature="e#54610#54611#0" expanded="false" />
-            <element signature="e#55031#55032#0" expanded="false" />
-            <element signature="e#55066#55067#0" expanded="false" />
-            <element signature="e#55240#55241#0" expanded="false" />
-            <element signature="e#55288#55289#0" expanded="false" />
-            <element signature="e#55337#55338#0" expanded="false" />
-            <element signature="e#55374#55375#0" expanded="false" />
-            <element signature="e#55442#55443#0" expanded="false" />
-            <element signature="e#55494#55495#0" expanded="false" />
-            <element signature="e#57986#57987#0" expanded="false" />
-            <element signature="e#58033#58034#0" expanded="false" />
-            <element signature="e#59809#59810#0" expanded="false" />
-            <element signature="e#59894#59895#0" expanded="false" />
-            <element signature="e#59975#59976#0" expanded="false" />
-            <element signature="e#60063#60064#0" expanded="false" />
-            <element signature="e#60147#60148#0" expanded="false" />
-            <element signature="e#60214#60215#0" expanded="false" />
-            <element signature="e#60295#60296#0" expanded="false" />
-            <element signature="e#60362#60363#0" expanded="false" />
-            <element signature="e#60452#60453#0" expanded="false" />
-            <element signature="e#60508#60509#0" expanded="false" />
-            <element signature="e#60601#60602#0" expanded="false" />
-            <element signature="e#60657#60658#0" expanded="false" />
-            <element signature="e#60751#60752#0" expanded="false" />
-            <element signature="e#60807#60808#0" expanded="false" />
-            <element signature="e#61651#61652#0" expanded="false" />
-            <element signature="e#61728#61729#0" expanded="false" />
-            <element signature="e#61801#61802#0" expanded="false" />
-            <element signature="e#61875#61876#0" expanded="false" />
-            <element signature="e#61951#61952#0" expanded="false" />
-            <element signature="e#62010#62011#0" expanded="false" />
-            <element signature="e#62083#62084#0" expanded="false" />
-            <element signature="e#62142#62143#0" expanded="false" />
-            <element signature="e#62224#62225#0" expanded="false" />
-            <element signature="e#62272#62273#0" expanded="false" />
-            <element signature="e#62357#62358#0" expanded="false" />
-            <element signature="e#62405#62406#0" expanded="false" />
-            <element signature="e#62491#62492#0" expanded="false" />
-            <element signature="e#62539#62540#0" expanded="false" />
-            <element signature="e#63638#63639#0" expanded="false" />
-            <element signature="e#63723#63724#0" expanded="false" />
-            <element signature="e#63804#63805#0" expanded="false" />
-            <element signature="e#63868#63869#0" expanded="false" />
-            <element signature="e#63952#63953#0" expanded="false" />
-            <element signature="e#64019#64020#0" expanded="false" />
-            <element signature="e#64100#64101#0" expanded="false" />
-            <element signature="e#64167#64168#0" expanded="false" />
-            <element signature="e#64257#64258#0" expanded="false" />
-            <element signature="e#64313#64314#0" expanded="false" />
-            <element signature="e#64406#64407#0" expanded="false" />
-            <element signature="e#64462#64463#0" expanded="false" />
-            <element signature="e#64556#64557#0" expanded="false" />
-            <element signature="e#64612#64613#0" expanded="false" />
-            <element signature="e#65631#65632#0" expanded="false" />
-            <element signature="e#65708#65709#0" expanded="false" />
-            <element signature="e#65781#65782#0" expanded="false" />
-            <element signature="e#65837#65838#0" expanded="false" />
-            <element signature="e#65913#65914#0" expanded="false" />
-            <element signature="e#65972#65973#0" expanded="false" />
-            <element signature="e#66045#66046#0" expanded="false" />
-            <element signature="e#66104#66105#0" expanded="false" />
-            <element signature="e#66186#66187#0" expanded="false" />
-            <element signature="e#66234#66235#0" expanded="false" />
-            <element signature="e#66319#66320#0" expanded="false" />
-            <element signature="e#66367#66368#0" expanded="false" />
-            <element signature="e#66453#66454#0" expanded="false" />
-            <element signature="e#66501#66502#0" expanded="false" />
-            <element signature="e#74399#74400#0" expanded="false" />
-            <element signature="e#74439#74440#0" expanded="false" />
-            <element signature="e#74514#74515#0" expanded="false" />
-            <element signature="e#74554#74555#0" expanded="false" />
-            <element signature="e#74630#74631#0" expanded="false" />
-            <element signature="e#74670#74671#0" expanded="false" />
-            <element signature="e#74744#74745#0" expanded="false" />
-            <element signature="e#74784#74785#0" expanded="false" />
-            <element signature="e#74858#74859#0" expanded="false" />
-            <element signature="e#74898#74899#0" expanded="false" />
-            <element signature="e#74969#74970#0" expanded="false" />
-            <element signature="e#75009#75010#0" expanded="false" />
-            <element signature="e#75079#75080#0" expanded="false" />
-            <element signature="e#75119#75120#0" expanded="false" />
-            <element signature="e#75190#75191#0" expanded="false" />
-            <element signature="e#75230#75231#0" expanded="false" />
-            <element signature="e#75291#75292#0" expanded="false" />
-            <element signature="e#75329#75330#0" expanded="false" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/internal/Autopilot/AutopilotLandingController.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="180">
+          <caret line="88" column="20" lean-forward="false" selection-start-line="88" selection-start-column="10" selection-end-line="88" selection-end-column="20" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/gui/Windows/Settings.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="34">
+          <caret line="2" column="12" lean-forward="false" selection-start-line="2" selection-start-column="12" selection-end-line="2" selection-end-column="12" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/gui/Windows/Window.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="180">
+          <caret line="584" column="26" lean-forward="false" selection-start-line="584" selection-start-column="16" selection-end-line="584" selection-end-column="26" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/gui/Windows/TextWindow.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="180">
+          <caret line="67" column="10" lean-forward="false" selection-start-line="67" selection-start-column="10" selection-end-line="67" selection-end-column="10" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/TestbedAutopilotInterface/TestbedServer.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1917">
+          <caret line="625" column="0" lean-forward="false" selection-start-line="625" selection-start-column="0" selection-end-line="625" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/internal/Autopilot/GammaFlightController.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="272">
+          <caret line="21" column="0" lean-forward="false" selection-start-line="21" selection-start-column="0" selection-end-line="21" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://C:/Program Files/Java/jdk1.8.0_144/src.zip!/java/util/concurrent/FutureTask.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3876">
+          <caret line="265" column="0" lean-forward="false" selection-start-line="265" selection-start-column="0" selection-end-line="265" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/AutopilotInterfaces/AutopilotInputs_v2Reader.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="442">
+          <caret line="26" column="33" lean-forward="false" selection-start-line="26" selection-start-column="33" selection-end-line="26" selection-end-column="33" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/internal/Helper/Vector.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="17">
+          <caret line="179" column="0" lean-forward="false" selection-start-line="179" selection-start-column="0" selection-end-line="179" selection-end-column="0" />
+          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/internal/Physics/WingPhysX.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1496">
-          <caret line="91" column="68" lean-forward="false" selection-start-line="91" selection-start-column="68" selection-end-line="91" selection-end-column="68" />
+        <state relative-caret-position="-289">
+          <caret line="94" column="109" lean-forward="false" selection-start-line="94" selection-start-column="109" selection-end-line="94" selection-end-column="109" />
+          <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/errorLog.txt">
+    <entry file="file://$PROJECT_DIR$/src/internal/Autopilot/Controller.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        <state relative-caret-position="164">
+          <caret line="64" column="13" lean-forward="false" selection-start-line="64" selection-start-column="13" selection-end-line="64" selection-end-column="13" />
+          <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/TestbedAutopilotInterface/Overseer/AutopilotOverseer.java">
+    <entry file="file://$PROJECT_DIR$/src/internal/Autopilot/testPathGen.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="9156">
-          <caret line="446" column="32" lean-forward="false" selection-start-line="446" selection-start-column="32" selection-end-line="446" selection-end-column="32" />
+        <state relative-caret-position="546">
+          <caret line="26" column="88" lean-forward="false" selection-start-line="26" selection-start-column="88" selection-end-line="26" selection-end-column="88" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/internal/Autopilot/AutoPilot.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="21">
+          <caret line="17" column="13" lean-forward="false" selection-start-line="17" selection-start-column="13" selection-end-line="17" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/internal/Autopilot/PathGenerator_v2.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="249">
+          <caret line="339" column="10" lean-forward="false" selection-start-line="339" selection-start-column="10" selection-end-line="339" selection-end-column="10" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <marker date="1524855169589" expanded="false" signature="41831:41839" ph="&lt;~&gt;" />
+            <marker date="1524855169589" expanded="false" signature="41893:41901" ph="&lt;~&gt;" />
+            <marker date="1524855169589" expanded="false" signature="46165:46180" ph="&lt;~&gt;" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/PhaseFourMain.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="204">
+          <caret line="28" column="68" lean-forward="false" selection-start-line="28" selection-start-column="68" selection-end-line="28" selection-end-column="68" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/internal/Physics/PhysXEngine.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="171">
+          <caret line="1812" column="11" lean-forward="true" selection-start-line="1812" selection-start-column="11" selection-end-line="1812" selection-end-column="11" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/TestbedAutopilotInterface/Overseer/MapAirport.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="7392">
-          <caret line="375" column="0" lean-forward="false" selection-start-line="375" selection-start-column="0" selection-end-line="375" selection-end-column="0" />
+        <state relative-caret-position="617">
+          <caret line="139" column="60" lean-forward="false" selection-start-line="139" selection-start-column="60" selection-end-line="139" selection-end-column="60" />
           <folding>
-            <element signature="imports" expanded="false" />
-            <element signature="e#10731#10732#0" expanded="false" />
-            <element signature="e#10793#10794#0" expanded="false" />
-            <element signature="e#11041#11042#0" expanded="false" />
-            <element signature="e#11087#11088#0" expanded="false" />
-            <element signature="e#11414#11415#0" expanded="false" />
-            <element signature="e#11460#11461#0" expanded="false" />
-            <element signature="e#11676#11677#0" expanded="false" />
-            <element signature="e#11737#11738#0" expanded="false" />
-            <element signature="e#14451#14452#0" expanded="false" />
-            <element signature="e#14485#14486#0" expanded="false" />
-            <element signature="e#14641#14642#0" expanded="false" />
-            <element signature="e#14676#14677#0" expanded="false" />
-            <element signature="e#14823#14824#0" expanded="false" />
-            <element signature="e#14854#14855#0" expanded="false" />
-            <element signature="e#15046#15047#0" expanded="false" />
-            <element signature="e#15082#15083#0" expanded="false" />
-            <element signature="e#15212#15213#0" expanded="false" />
-            <element signature="e#15244#15245#0" expanded="false" />
-            <element signature="e#16097#16098#0" expanded="false" />
-            <element signature="e#16140#16141#0" expanded="false" />
-            <element signature="e#16605#16606#0" expanded="false" />
-            <element signature="e#16633#16634#0" expanded="false" />
+            <element signature="e#14879#14880#0" expanded="true" />
+            <element signature="e#14910#14911#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://C:/Program Files/Java/jdk1.8.0_144/src.zip!/java/util/Map.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="284">
+          <caret line="239" column="6" lean-forward="false" selection-start-line="239" selection-start-column="6" selection-end-line="239" selection-end-column="6" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/tests/SquareMatrixTest.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="168">
+          <caret line="11" column="13" lean-forward="false" selection-start-line="11" selection-start-column="13" selection-end-line="11" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/TestMain.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="42">
+          <caret line="4" column="25" lean-forward="true" selection-start-line="4" selection-start-column="25" selection-end-line="4" selection-end-column="25" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/TestbedAutopilotInterface/Overseer/PlannerDelivery.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="346">
+          <caret line="49" column="7" lean-forward="false" selection-start-line="49" selection-start-column="7" selection-end-line="49" selection-end-column="7" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/internal/Testbed/Drone.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="451">
+          <caret line="588" column="36" lean-forward="false" selection-start-line="588" selection-start-column="36" selection-end-line="588" selection-end-column="36" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/TestbedAutopilotInterface/SimulationSetup/SimulationGen.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-106">
+          <caret line="153" column="69" lean-forward="false" selection-start-line="153" selection-start-column="69" selection-end-line="153" selection-end-column="69" />
+          <folding>
+            <element signature="e#5976#5977#0" expanded="true" />
+            <element signature="e#6016#6017#0" expanded="true" />
+            <element signature="e#6088#6089#0" expanded="true" />
+            <element signature="e#6128#6129#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/tests/searchTests.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="274">
+          <caret line="43" column="0" lean-forward="true" selection-start-line="43" selection-start-column="0" selection-end-line="62" selection-end-column="5" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/TestbedAutopilotInterface/Overseer/DeliveryPackage.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="21">
+          <caret line="1" column="0" lean-forward="true" selection-start-line="1" selection-start-column="0" selection-end-line="1" selection-end-column="0" />
+          <folding>
+            <element signature="e#3266#3267#0" expanded="true" />
+            <element signature="e#3297#3298#0" expanded="true" />
+            <element signature="e#3500#3501#0" expanded="true" />
+            <element signature="e#3540#3541#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/TestbedAutopilotInterface/Overseer/DeliveryPlanner.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="402">
+          <caret line="1054" column="48" lean-forward="false" selection-start-line="1054" selection-start-column="48" selection-end-line="1054" selection-end-column="48" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/TestbedAutopilotInterface/AutopilotConnection.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-505">
+          <caret line="47" column="0" lean-forward="false" selection-start-line="47" selection-start-column="0" selection-end-line="47" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/internal/Autopilot/OverseerCommunication.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="367">
+          <caret line="71" column="43" lean-forward="false" selection-start-line="71" selection-start-column="43" selection-end-line="71" selection-end-column="43" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/internal/Autopilot/AutopilotFiniteStateMachine.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="178">
+          <caret line="220" column="0" lean-forward="false" selection-start-line="220" selection-start-column="0" selection-end-line="220" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/internal/Testbed/World.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="210">
+          <caret line="28" column="99" lean-forward="false" selection-start-line="28" selection-start-column="99" selection-end-line="28" selection-end-column="99" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/TestbedAutopilotInterface/Overseer/AutopilotDelivery.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="294">
+          <caret line="14" column="27" lean-forward="false" selection-start-line="14" selection-start-column="27" selection-end-line="14" selection-end-column="27" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/TestbedAutopilotInterface/Overseer/AutopilotOverseer.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="315">
+          <caret line="533" column="60" lean-forward="false" selection-start-line="533" selection-start-column="60" selection-end-line="533" selection-end-column="60" />
+          <folding>
+            <element signature="e#23037#23038#0" expanded="true" />
+            <element signature="e#23105#23106#0" expanded="true" />
+            <element signature="e#23471#23472#0" expanded="true" />
+            <element signature="e#23511#23512#0" expanded="true" />
+            <element signature="e#24111#24112#0" expanded="true" />
+            <element signature="e#24166#24167#0" expanded="true" />
+            <element signature="e#24368#24369#0" expanded="true" />
+            <element signature="e#24433#24434#0" expanded="true" />
+            <element signature="e#25912#25960#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/TestbedAutopilotInterface/Overseer/WorldDelivery.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="21">
+          <caret line="6" column="17" lean-forward="false" selection-start-line="6" selection-start-column="17" selection-end-line="6" selection-end-column="17" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/TestbedAutopilotInterface/Overseer/PackageService.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="234">
+          <caret line="15" column="50" lean-forward="false" selection-start-line="15" selection-start-column="50" selection-end-line="15" selection-end-column="50" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/internal/Autopilot/AirportNavigationController.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-150">
+          <caret line="95" column="0" lean-forward="false" selection-start-line="95" selection-start-column="0" selection-end-line="95" selection-end-column="0" />
+          <folding>
+            <element signature="imports" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1725,68 +1696,26 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/TestbedAutopilotInterface/SimulationSetup/SimulationEnvironment.java">
+    <entry file="file://$PROJECT_DIR$/errorLog.txt">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="189">
-          <caret line="10" column="17" lean-forward="false" selection-start-line="10" selection-start-column="17" selection-end-line="10" selection-end-column="17" />
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/TestbedAutopilotInterface/SimulationSetup/SimulationGen.java">
+    <entry file="file://$PROJECT_DIR$/replay_pid240.log">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2352">
-          <caret line="127" column="71" lean-forward="false" selection-start-line="127" selection-start-column="71" selection-end-line="127" selection-end-column="71" />
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/TestbedAutopilotInterface/Overseer/OverseerAirportMap.java">
+    <entry file="file://$PROJECT_DIR$/plotTrajectory.m">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="651">
-          <caret line="36" column="0" lean-forward="false" selection-start-line="36" selection-start-column="0" selection-end-line="36" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/internal/Autopilot/OverseerCommunication.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2016">
-          <caret line="105" column="35" lean-forward="false" selection-start-line="105" selection-start-column="35" selection-end-line="105" selection-end-column="35" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/internal/Autopilot/Controller.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="17535">
-          <caret line="907" column="14" lean-forward="false" selection-start-line="907" selection-start-column="14" selection-end-line="907" selection-end-column="14" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/internal/Autopilot/StabilizerController.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="483">
-          <caret line="29" column="34" lean-forward="false" selection-start-line="29" selection-start-column="34" selection-end-line="29" selection-end-column="34" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/internal/Autopilot/AirportNavigationController.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="29631">
-          <caret line="1519" column="8" lean-forward="false" selection-start-line="1519" selection-start-column="8" selection-end-line="1519" selection-end-column="8" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/TestbedAutopilotInterface/TestbedServer.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="347">
-          <caret line="616" column="52" lean-forward="false" selection-start-line="616" selection-start-column="52" selection-end-line="616" selection-end-column="52" />
+        <state relative-caret-position="294">
+          <caret line="14" column="25" lean-forward="true" selection-start-line="14" selection-start-column="25" selection-end-line="14" selection-end-column="25" />
           <folding />
         </state>
       </provider>

@@ -17,23 +17,23 @@ public class searchTests {
         //generate the airports
         OverseerAirportMap airportMap = generateAirportMap();
         Map<String, Vector> drones = generateDrones(airportMap);
-        Set<DeliveryPackage> packages = generateDeliveries(airportMap,0);
+        Set<PlannerDelivery> packages = generateDeliveries(airportMap,0);
 
         //print the airport map
         System.out.println(airportMap);
         System.out.println(airportMap);
         long startTime = System.currentTimeMillis();
         DeliveryPlanner planner = new DeliveryPlanner(packages, airportMap, drones);
-        Map<String, List<DeliveryPackage>> schedule = planner.call();
+        Map<String, List<PlannerDelivery>> schedule = planner.call();
         long endTime = System.currentTimeMillis();
         long totalTime = endTime - startTime;
         printSchedule(schedule, airportMap, drones);
 
         //add new deliveries
         startTime = System.currentTimeMillis();
-        Set<DeliveryPackage> newPackages = generateDeliveries(airportMap, 1);
+        Set<PlannerDelivery> newPackages = generateDeliveries(airportMap, 1);
         planner.addPackages(newPackages);
-        Map<String, List<DeliveryPackage>> addedSchedule = planner.call();
+        Map<String, List<PlannerDelivery>> addedSchedule = planner.call();
         endTime = System.currentTimeMillis();
         printSchedule(addedSchedule, airportMap, drones);
         totalTime = totalTime + (endTime - startTime);
@@ -41,13 +41,13 @@ public class searchTests {
 
     }
 
-    private void printSchedule(Map<String, List<DeliveryPackage>> schedule, OverseerAirportMap airportMap, Map<String, Vector> drones){
+    private void printSchedule(Map<String, List<PlannerDelivery>> schedule, OverseerAirportMap airportMap, Map<String, Vector> drones){
         for(String droneID : schedule.keySet()){
             System.out.println("Current Drone: " + droneID + ", Start: " + drones.get(droneID));
             System.out.println();
             //get the delivery list
-            List<DeliveryPackage> deliveryPackages = schedule.get(droneID);
-            for(DeliveryPackage deliveryPackage: deliveryPackages){
+            List<PlannerDelivery> deliveryPackages = schedule.get(droneID);
+            for(PlannerDelivery deliveryPackage: deliveryPackages){
                 //get the airport corresponding the delivery
                 int sourceID = deliveryPackage.getSourceAirport();
                 int destinationID = deliveryPackage.getDestinationAirport();
@@ -108,15 +108,15 @@ public class searchTests {
         return map;
     }
 
-    private static Set<DeliveryPackage> generateDeliveries(OverseerAirportMap airportMap, int modRes){
+    private static Set<PlannerDelivery> generateDeliveries(OverseerAirportMap airportMap, int modRes){
         //set one package for every airport
         //deliver the package to airport with index + 2 (mod nb airports)
         int nbOfAirports = airportMap.getNbOfAirports();
-        Set<DeliveryPackage> deliveries = new HashSet<>();
+        Set<PlannerDelivery> deliveries = new HashSet<>();
         for(int id = 0; id != nbOfAirports; id++){
             if(id%2 == modRes)
                 continue;
-            DeliveryPackage deliveryPackage = new DeliveryPackage(id, 0, (id + 2)%nbOfAirports, 0);
+            PlannerDelivery deliveryPackage = new DeliveryPackage(id, 0, (id + 2)%nbOfAirports, 0);
             deliveries.add(deliveryPackage);
         }
 

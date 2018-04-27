@@ -13,19 +13,19 @@ public interface PackageService {
      * Gets all the packages that need to be delivered by the package service
      * @return a Set of DeliveryPackages that need to be delivered
      */
-    Set<DeliveryPackage> getSubmittedPackages();
+    Set<WorldDelivery> getSubmittedWorldDeliveries();
 
     /**
      * Getter for all the packages that have an assigned drone
      * @return all the delivery packages that have a drone assigned to them
      */
-    Set<DeliveryPackage> getAssignedPackages();
+    Set<WorldDelivery> getAssignedWorldDeliveries();
 
     /**
      * Getter for all the packages that have not been delivered yet & should be in the future
      * @return the set of all packages that have not been delivered yet
      */
-    Set<DeliveryPackage> getAllUndeliveredPackages();
+    Set<WorldDelivery> getAllUndeliveredWorldDeliveries();
 
     /**
      * Getter for all the packages that have been assigned to a drone to be delivered but
@@ -33,5 +33,5 @@ public interface PackageService {
      * @return a set of packages that have not been delivered yet but have a delivery drone ID
      *         different from null
      */
-    Set<DeliveryPackage> getAllUndeliveredAssignedPackages();
+    Set<WorldDelivery> getAllUndeliveredAssignedWorldDeliveries();
 }

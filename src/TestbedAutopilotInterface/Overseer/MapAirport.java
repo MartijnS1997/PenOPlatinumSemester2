@@ -255,7 +255,7 @@ public class MapAirport {
 
     /**
      * Get the outer most point of runway zero in relative terms located at (0, Length)
-     * @return a vector containing the endpoint of runway number zero
+     * @return a vector containing the endpoint of runway number zero in the world axis system
      */
     public Vector getRunwayZeroEnd(){
         //first get the heading vector
@@ -271,7 +271,7 @@ public class MapAirport {
     }
     /**
      * Get the outer most point of runway one in relative terms located at (0, -Length)
-     * @return a vector containing the endpoint of runway number one
+     * @return a vector containing the endpoint of runway number one given in the world axis system
      */
     public Vector getRunwayOneEnd(){
         //first get the heading vector
