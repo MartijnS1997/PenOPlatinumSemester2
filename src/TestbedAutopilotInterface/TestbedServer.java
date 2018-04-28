@@ -276,8 +276,10 @@ public class TestbedServer implements Runnable {
 
     private void initGui() {
         ConcurrentLinkedQueue<GUIQueueElement> guiQueue = this.getRendererQueue();
+        int playbackSpeed = this.getPlaybackSpeed();
         //create the gui
         TestbedGUI gui = new TestbedGUI(guiQueue);
+        gui.setPlaybackSpeed(playbackSpeed);
         Thread guiThread = new Thread(gui);
         guiThread.start();
 
@@ -610,6 +612,44 @@ public class TestbedServer implements Runnable {
      * The queue used to communicate with the gui
      */
     private ConcurrentLinkedQueue<GUIQueueElement> rendererQueue = new ConcurrentLinkedQueue<>();
+
+    /**
+     * Getter for the playback speed of the simulation, this multiplier specifies how many times faster the
+     * simulation is displayed by the gui
+     * @return an integer with the playback speed multiplier
+     */
+    private int getPlaybackSpeed() {
+        return playbackSpeed;
+    }
+
+    /**
+     * Setter for the playback speed of the simulation
+     * this multiplier specifies how many times faster the gui must render the frames produced by the
+     * testbed --> used for long flights
+     * @param playbackSpeed the playback speed to set (integer > 0);
+     */
+    public void setPlaybackSpeed(int playbackSpeed) {
+        if(!isValidPlaybackSpeed(playbackSpeed)){
+            throw new IllegalArgumentException("Illegal playback speed, the playback speed should be a strictly positive integer");
+        }
+        this.playbackSpeed = playbackSpeed;
+    }
+
+    /**
+     * Checks if the provided playback speed is valid
+     * @param playbackSpeed the playback speed to check
+     * @return true if and only if the playback speed is a strictly positive integer
+     */
+    private static boolean isValidPlaybackSpeed(int playbackSpeed){
+        return playbackSpeed > 0;
+    }
+
+    /**
+     * The playback speed for the gui, specifies the multiplier for the playback of the simulation
+     * if the simulation is generated at 50ms per frame the gui renders with a timeframe of
+     * playbackSpeed * 50ms
+     */
+    private int playbackSpeed = 1;
 
     /**
      * The amount of frames the testbed may go ahead of the renderer before issuing a pause, this

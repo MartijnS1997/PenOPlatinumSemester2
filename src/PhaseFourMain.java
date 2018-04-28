@@ -40,6 +40,7 @@ public class PhaseFourMain {
         AutopilotOverseer overseer = SimulationGen.generateOverseer(environment);
         //create the server
         TestbedServer testbedServer = generator.generateTestbedServer(environment, overseer);
+        testbedServer.setPlaybackSpeed(playbackSpeed);
         //create the autopilot initializer
         AutopilotInitializer initializer = new AutopilotInitializer(host, tcpPort, nbDrones, overseer);
         //run server (will also initiate gui
@@ -178,6 +179,7 @@ public class PhaseFourMain {
     private static int stepsPerCycle = 50;
     private static int stepsPerSubCycle = 10;
     private static float timeStep = 0.001f;
+    private static int playbackSpeed = 1;
 
     private static int tcpPort = 4242;
     private static String host = "localhost";

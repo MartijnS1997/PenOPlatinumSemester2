@@ -110,11 +110,38 @@ public class TestbedGUI implements Runnable{
     }
 
     /**
+     * Reads from the queue at the given playback speed, this by reading the first frame and skipping getPlayBackSpeed() - 1
+     * frames afterwards. If the number of frames to be read is larger than the number of frames available in the queue
+     * all the elements available are read.
+     * @return a gui queue element containing the data for generating a single frame
+     */
+    private GUIQueueElement readFromQueue(){
+        int playbackSpeed = this.getPlaybackSpeed();
+        //read the first frame in the queue
+        GUIQueueElement firstFrame = readElementFromGUIQueue();
+        skipFrames(playbackSpeed-1);
+        return firstFrame;
+    }
+
+    /**
+     * Skips the specified amount of frames in the queue, if the number of frames to skip is greater than
+     * the number of elements in the queue all the elements in the queue are skipped, this prevents the gui from
+     * being blocked by the physics engine
+     * this is achieved by calling the readElementFromGUIQueue() one time
+     * @param nbFramesToSkip the number of frames to skip from the queue
+     */
+    private void skipFrames(int nbFramesToSkip){
+        for(int framesSkipped = 0; framesSkipped != nbFramesToSkip; framesSkipped++){
+            readElementFromGUIQueue();
+        }
+    }
+
+    /**
      * Reads an element from the queue. If the queue is empty returns the previously read element
      * as a placeholder until the next element will be simulated
      * @return a GUIQueue element containing the testbed results for rendering
      */
-    private GUIQueueElement readFromQueue(){
+    private GUIQueueElement readElementFromGUIQueue() {
         ConcurrentLinkedQueue<GUIQueueElement> queue = this.getGuiQueue();
         //peek in the queue, check if it is empty or not
         if(queue.isEmpty()){
@@ -152,6 +179,33 @@ public class TestbedGUI implements Runnable{
      */
     private ConcurrentLinkedQueue<GUIQueueElement> getGuiQueue() {
         return guiQueue;
+    }
+
+    /**
+     * Getter for the playback speed this is the speed multiplier of the playback of the generated frames by the
+     * testbed, the higher playback is simply achieved by dropping frames
+     * (eg if the playback speed is n, there are n frames taken from the queue but only one is displayed)
+     * @return the playback multiplier
+     */
+    private int getPlaybackSpeed() {
+        return playbackSpeed;
+    }
+
+    /**
+     * Setter for the playback speed, the multiplier for the playback of the frames
+     * @param playbackSpeed a positive integer indicating the playback multiplier
+     */
+    public void setPlaybackSpeed(int playbackSpeed) {
+        this.playbackSpeed = playbackSpeed;
+    }
+
+    /**
+     * Checks if the provided playback speed is a valid playback speed for the gui
+     * @param playbackSpeed the playback speed to check
+     * @return true if and only if the playback speed is a positive integer
+     */
+    private boolean isValidPlaybackSpeed(int playbackSpeed){
+        return playbackSpeed > 0;
     }
 
     /**
@@ -259,6 +313,14 @@ public class TestbedGUI implements Runnable{
      * The previously received Queue element
      */
     private GUIQueueElement prevGUIQueueElement;
+
+    /**
+     * The speed at which the received frames are played
+     * this increase in playback speed is achieved by dropping the specified amount of frames minus 1
+     * every time there are elements picked from the queue
+     * eg if playback speed is  n there are taken n frames from the queue and only one is displayed by the gui
+     */
+    private int playbackSpeed = 1;
 
     /**
      * The queue the Gui receives the queue elements from to render on screen

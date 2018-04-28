@@ -1,6 +1,5 @@
 package internal.Autopilot;
 
-import AutopilotInterfaces.AutopilotInputs;
 import AutopilotInterfaces.AutopilotInputs_v2;
 import AutopilotInterfaces.AutopilotOutputs;
 import TestbedAutopilotInterface.Overseer.MapAirport;
@@ -136,13 +135,9 @@ public class AirportNavigationController extends AutopilotFlightController {
         //initialize the path generator
         //we've fixed the destination airport as the true destination... for now
         MapAirport targetAirport = this.getDestinationAirport();
-        //take the other airport (not the one we're standing on)
-        MapAirport currentAirport = this.getAutopilot().getCommunicator().getAirportAtCurrentLocation();
         //generate the new path planner
         PathGenerator_v2 pathGenerator = new PathGenerator_v2(currentInputs, targetAirport);
         this.setPathGenerator(pathGenerator);
-        int nbOfTurns = pathGenerator.getTotalNbOfTurns();
-        this.setRemainingTurns(nbOfTurns);
     }
 
     /**
@@ -158,7 +153,6 @@ public class AirportNavigationController extends AutopilotFlightController {
         AutopilotTurn nextTurn = pathGenerator.getNextTurn();
         System.out.println("next turn specified: " + nextTurn.getTurnCenter() + "turning angle: " + nextTurn.getTurnAngle());
         //decrement the number of remaining turns
-        this.decrementRemainingTurns();
         return nextTurn;
 
 //        //TODO implement
@@ -642,38 +636,9 @@ public class AirportNavigationController extends AutopilotFlightController {
      * @return true if and only if the remaining turns have reached zero
      */
     private boolean finalTurnInitiated(){
-        int remainingTurns = this.getRemainingTurns();
+        PathGenerator_v2 pathGenerator = this.getPathGenerator();
+        int remainingTurns = pathGenerator.getNbOfRemainingTurns();
         return remainingTurns <= 0;
-    }
-
-    /**
-     * Getter for the number of turns the drone has yet to make after finishing the current state,
-     * if this counter reaches zero this means that the final turn is initialized and we should check if
-     * the final turn was finished
-     * @return the number of turns remaining
-     */
-    private int getRemainingTurns() {
-        return remainingTurns;
-    }
-
-    /**
-     * Setter for the remaining turns to make
-     * note: is only invoked after the path generator is reading generating the path, after that we may only decrement
-     * the number of turns to make
-     * @param remainingTurns the number of turns that the drones has to make to complete the navigation to the next airport
-     */
-    private void setRemainingTurns(int remainingTurns){
-        this.remainingTurns = remainingTurns;
-    }
-
-    /**
-     * Decrements the number of remaining turns to make
-     * if the counter reaches zero, extra control actions should be taken to see if the controller is finished doing
-     * its work
-     * --> should be called every time a turn is generated
-     */
-    private void decrementRemainingTurns() {
-        this.remainingTurns = remainingTurns;
     }
 
     /**
@@ -830,14 +795,6 @@ public class AirportNavigationController extends AutopilotFlightController {
      * also generates the control actions needed to fly between the turns
      */
     private ToNextTurnControl toNextTurnControl;
-
-    /**
-     * Getter for the number of turns that the drone has still to make upon exiting
-     * the current state, this variable counts down to zero
-     * if the counter reaches zero we should check if we've finished the final turn, if so the controller is finished
-     */
-    private int remainingTurns;
-
 
 
     /*
