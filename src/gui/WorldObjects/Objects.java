@@ -72,7 +72,7 @@ public class Objects {
 
     public static void renderAll() {
         updateGraphicsObjects();
-        getGraphics().renderWindows(getObjectSet(), getDroneGuiStates().get(getMainDroneID()));
+        getGraphics().renderWindows(getObjectSet(), getDroneGuiStates(), getMainDroneID());
     }
 
     /**

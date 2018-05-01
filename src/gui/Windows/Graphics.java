@@ -22,6 +22,7 @@ import gui.WorldObjects.Drone;
 import org.lwjgl.glfw.GLFWErrorCallback;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 public class Graphics {
@@ -29,6 +30,7 @@ public class Graphics {
 	public HashMap<String, Window> windows =  new HashMap<String, Window>();
 	private boolean terminated = false;
 	private TextWindow textWindow = null;
+	private MiniMap miniMap = null;
 	
 	public Graphics() {	
 		
@@ -57,25 +59,32 @@ public class Graphics {
 		
 		this.textWindow = TextWindow.createAndShowWindow(this, title, width, height, xPos, yPos, droneState);
 	}
+
+	public void makeMiniMap(String title, int width, int height, int xPos, int yPos, Map<String, DroneGuiState> droneStates, String mainDrone) {
+
+		this.miniMap = new MiniMap(title, width, height, xPos, yPos, droneStates, mainDrone);
+	}
 	
 	public void makeButtonWindow() {
 		ButtonWindow.createAndShowWindow(this);
 	}
 	
-	public void renderWindows(Set<GraphicsObject> renderObjects, DroneGuiState droneState) {
+	public void renderWindows(Set<GraphicsObject> renderObjects, Map<String, DroneGuiState> droneStates, String mainDrone) {
 		// Poll for window events. The key callback above will only be
 		// invoked during this call.
 		glfwPollEvents();
 		
 		if (this.textWindow != null)
-			this.textWindow.update(droneState);
+			this.textWindow.update(droneStates.get(mainDrone));
+		if (this.miniMap != null)
+			this.miniMap.update(droneStates);
 		
 		for (String key: windows.keySet()) {
 			Window window = windows.get(key);
 			
 			// Make the OpenGL context current
 			glfwMakeContextCurrent(window.getHandler());
-			window.render(renderObjects, droneState);
+			window.render(renderObjects, droneStates.get(mainDrone));
 			if (window.isTerminated()) {
 				windows.remove(key);
 				break;
@@ -107,6 +116,8 @@ public class Graphics {
 
 	// Terminate GLFW and free the error callback
 	public void terminate() {
+		if (miniMap != null)
+			miniMap.close();
 		glfwTerminate();
 		glfwSetErrorCallback(null).free();
 		this.terminated = true;
