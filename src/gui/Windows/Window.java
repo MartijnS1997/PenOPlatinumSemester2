@@ -334,7 +334,7 @@ public class Window {
 		Vector3f orientation = droneState.getOrientation().convertToVector3f().scale(camOrientation);
 		Vector3f dronePosition = droneState.getPosition().convertToVector3f();
         
-        Matrix3f transformationMatrix = Matrix3f.transformationMatrix(orientation).transpose();
+        Matrix3f transformationMatrix = Matrix3f.transformationMatrix(orientation.negate());
         
         Vector3f right = transformationMatrix.multiply(new Vector3f(1,0,0));
         Vector3f up = transformationMatrix.multiply(new Vector3f(0,1,0));
@@ -350,7 +350,7 @@ public class Window {
 		Vector3f orientation = droneState.getOrientation().convertToVector3f().scale(camOrientation).add(addOrientation);
 		Vector3f dronePosition = droneState.getPosition().convertToVector3f();
 
-		Matrix3f transformationMatrix = Matrix3f.transformationMatrix(orientation).transpose();
+		Matrix3f transformationMatrix = Matrix3f.transformationMatrix(orientation.negate());
 
 		Vector3f right = transformationMatrix.multiply(new Vector3f(1,0,0));
 		Vector3f up = transformationMatrix.multiply(new Vector3f(0,1,0));
