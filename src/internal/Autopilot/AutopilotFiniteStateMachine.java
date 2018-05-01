@@ -76,7 +76,7 @@ public class AutopilotFiniteStateMachine {
         switch(state){
             case INIT_FLIGHT:
                 //check if we've already passed a single iteration (needed to configure the autopilot)
-                return this.getInitController().hasReachedObjective(currentInputs, previousInputs) ? TAKEOFF : INIT_FLIGHT;
+                return this.getInitController().hasReachedObjective(currentInputs, previousInputs) ? TAXIING_TO_RUNWAY : INIT_FLIGHT;
             case TAKEOFF:
                 //get the takeoff controller
                 AutopilotTakeoffController takeoffController = this.getTakeoffController();
