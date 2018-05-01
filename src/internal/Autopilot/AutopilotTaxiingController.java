@@ -1,6 +1,8 @@
 package internal.Autopilot;
 
 import AutopilotInterfaces.*;
+import TestbedAutopilotInterface.Overseer.AutopilotDelivery;
+import TestbedAutopilotInterface.Overseer.MapAirport;
 import com.sun.istack.internal.Nullable;
 import internal.Helper.Vector;
 import internal.Physics.PhysXEngine;
@@ -23,9 +25,9 @@ public class AutopilotTaxiingController extends Controller {
         //set the current inputs
         //this.updateInputs(inputs);
         //set the current outputs
-        ControlOutputs outputs = new ControlOutputs();
+        ControlOutputs outputs = new ControlOutputs(getStandardOutputs());
 
-        this.getControlActionsActiveState(outputs);
+        this.getControlActionsActiveState(outputs, currentInputs, previousInputs);
         //maybe add AOA?
 
         return outputs;
@@ -39,23 +41,85 @@ public class AutopilotTaxiingController extends Controller {
      *                    if null the orientation doesn't matter
      */
     public void setTarget(Vector location, @Nullable Vector orientation ){
-        //TODO implement
+        this.target = location;
+        if (orientation != null)
+            this.wantedOrientation = orientation;
     }
 
-    private void getControlActionsActiveState(ControlOutputs outputs){
+    private void getControlActionsActiveState(ControlOutputs outputs, AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 prevInputs){
         TaxiingState state = this.getTaxiingState();
         switch (state){
             case INIT_TURN:
-                initialTurn(outputs);
+                initialTurn(outputs, currentInputs, prevInputs);
                 break;
             case FULL_BRAKE:
-                fullBrake(outputs);
+                fullBrake(outputs, currentInputs, prevInputs);
                 break;
             case MOVING_TO_TARGET:
-                moveToTarget(outputs);
+                moveToTarget(outputs, currentInputs, prevInputs);
+                break;
+            case TURNING:
+                turnToCorrectOrientation(outputs, currentInputs, prevInputs);
                 break;
         }
     }
+
+    public void stayWithinAirportBorders(Vector[] airportBorders, ControlOutputs outputs, AutopilotInputs_v2 inputs){
+        Vector topLeft = airportBorders[0];
+        Vector topRight = airportBorders[1];
+        Vector bottomLeft = airportBorders[2];
+        Vector bottomRight = airportBorders[3];
+
+        Vector position = Controller.extractPosition(inputs);
+        float maxBrake = this.getConfig().getRMax();
+
+
+        float x = position.getxValue();
+        float z = position.getzValue();
+
+        float x1 = topLeft.getxValue();
+        float z1 = topLeft.getzValue();
+        float x2 = bottomLeft.getxValue();
+        float z2 = bottomLeft.getzValue();
+
+        float x3 = topRight.getxValue();
+        float z3 = topRight.getzValue();
+        float x4 = bottomRight.getxValue();
+        float z4 = bottomRight.getzValue();
+
+        float d;
+
+        //check on what side of a line A(x1,y1) & B(x2,y2) a point (x,y) is:
+        //d = (x-x1)(y2-y1)-(y-y1)(x2-x1)
+        //d < 0 = left, d > 0 right
+        if (topLeft.getxValue() < topRight.getxValue()){
+            d = (x-(x1+AIRPORT_BOUND_BUFFER))*(z2-z1) - (z-z1)*((x2+AIRPORT_BOUND_BUFFER)-(x1+AIRPORT_BOUND_BUFFER));
+            if (d < 0){
+                outputs.setRightBrakeForce(maxBrake);
+            }
+
+            d = (x-(x3-AIRPORT_BOUND_BUFFER))*(z4-z3) - (z-z3)*((x4-AIRPORT_BOUND_BUFFER)-(x3-AIRPORT_BOUND_BUFFER));
+            if (d > 0){
+                outputs.setLeftBrakeForce(maxBrake);
+            }
+        }
+        else{
+            d = (x-(x1-AIRPORT_BOUND_BUFFER))*(z2-z1) - (z-z1)*((x2-AIRPORT_BOUND_BUFFER)-(x1-AIRPORT_BOUND_BUFFER));
+            if (d > 0){
+                outputs.setRightBrakeForce(maxBrake);
+            }
+
+            d = (x-(x3+AIRPORT_BOUND_BUFFER))*(z4-z3) - (z-z3)*((x4+AIRPORT_BOUND_BUFFER)-(x3+AIRPORT_BOUND_BUFFER));
+            if (d < 0){
+                outputs.setLeftBrakeForce(maxBrake);
+            }
+        }
+    }
+
+    private final static float AIRPORT_BOUND_BUFFER = 2f;
+
+
+
 
     /*
     Initial turn constants
@@ -72,21 +136,21 @@ public class AutopilotTaxiingController extends Controller {
      * Getter for the control actions for the phase where we take out initial turn
      * @param outputs the outputs to write the control actions to
      */
-    private void initialTurn(ControlOutputs outputs){
+    private void initialTurn(ControlOutputs outputs, AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 prevInputs){
 
         Vector target = this.getTarget();
-        AutopilotInputs_v2 inputs = null;// this.getCurrentInputs();
+        //AutopilotInputs_v2 inputs = null;// this.getCurrentInputs();
         float maxBrake = this.getConfig().getRMax();
         float maxThrust = this.getConfig().getMaxThrust();
         //calculate the angle between the heading vector and the target vector
-        float angle = angleToTarget(target, inputs);
+        float angle = angleToTarget(target, currentInputs);
 //        System.out.println("Angle between heading and diff: " + angle);
 //        System.out.println();
         //check if we've reached our target
         if(checkHasFinishedTurn(angle)){
             //invoke the next controller
             this.setTaxiingState(TaxiingState.FULL_BRAKE);
-            this.fullBrake(outputs);
+            this.fullBrake(outputs, currentInputs, prevInputs);
             return;
         }
         //if not, continue normal procedure
@@ -129,20 +193,29 @@ public class AutopilotTaxiingController extends Controller {
      * The controller used to brake to our full capabilities... nothing special, just braking
      * @param outputs the outputs to write our control actions to
      */
-    private void fullBrake(ControlOutputs outputs){
+    private void fullBrake(ControlOutputs outputs, AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 prevInputs){
 //        System.out.println("Entered full brake ##########");
         //we just brake to the full extent
         float maxBrake = this.getConfig().getRMax();
         //check if we've come to a standstill && reached the target
-        if(droneInStandstill() && targetReached( null /*this.getCurrentInputs()*/)){
+        if(droneInStandstill(currentInputs, prevInputs) && targetReached( currentInputs /*this.getCurrentInputs()*/)){
             //do not change the inputs, we're finished
             return;
         }
+
+        //if we've only came to a standstill, but don't have to correct orientation
+        if(droneInStandstill(currentInputs, prevInputs)){
+            this.setTaxiingState(TaxiingState.TURNING);
+            //invoke the turning to target controller
+            this.turnToCorrectOrientation(outputs, currentInputs, prevInputs);
+            return;
+        }
+
         //if we've only came to a standstill, but we didn't reach anything, call the move controller
-        if(droneInStandstill()){
+        if(droneInStandstill(currentInputs, prevInputs)){
             this.setTaxiingState(TaxiingState.MOVING_TO_TARGET);
             //invoke the moving to target controller
-            this.moveToTarget(outputs);
+            this.moveToTarget(outputs, currentInputs, prevInputs);
             return;
         }
         //doing full brake
@@ -158,9 +231,9 @@ public class AutopilotTaxiingController extends Controller {
      * Checks if the drone came to an (approximate) standstill
      * @return true if the total velocity of the drone is <= STANDSTILL_VELOCITY
      */
-    private boolean droneInStandstill(){
-        AutopilotInputs_v2 currentInputs = null; //this.getCurrentInputs();
-        AutopilotInputs_v2 prevInputs = null; //this.getPreviousInputs();
+    private boolean droneInStandstill(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 prevInputs){
+        //AutopilotInputs_v2 currentInputs = null; //this.getCurrentInputs();
+        //AutopilotInputs_v2 prevInputs = null; //this.getPreviousInputs();
 
         //approx the velocity
         Vector approxVelocity = getVelocityApprox(prevInputs, currentInputs);
@@ -178,20 +251,20 @@ public class AutopilotTaxiingController extends Controller {
   Moving to target constants
    */
 
-     // reference is 5m/s
-    private final static float REACHING_DISTANCE = 10f; // the distance we need to enter before we can call it a day
-                                                        // also added a bit of padding for the brakes
+    // reference is 5m/s
+    public final static float REACHING_DISTANCE = 5f; // the distance we need to enter before we can call it a day
+    // also added a bit of padding for the brakes
 
-    private void moveToTarget(ControlOutputs outputs){
+    private void moveToTarget(ControlOutputs outputs, AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 prevInputs){
 
         //acquire the current inputs (needed for angle calculation)
-        AutopilotInputs_v2 currentInputs = null; //this.getCurrentInputs();
-        AutopilotInputs_v2 prevInputs = null; // this.getPreviousInputs();
+        //AutopilotInputs_v2 currentInputs = null; //this.getCurrentInputs();
+        //AutopilotInputs_v2 prevInputs = null; // this.getPreviousInputs();
         //check if we are done with moving
         if(targetReached(currentInputs)){
             //if so, change the state and call the brake method, return afterwards
             this.setTaxiingState(TaxiingState.FULL_BRAKE);
-            this.fullBrake(outputs);
+            this.fullBrake(outputs, currentInputs, prevInputs);
             return;
         }
 //        System.out.println("position: " + Controller.extractPosition(currentInputs));
@@ -211,6 +284,110 @@ public class AutopilotTaxiingController extends Controller {
 
         return position.distanceBetween(target) <=  REACHING_DISTANCE;
     }
+
+
+    private void turnToCorrectOrientation(ControlOutputs outputs, AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 prevInputs){
+
+        //check if we are done with turning
+        if(orientationReached(currentInputs)){
+            //if so, change the state and call the brake method, return afterwards
+            this.setTaxiingState(TaxiingState.FULL_BRAKE);
+            this.fullBrake(outputs, currentInputs, prevInputs);
+            return;
+        }
+//        System.out.println("position: " + Controller.extractPosition(currentInputs));
+        brakeTurningControls(outputs, currentInputs, prevInputs);
+        ///cruiseControl(outputs, prevInputs,currentInputs);
+
+
+    }
+
+    private boolean orientationReached(AutopilotInputs_v2 inputs){
+        Vector orientation = Controller.extractOrientation(inputs);
+
+        return Math.abs(orientation.getAngleBetween(getWantedOrientation())) <= ORIENTATION_ERROR;
+    }
+
+    private Vector wantedOrientation;
+    public Vector getWantedOrientation(){
+        return wantedOrientation;
+    }
+
+    //cosinus(15/280) AirportWidth/AirportLength
+    public static final float ORIENTATION_ERROR = (float) PI/120;
+
+
+    public void gateTaxiing(AutopilotInputs_v2 inputs, AutopilotDelivery packageToDeliver){
+        //airport to go to
+        int goToAirport;
+        //gate to go to
+        int goToGate;
+        //position to taxi to
+        Vector taxiTo = new Vector();
+
+        //if the package hasn't been picked up yet, the drone has to taxi to the correct gate
+        if (!packageToDeliver.isPickedUp()){
+            goToAirport = packageToDeliver.getSourceAirport();
+            goToGate = packageToDeliver.getSourceAirportGate();
+
+            //go to the correct gate to get the package
+            if (goToGate == 0) taxiTo = getAutopilot().getCommunicator().getAirportByID(goToAirport).getGateZeroPosition();
+            if (goToGate == 1) taxiTo = getAutopilot().getCommunicator().getAirportByID(goToAirport).getGateOnePosition();
+
+            //the drones current position
+            Vector location = Controller.extractPosition(inputs);
+
+            //the distance to between the drone and the gate
+            float distanceToGate = this.getAutopilot().getCommunicator().getAirportAtCurrentLocation().distanceToGate(goToGate,location);
+
+            //if the distance to the gate is smaller than the reaching distance, the package has been picked up
+            // if (distanceToGate < AutopilotTaxiingController.REACHING_DISTANCE) packageToDeliver.setHasBeenPickedUp();
+        }
+        //if the package has already been picked up, the drone has to taxi to the correct gate to drop the package off
+        else{
+            goToAirport = packageToDeliver.getDestinationAirport();
+            goToGate = packageToDeliver.getDestinationAirportGate();
+
+            //go to the correct destination
+            if (goToGate == 0) taxiTo = getAutopilot().getCommunicator().getAirportByID(goToAirport).getGateZeroPosition();
+            if (goToGate == 1) taxiTo = getAutopilot().getCommunicator().getAirportByID(goToAirport).getGateOnePosition();
+        }
+
+        //set the destination of where the drone has to go to, orientation doesn't matter
+        setTarget(taxiTo, null);
+
+
+    }
+
+    public void runwayTaxiing(AutopilotInputs_v2 inputs){
+        Vector taxiTo;
+        Vector takeOffDirection;
+        //the airport where the drone is currently at
+        MapAirport currentAirport = this.getAutopilot().getCommunicator().getAirportAtCurrentLocation();
+
+        //current orientation of the drone
+        Vector orientation = Controller.extractOrientation(inputs);
+        //the orientation of both runways
+        Vector gateZeroOrientation = currentAirport.getRunwayZeroTakeoffDirection();
+        Vector gateOneOrientation = currentAirport.getRunwayOneTakeoffDirection();
+
+
+        //go to the gate for which the drone has to turn the least and is therefore the easiest to reach
+        if (Math.abs(orientation.getAngleBetween(gateZeroOrientation)) <  Math.abs(orientation.getAngleBetween(gateOneOrientation))) {
+            taxiTo = currentAirport.getRunwayZeroEnd();
+            takeOffDirection = currentAirport.getRunwayZeroTakeoffDirection();
+        }
+        else {
+            taxiTo = currentAirport.getRunwayOneEnd();
+            takeOffDirection = currentAirport.getRunwayOneTakeoffDirection();
+        }
+
+        //set the destination of the drone and the correct orientation so it can take off from the runway
+        setTarget(taxiTo, takeOffDirection);
+
+    }
+
+
 
     /**
      * The controller that regulates the velocity during the taxiing phase of the drone
@@ -250,7 +427,10 @@ public class AutopilotTaxiingController extends Controller {
             setBrakeVector(outputs, brakeVector);
         }
 
-
+        //the borders of the Airport we're currently in
+        Vector[] airportBorders = getAutopilot().getCommunicator().getAirportAtCurrentLocation().getAirportBorders();
+        //make sure you always stay within the borders of the Airport
+        stayWithinAirportBorders(airportBorders,outputs,currentInputs);
 
         // we are finished
 //        System.out.println(outputs);
@@ -454,7 +634,8 @@ public class AutopilotTaxiingController extends Controller {
 
     @Override
     public boolean hasReachedObjective(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs) {
-        return false;
+        return targetReached(currentInputs);
+
     }
 
 //    @Override
@@ -564,8 +745,71 @@ public class AutopilotTaxiingController extends Controller {
 
 
     private enum TaxiingState {
-        INIT_TURN, FULL_BRAKE, MOVING_TO_TARGET
+        INIT_TURN, FULL_BRAKE, MOVING_TO_TARGET, TURNING
     }
+
+
+
+
+    /**
+     * Main wing configuration
+     * --> standard main, the usual inclination of the main wings
+     * --> max inclination delta, the maximum deviation from the standard inclination of the main wings
+     */
+    private static float STANDARD_MAIN = (float) (5*PI/180);
+    private static float MAX_MAIN_DELTA = (float) (2*PI/180);
+
+    /**
+     * Horizontal stabilizer configuration
+     * --> standard horizontal, the usual inclination of the stabilizer
+     * --> max horizontal, the maximum horizontal stabilizer inclination
+     */
+    private static float STANDARD_HORIZONTAL = 0f;
+    private static float MAX_HORIZONTAL = (float) (8f*PI/180f);
+
+    /**
+     * Vertical stabilizer configuration
+     * --> standard vertical, the usual vertical inclination
+     * --> max vertical, the maximum vertical stabilizer inclination
+     */
+    private static float STANDARD_VERTICAL = 0f;
+    private static float MAX_VERTICAL = 0f;
+
+    public StandardOutputs getStandardOutputs() {
+        return standardOutputs;
+    }
+
+    /**
+     * The standard outputs for this controller, is used to initialize the control outputs of the drone
+     */
+    private StandardOutputs standardOutputs = new StandardOutputs() {
+        @Override
+        public float getStandardRightMainInclination() {
+            return STANDARD_MAIN;
+        }
+
+        @Override
+        public float getStandardLeftMainInclination() {
+            return STANDARD_MAIN;
+        }
+
+        @Override
+        public float getStandardHorizontalStabilizerInclination() {
+            return STANDARD_HORIZONTAL;
+        }
+
+        @Override
+        public float getStandardVerticalStabilizerInclination() {
+            return STANDARD_VERTICAL;
+        }
+
+        @Override
+        public float getStandardThrust() {
+            return 0;
+        }
+    };
+
+
 }
 
 //  /**
