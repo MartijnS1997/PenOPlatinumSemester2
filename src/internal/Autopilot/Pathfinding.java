@@ -57,8 +57,8 @@ public class Pathfinding {
 //		PriorityQueue<N> positionQueue = new PriorityQueue<N>(new Comparator<N>(){
 //			@Override
 //			public int compare(N o1, N o2) {
-//				int cX = o1.getPosition()[0], cY = o1.getPosition()[1], cZ = o1.getPosition()[2];
-//				int dX = o2.getPosition()[0], dY = o2.getPosition()[1], dZ = o2.getPosition()[2];
+//				int cX = o1.getCurrentPosition()[0], cY = o1.getCurrentPosition()[1], cZ = o1.getCurrentPosition()[2];
+//				int dX = o2.getCurrentPosition()[0], dY = o2.getCurrentPosition()[1], dZ = o2.getCurrentPosition()[2];
 //
 //				double distance1 = Math.sqrt(Math.pow((cX-end[0]),2) + Math.pow((cY-end[1]),2) + Math.pow((cZ-end[2]),2));
 //				double distance2 = Math.sqrt(Math.pow((dX-end[0]),2) + Math.pow((dY-end[1]),2) + Math.pow((dZ-end[2]),2));
@@ -194,7 +194,7 @@ public class Pathfinding {
 //			if (! (obj instanceof N))
 //				return false;
 //			N node = (N)obj;
-//			return (position[0] == node.getPosition()[0] && position[1] == node.getPosition()[1] && position[2] == node.getPosition()[2]);
+//			return (position[0] == node.getCurrentPosition()[0] && position[1] == node.getCurrentPosition()[1] && position[2] == node.getCurrentPosition()[2]);
 //		}
 //
 //	}

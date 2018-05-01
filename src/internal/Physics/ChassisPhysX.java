@@ -65,8 +65,8 @@ public class ChassisPhysX {
         Vector scaledNonChassisForces = nonChassisForces.scalarMult(nbOfActiveTyres);
 //        System.out.println("Orientation: " + state.getOrientation().scalarMult((float) (180/PI)));
 //        System.out.println("Rotation" + state.getRotation().scalarMult((float) (180/PI)));
-//        System.out.println("Position: " + state.getPosition());
-//        System.out.println("Velocity: " + state.getVelocity());
+//        System.out.println("Position: " + state.getCurrentPosition());
+//        System.out.println("Velocity: " + state.getPreviousPosition());
         //first calculate the known forces exerted by the tires
         TyrePhysX frontTyre = this.getFrontTyre();
 //        System.out.println("front: ");

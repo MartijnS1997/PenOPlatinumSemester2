@@ -254,7 +254,7 @@ public class TestbedMain implements Runnable{
 
         //create the output object
         autopilotInputs = new MainAutopilotInputs(this.getDrone(), cameraImage, this.getSimulationTime());
-        //System.out.println("Dronepos: " + this.getDrone().getPosition() + "; elapsed_time: " + this.getSimulationTime());
+        //System.out.println("Dronepos: " + this.getDrone().getCurrentPosition() + "; elapsed_time: " + this.getSimulationTime());
         return autopilotInputs;
     }
 

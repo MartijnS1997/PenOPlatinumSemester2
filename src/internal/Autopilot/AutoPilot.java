@@ -114,12 +114,12 @@ public class AutoPilot implements Autopilot_v2{
 		this.setCurrentInputs(inputs);
 		//get the overseer
 		OverseerCommunication communicator = this.getCommunicator();
-		communicator.overseerCommunication();
+		communicator.communicateWithOverseer();
 		//return this.getSelector().getControlActions(inputs);
 
 		//get the outputs from the state machine
-		return this.getStateMachine().getMachineOutput(inputs);
-
+		AutopilotOutputs outputs = this.getStateMachine().getMachineOutput(inputs);
+		return outputs;
 	}
 
 
@@ -311,7 +311,7 @@ public class AutoPilot implements Autopilot_v2{
 	 * package delivery system
 	 * @return the state machine used to guide the autopilot
 	 */
-	private AutopilotFiniteStateMachine getStateMachine(){
+	protected AutopilotFiniteStateMachine getStateMachine(){
 		return this.stateMachine;
 	}
 

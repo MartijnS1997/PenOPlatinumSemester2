@@ -6,6 +6,7 @@ import TestbedAutopilotInterface.Overseer.MapAirport;
 import internal.Helper.Vector;
 import internal.Physics.PhysXEngine;
 
+import javax.sound.midi.SysexMessage;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -79,8 +80,7 @@ public class AirportNavigationController extends AutopilotFlightController {
     public void reset(){
         this.navigatorState = NavigatorState.INIT;
         this.pathGenerator = null;
-        this.sourceAirport = null;
-        this.destinationAirport = null;
+        this.targetAirport = null;
         this.turnPhysX = null;
     }
 
@@ -128,16 +128,18 @@ public class AirportNavigationController extends AutopilotFlightController {
      * @param previousInputs the inputs previously received from the testbed
      */
     private void initializeNavigation(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs){
-        //TODO implement proper sequence based on package state, for now dummy airport
         PhysXEngine.TurnPhysX turnPhysX = this.getAutopilot().getPhysXEngine().createTurnPhysics();
         //save the turn physX
         this.setTurnPhysX(turnPhysX);
         //initialize the path generator
         //we've fixed the destination airport as the true destination... for now
-        MapAirport targetAirport = this.getDestinationAirport();
+        MapAirport targetAirport = this.getTargetAirport();
+        float cruisingAltitude = this.getCruisingAltitude();
+        System.out.println(targetAirport);
         //generate the new path planner
-        PathGenerator_v2 pathGenerator = new PathGenerator_v2(currentInputs, targetAirport);
+        PathGenerator_v2 pathGenerator = new PathGenerator_v2(currentInputs, targetAirport, cruisingAltitude);
         this.setPathGenerator(pathGenerator);
+        this.setFlightPath(pathGenerator.getFlightPath());
     }
 
     /**
@@ -498,40 +500,21 @@ public class AirportNavigationController extends AutopilotFlightController {
 
 
     /**
-     * Getter for the destination airport for this navigation, this is the airport the controller has to guide
-     * the drone to
-     * note this destination airport should be re initiated every flight
-     * @return a map airport containing all the information necessary for path generation (target)
+     * Getter for the target airport this is the airport to which the drone has to fly
+     * this variable is set by the finite state machine
+     * @return the target airport, this is the airport to which the drone has to fly
      */
-    private MapAirport getDestinationAirport() {
-        return destinationAirport;
+    private MapAirport getTargetAirport() {
+        return targetAirport;
     }
 
     /**
-     * Setter for the destination airport of the navigation
-     * --> call this method every package delivery
-     * @param destinationAirport the destination airport data
-     * note: needs to be called by the autopilot finite state machine every time a new package is delivered (airports change)
+     * Setter for the target airport, this is the airport to which the drone has to fly. The target is set by the
+     * autopilot finite state machine
+     * @param targetAirport the airport that is the target of this flight
      */
-    public void setDestinationAirport(MapAirport destinationAirport) {
-        this.destinationAirport = destinationAirport;
-    }
-
-    /**
-     * Getter for the source airport of the delivery, this is the airport where from the drone is coming
-     * @return the source airport
-     */
-    private MapAirport getSourceAirport() {
-        return sourceAirport;
-    }
-
-    /**
-     * Setter for the source airport, this is the airport the drone is coming from (takeoff)
-     * @param sourceAirport the source airport
-     * note: must be called by the autopilot finite state machine every time a new package is delivered (airports change)
-     */
-    public void setSourceAirport(MapAirport sourceAirport) {
-        this.sourceAirport = sourceAirport;
+    public void setTargetAirport(MapAirport targetAirport) {
+        this.targetAirport = targetAirport;
     }
 
     /**
@@ -742,6 +725,22 @@ public class AirportNavigationController extends AutopilotFlightController {
     }
 
     /**
+     * Getter for the flight path that the autopilot will traverse to reach the destination airport
+     * @return the total flight path
+     */
+    public FlightPath getFlightPath() {
+        return flightPath;
+    }
+
+    /**
+     * Setter for the flight path that will be traversed by the drone to reach the next airport
+     * @param flightPath the flight path of the drone
+     */
+    private void setFlightPath(FlightPath flightPath) {
+        this.flightPath = flightPath;
+    }
+
+    /**
      * The state of the airport navigator, used to configure the finite state machine
      * describing the behavior of the airport navigation
      * --> 1. start turning
@@ -757,16 +756,10 @@ public class AirportNavigationController extends AutopilotFlightController {
     private PathGenerator_v2 pathGenerator;
 
     /**
-     * The airport the drone has to fly to for delivering the package, this variable is used for initializing
-     * the path generator
+     * Getter for the target airport, this is the airport to which the drone has to fly, is set by the finite state machine
+     * which decides in which phase the package is in
      */
-    private MapAirport destinationAirport;
-
-    /**
-     * The source airport, the airport the drone comes from (where the takeoff occurred)
-     */
-    private MapAirport sourceAirport;
-
+    private MapAirport targetAirport;
 
     /**
      * The cruising altitude assigned to the drone by the overseer, this is the reference altitude for the
@@ -795,6 +788,12 @@ public class AirportNavigationController extends AutopilotFlightController {
      * also generates the control actions needed to fly between the turns
      */
     private ToNextTurnControl toNextTurnControl;
+
+    /**
+     * The flight path generated by the path generator, this is the total path generated by the
+     * path generator, is used for collision detection
+     */
+    private FlightPath flightPath;
 
 
     /*

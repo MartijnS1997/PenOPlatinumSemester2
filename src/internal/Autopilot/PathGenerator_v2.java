@@ -15,7 +15,7 @@ import static java.lang.Math.cos;
 import static java.lang.Math.sin;
 
 /**
- * Created by Martijn on 25/04/2018.
+ * Created by Martijn & Anthony Rathé on 25/04/2018.
  * created for testing purposes
  */
 public class PathGenerator_v2{

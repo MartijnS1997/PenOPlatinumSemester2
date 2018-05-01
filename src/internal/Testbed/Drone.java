@@ -577,6 +577,8 @@ public class Drone implements Callable<Void> {
 			throw new IllegalStateException("The drone does not match the package");
 		}
 		//if it has the same ID, go ahead and transport it
+		packageToDeliver.setPickedUp();
+		System.out.println("package picked up");
 		this.deliveryPackage = packageToDeliver;
 	}
 
@@ -1222,7 +1224,7 @@ public class Drone implements Callable<Void> {
 //	 * @return a vector containing the velocity of the next time step
 //	 */
 //	public Vector getNextVelocity(float deltaTime, Vector acceleration){
-//		Vector currentVelocity = this.getVelocity();
+//		Vector currentVelocity = this.getPreviousPosition();
 //		Vector deltaVelocity = acceleration.scalarMult(deltaTime);
 //		return currentVelocity.vectorSum(deltaVelocity);
 //
@@ -1236,8 +1238,8 @@ public class Drone implements Callable<Void> {
 //	 * @return a vector containing the position of the next time step
 //	 */
 //	public Vector getNextPosition(float deltaTime, Vector acceleration){
-//		Vector currentPosition = this.getPosition();
-//		Vector currentVelocity = this.getVelocity();
+//		Vector currentPosition = this.getCurrentPosition();
+//		Vector currentVelocity = this.getPreviousPosition();
 //		Vector deltaPosVelocityPart = currentVelocity.scalarMult(deltaTime);
 //		Vector deltaPosAccelerationPart = acceleration.scalarMult(deltaTime*deltaTime/2.0f);
 //
@@ -1590,7 +1592,7 @@ public class Drone implements Callable<Void> {
 //	    	DataOutputStream dataOutputStream =
 //	                new DataOutputStream(new FileOutputStream(dataStreamLocationInputs));
 //
-//	    	Vector pos = getPosition();
+//	    	Vector pos = getCurrentPosition();
 //	    	Vector posOnWorld = droneOnWorld(pos);
 //	    	float x = posOnWorld.getxValue();
 //	    	float y = posOnWorld.getyValue();
