@@ -26,6 +26,8 @@ public class AutopilotLandingController extends Controller {
         // implement constructor
         super(autopilot);
         setDescendController(new DescendController(autopilot));
+        setSoftDescendController(new SoftDescendController(autopilot));
+        setBrakeController(new BrakeController(autopilot));
 //        this.getVelocityPID().setSetPoint(this.referenceVelocity);
 //        this.getOrientationPID().setSetPoint(this.referenceOrientation);
 //        this.getAltitudePID().setSetPoint(this.referenceAltitude);
@@ -42,51 +44,57 @@ public class AutopilotLandingController extends Controller {
      */
     @Override
     public boolean hasReachedObjective(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs) {
-        return (this.getVelocityApprox(currentInputs, previousInputs).getSize() < GROUND_SPEED);
+        return isObjectiveReached();
     }
+    private boolean objectiveReached = false;
 
-    /**
+    public boolean isObjectiveReached() {
+		return objectiveReached;
+	}
+
+	public void setObjectiveReached(boolean objectiveReached) {
+		this.objectiveReached = objectiveReached;
+	}
+
+	/**
      * Generates the control actions for the autopilot
      *
      * @param inputs the inputs of the autopilot
      * @return the control actions
      */
     @Override
-    public AutopilotOutputs getControlActions(AutopilotInputs_v2 inputs, AutopilotInputs_v2 previousInputs) {
+    public AutopilotOutputs getControlActions(AutopilotInputs_v2 inputs, AutopilotInputs_v2 prevInputs) {
 
         if(this.isFirstControlCall()){
             this.setStartElapsedTime(inputs);
             this.setFirstControlCall();
         }
 
-        LandingPhases landingPhase = this.getCurrentLandingPhase(inputs, previousInputs);
-        ControlOutputs outputs = new ControlOutputs();
+        //LandingPhases landingPhase = this.getCurrentLandingPhase(inputs, previousInputs);
+       // ControlOutputs outputs = new ControlOutputs();
 //        System.out.println("Current velocity: " + this.getVelocityApprox(prevInputs, getCurrentInputs()));
 
-        switch (landingPhase){
-	        case SLOW_DOWN:
-//	        	System.out.println("Slowdown");
-	        	this.slowDown(outputs);
-	        	break;
-            case STABILIZE:
-                this.stabilizeFlight(outputs, inputs, previousInputs);
-//                System.out.println("stabilize");
-                break;
-            case RAPID_DESCEND:
-                this.getRapidDescendControls(outputs, inputs, previousInputs);
-//                System.out.println("rapidDescend");
-                break;
-            case SOFT_DESCEND:
-//                System.out.println("soft descend");
-                this.getSoftDescendControls(outputs, inputs, previousInputs);
-                break;
-            case BRAKE:
-            	this.brake(outputs,inputs, previousInputs);
-//            	System.out.println("Brake");
-            	break;
-        }
-        float resultMargin = 0f;
-        angleOfAttackControl(resultMargin, outputs, inputs,  previousInputs);
+//        switch (landingPhase){
+//
+//            case RAPID_DESCEND:
+//                this.getRapidDescendControls(outputs, inputs, previousInputs);
+////                System.out.println("rapidDescend");
+//                break;
+//            case SOFT_DESCEND:
+////                System.out.println("soft descend");
+//                this.getSoftDescendControls(outputs, inputs, previousInputs);
+//                break;
+//            case BRAKE:
+//            	this.brake(outputs,inputs, previousInputs);
+////            	System.out.println("Brake");
+//            	break;
+//            case DONE: 
+//            	setObjectiveReached(true);
+//            	break;
+//        }
+        LandingPhases landingPhase = toNextState(inputs, prevInputs);
+        LandingController controller = getStateController(landingPhase);
+        AutopilotOutputs outputs = controller.getControlActions(inputs, prevInputs);
         // System.out.println(Controller.extractPosition(inputs).getyValue());
 
         //System.out.println(outputs);
@@ -99,15 +107,6 @@ public class AutopilotLandingController extends Controller {
 	private LandingPhases getCurrentLandingPhase(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 prevInputs){
         //check if the rapid descend phase was started
         if(!this.isHasStartedRapidDescend()){
-            //check if the flight is stable
-        	if(!slowEnough(currentInputs,prevInputs)){
-        		return LandingPhases.SLOW_DOWN;
-        	}
-        	else if(!mayInitializeLanding(currentInputs)){
-                //if not, stabilize
-                return LandingPhases.STABILIZE;
-            }
-            //System.out.println("Drone is stabilized");
             this.setHasStartedRapidDescend();
             this.configureSoftDescendHeight(currentInputs);
             return LandingPhases.RAPID_DESCEND;
@@ -148,22 +147,19 @@ public class AutopilotLandingController extends Controller {
         switch(state){
             case RAPID_DESCEND:
                 //check if we've already passed a single iteration (needed to configure the autopilot)
-                return descendController.hasReachedObjective(currentInputs,prevInputs) ? LandingPhases.SOFT_DESCEND : LandingPhases.RAPID_DESCEND;
+                return descendController.hasReachedGoal(currentInputs,prevInputs) ? LandingPhases.SOFT_DESCEND : LandingPhases.RAPID_DESCEND;
             case SOFT_DESCEND:
                 //get the takeoff controller
-                AutopilotTakeoffController takeoffController = this.getTakeoffController();
-                //check if it has reached its objective, if so return the next state, if not continue the takeoff
-                return takeoffController.hasReachedObjective(currentInputs, previousInputs ) ? STABILIZE_TAKEOFF : TAKEOFF;
+                //check if it has reached its Goal, if so return the next state, if not continue the takeoff
+                return softDescendController.hasReachedGoal(currentInputs, prevInputs ) ? LandingPhases.BRAKE : LandingPhases.SOFT_DESCEND;
             case BRAKE:
                 //get the takeoff stabilization controller
-                AutopilotStabilization stabilizationController = this.getTakeoffStabilizerController();
-                return stabilizationController.hasReachedObjective(currentInputs, previousInputs) ? FLIGHT : STABILIZE_TAKEOFF;
+                return brakeController.hasReachedGoal(currentInputs, prevInputs) ? LandingPhases.BRAKE : LandingPhases.DONE;
 
             default:
                 //Default action, may change later (determine based on the inputs which state should be appropriate
                 return LandingPhases.BRAKE;
         }
-
     }
 
     /**
@@ -174,25 +170,51 @@ public class AutopilotLandingController extends Controller {
      * note: may change the configuration of the controllers during the method call (eg targets may be changed)
      * note: usecase --> should be called every iteration to get the next state
      */
-    private AutopilotState toNextState(AutopilotInputs_v2 inputs){
+    private LandingPhases toNextState(AutopilotInputs_v2 inputs, AutopilotInputs_v2 prevInputs){
         //get the next state needed by the controller
-        AutopilotState nextState = this.getNextActiveState(inputs);
+    	LandingPhases nextState = this.getNextActiveState(inputs,prevInputs);
         //get the previous state
-        AutopilotState prevState = this.getState();
+    	LandingPhases prevState = this.getState();
 
         //check if they are the same, if not, configure the controller & save the next state
         if(!nextState.equals(prevState)){
-            configureState(nextState, inputs);
+            //configureState(nextState, inputs);
             this.setState(nextState);
-            System.out.println("Switched states, from " + AutopilotState.getString(prevState) +
-                    ", to " + AutopilotState.getString(nextState));
+//            System.out.println("Switched states, from " + AutopilotState.getString(prevState) +
+//                    ", to " + AutopilotState.getString(nextState));
         }
 
         //now return the next state
         return nextState;
     }
 
+    private LandingPhases landingPhase;
+    
+    private LandingPhases getState() {
+		return landingPhase;
+	}
+    private void setState(LandingPhases landingPhase){
+    	this.landingPhase = landingPhase;
+    }
     /**
+     * Get the controller responsible for the provided state
+     * @param state the state to get the controller for
+     * @return the controller assiciated with the state
+     */
+    private LandingController getStateController(LandingPhases state){
+        switch(state){
+            case RAPID_DESCEND:
+                return getDescendController();
+            case SOFT_DESCEND:
+                return getSoftDescendController();
+            case BRAKE:
+                return getBrakeController();
+            default:
+                return getBrakeController();//TODO is this correct?
+        }
+    }
+
+	/**
      * Configures the soft descend height of the soft landing phase of the landing controller
      * only call after leaving the stabilizer stage and before the first call of rapid descend controls
      * @param inputs the inputs to infer the height from
@@ -448,7 +470,7 @@ public class AutopilotLandingController extends Controller {
     /**
      * Constants
      */
-    private final static float STOP_VELOCITY = 0.0f;
+    private final static float STOP_VELOCITY = 5.0f;
 
     private final static float MAIN_STABLE = (float) (7*PI/180);
     private final static float MAIN_DELTA_INCL = (float) (2*PI/180);
@@ -701,22 +723,46 @@ public class AutopilotLandingController extends Controller {
      * Enumerations for the landing phases
      */
     private enum LandingPhases {
-        STABILIZE,RAPID_DESCEND, SOFT_DESCEND, SLOW_DOWN, BRAKE
-    }
+        RAPID_DESCEND, SOFT_DESCEND, BRAKE, DONE}
     private DescendController descendController;
-
+    private SoftDescendController softDescendController;
+    private BrakeController brakeController;
+    
     private void setDescendController(DescendController descendController){
         this.descendController = descendController;
-
     }
+    private void setSoftDescendController(SoftDescendController softDescendController){
+        this.softDescendController = softDescendController;
+    }
+    private void setBrakeController(BrakeController brakeController){
+    	this.brakeController = brakeController;
+    }
+    private DescendController getDescendController(){
+    	return descendController;
+    }
+    private SoftDescendController getSoftDescendController(){
+    	return softDescendController;
+    }
+    private BrakeController getBrakeController(){
+    	return brakeController;
+    }
+    
 
-    private class DescendController extends Controller{
+    //TODO should this do anything?
+    private abstract class LandingController{
+    	 public abstract boolean hasReachedGoal(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 prevInputs); 
 
-        public DescendController(AutoPilot autopilot) {
-            super(autopilot);
+
+     	public abstract AutopilotOutputs getControlActions(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 prevInputs);
+    	
+    }
+    private class DescendController extends LandingController{
+
+        public DescendController(AutoPilot autopilot) /*extends Controller*/ {
+            //super(autopilot);
         }
 
-        @Override
+        
         public AutopilotOutputs getControlActions(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs) {
             ControlOutputs outputs = new ControlOutputs(getStandardOutputs());
             getRollControls(outputs,currentInputs,previousInputs);
@@ -726,9 +772,10 @@ public class AutopilotLandingController extends Controller {
             return outputs;
         }
 
-        @Override
-        public boolean hasReachedObjective(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs) {
-            return false;
+        
+        public boolean hasReachedGoal(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs) {
+        	float altitude = Controller.extractAltitude(currentInputs);
+        	return(altitude < getStartSoftDescendPhaseHeight());
         }
 
         /**
@@ -974,38 +1021,64 @@ public class AutopilotLandingController extends Controller {
 
     }
 
-    private class softDescendController extends Controller{
+    private class SoftDescendController extends LandingController{
 
-        public softDescendController(AutoPilot autopilot) {
-            super(autopilot);
+        public SoftDescendController(AutoPilot autopilot) {
+            //super(autopilot);
         }
 
-        @Override
-        public AutopilotOutputs getControlActions(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs) {
-            ControlOutputs outputs = new ControlOutputs(getStandardOutputs());
-//          System.out.println("querying soft descend");
-            AutopilotConfig config = this.getConfig();
-            //set the setPoint
-            PIDController pitchPID = this.getPitchPIDController();
-            pitchPID.setSetPoint(SOFT_DESCEND_PHASE_REF_PITCH);
-            //call the pitch and roll PID
-            this.pitchStabilizer(outputs, currentInputs, prevInputs);
-            this.rollStabilizer(outputs, currentInputs, prevInputs);
+ 
+        public boolean hasReachedGoal(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 prevInputs) {
+        	float altitude = Controller.extractAltitude(currentInputs);
+        	return(altitude < SOFT_DESCEND_MIN_START_HEIGHT);
+        }
 
-            //change the main wing inclination
-    //        outputs.setRightWingInclination(outputs.getRightWingInclination() - SOFT_DESCEND_PHASE_MAIN_WING_INCLINATION_DELTA);
-    //        outputs.setLeftWingInclination(outputs.getLeftWingInclination() - SOFT_DESCEND_PHASE_MAIN_WING_INCLINATION_DELTA);
+
+		public AutopilotOutputs getControlActions(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 prevInputs) {
+            ControlOutputs outputs = new ControlOutputs(getStandardOutputs());
+            AutopilotConfig config = getConfig();
+            PIDController pitchPID = getPitchPIDController();
+            pitchPID.setSetPoint(SOFT_DESCEND_PHASE_REF_PITCH);
+            pitchStabilizer(outputs, currentInputs, prevInputs);
+            rollStabilizer(outputs, currentInputs, prevInputs);
             outputs.setThrust(SOFT_DESCEND_THRUST);
             outputs.setRightBrakeForce(config.getRMax());
             outputs.setLeftBrakeForce(config.getRMax());
             outputs.setFrontBrakeForce(config.getRMax());
+            return outputs;
             }
         }
 
-        @Override
-        public boolean hasReachedObjective(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs) {
-            return false;
+    private class BrakeController extends LandingController{
+
+        public BrakeController(AutoPilot autopilot) {
+            //super(autopilot);
         }
+
+        @Override
+        public boolean hasReachedGoal(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 prevInputs) {
+    		Vector velocity = Controller.getVelocityApprox(currentInputs, prevInputs);
+    		return (velocity.getSize() <STOP_VELOCITY) ;//TODO Velocity
+    	}
+
+        @Override
+    	public AutopilotOutputs getControlActions(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 prevInputs) {
+            ControlOutputs outputs = new ControlOutputs(getStandardOutputs());
+            AutopilotConfig config = getConfig();
+            rollStabilizer(outputs, currentInputs, prevInputs);
+            PIDController pitchPID = getPitchPIDController();
+            pitchPID.setSetPoint(SOFT_DESCEND_PHASE_REF_PITCH/2);
+            outputs.setThrust(SOFT_DESCEND_THRUST);
+            outputs.setRightBrakeForce(config.getRMax());
+            outputs.setLeftBrakeForce(config.getRMax());
+            outputs.setFrontBrakeForce(config.getRMax());
+            return outputs;
+            }
+        }
+
+
+
+
 
         private PIDController getPitchPIDController() {
             return pitchPIDController;
@@ -1016,6 +1089,6 @@ public class AutopilotLandingController extends Controller {
         private static float PITCH_INTEGRAL = 0.2f;
         private static float PITCH_DERIVATIVE = 0.0f;
         private PIDController pitchPIDController = new PIDController(PITCH_GAIN, PITCH_INTEGRAL, PITCH_DERIVATIVE);
-    }
 }
+
 

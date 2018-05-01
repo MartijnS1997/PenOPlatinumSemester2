@@ -269,7 +269,7 @@ public class AutopilotFiniteStateMachine {
     	int airportID = this.getAutopilot().getCommunicator().getCurrentRequest().getDestinationAirport();
     	MapAirport airport = this.getAutopilot().getCommunicator().getAirportByID(airportID);
     	AutopilotLandingController landingController = this.getLandingController();
-    	landingController.setAirport(airport);
+    	landingController.setTargetAirport(airport);
     	//Set configuration of the autopilot
     	AutopilotConfig config = this.getAutopilot().getConfig();
         landingController.setConfig(config);
