@@ -233,7 +233,7 @@ public class PathGenerator_v2{
 
 		//resize for the correct location relative to the airport center
 		Vector scaledRightOrth = projOnRightOrth.normalizeToLength(turnRadius);
-		Vector scaledHeadingComp = projOnHeading.normalizeToLength(runwayLength + landingDistance);
+		Vector scaledHeadingComp = projOnHeading.normalizeToLength(2*runwayLength + landingDistance);
 
 		//the turn center relative to the airport center
 		Vector turnCenterRel = scaledHeadingComp.vectorSum(scaledRightOrth);

@@ -635,7 +635,7 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void>, Packa
     /**
      * The base altitude to assign to the drones (incremented from here)
      */
-    private final static float BASE_ALTITUDE = 30f;
+    private final static float BASE_ALTITUDE =120f;
 
     /**
      * The minimal cruising altitude difference between two drones

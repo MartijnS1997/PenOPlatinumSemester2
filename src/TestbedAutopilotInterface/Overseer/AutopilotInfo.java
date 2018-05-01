@@ -61,6 +61,8 @@ public interface AutopilotInfo {
      * @return the flight path of the drone, if the drone is not in the flight phase this call will return null
      */
     FlightPath getFlightPath();
+    
+    boolean isIdle();
 
     /**
      * Generates initial info to indicate that the autopilot is still configuring itself
@@ -102,6 +104,11 @@ public interface AutopilotInfo {
             @Override
             public FlightPath getFlightPath() {
                 return null;
+            }
+            
+            @Override
+            public boolean isIdle() {
+            	return true;
             }
         };
     }

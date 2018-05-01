@@ -15,21 +15,23 @@ public interface Polygon extends GraphicsObject {
 	public default Vector3f getOrientation() {
 		return this.orientation;
 	}
-	
-	public default Vector3f getRelPos() {
-		Vector3f pos = this.position;
-		Matrix3f transformation = Matrix3f.transformationMatrix(this.orientation).transpose();
-		float heading = this.orientation.x;
-		float pitch = this.orientation.y;
-		float roll = this.orientation.z;
-		Matrix3f transform =
-				new Matrix3f(
-						new Vector3f((float) (cos(heading)*cos(roll) + sin(heading)*sin(pitch)*sin(roll)), (float) (cos(roll)*sin(heading)*sin(pitch)-cos(heading)*sin(roll)), (float) (cos(pitch)*sin(heading))),
-						new Vector3f((float) (cos(pitch)*sin(roll)), (float) (cos(pitch)*cos(roll)), (float) -sin(pitch)),
-						new Vector3f((float) (cos(heading)*sin(pitch)*sin(roll) - cos(roll)*sin(heading)), (float) (sin(heading)*sin(roll)+cos(heading)*cos(roll)*sin(pitch)), (float) (cos(heading)*cos(pitch)))).transpose();
 
-		Vector3f difference = transformation.multiply(relativePosition);
-		pos = pos.add(difference);
-		return pos;
-	}
+	public abstract Vector3f getRelPos();
+	
+//	public default Vector3f getRelPos() {
+//		Vector3f pos = this.position;
+//		Matrix3f transformation = Matrix3f.transformationMatrix(getOrientation()).transpose();
+//		float heading = this.orientation.x;
+//		float pitch = this.orientation.y;
+//		float roll = this.orientation.z;
+//		Matrix3f transform =
+//				new Matrix3f(
+//						new Vector3f((float) (cos(heading)*cos(roll) + sin(heading)*sin(pitch)*sin(roll)), (float) (cos(roll)*sin(heading)*sin(pitch)-cos(heading)*sin(roll)), (float) (cos(pitch)*sin(heading))),
+//						new Vector3f((float) (cos(pitch)*sin(roll)), (float) (cos(pitch)*cos(roll)), (float) -sin(pitch)),
+//						new Vector3f((float) (cos(heading)*sin(pitch)*sin(roll) - cos(roll)*sin(heading)), (float) (sin(heading)*sin(roll)+cos(heading)*cos(roll)*sin(pitch)), (float) (cos(heading)*cos(pitch)))).transpose();
+//
+//		Vector3f difference = transform.multiply(relativePosition);
+////		pos = pos.add(difference);
+//		return pos;
+//	}
 }

@@ -16,6 +16,7 @@ import static org.lwjgl.glfw.GLFW.glfwTerminate;
 import static org.lwjgl.glfw.GLFW.glfwWindowHint;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
+import TestbedAutopilotInterface.GUI.AirportGuiState;
 import TestbedAutopilotInterface.GUI.DroneGuiState;
 import gui.GraphicsObjects.GraphicsObject;
 import gui.WorldObjects.Drone;
@@ -60,9 +61,9 @@ public class Graphics {
 		this.textWindow = TextWindow.createAndShowWindow(this, title, width, height, xPos, yPos, droneState);
 	}
 
-	public void makeMiniMap(String title, int width, int height, int xPos, int yPos, Map<String, DroneGuiState> droneStates, String mainDrone) {
+	public void makeMiniMap(String title, int width, int height, int xPos, int yPos, Map<String, DroneGuiState> droneStates, String mainDrone, Set<AirportGuiState> airportGuiStates) {
 
-		this.miniMap = new MiniMap(title, width, height, xPos, yPos, droneStates, mainDrone);
+		this.miniMap = new MiniMap(title, width, height, xPos, yPos, droneStates, mainDrone, airportGuiStates);
 	}
 	
 	public void makeButtonWindow() {

@@ -134,7 +134,7 @@ public class Cube implements Polygon {
 	
 	public Vector3f getRelPos() {
 		Vector3f pos = this.position;
-		Matrix3f transformation = Matrix3f.transformationMatrix(this.orientation).transpose();
+		Matrix3f transformation = Matrix3f.transformationMatrix(this.orientation.negate());
 		Vector3f difference = transformation.multiply(relativePosition);
 		pos = pos.add(difference);
 		return pos;
