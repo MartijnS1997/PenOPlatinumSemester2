@@ -33,7 +33,7 @@ public class PhaseFourMain {
         //set the seed so we generate the same world
         generator.setRandomSeed(0);
         //create the simulation environment
-        SimulationEnvironment environment = generator.generate2AirportWorld();//generator.generateGridWorld(gridWorldRows, gridWorldColumns);
+        SimulationEnvironment environment = generator.generateGridWorld(gridWorldRows, gridWorldColumns);//generator.generateGridWorld(gridWorldRows, gridWorldColumns);
         //print the environment
         System.out.println(SimulationGen.environmentToString(environment));
         //generate the overseer

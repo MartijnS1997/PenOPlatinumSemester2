@@ -107,7 +107,7 @@ public class TestbedGUI implements Runnable{
         this.getSideView().initWindow(Settings.DRONE_SIDE_CAM);
 
         this.getGraphics().makeTextWindow("Stats", getMonitorWidth()/4, getMonitorHeight()/3, getMonitorWidth()/2, getMonitorHeight()*2/3, Objects.getDroneGuiStates().get(Objects.getMainDroneID()));
-        this.getGraphics().makeMiniMap("Minimap", getMonitorWidth()/4, getMonitorHeight()/3, getMonitorWidth()*3/4, getMonitorHeight()*2/3, Objects.getDroneGuiStates(), Objects.getMainDroneID());
+        this.getGraphics().makeMiniMap("Radar", getMonitorWidth()/4, getMonitorHeight()/3, getMonitorWidth()*3/4, getMonitorHeight()*2/3, Objects.getDroneGuiStates(), Objects.getMainDroneID(), Objects.getAirportGuiStates());
     }
 
     /**
