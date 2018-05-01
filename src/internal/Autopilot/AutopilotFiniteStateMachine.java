@@ -290,6 +290,18 @@ public class AutopilotFiniteStateMachine {
         //TODO this.getAutopilot().getCommunicator().getDelivery().getDestinationGate()
         //TODO and then calling the .getAirportByID() in the communicator class
 
+
+        AutopilotTaxiingController taxiingController = this.getTaxiingController();
+
+        //package that has to be delivered
+        AutopilotDelivery packageToDeliver = this.getAutopilot().getCommunicator().getCurrentRequest();
+
+        taxiingController.gateTaxiing(inputs, packageToDeliver);
+
+        //set the config for the controller
+        AutopilotConfig config = this.getAutopilot().getConfig();
+        taxiingController.setConfig(config);
+
     }
 
     private void configureRunwayTaxiing(AutopilotInputs_v2 inputs){
@@ -299,6 +311,17 @@ public class AutopilotFiniteStateMachine {
         //TODO the taxiing controller knows in which direction to stand for takeoff
         //TODO get the current airport to configure for by the following API chain:
         //TODO this.getAutopilot().getCommunicator().getAirportAtLocation();
+
+        AutopilotTaxiingController taxiingController = this.getTaxiingController();
+
+        //AutopilotDelivery packageToDeliver = this.getAutopilot().getCommunicator().getCurrentRequest();
+
+        taxiingController.runwayTaxiing(inputs);
+
+        //set the config for the controller
+        AutopilotConfig config = this.getAutopilot().getConfig();
+        taxiingController.setConfig(config);
+
     }
 
     /**
