@@ -84,7 +84,7 @@ public abstract class AutopilotFlightController extends Controller {
      * the path contains the positions of the cubes within a margin of 5 meters
      * @return the flight path
      */
-    private AutopilotInterfaces.Path getFlightPath() {
+    private AutopilotInterfaces.Path getApproxFlightPath() {
         return flightPath;
     }
 
@@ -105,7 +105,7 @@ public abstract class AutopilotFlightController extends Controller {
      * @return true if the provided flight path is a non null and the current flight path is (uninitialized)
      */
     private boolean canHaveAsFlightPath(Path flightPath){
-        return flightPath!=null &&this.getFlightPath() == null;
+        return flightPath!=null &&this.getApproxFlightPath() == null;
     }
 
     //    private void logControlActions(ControlOutputs outputs, String controlString){
@@ -187,7 +187,7 @@ public abstract class AutopilotFlightController extends Controller {
         //get the start position
         Vector startPos = this.getAutopilot().getStartPosition();
         //get the furthest element of the path
-        Path flightPath = this.getFlightPath();
+        Path flightPath = this.getApproxFlightPath();
         List<Vector> flightPathList = Controller.extractPath(flightPath);
         //find the one the furthest away
         //compare the accumulator to the sta
@@ -221,7 +221,7 @@ public abstract class AutopilotFlightController extends Controller {
      * @return returns true if so
      */
     private boolean hasAlreadySetFurthestCube(){
-        return this.getFlightPath() != null;
+        return this.getApproxFlightPath() != null;
     }
 
     /**

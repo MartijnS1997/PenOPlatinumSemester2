@@ -2,6 +2,7 @@ package internal.Autopilot;
 
 import AutopilotInterfaces.AutopilotInputs_v2;
 import TestbedAutopilotInterface.Overseer.AutopilotDelivery;
+import TestbedAutopilotInterface.Overseer.AutopilotInfo;
 import TestbedAutopilotInterface.Overseer.AutopilotOverseer;
 import TestbedAutopilotInterface.Overseer.MapAirport;
 
@@ -22,9 +23,12 @@ public class OverseerCommunication {
     }
 
     /**
-     * communicates with the overseer for the current details of the
+     * communicates with the overseer for the current details of the flight
+     * --> note that the state is always sent first before accessing the data of the different drones
+     * this means that on the first iteration all the drones will see default value for all the info they have
+     * received, so they need to be able to cope with the init values
      */
-    protected void overseerCommunication(){
+    protected void communicateWithOverseer(){
         //get the overseer and the autopilot we represent
         AutopilotOverseer overseer = this.getOverseer();
         AutoPilot autopilot = this.getAutopilot();
@@ -34,7 +38,6 @@ public class OverseerCommunication {
         //registered yet, it will assign a cruising altitude)
         float cruisingAltitude = overseer.getCruisingAltitude(autopilot);
         this.setAssignedCruiseAltitude(cruisingAltitude);
-
     }
 
     /**
@@ -79,10 +82,12 @@ public class OverseerCommunication {
      * @param overseer the overseer to send the current state to
      */
     private void sendStateToOverseer(AutoPilot autopilot, AutopilotOverseer overseer){
+        //get the state machine
+        AutopilotFiniteStateMachine stateMachine = autopilot.getStateMachine();
         //get the inputs to send to the overseer
-        AutopilotInputs_v2 inputs = autopilot.getCurrentInputs();
+        AutopilotInfo info = stateMachine.getAutopilotInfo();
         //send the info to the overseer
-        overseer.autopilotStatusUpdate(autopilot, inputs);
+        overseer.autopilotStatusUpdate(autopilot, info);
     }
 
     /**

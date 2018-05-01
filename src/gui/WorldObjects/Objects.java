@@ -45,7 +45,7 @@ public class Objects {
 
     public static void updateStates(GUIQueueElement queueElement) {
         setDroneGuiStates(queueElement.getDroneStates());
-        setAirportGuiStates(queueElement.getAirport());
+        setAirportGuiStates(queueElement.getAirports());
         setCubeGuiStates(queueElement.getCubePositions());
     }
 

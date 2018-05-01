@@ -29,7 +29,16 @@ public interface GUIQueueElement {
      * (the first and the final element contain data, y is by definition zero)
      * @return a set of airport gui states with all the info needed to render the airports
      */
-    Set<AirportGuiState> getAirport();
+    Set<AirportGuiState> getAirports();
+
+    /**
+     * Getter for the delivery specifications, these are tha packages that are to be delivered in the world
+     * by the drones, these packages contain the destination and source of the package as well as some meta data
+     * for coordinating the package delivery
+     * @return a set containing all the delivery specifications
+     */
+    Set<DeliveryGuiState> getDeliveries();
+
 
 
 }

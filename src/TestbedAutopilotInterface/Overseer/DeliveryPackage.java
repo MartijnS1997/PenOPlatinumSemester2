@@ -97,7 +97,7 @@ public class DeliveryPackage implements AutopilotDelivery, WorldDelivery, Planne
      * --> can only be invoked once and should only be invoked by the
      */
     public void setPickedUp() {
-        this.pickedUp = pickedUp;
+        this.pickedUp = true;
     }
 
     /**

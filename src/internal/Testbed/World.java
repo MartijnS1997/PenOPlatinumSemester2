@@ -1,9 +1,6 @@
 package internal.Testbed;
 import AutopilotInterfaces.Path;
-import TestbedAutopilotInterface.GUI.AirportGuiState;
-import TestbedAutopilotInterface.GUI.CubeGuiState;
-import TestbedAutopilotInterface.GUI.DroneGuiState;
-import TestbedAutopilotInterface.GUI.GUIQueueElement;
+import TestbedAutopilotInterface.GUI.*;
 import TestbedAutopilotInterface.Overseer.DeliveryPackage;
 import TestbedAutopilotInterface.Overseer.PackageService;
 import TestbedAutopilotInterface.Overseer.WorldDelivery;
@@ -27,6 +24,9 @@ import java.util.stream.Collectors;
 //TODO check if the drone is on the tarmac or not
 //TODO use more resource friendly query for the packages --> now every time a shallow copy of the main set is made
 //TODO only access the package service when new deliveries are available (use flags to communicate)
+//TODO implement the GUIdeliveryStates into the gui frame that is sent to the GUI
+//TODO soften the restrictions on the distance needed to load the package (in first iter we try only to arrive at a gate
+//TODO if we're at a gate we should receive a package destined for either gate one or zero)
 public class World {
 	
 	public World(){
@@ -230,6 +230,7 @@ public class World {
 			Drone drone = drones.get(deliveryDroneID);
 			//check if the drone can be loaded with the package
 			if(canPickUpPackage(drone, delivery)){
+				System.out.println("delivery loading: " + delivery);
 				drone.loadPackage(delivery);
 			}
 		}
@@ -444,7 +445,7 @@ public class World {
 	private final static float MAX_TRANSFER_VELOCITY = 1.0f;
 
 	//the maximum distance between the target gate and the drone before a package can be transferred
-	private final static float MAX_TRANSFER_DISTANCE = 5.0f;
+	private final static float MAX_TRANSFER_DISTANCE = 25.0f;
 
 	/**
 	 * Checks if there are any drones that have crashed during the timestep simulated
@@ -700,7 +701,6 @@ public class World {
 	 */
 	private PackageService packageService;
 
-
 	/**
 	 * A counter that keeps track of the ID's that were already distributed to the drones
 	 */
@@ -734,11 +734,13 @@ public class World {
 		Set<Drone> drones = this.getDroneSet();
 //		Set<Block> blocks = this.getBlockSet(); //no blocks in the world
 		Set<WorldAirport> airports = this.getAirportSet();
+		Set<WorldDelivery> deliveries = this.getPackageService().getSubmittedWorldDeliveries();
 
 		//generate the necessary data
 		Map<String, DroneGuiState> droneGuiQueueElem = getDroneGuiStates(drones);
 		Set<CubeGuiState> cubeGuiQueueElem = new HashSet<>(); //there are no blocks anymore
 		Set<AirportGuiState> airportGuiQueueElem = getAirportGuiStates(airports);
+		Set<DeliveryGuiState> deliveryGuiQueueElem = getDeliveryGuiStates(deliveries);
 
 		//create a new entry for the queue
 		return new GUIQueueElement() {
@@ -753,8 +755,13 @@ public class World {
 			}
 
 			@Override
-			public Set<AirportGuiState> getAirport() {
+			public Set<AirportGuiState> getAirports() {
 				return airportGuiQueueElem;
+			}
+
+			@Override
+			public Set<DeliveryGuiState> getDeliveries(){
+				return deliveryGuiQueueElem;
 			}
 		};
 
@@ -825,6 +832,66 @@ public class World {
 		return stateSet;
 	}
 
+	/**
+	 * Creates a set of delivery state objects containing all the states for the deliveries, will be sent over to the
+	 * GUI for rendering the data about the packages.
+	 * @param deliveries the deliveries to create the state set from
+	 * @return a set of deliveryGuiStates to describe the state of all packages in the world
+	 */
+	private Set<DeliveryGuiState> getDeliveryGuiStates(Set<WorldDelivery> deliveries){
+		Set<DeliveryGuiState> guiDeliveries = new HashSet<>();
+		for(WorldDelivery delivery : deliveries){
+			//grab the needed parameters
+			int sourceAirport = delivery.getSourceAirport();
+			int sourceGate = delivery.getSourceAirportGate();
+			int destinationAirport = delivery.getDestinationAirport();
+			int destinationGate = delivery.getDestinationAirportGate();
+			String deliveryDrone = delivery.getDeliveryDroneID();
+			boolean isPickedUp = delivery.isPickedUp();
+			boolean isDelivered = delivery.isDelivered();
+			DeliveryGuiState deliveryState = new DeliveryGuiState() {
+				@Override
+				public int getSourceAirport() {
+					return sourceAirport;
+				}
+
+				@Override
+				public int getSourceGate() {
+					return sourceGate;
+				}
+
+				@Override
+				public int getDestinationAirport() {
+					return destinationAirport;
+				}
+
+				@Override
+				public int getDestinationGate() {
+					return destinationGate;
+				}
+
+				@Override
+				public String getDeliveryDrone() {
+					return deliveryDrone;
+				}
+
+				@Override
+				public boolean isPickedUp() {
+					return isPickedUp;
+				}
+
+				@Override
+				public boolean isDelivered() {
+					return isDelivered;
+				}
+			};
+
+			guiDeliveries.add(deliveryState);
+		}
+
+		return guiDeliveries;
+	}
+
 	@Override
 	public String toString() {
 		return "World{" +
@@ -878,8 +945,8 @@ public class World {
 //			//create the entry
 //			CubeGuiState cubeState = new CubeGuiState() {
 //				@Override
-//				public Vector getPosition() {
-//					return block.getPosition();
+//				public Vector getCurrentPosition() {
+//					return block.getCurrentPosition();
 //				}
 //			};
 //
@@ -942,7 +1009,7 @@ Code graveyard
 //	 */
 //	private String objective;
 //
-//		boolean withinFourMeters = block.getPosition().distanceBetween(drone.getPosition()) <=4.0f;
+//		boolean withinFourMeters = block.getCurrentPosition().distanceBetween(drone.getCurrentPosition()) <=4.0f;
 //		switch (this.getObjective()){
 //			case REACH_CUBE_OBJECTIVE:
 //				return withinFourMeters;
@@ -978,7 +1045,7 @@ Code graveyard
 //	}
 
 //	private boolean flightObjectiveReached(Block block, Drone drone) {
-//		boolean withinFourMeters = block.getPosition().distanceBetween(drone.getPosition()) <=4.0f;
+//		boolean withinFourMeters = block.getCurrentPosition().distanceBetween(drone.getCurrentPosition()) <=4.0f;
 //		if(!withinFourMeters)
 //            return false;
 //
@@ -1011,9 +1078,9 @@ Code graveyard
 //		//first check if all the blocks are visited
 //		boolean ready = this.getBlockSet().size() == 0;
 //		//check if more or les on the ground
-//		ready = ready && (drone.getPosition().getyValue() <= landedDroneYPos(drone));
+//		ready = ready && (drone.getCurrentPosition().getyValue() <= landedDroneYPos(drone));
 //		//check if moving fast
-//		ready = ready && drone.getVelocity().getSize() < MAX_LANDING_VELOCITY;
+//		ready = ready && drone.getPreviousPosition().getSize() < MAX_LANDING_VELOCITY;
 //		return ready;
 //
 //	}

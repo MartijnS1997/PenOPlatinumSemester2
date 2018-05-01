@@ -1,12 +1,15 @@
 package internal.Autopilot;
 
 import AutopilotInterfaces.AutopilotConfig;
+import AutopilotInterfaces.AutopilotInputs;
 import AutopilotInterfaces.AutopilotInputs_v2;
 import AutopilotInterfaces.AutopilotOutputs;
 import TestbedAutopilotInterface.Overseer.AutopilotDelivery;
+import TestbedAutopilotInterface.Overseer.AutopilotInfo;
 import TestbedAutopilotInterface.Overseer.DeliveryPackage;
 import TestbedAutopilotInterface.Overseer.MapAirport;
 import com.sun.org.apache.bcel.internal.generic.LAND;
+import internal.Helper.Vector;
 
 import static internal.Autopilot.AutopilotState.*;
 
@@ -52,6 +55,8 @@ public class AutopilotFiniteStateMachine {
         AutopilotOutputs outputs = controller.getControlActions(currentInputs, previousInputs);
         //save the inputs for the next round
         this.updatePreviousOutputs(currentInputs);
+        this.generateInfo(currentInputs, previousInputs, activeState);
+
         //return the result
         return outputs;
     }
@@ -218,14 +223,22 @@ public class AutopilotFiniteStateMachine {
 
         //get the data about the package that we currently need to deliver
         AutopilotDelivery currentDelivery = communicator.getCurrentRequest();
-        int sourceID = currentDelivery.getSourceAirport();
-        MapAirport sourceAirport = communicator.getAirportByID(sourceID);
-        int destinationID = currentDelivery.getDestinationAirport();
-        MapAirport destinationAirport = communicator.getAirportByID(destinationID);
 
-        //set the airport data
-        navigationController.setSourceAirport(sourceAirport);
-        navigationController.setDestinationAirport(destinationAirport);
+        //select the airport needed by the navigator
+        if(!currentDelivery.isPickedUp()){
+            //if the delivery is not yet picked up, get the source address
+            System.out.println("need to pick up package at source airport");
+            int sourceAirportID = currentDelivery.getSourceAirport();
+            MapAirport targetAirport = communicator.getAirportByID(sourceAirportID);
+            navigationController.setTargetAirport(targetAirport);
+
+        }else{
+            //if the delivery is already picked up, get to the destination address
+            System.out.println("package must be delivered to destination airport");
+            int destinationAirportID = currentDelivery.getDestinationAirport();
+            MapAirport targetAirport = communicator.getAirportByID(destinationAirportID);
+            navigationController.setTargetAirport(targetAirport);
+        }
 
 
         //TODO implement, use the information available on the packages to set the parameters needed to fly to
@@ -286,6 +299,82 @@ public class AutopilotFiniteStateMachine {
         //TODO the taxiing controller knows in which direction to stand for takeoff
         //TODO get the current airport to configure for by the following API chain:
         //TODO this.getAutopilot().getCommunicator().getAirportAtLocation();
+    }
+
+    /**
+     * Generates the info to be sent over to the overseer & saves it to the info variable
+     * this information should contain all the info needed to do collision detection and avoidance
+     * @param currentInputs the inputs most recently received from the testbed
+     * @param previousInputs the inputs previously received from the testbed
+     * @param currentState the current state of the autopilot (eg flight, takeoff etc)
+     */
+    private void generateInfo(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs, AutopilotState currentState){
+        AutoPilot autopilot = this.getAutopilot();
+        //get the id of the drone to add to the info
+        String droneID = autopilot.getID();
+        //get the current position and the previous position
+        Vector currentPosition = Controller.extractPosition(currentInputs);
+        //check if the previous inputs were null (meaning we're in init)
+        if(previousInputs == null){
+            previousInputs = currentInputs;
+        }
+        Vector previousPosition = Controller.extractPosition(previousInputs);
+
+
+        //get the delta time
+        float deltaTime = Controller.getDeltaTime(currentInputs, previousInputs);
+
+        //use the state of the drone to extract the flight path if needed
+        FlightPath flightPath = null;
+        if(currentState == FLIGHT){
+            //get the flight controller
+            AirportNavigationController navigationController = this.getFlightController();
+            flightPath = navigationController.getFlightPath();
+        }
+
+        //get the cruising altitude form the communicator
+        float cruisingAltitude = autopilot.getCommunicator().getAssignedCruiseAltitude();
+
+        FlightPath anonymousFlightPath = flightPath;
+        //now generate the info to be sent to the overseer
+        AutopilotInfo info = new AutopilotInfo() {
+            @Override
+            public String droneID() {
+                return droneID;
+            }
+
+            @Override
+            public Vector getCurrentPosition() {
+                return currentPosition;
+            }
+
+            @Override
+            public Vector getPreviousPosition() {
+                return previousPosition;
+            }
+
+            @Override
+            public float getDeltaTime() {
+                return deltaTime;
+            }
+
+            @Override
+            public float getCruisingAltitude() {
+                return cruisingAltitude;
+            }
+
+            @Override
+            public AutopilotState getAutopilotState() {
+                return currentState;
+            }
+
+            @Override
+            public FlightPath getFlightPath() {
+                return anonymousFlightPath;
+            }
+        };
+
+        this.setAutopilotInfo(info);
     }
 
     /**
@@ -454,6 +543,25 @@ public class AutopilotFiniteStateMachine {
     }
 
     /**
+     * Getter for the autopilot info, this object contains all the information about the autopilot
+     * to do collision detection for the drone
+     * @return the autopilot info containing all the necessary data about the autopilot
+     */
+    public AutopilotInfo getAutopilotInfo() {
+        return autopilotInfo;
+    }
+
+    /**
+     * Setter for the autopilot info
+     * this method must be called after every generation of the outputs
+     * such that the communicator can send the data about the autopilots to the overseer
+     * @param autopilotInfo the info to be set, this is the info generated at the current state
+     */
+    private void setAutopilotInfo(AutopilotInfo autopilotInfo) {
+        this.autopilotInfo = autopilotInfo;
+    }
+
+    /**
      * The state of the finite state machine, is initialized on takeoff
      */
     private AutopilotState state = AutopilotState.INIT_FLIGHT;
@@ -469,6 +577,13 @@ public class AutopilotFiniteStateMachine {
      * or when they are used for the first time
      */
     private AutopilotInputs_v2 previousInputs = null;
+
+    /**
+     * The information generated for the autopilot to send to the overseer
+     * this variable must be set & generated on every iteration --> will be read by the overseer communicator
+     * & the info will be sent to the overseer
+     */
+    private AutopilotInfo autopilotInfo = AutopilotInfo.generateInitInfo();
 
     /**
      * The controllers used by the finite state machine to generate the control actions
