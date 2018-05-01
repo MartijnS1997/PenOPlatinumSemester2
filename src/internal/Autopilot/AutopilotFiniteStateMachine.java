@@ -317,7 +317,7 @@ public class AutopilotFiniteStateMachine {
         //AutopilotDelivery packageToDeliver = this.getAutopilot().getCommunicator().getCurrentRequest();
 
         taxiingController.runwayTaxiing(inputs);
-        
+
         //set the config for the controller
         AutopilotConfig config = this.getAutopilot().getConfig();
         taxiingController.setConfig(config);
