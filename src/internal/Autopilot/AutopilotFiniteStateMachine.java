@@ -336,6 +336,8 @@ public class AutopilotFiniteStateMachine {
         float cruisingAltitude = autopilot.getCommunicator().getAssignedCruiseAltitude();
 
         FlightPath anonymousFlightPath = flightPath;
+        OverseerCommunication communicator = this.getAutopilot().getCommunicator();
+        AutopilotDelivery currentDelivery = communicator.getCurrentRequest();
         //now generate the info to be sent to the overseer
         AutopilotInfo info = new AutopilotInfo() {
             @Override
@@ -371,6 +373,11 @@ public class AutopilotFiniteStateMachine {
             @Override
             public FlightPath getFlightPath() {
                 return anonymousFlightPath;
+            }
+            
+            @Override
+            public boolean isIdle() {
+            	return currentDelivery == null;
             }
         };
 

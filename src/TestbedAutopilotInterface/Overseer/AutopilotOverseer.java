@@ -299,9 +299,31 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void>, Packa
             setDeliveryQueue(autoPilot);
 
         }
+
+        // If the autopilot is idle and packages are available for delivery, redistribute packages
+        if (autopilotInfo.isIdle() && getAllUndeliveredDeliveryPackages().size() > 0) {
+        	distributePackages();
+        }
+        
         //replace the old entry
 //        System.out.println("Autopilot ID: " + autopilotId + ", Autopilot location: " + extractPosition(inputs));
         infoEntries.put(autopilotId, autopilotInfo);
+    }
+    
+    
+    /**
+     * Returns all DeliveryPackages that have not yet been delivered, nor assigned to a drone
+     * @return
+     */
+    private Set<DeliveryPackage> getAllUndeliveredDeliveryPackages(){
+    	Set<DeliveryPackage> submittedPackages = getSubmittedDeliveryPackages();
+    	Set<DeliveryPackage> packagesToBeAssigned = new HashSet<DeliveryPackage>();
+    	for (DeliveryPackage deliveryPackage : submittedPackages) {
+    		if (!deliveryPackage.isDelivered() && deliveryPackage.getDeliveryDroneID() == null) {
+    			packagesToBeAssigned.add(deliveryPackage);
+    		}
+    	}
+    	return packagesToBeAssigned;
     }
 
     /**

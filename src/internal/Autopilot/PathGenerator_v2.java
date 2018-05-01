@@ -15,7 +15,7 @@ import static java.lang.Math.cos;
 import static java.lang.Math.sin;
 
 /**
- * Created by Martijn on 25/04/2018.
+ * Created by Martijn & Anthony Rathé on 25/04/2018.
  * created for testing purposes
  */
 public class PathGenerator_v2{
@@ -25,11 +25,11 @@ public class PathGenerator_v2{
 	 * @param currentInputs the current inputs of the drone
 	 * @param destinationAirport the destination airport, this is the airport where to deliver the current package
 	 */
-	public PathGenerator_v2(AutopilotInputs_v2 currentInputs, MapAirport destinationAirport, float cruisingAltitude){
+	public PathGenerator_v2(AutopilotInputs_v2 currentInputs, MapAirport destinationAirport){
 		Vector dronePosGround = Controller.extractGroundPosition(currentInputs);
 		Vector droneOrientation = Controller.extractOrientation(currentInputs);
 		//calculate the trajectory
-		generateTrajectory(dronePosGround, droneOrientation, destinationAirport,cruisingAltitude);
+		generateTrajectory(dronePosGround, droneOrientation, destinationAirport);
 	}
 
 	/**
@@ -64,57 +64,37 @@ public class PathGenerator_v2{
 	}
 
 
-	private void generateTrajectory(Vector dronePosGround, Vector droneOrientation, MapAirport destinationAirport, float cruisingAltitude){
+	private void generateTrajectory(Vector dronePosGround, Vector droneOrientation, MapAirport destinationAirport){
 		//grab the parameters needed
 		Vector airportLocation = destinationAirport.getLocation();
 		//generate the center of the first turn
-		TurnSpec firstTurn = this.getFirstTurnSpec(dronePosGround, droneOrientation, airportLocation);
-		TurnSpec secondTurn = this.getSecondTurnSpec(dronePosGround, destinationAirport, cruisingAltitude);
-
-		distanceCheck(firstTurn, secondTurn);
+		TurnSpec firstTurnSpec = this.getFirstTurnSpec(dronePosGround, droneOrientation, airportLocation);
+		TurnSpec secondTurnSpec = this.getSecondTurnSpec(dronePosGround, destinationAirport);
 
 		//calculate the two tangents of the first turn (the base turn in tangent terminology)
-		Tangent parallelTangent = calcParallelTangent(firstTurn, secondTurn);
-		Tangent diagonalTangent = calcDiagonalTangent(firstTurn, secondTurn);
+		Tangent parallelTangent = calcParallelTangent(firstTurnSpec, secondTurnSpec);
+		Tangent diagonalTangent = calcDiagonalTangent(firstTurnSpec, secondTurnSpec);
 
 		//now get the tangent needed for the second turn
-		Tangent pathToNextTurn = secondTurnTangentSelection(secondTurn, parallelTangent, diagonalTangent);
+		Tangent pathToNextTurn = secondTurnTangentSelection(secondTurnSpec, parallelTangent, diagonalTangent);
 
 		//set the entry points of both turns relative to the center of the turn
-		Vector entryFirstTurn = dronePosGround.vectorDifference(firstTurn.getTurnCenter());
-		Vector entrySecondTurn = pathToNextTurn.getEndPoint().vectorDifference(secondTurn.getTurnCenter());
-		firstTurn.setEntryPoint(entryFirstTurn);
-		secondTurn.setEntryPoint(entrySecondTurn);
+		Vector entryFirstTurn = dronePosGround.vectorDifference(firstTurnSpec.getTurnCenter());
+		Vector entrySecondTurn = pathToNextTurn.getEndPoint().vectorDifference(secondTurnSpec.getTurnCenter());
+		firstTurnSpec.setEntryPoint(entryFirstTurn);
+		secondTurnSpec.setEntryPoint(entrySecondTurn);
 
 		//also set the exit point for both turns relative to the turn center for the first turn
 		Vector exitFirstTurn = pathToNextTurn.getStartPoint();
-		firstTurn.setExitPoint(exitFirstTurn);
+		firstTurnSpec.setExitPoint(exitFirstTurn);
 
-		firstTurn.setTurnAngle();
-		secondTurn.setTurnAngle();
+		firstTurnSpec.setTurnAngle();
+		secondTurnSpec.setTurnAngle();
 
 		//save the generated turns in the list containing all the turns
 		List<AutopilotTurn> turns = this.getTurnList();
-		turns.add(firstTurn);
-		turns.add(secondTurn);
-
-		//save the flight path for future reference
-		this.setFlightPath(new FlightPath(firstTurn, secondTurn));
-	}
-
-	/**
-	 * Checks if the two generated turns may overlap (if the two circles defining the turns overlap)
-	 * and prints error message to the user if so
-	 * @param turn1 the first turn
-	 * @param turn2 the second turn
-	 */
-	private void distanceCheck(TurnSpec turn1, TurnSpec turn2){
-		Vector center1 = turn1.getTurnCenter();
-		Vector center2 = turn2.getTurnCenter();
-		float radius = this.getTurnRadius();
-		if(center1.distanceBetween(center2) < 4*radius){
-			System.out.println("Warning, the generated turns will overlap, may cause unpredictable behavior");
-		}
+		turns.add(firstTurnSpec);
+		turns.add(secondTurnSpec);
 	}
 
 	/**
@@ -134,11 +114,11 @@ public class PathGenerator_v2{
 		Vector parallelEndPoint = parallelTangent.getEndPoint();
 		Vector diagonalEndPoint = diagonalTangent.getEndPoint();
 
-//		System.out.println();
-//		System.out.println("Turn one center: " + diagonalTangent.getTurn().getTurnCenter());
-//		System.out.println("diagonal tangent start: " + diagonalTangent.getStartPoint().vectorSum(diagonalTangent.getTurn().getTurnCenter()));
-//		System.out.println("Turn two center: " + secondTurn.getTurnCenter());
-//		System.out.println("diagonal tangent end: " + diagonalTangent.getEndPoint());
+		System.out.println();
+		System.out.println("Turn one center: " + diagonalTangent.getTurn().getTurnCenter());
+		System.out.println("diagonal tangent start: " + diagonalTangent.getStartPoint().vectorSum(diagonalTangent.getTurn().getTurnCenter()));
+		System.out.println("Turn two center: " + secondTurn.getTurnCenter());
+		System.out.println("diagonal tangent end: " + diagonalTangent.getEndPoint());
 
 		Vector pTangentVector = parallelTangent.getTangentVector();
 		Vector dTangentVector = diagonalTangent.getTangentVector();
@@ -148,9 +128,9 @@ public class PathGenerator_v2{
 		Vector entryDiagonal = diagonalEndPoint.vectorDifference(turnCenter);
 
 		//print the difference from the radius
-//		System.out.println("calcError parallel: " + (entryParallel.getSize() - radius));
-//		System.out.println("calcError diagonal: " + (entryDiagonal.getSize() - radius));
-//		System.out.println();
+		System.out.println("calcError parallel: " + (entryParallel.getSize() - radius));
+		System.out.println("calcError diagonal: " + (entryDiagonal.getSize() - radius));
+		System.out.println();
 
 		//determine the correct tangent by the cross product of the entry and the tangent, if the sign matches with the sign of the y-component
 		//of the cross product we're good (always test for both just in case, will raise error but prevents us from having headache over bug)
@@ -212,11 +192,11 @@ public class PathGenerator_v2{
 	 * @return the turn center of the second turn
 	 * note: the exit point of the turn spec is also set in this method
 	 */
-	private TurnSpec getSecondTurnSpec(Vector dronePosGround, MapAirport airport, float cruisingAltitude){
+	private TurnSpec getSecondTurnSpec(Vector dronePosGround, MapAirport airport){
 		Vector airportHeading = airport.getHeadingVector();
 		Vector airportLocation = airport.getLocation();
 		float runwayLength = airport.getRunwayLength();
-		float landingDistance = this.landingDistance(cruisingAltitude);
+		float landingDistance = this.getLandingDistance();
 		float turnRadius = this.getTurnRadius();
 		//first calculate the right turning axis system used to find the entry point for the drone at the airport
 		//this is the vector that is to the right of the heading
@@ -258,17 +238,6 @@ public class PathGenerator_v2{
 		secondTurn.setExitPoint(exitPointRel);
 
 		return secondTurn;
-	}
-
-	/**
-	 * Calculates the landing distance needed for landing the drone for the given altitude
-	 * (for now a lineair approx is used)
-	 * @param landingAltitude the altitude from which the drone starts descending
-	 * @return the landing distance needed to get the drone on the landing strip
-	 */
-	private float landingDistance(float landingAltitude){
-		float c1 = 9.2f;
-		return c1*landingAltitude;
 	}
 
 	/**
@@ -413,20 +382,19 @@ public class PathGenerator_v2{
 	}
 
 	/**
-	 * Getter for the flight path generated by the generator
-	 * this path is used by the autopilot to avoid collisions
-	 * @return the flight path of the drone
+	 * Getter for the landing distance this is the distance the drone needs to cover before it can safely touch the ground
+	 * @return the landing distance needed for a safe landing in meters
 	 */
-	protected FlightPath getFlightPath() {
-		return flightPath;
+	private float getLandingDistance() {
+		return landingDistance;
 	}
 
 	/**
-	 * Setter for the flight path generated by the generator
-	 * @param flightPath the flight path to be set
+	 * Setter for the landing distance (see getter for more info)
+	 * @param landingDistance the desired landing distance in meters
 	 */
-	private void setFlightPath(FlightPath flightPath) {
-		this.flightPath = flightPath;
+	public void setLandingDistance(float landingDistance) {
+		this.landingDistance = landingDistance;
 	}
 
 	/**
@@ -441,11 +409,10 @@ public class PathGenerator_v2{
 	private float turnRadius = 1000f;
 
 	/**
-	 * The total flight path generated by the path generator
-	 * this variable is used by the controls to avoid collision
+	 * The distance from the airport needed to make a safe landing
+	 * TODO make dynamically by fitting barts landing data
 	 */
-	private FlightPath flightPath;
-
+	private float landingDistance = 400f;
 
 	/**
 	 * A class to save the specifications of a turn in construction progress (provided object to store intermediary results)
@@ -756,7 +723,7 @@ public class PathGenerator_v2{
 //	public PathGenerator_v2(AutopilotInputs_v2 currentInputs, MapAirport destinationAirport){
 //		setDroneParameters(currentInputs);
 //		setAirportParameters(destinationAirport, currentInputs);
-//		System.out.println("Data fed to the generator, drone pos: " + getCurrentPosition() + ", drone heading: " + getOrientation()
+//		System.out.println("Data fed to the generator, drone pos: " + getPosition() + ", drone heading: " + getOrientation()
 //				+ ", airport entry point: " + getLandingPosition() + ", airport landing direction: " + getLandingOrientation());
 //		generatePath();
 //	}
@@ -827,7 +794,7 @@ public class PathGenerator_v2{
 //
 //	// Getters and setters
 //
-//	public Vector getCurrentPosition() {
+//	public Vector getPosition() {
 //		return this.position;
 //	}
 //
@@ -868,7 +835,7 @@ public class PathGenerator_v2{
 //	 * @return
 //	 */
 //	private Vector getDescentStartPosition() {
-//		Vector position = getCurrentPosition();
+//		Vector position = getPosition();
 //		Vector landingPosition = getLandingPosition();
 //		float heightDifference = position.getyValue()-landingPosition.getyValue();
 //		float a = (float) (heightDifference/Math.sin(getLandingAngle()));
@@ -890,7 +857,7 @@ public class PathGenerator_v2{
 //	/*
 //	 * PURE CHaos
 //	private Vector getPointOfIntersection() {
-//		Vector position = getCurrentPosition().makeHorizontal();
+//		Vector position = getPosition().makeHorizontal();
 //		Vector landingPosition = getLandingPosition().makeHorizontal();
 //		Vector orientation = getOrientation().makeHorizontal();
 //		Vector landingOrientation = getLandingOrientation().makeHorizontal();
@@ -924,7 +891,7 @@ public class PathGenerator_v2{
 //	}
 //
 //	public void generatePath() {
-//		Vector position = getCurrentPosition().makeHorizontal();
+//		Vector position = getPosition().makeHorizontal();
 //		Vector orientation = getOrientation().makeHorizontal();
 //		Vector descentStartPosition = getDescentStartPosition().makeHorizontal();
 //		Vector descentStartOrientation = getLandingOrientation().makeHorizontal();
@@ -1048,7 +1015,7 @@ public class PathGenerator_v2{
 //
 //		getTurns().clear();
 //
-//		Vector position = getCurrentPosition().makeHorizontal();
+//		Vector position = getPosition().makeHorizontal();
 //		Vector orientation = getOrientation().makeHorizontal();
 //		Vector descentStartPosition = getDescentStartPosition().makeHorizontal();
 //		Vector descentStartOrientation = getLandingOrientation().makeHorizontal();
