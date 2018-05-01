@@ -61,25 +61,25 @@ public class AutopilotLandingController extends Controller {
 //        System.out.println("Current velocity: " + this.getVelocityApprox(prevInputs, getCurrentInputs()));
 
         switch (landingPhase){
+	        case SLOW_DOWN:
+//	        	System.out.println("Slowdown");
+	        	this.slowDown(outputs);
+	        	break;
             case STABILIZE:
                 this.stabilizeFlight(outputs, inputs, previousInputs);
-                System.out.println("stabilize");
+//                System.out.println("stabilize");
                 break;
             case RAPID_DESCEND:
                 this.getRapidDescendControls(outputs, inputs, previousInputs);
-                System.out.println("rapidDescend");
+//                System.out.println("rapidDescend");
                 break;
             case SOFT_DESCEND:
-                System.out.println("soft descend");
+//                System.out.println("soft descend");
                 this.getSoftDescendControls(outputs, inputs, previousInputs);
                 break;
-            case SLOW_DOWN:
-            	System.out.println("Slowdown");
-            	this.slowDown(outputs);
-            	break;
             case BRAKE:
             	this.brake(outputs,inputs, previousInputs);
-            	System.out.println("Brake");
+//            	System.out.println("Brake");
             	break;
         }
         float resultMargin = 0f;
