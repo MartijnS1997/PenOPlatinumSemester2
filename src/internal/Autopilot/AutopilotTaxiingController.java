@@ -60,9 +60,6 @@ public class AutopilotTaxiingController extends Controller {
             case MOVING_TO_TARGET:
                 moveToTarget(outputs, currentInputs, prevInputs);
                 break;
-            case TURNING:
-                turnToCorrectOrientation(outputs, currentInputs, prevInputs);
-                break;
         }
     }
 
@@ -120,6 +117,34 @@ public class AutopilotTaxiingController extends Controller {
 
     private final static float AIRPORT_BOUND_BUFFER = 2f;
 
+
+
+    @Override
+    public boolean hasReachedObjective(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs) {
+        boolean reached = false;
+
+        //if the wantedOrientation matters
+        if (getWantedOrientation() != null) {
+          //  if (targetReached(currentInputs) && checkHasFinishedTurn(abs(Controller.extractOrientation(currentInputs).getAngleBetween(getWantedOrientation())))) {
+
+            if (targetReached(currentInputs) && orientationReached(currentInputs)) {
+                reached = true;
+            }
+        }
+        //if the wantedOrientation doesn't matter and is equal to null
+        else{
+            if (targetReached(currentInputs)){
+                reached = true;
+            }
+        }
+//        System.out.println("angle " + Controller.extractOrientation(currentInputs).getAngleBetween(getWantedOrientation()));
+//        System.out.println("wanted " + getWantedOrientation());
+//        System.out.println("current " + Controller.extractOrientation(currentInputs));
+//        System.out.println(reached);
+
+        return reached;
+
+    }
 
 
 
@@ -206,13 +231,6 @@ public class AutopilotTaxiingController extends Controller {
             return;
         }
 
-        //if we've only came to a standstill, but don't have to correct orientation
-//        if(droneInStandstill(currentInputs, prevInputs)){
-//            this.setTaxiingState(TaxiingState.TURNING);
-//            //invoke the turning to target controller
-//            this.turnToCorrectOrientation(outputs, currentInputs, prevInputs);
-//            return;
-//        }
 
         //if we've only came to a standstill, but we didn't reach anything, call the move controller
         if(droneInStandstill(currentInputs, prevInputs)){
@@ -294,22 +312,22 @@ public class AutopilotTaxiingController extends Controller {
         return position.distanceBetween(target) <=  REACHING_DISTANCE;
     }
 
-
-    private void turnToCorrectOrientation(ControlOutputs outputs, AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 prevInputs){
-
-        //check if we are done with turning
-        if(orientationReached(currentInputs)){
-            //if so, change the state and call the brake method, return afterwards
-            this.setTaxiingState(TaxiingState.FULL_BRAKE);
-            this.fullBrake(outputs, currentInputs, prevInputs);
-            return;
-        }
-//        System.out.println("position: " + Controller.extractPosition(currentInputs));
-        brakeTurningControls(outputs, currentInputs, prevInputs);
-        ///cruiseControl(outputs, prevInputs,currentInputs);
-
-
-    }
+//
+//    private void turnToCorrectOrientation(ControlOutputs outputs, AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 prevInputs){
+//
+//        //check if we are done with turning
+//        if(orientationReached(currentInputs)){
+//            //if so, change the state and call the brake method, return afterwards
+//            this.setTaxiingState(TaxiingState.FULL_BRAKE);
+//            this.fullBrake(outputs, currentInputs, prevInputs);
+//            return;
+//        }
+////        System.out.println("position: " + Controller.extractPosition(currentInputs));
+//        brakeTurningControls(outputs, currentInputs, prevInputs);
+//        ///cruiseControl(outputs, prevInputs,currentInputs);
+//
+//
+//    }
 
     private boolean orientationReached(AutopilotInputs_v2 inputs){
         Vector orientation = Controller.extractOrientation(inputs);
@@ -319,11 +337,12 @@ public class AutopilotTaxiingController extends Controller {
 //        System.out.println(orientation);
      //   System.out.println(orientation.getAngleBetween(getWantedOrientation()));
 
-
-        return Math.abs(orientation.getAngleBetween(getWantedOrientation())) >= maxOrientationError();
+        //if the angle between the current orientation en the wanted orientation is smaller than the maxOrientationError, the correct orientation has been reached
+        return Math.abs(orientation.getAngleBetween(getWantedOrientation())) <= maxOrientationError();
     }
 
     private Vector wantedOrientation;
+
     public Vector getWantedOrientation(){
         return wantedOrientation;
     }
@@ -337,7 +356,11 @@ public class AutopilotTaxiingController extends Controller {
     }
 
 
-
+    /**
+     * taxi to the correct gate
+     * @param inputs
+     * @param packageToDeliver
+     */
     public void gateTaxiing(AutopilotInputs_v2 inputs, AutopilotDelivery packageToDeliver){
         //airport to go to
         int goToAirport;
@@ -358,15 +381,8 @@ public class AutopilotTaxiingController extends Controller {
             if (goToGate == 0) taxiTo = getAutopilot().getCommunicator().getAirportByID(goToAirport).getGateZeroPosition();
             if (goToGate == 1) taxiTo = getAutopilot().getCommunicator().getAirportByID(goToAirport).getGateOnePosition();
 
-            //the drones current position
- //           Vector location = Controller.extractPosition(inputs);
-
-            //the distance to between the drone and the gate
-         //   float distanceToGate = this.getAutopilot().getCommunicator().getAirportAtCurrentLocation().distanceToGate(goToGate,location);
-
-            //if the distance to the gate is smaller than the reaching distance, the package has been picked up
-            // if (distanceToGate < AutopilotTaxiingController.REACHING_DISTANCE) packageToDeliver.setHasBeenPickedUp();
         }
+
         //if the package has already been picked up, the drone has to taxi to the correct gate to drop the package off
         else{
             goToAirport = packageToDeliver.getDestinationAirport();
@@ -383,6 +399,10 @@ public class AutopilotTaxiingController extends Controller {
 
     }
 
+    /**
+     * Taxi to the correct runway
+     * @param inputs
+     */
     public void runwayTaxiing(AutopilotInputs_v2 inputs){
         Vector taxiTo;
         Vector takeOffDirection;
@@ -398,13 +418,16 @@ public class AutopilotTaxiingController extends Controller {
 
         //go to the gate for which the drone has to turn the least and is therefore the easiest to reach
         if (Math.abs(orientation.getAngleBetween(gateZeroOrientation)) <  Math.abs(orientation.getAngleBetween(gateOneOrientation))) {
-            taxiTo = currentAirport.getRunwayZeroEnd();
+            taxiTo = currentAirport.getLocation();
             takeOffDirection = currentAirport.getRunwayZeroTakeoffDirection();
         }
         else {
-            taxiTo = currentAirport.getRunwayOneEnd();
+            taxiTo = currentAirport.getLocation();
             takeOffDirection = currentAirport.getRunwayOneTakeoffDirection();
         }
+
+
+        //taxiTo = Controller.extractPosition(inputs);
 
         //set the destination of the drone and the correct orientation so it can take off from the runway
         setTarget(taxiTo, takeOffDirection);
@@ -652,63 +675,45 @@ public class AutopilotTaxiingController extends Controller {
 
 
 
-    private float angleToWantedOrientation(AutopilotInputs_v2 inputs){
-        Vector orientation = Controller.extractOrientation(inputs);
-        Vector normal = new Vector(0,1,0); // the normal vector of the xz-plane
-        //now calculate the current heading vector of the drone in the world axis system
-        Vector headingDrone = new Vector(0,0,-1);
-        //transform
-        Vector headingWorld = PhysXEngine.droneOnWorld(headingDrone, orientation);
-        //project
-        Vector projHeadingWorld = headingWorld.orthogonalProjection(normal);
+//    private float angleToWantedOrientation(AutopilotInputs_v2 inputs){
+//        Vector orientation = Controller.extractOrientation(inputs);
+//        Vector normal = new Vector(0,1,0); // the normal vector of the xz-plane
+//        //now calculate the current heading vector of the drone in the world axis system
+//        Vector headingDrone = new Vector(0,0,-1);
+//        //transform
+//        Vector headingWorld = PhysXEngine.droneOnWorld(headingDrone, orientation);
+//        //project
+//        Vector projHeadingWorld = headingWorld.orthogonalProjection(normal);
+//
+//        Vector wantedOrientation = getWantedOrientation();
+//
+//        //now get the angle between the heading vector and the wantedOrientation
+//        float angle = abs(projHeadingWorld.getAngleBetween(wantedOrientation));
+//
+//        //calculate the direction, we use the vector product of the heading vector and the difference vector
+//        //a positive vector indicates that the target is located to the left, a negative angle indicates the
+//        float direction = signum(projHeadingWorld.crossProduct(wantedOrientation).scalarProduct(normal));
+//
+//        float result = angle*direction;
+//        //check for NaN
+//        if(Float.isNaN(result)){
+//            return 0f;
+//        }
+//
+//        return result;
+//    }
+//
+//    private boolean orientationWithinErrorRange(AutopilotInputs_v2 inputs){
+//        float angle = angleToWantedOrientation(inputs);
+//
+//
+//        if(maxOrientationError() <= abs(angle)){
+//            return true;
+//        }
+//
+//        return false;
+//    }
 
-        Vector wantedOrientation = getWantedOrientation();
-
-        //now get the angle between the heading vector and the wantedOrientation
-        float angle = abs(projHeadingWorld.getAngleBetween(wantedOrientation));
-
-        //calculate the direction, we use the vector product of the heading vector and the difference vector
-        //a positive vector indicates that the target is located to the left, a negative angle indicates the
-        float direction = signum(projHeadingWorld.crossProduct(wantedOrientation).scalarProduct(normal));
-
-        float result = angle*direction;
-        //check for NaN
-        if(Float.isNaN(result)){
-            return 0f;
-        }
-
-        return result;
-    }
-
-    private boolean orientationWithinErrorRange(AutopilotInputs_v2 inputs){
-        float angle = angleToWantedOrientation(inputs);
-
-
-        if(maxOrientationError() <= abs(angle)){
-            return true;
-        }
-
-        return false;
-    }
-
-
-    @Override
-    public boolean hasReachedObjective(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs) {
-        boolean reached = false;
-
-        if (wantedOrientation != null) {
-            if (targetReached(currentInputs) && orientationWithinErrorRange(currentInputs)) {
-                reached = true;
-            }
-        }
-        else{
-            if (targetReached(currentInputs)){
-                reached = true;
-            }
-        }
-        return reached;
-
-    }
 
 //    @Override
 //    protected float getMainStableInclination() {
@@ -817,7 +822,7 @@ public class AutopilotTaxiingController extends Controller {
 
 
     private enum TaxiingState {
-        INIT_TURN, FULL_BRAKE, MOVING_TO_TARGET, TURNING
+        INIT_TURN, FULL_BRAKE, MOVING_TO_TARGET
     }
 
 
