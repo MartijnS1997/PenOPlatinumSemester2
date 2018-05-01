@@ -63,11 +63,12 @@ public class AirportNavigationController extends AutopilotFlightController {
     private static boolean willFinishTurn(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs, TurnControl turnControl){
         //get the specifications for the turn we're currently making
         AutopilotTurn turn = turnControl.getTurn();
+        System.out.println("turn control: " +  turnControl);
         float turnAngle = turn.getTurnAngle();
 
         float deltaAngle = turnControl.calcDeltaAngle(currentInputs, previousInputs, turn);
         float angleToGo = turnControl.getAngleToGo();
-        float nextAngleToGo = deltaAngle - angleToGo;
+        float nextAngleToGo = angleToGo-deltaAngle;
         //check if we've made the whole turn this can be checked easily by comparing the signs of the
         //angle to go and the turn angle, if they differ the angle is finished
         return signum(nextAngleToGo) != signum(turnAngle);
@@ -100,7 +101,7 @@ public class AirportNavigationController extends AutopilotFlightController {
         if(nextState != currentState){
             System.out.println();
             //if not configure the controller
-            configureStateController(nextState, currentInputs, previousInputs);
+            configureStateController(nextState);
             //and save the state
             this.setNavigatorState(nextState);
             //note: we only have to save the next state if the state is indeed changed, if not we would be doing
@@ -145,11 +146,9 @@ public class AirportNavigationController extends AutopilotFlightController {
     /**
      * Getter for the next turn on the trajectory of the drone to navigate to the airport
      * TODO now it is just configured for testing but once finished, hook it up to the path generator
-     * @param currentInputs the inputs most recently received from the testbed
-     * @param previousInputs the inputs previously received from the testbed
      * @return an AutopilotTurn object containing all the specifications to do the next turn
      */
-    private AutopilotTurn getNextTurn(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs){
+    private AutopilotTurn getNextTurn(){
         //get the path generator
         PathGenerator_v2 pathGenerator = this.getPathGenerator();
         AutopilotTurn nextTurn = pathGenerator.getNextTurn();
@@ -421,19 +420,17 @@ public class AirportNavigationController extends AutopilotFlightController {
      * Configures the controller responsible for the provided state
      * this method should be called every time the finite state machine switches state
      * @param navigatorState the state to configure the corresponding controller for
-     * @param currentInputs the inputs most recently received from the testbed
-     * @param previousInputs the inputs previously received from the testbed
      */
-    private void configureStateController(NavigatorState navigatorState, AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs){
+    private void configureStateController(NavigatorState navigatorState){
         //open a switch to call the configurators
         switch(navigatorState){
             case TURNING:
                 //call the configuration method
-                configureTurningController(currentInputs, previousInputs);
+                configureTurningController();
                 break;
             case TO_NEXT_TURN:
                 //call the configuration method
-                configureToNextTurnController(currentInputs, previousInputs);
+                configureToNextTurnController();
                 break;
         }
     }
@@ -441,10 +438,8 @@ public class AirportNavigationController extends AutopilotFlightController {
     /**
      * Configures the turn controller for the next turn that has to be made
      * method should be called every time the controller is switched to a turn controller
-     * @param currentInputs the inputs most recently received from the testbed
-     * @param previousInputs the inputs previously received from the testbed
      */
-    private void configureTurningController(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs){
+    private void configureTurningController(){
         //get the turn physics
         PhysXEngine.TurnPhysX turnPhysX = this.getTurnPhysX();
         //generate the next turn
@@ -455,7 +450,7 @@ public class AirportNavigationController extends AutopilotFlightController {
         //that was responsible for flying to the turn
         switch(state){
             case INIT:
-                nextTurn = this.getNextTurn(currentInputs, previousInputs);
+                nextTurn = this.getNextTurn();
                 break;
             default:
                 ToNextTurnControl toNextTurnControl = this.getToNextTurnControl();
@@ -472,13 +467,11 @@ public class AirportNavigationController extends AutopilotFlightController {
      * Configures the to next turn controller
      * this method should be called every time the state is switched to the to next turn controller
      * --> generates a new controller configured to fly to the next turn
-     * @param currentInputs the inputs most recently received from the testbed
-     * @param previousInputs the inputs previously received from the testbed
      * note: this method relies on the previously active controller being the turning controller
      *       if we decide to start with the to next turn controller this method should be changed & make use
      *       of a dummy turn to begin with
      */
-    private void configureToNextTurnController(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs){
+    private void configureToNextTurnController(){
         //get the turn physics
         PhysXEngine.TurnPhysX turnPhysX = this.getTurnPhysX();
         //get the previous turn from the previous turning controller
@@ -486,11 +479,15 @@ public class AirportNavigationController extends AutopilotFlightController {
         AutopilotTurn previousTurn = previousTurnControl.getTurn();
 
         //generate the next turn
-        AutopilotTurn nextTurn = this.getNextTurn(currentInputs, previousInputs);
+        AutopilotTurn nextTurn = this.getNextTurn();
 
         //generate and set the controller
         ToNextTurnControl toNextTurnControl = new ToNextTurnControl(nextTurn, previousTurn, turnPhysX);
         this.setToNextTurnControl(toNextTurnControl);
+
+//        //TODO bug-fix, check for more elegant solution
+        TurnControl turnControl = new TurnControl(nextTurn, turnPhysX);
+        this.setTurnControl(turnControl);
 
     }
 
@@ -594,6 +591,7 @@ public class AirportNavigationController extends AutopilotFlightController {
      * @param turnControl the next turn to make with the navigation controller
      */
     private void setTurnControl(TurnControl turnControl) {
+        System.out.println(turnControl);
         this.turnControl = turnControl;
     }
 
@@ -1485,6 +1483,13 @@ public class AirportNavigationController extends AutopilotFlightController {
         private final static float ROLL_CORRECT_INTEGRAL = 0.f;
         private final static float ROLL_CORRECT_DERIVATIVE = 1.0f;
         private final PIDController rollCorrectController = new PIDController(ROLL_CORRECT_GAIN, ROLL_CORRECT_INTEGRAL, ROLL_CORRECT_DERIVATIVE);
+
+//        @Override
+//        public String toString() {
+//            return "TurnControl{" +
+//                    "turn=" + turn +
+//                    '}';
+//        }
     }
 
     /**

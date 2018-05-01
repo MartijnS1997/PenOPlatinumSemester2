@@ -529,7 +529,7 @@ public class AutopilotTakeoffController extends Controller {
 //        float PIDControlActions =  pitchPid.getPIDOutput(pitchAngle,  deltaTime);
 //        //System.out.println("Pitch result PID" + PIDControlActions);
 //        //adjust the horizontal stabilizer
-//        float horizontalInclination = this.getStabilizerStableInclination() - PIDControlActions;
+//        float horizontalInclination = this.getStabilizerStable() - PIDControlActions;
 //        horizontalInclination = signum(horizontalInclination) * min(abs(horizontalInclination), HOR_STABILIZER_MAX);
 //        outputs.setHorStabInclination(horizontalInclination);
 //    }
@@ -634,12 +634,12 @@ public class AutopilotTakeoffController extends Controller {
 //    }
 //
 //    @Override
-//    protected float getMainStableInclination() {
+//    protected float getMainStable() {
 //        return MAIN_STABLE;
 //    }
 //
 //    @Override
-//    protected float getStabilizerStableInclination() {
+//    protected float getStabilizerStable() {
 //        return STABILIZER_STABLE;
 //    }
 //

@@ -445,7 +445,7 @@ public class World {
 	private final static float MAX_TRANSFER_VELOCITY = 1.0f;
 
 	//the maximum distance between the target gate and the drone before a package can be transferred
-	private final static float MAX_TRANSFER_DISTANCE = 25.0f;
+	private final static float MAX_TRANSFER_DISTANCE = 50.0f;
 
 	/**
 	 * Checks if there are any drones that have crashed during the timestep simulated

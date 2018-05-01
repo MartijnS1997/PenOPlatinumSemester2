@@ -12,6 +12,7 @@ import com.sun.org.apache.bcel.internal.generic.LAND;
 import internal.Helper.Vector;
 
 import static internal.Autopilot.AutopilotState.*;
+import static internal.Autopilot.Controller.trajectoryLog;
 
 /**
  * Created by Martijn on 3/04/2018.
@@ -46,6 +47,7 @@ public class AutopilotFiniteStateMachine {
      */
     public AutopilotOutputs getMachineOutput(AutopilotInputs_v2 currentInputs){
         //TODO uncomment if controllers are implemented
+        trajectoryLog(currentInputs);
         //check the state that we should start next
         AutopilotState activeState = toNextState(currentInputs);
         //get the controller that needs to be active

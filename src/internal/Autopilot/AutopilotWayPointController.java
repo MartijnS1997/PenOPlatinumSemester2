@@ -155,7 +155,7 @@ public class AutopilotWayPointController {
 ////        System.out.println("PID output: " + pidResult);
 //        //if the pid result is positive: the set point is larger than the input -> lower the pitch (pos inclination)
 //        //if the pid result is negative: the set point is smaller than the input -> increase the pitch (neg inclination)
-//        float horizontalInclination = /*this.getStabilizerStableInclination() */+ pidResult; //todo change the constants for better result
+//        float horizontalInclination = /*this.getStabilizerStable() */+ pidResult; //todo change the constants for better result
 //        horizontalInclination = signum(horizontalInclination) * min(abs(horizontalInclination), HORIZONTAL_CAP_INCLINATION);
 //        outputs.setHorStabInclination(horizontalInclination);
 //    }
@@ -188,8 +188,8 @@ public class AutopilotWayPointController {
 //
 //        //System.out.println( "input sign: " + pidInput);
 //        //and inclining the main wings
-//        float mainLeftWingInclination = /*this.getMainStableInclination()*/ + pidOutput;
-//        float mainRightWingInclination =/* this.getMainStableInclination()*/ - pidOutput;
+//        float mainLeftWingInclination = /*this.getMainStable()*/ + pidOutput;
+//        float mainRightWingInclination =/* this.getMainStable()*/ - pidOutput;
 //
 //        //put some extra umpf into the horizontal stabilizer
 //        float surplusHor = outputs.getHorStabInclination()  + BANK_HOR_STAB_EXTRA;
@@ -204,15 +204,15 @@ public class AutopilotWayPointController {
 //    /**
 //     * Enforces a maximum onto the main wing inclination based on the MAIN_CAP_DELTA_INCLINATION variable
 //     * @param inclination the inclination to adjust
-//     * @return if the inclination is in the range getMainStableInclination +- MAIN_CAP_DELTA_INCLINATION
+//     * @return if the inclination is in the range getMainStable +- MAIN_CAP_DELTA_INCLINATION
 //     *         the same value as the inclination is returned, if it exceeds the border value, the inclination
 //     *         is set to the border value
 //     */
 //    //note: replace with main class call cap inclination
 //    private float capMainWingInclination(float inclination){
 ////        //first determine the lower cap:
-////        float lowerCap = this.getMainStableInclination() - MAIN_CAP_DELTA_INCLINATION;
-////        float upperCap = this.getMainStableInclination() + MAIN_CAP_DELTA_INCLINATION;
+////        float lowerCap = this.getMainStable() - MAIN_CAP_DELTA_INCLINATION;
+////        float upperCap = this.getMainStable() + MAIN_CAP_DELTA_INCLINATION;
 ////        if(inclination < lowerCap){
 ////            return lowerCap;
 ////        }
@@ -331,12 +331,12 @@ public class AutopilotWayPointController {
 //        float roll = currentInput.getRoll();
 //
 //        if(roll >= rollThreshold&&isSteeringLeft(outputs)){
-//            outputs.setRightWingInclination(0/* this.getMainStableInclination()*/);
-//            outputs.setLeftWingInclination(0 /*this.getMainStableInclination()*/);
+//            outputs.setRightWingInclination(0/* this.getMainStable()*/);
+//            outputs.setLeftWingInclination(0 /*this.getMainStable()*/);
 //        }
 //        else if(roll <= - rollThreshold&&isSteeringRight(outputs)){
-//            outputs.setLeftWingInclination(0 /*this.getMainStableInclination()*/);
-//            outputs.setRightWingInclination(0 /*this.getMainStableInclination()*/);
+//            outputs.setLeftWingInclination(0 /*this.getMainStable()*/);
+//            outputs.setRightWingInclination(0 /*this.getMainStable()*/);
 //
 //        }else{
 //            // change nothing
@@ -350,7 +350,7 @@ public class AutopilotWayPointController {
 //     * @return true if the drone is steering right
 //     */
 //    private boolean isSteeringRight(Controller.ControlOutputs outputs){
-//        return false; //outputs.getRightWingInclination() < this.getMainStableInclination();
+//        return false; //outputs.getRightWingInclination() < this.getMainStable();
 //    }
 //
 //    /**
@@ -359,7 +359,7 @@ public class AutopilotWayPointController {
 //     * @return true if the drone is steering left
 //     */
 //    private boolean isSteeringLeft(Controller.ControlOutputs outputs){
-//        return false; //outputs.getRightWingInclination() > this.getMainStableInclination();
+//        return false; //outputs.getRightWingInclination() > this.getMainStable();
 //    }
 //
 //    /**
@@ -459,12 +459,12 @@ public class AutopilotWayPointController {
 //
 //    //TODO implement these methods accordingly
 ////    @Override
-////    protected float getMainStableInclination() {
+////    protected float getMainStable() {
 ////        return MAIN_STABLE_INCLINATION;
 ////    }
 ////
 ////    @Override
-////    protected float getStabilizerStableInclination() {
+////    protected float getStabilizerStable() {
 ////        return HORIZONTAL_STABLE_INCLINATION;
 ////    }
 ////

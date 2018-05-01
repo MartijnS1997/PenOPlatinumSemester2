@@ -463,7 +463,7 @@ public class AutopilotTaxiingController extends Controller {
 //    }
 //
 //    @Override
-//    protected float getStabilizerStableInclination() {
+//    protected float getStabilizerStable() {
 //        return 0;
 //    }
 //
@@ -840,7 +840,7 @@ public class AutopilotTaxiingController extends Controller {
 //    }
 //
 //    @Override
-//    protected float getStabilizerStableInclination() {
+//    protected float getStabilizerStable() {
 //        return STABILIZER_STABLE;
 //    }
 //

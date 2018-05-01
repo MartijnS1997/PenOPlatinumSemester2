@@ -191,7 +191,7 @@ public class GammaFlightController extends AutopilotFlightController {
 //        return MAIN_STABLE_INCLINATION;
 //    }
 //    @Override
-//    protected float getStabilizerStableInclination() {
+//    protected float getStabilizerStable() {
 //        return STABILIZER_STABLE_INCLINATION;
 //    }
 //    @Override
@@ -302,10 +302,10 @@ public class GammaFlightController extends AutopilotFlightController {
 //        }
 //
 //        //for the horizontal wing
-//        if(horizontalInclination > getStabilizerStableInclination()){
-//            decrementHorizontalStabilizer(outputs, getStabilizerStableInclination());
+//        if(horizontalInclination > getStabilizerStable()){
+//            decrementHorizontalStabilizer(outputs, getStabilizerStable());
 //        }else{
-//            incrementHorizontalStabilizer(outputs, getStabilizerStableInclination());
+//            incrementHorizontalStabilizer(outputs, getStabilizerStable());
 //        }
 //    }
 //
@@ -532,7 +532,7 @@ public class GammaFlightController extends AutopilotFlightController {
 //    }
 //
 //    @Override
-//    protected float getStabilizerStableInclination() {
+//    protected float getStabilizerStable() {
 //        return STABILIZER_STABLE_INCLINATION;
 //    }
 //

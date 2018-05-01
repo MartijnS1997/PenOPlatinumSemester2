@@ -59,7 +59,7 @@ public class StabilizerController extends Controller {
         //get the outputs (we want pitch zero so out current pitch is the error)
         float pidOutputs = pitchPid.getPIDOutput(pitch, deltaTime);
         //based on the output set the horizontal rudder, cap it
-        float horizontalInclination = /*this.getStabilizerStableInclination()*/ - pidOutputs;
+        float horizontalInclination = /*this.getStabilizerStable()*/ - pidOutputs;
         horizontalInclination = signum(horizontalInclination) * min(abs(horizontalInclination), MAX_HOR_STAB_INCL);
         outputs.setHorStabInclination(horizontalInclination);
 
@@ -82,8 +82,8 @@ public class StabilizerController extends Controller {
         //get the output, reference roll is 0, so our current roll is the error
         float pidOutputs = rollPid.getPIDOutput(roll, deltaTime);
         //now set the main wings based on the outputs of the PID controller
-        float rightMainWing = /*this.getMainStableInclination()*/ + pidOutputs;
-        float leftMainWing = /*this.getMainStableInclination()*/ - pidOutputs;
+        float rightMainWing = /*this.getMainStable()*/ + pidOutputs;
+        float leftMainWing = /*this.getMainStable()*/ - pidOutputs;
 
         outputs.setRightWingInclination(capMainWingInclination(rightMainWing));
         outputs.setLeftWingInclination(capMainWingInclination(leftMainWing));
@@ -93,14 +93,14 @@ public class StabilizerController extends Controller {
     /**
      * Enforces a maximum onto the main wing inclination based on the MAIN_CAP_DELTA_INCLINATION variable
      * @param inclination the inclination to adjust
-     * @return if the inclination is in the range getMainStableInclination +- MAIN_CAP_DELTA_INCLINATION
+     * @return if the inclination is in the range getMainStable +- MAIN_CAP_DELTA_INCLINATION
      *         the same value as the inclination is returned, if it exceeds the border value, the inclination
      *         is set to the border value
      */
     private float capMainWingInclination(float inclination){
         //first determine the lower cap:
-        float lowerCap = /*this.getMainStableInclination()*/ - MAIN_INCL_CAP_DELTA;
-        float upperCap = /*this.getMainStableInclination()*/ + MAIN_INCL_CAP_DELTA;
+        float lowerCap = /*this.getMainStable()*/ - MAIN_INCL_CAP_DELTA;
+        float upperCap = /*this.getMainStable()*/ + MAIN_INCL_CAP_DELTA;
         if(inclination < lowerCap){
             return lowerCap;
         }
@@ -135,12 +135,12 @@ public class StabilizerController extends Controller {
     }
 //
 //    @Override
-//    protected float getMainStableInclination() {
+//    protected float getMainStable() {
 //        return MAIN_STABLE_INCLINATION;
 //    }
 //
 //    @Override
-//    protected float getStabilizerStableInclination() {
+//    protected float getStabilizerStable() {
 //        return STABILIZER_STABLE;
 //    }
 //
