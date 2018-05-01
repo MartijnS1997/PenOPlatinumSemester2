@@ -1077,7 +1077,7 @@ public class SimulationGen {
     /**
      * The length of the runway of the airports (same values for all the airports within a world
      */
-    private float airportRunwayLength = 280f;
+    private float airportRunwayLength = 400f;
 
     /**
      * The number of steps that should be taken by the testbed in one simulation cycle

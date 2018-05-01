@@ -179,7 +179,7 @@ public class PhaseFourMain {
     private static int stepsPerCycle = 50;
     private static int stepsPerSubCycle = 10;
     private static float timeStep = 0.001f;
-    private static int playbackSpeed = 1;
+    private static int playbackSpeed = 4;
 
     private static int tcpPort = 4242;
     private static String host = "localhost";
