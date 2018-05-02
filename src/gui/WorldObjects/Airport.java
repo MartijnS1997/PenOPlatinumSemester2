@@ -1,5 +1,6 @@
 package gui.WorldObjects;
 
+import gui.GraphicsObjects.Cube;
 import gui.GraphicsObjects.GraphicsObject;
 import gui.GraphicsObjects.Tile;
 import math.Vector3f;
@@ -54,10 +55,12 @@ public class Airport implements WorldObject {
     }
 
     public void createGate(float W, float number) {
-        Vector3f position = getPosition().add(new Vector3f((float) (-W/2*(float)Math.pow(-1, number)*Math.cos(-getOrientation().x)), 0, (float) (-W/2*(float)Math.pow(-1, number)*Math.sin(-getOrientation().x))));
+        Vector3f position = getPosition().add(new Vector3f((float) (-W/2*(float)Math.pow(-1, number)*Math.cos(-getOrientation().x)), 1, (float) (-W/2*(float)Math.pow(-1, number)*Math.sin(-getOrientation().x))));
         Vector3f color = new Vector3f(0, 0, 0.45f + number/2);
-        Tile tile = new Tile(position, color, orientation);
-        tile.setSize(new Vector3f(W, 1, W));
+//        Tile tile = new Tile(position, color, orientation);
+        Cube tile = new Cube(position, color, false);
+        tile.update(position, orientation);
+        tile.setSize(W);
         addGraphicsObject(tile);
     }
 
