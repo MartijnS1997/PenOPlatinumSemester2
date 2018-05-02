@@ -140,6 +140,7 @@ public class Window {
 		glDepthFunc(GL_LESS);
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
+		glEnable(GL_BLEND);
 		
 		program = new ShaderProgram(false, "resources/3dWorld.vert", "resources/3dWorld.frag");	
 

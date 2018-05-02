@@ -24,7 +24,9 @@ public class Floor implements WorldObject {
 
     @Override
     public void initGraphicsObjects() {
-
+        Tile tile1 = new Tile(new Vector3f(0, -5f, 0), new Vector3f(90, 1, 0.6f), false);
+        tile1.setSize(new Vector3f(10000, 1, 10000));
+        this.addGraphicsObject(tile1);
         for (int i = 0; i < n*n; i++) {
             Vector3f delta = new Vector3f(nx*(i%n), 0, nz*(i/n));
             Vector3f position = delta.add(getPosition());
