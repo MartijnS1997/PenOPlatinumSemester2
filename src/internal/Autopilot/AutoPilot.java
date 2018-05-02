@@ -27,7 +27,7 @@ public class AutoPilot implements Autopilot_v2{
 		//this.setSelector(new ControllerSelector(this));
 		this.stateMachine = new AutopilotFiniteStateMachine(this);
 		this.overseer = overseer;
-		this.communicator = new OverseerCommunication(this, overseer);
+		this.communicator = new AutopilotCommunicator(this, overseer);
 		//may be out commented if the transitions are smooth
 		//this.getSelector().forceActiveController(FlightState.TAXIING_TO_GATE);
 
@@ -113,7 +113,7 @@ public class AutoPilot implements Autopilot_v2{
 		//set the current inputs so the communicator can access them
 		this.setCurrentInputs(inputs);
 		//get the overseer
-		OverseerCommunication communicator = this.getCommunicator();
+		AutopilotCommunicator communicator = this.getCommunicator();
 		communicator.communicateWithOverseer();
 		//return this.getSelector().getControlActions(inputs);
 
@@ -293,7 +293,7 @@ public class AutoPilot implements Autopilot_v2{
 	 * Getter for the overseer communication entity, used to communicate with the overseer
 	 * @return an OverseerCommunication object used to communicate with the overseer
 	 */
-	protected OverseerCommunication getCommunicator() {
+	protected AutopilotCommunicator getCommunicator() {
 		return communicator;
 	}
 
@@ -366,7 +366,7 @@ public class AutoPilot implements Autopilot_v2{
 	/**
 	 * The entity that regulates the communication with the overseer
 	 */
-	private OverseerCommunication communicator;
+	private AutopilotCommunicator communicator;
 
 	/**
 	 * The finite state machine used to govern the controllers for the autopilot

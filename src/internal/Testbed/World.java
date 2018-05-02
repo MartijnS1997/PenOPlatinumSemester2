@@ -200,9 +200,10 @@ public class World {
 		for(Drone drone: drones){
 			if(drone.isDelivering()){
 				//check if the drone can deliver the package
-				canDeliverPackage(drone);
+				if(canDeliverPackage(drone)){
 				//unload the package
 				drone.unloadPackage();
+				}
 			}
 		}
 
@@ -388,11 +389,13 @@ public class World {
 	private boolean canDeliverPackage(Drone drone){
 		//check first if drone has the required velocity, if not skip the rest of the calc
 		Vector droneVelocity = drone.getVelocity();
+
 		if(droneVelocity.getSize()  > MAX_LANDING_VELOCITY){
 			return false;
 		}
-		//first get the package
+		//check if the drone is currently at the airport where the package needs to be delivered
 		WorldDelivery delivery = drone.getDeliveryPackage();
+		//first get the package
 		int destinationAirportID = delivery.getDestinationAirport();
 		int destinationGateNumber = delivery.getDestinationAirportGate();
 		//get the position of the gate
@@ -400,7 +403,6 @@ public class World {
 		WorldAirport airport = airports.get(destinationAirportID);
 		Vector dronePos = drone.getPosition();
 		float distanceToGate = airport.distanceToGate(destinationGateNumber, dronePos);
-
 		return distanceToGate <= MAX_TRANSFER_DISTANCE;
 	}
 
@@ -448,7 +450,7 @@ public class World {
 	private final static float MAX_TRANSFER_DISTANCE = 25.0f;
 
 	/**
-	 * Checks if there are any drones that have crashed during the timestep simulated
+	 * Checks if there are any drones that have crashed during the time step simulated
 	 * @param droneSet the set of drones to be checked
 	 */
 	private void checkForCrashes(Set<Drone> droneSet){

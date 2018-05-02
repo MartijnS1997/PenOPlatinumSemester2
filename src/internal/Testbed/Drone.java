@@ -588,6 +588,7 @@ public class Drone implements Callable<Void> {
 	public void unloadPackage(){
 		WorldDelivery deliveryPackage = this.getDeliveryPackage();
 		deliveryPackage.setDelivered();
+		System.out.println("package delivered");
 		this.deliveryPackage = null;
 	}
 

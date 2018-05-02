@@ -314,9 +314,12 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void>, Packa
         //get the ID from the autopilot that is invoking the getter
         String value = autoPilot.getID();
         //retrieve the corresponding queue for the drone
-        ConcurrentLinkedQueue<DeliveryPackage> queue = new ConcurrentLinkedQueue<>(this.getDroneDeliveryMap().get(value));
+        ConcurrentLinkedQueue<DeliveryPackage> queue = this.getDroneDeliveryMap().get(value);
         //and return the next element
-        return !queue.isEmpty() ? queue.poll() : null;
+        return queue.peek() != null ? queue.poll() : null;
+//        System.out.println("Elements in queue: " + (queue.peek()!=null));
+//        System.out.println("returned queue element: " + delivery);
+
     }
 
     /**

@@ -24,12 +24,17 @@ public class PathGenerator_v2{
 	 * Constructor for a path generator to generate the turns
 	 * @param currentInputs the current inputs of the drone
 	 * @param destinationAirport the destination airport, this is the airport where to deliver the current package
+	 * @param cruisingAltitude  the cruising altitude of the drone
+	 * @param descendThreshold the threshold wherefore the descend phase is triggered, if this happens the offset for the landing needs to be adjusted
+	 * @param standardDescendAltitude the standard descend altitude, this altitude is the altitude for which the drone starts to land
+	 *                                if the descend threshold is breached
 	 */
-	public PathGenerator_v2(AutopilotInputs_v2 currentInputs, MapAirport destinationAirport, float cruisingAltitude){
+	public PathGenerator_v2(AutopilotInputs_v2 currentInputs, MapAirport destinationAirport, float cruisingAltitude, float descendThreshold, float standardDescendAltitude){
 		Vector dronePosGround = Controller.extractGroundPosition(currentInputs);
 		Vector droneOrientation = Controller.extractOrientation(currentInputs);
 		//calculate the trajectory
-		generateTrajectory(dronePosGround, droneOrientation, destinationAirport,cruisingAltitude);
+		float landingAltitude = cruisingAltitude < descendThreshold? cruisingAltitude : standardDescendAltitude;
+		generateTrajectory(dronePosGround, droneOrientation, destinationAirport,landingAltitude);
 	}
 
 	/**
@@ -64,12 +69,19 @@ public class PathGenerator_v2{
 	}
 
 
-	private void generateTrajectory(Vector dronePosGround, Vector droneOrientation, MapAirport destinationAirport, float cruisingAltitude){
+	/**
+	 * Generates the trajectory to be made by the drone to do the delivery
+	 * @param dronePosGround the position of the drone in ground coordinates
+	 * @param droneOrientation the orientation of the drone
+	 * @param destinationAirport the destination airport
+	 * @param landingAltitude the altitude at which the drone starts landing (needed to calculate the offset for the landing itself)
+	 */
+	private void generateTrajectory(Vector dronePosGround, Vector droneOrientation, MapAirport destinationAirport, float landingAltitude){
 		//grab the parameters needed
 		Vector airportLocation = destinationAirport.getLocation();
 		//generate the center of the first turn
 		TurnSpec firstTurn = this.getFirstTurnSpec(dronePosGround, droneOrientation, airportLocation);
-		TurnSpec secondTurn = this.getSecondTurnSpec(dronePosGround, destinationAirport, cruisingAltitude);
+		TurnSpec secondTurn = this.getSecondTurnSpec(dronePosGround, destinationAirport, landingAltitude);
 
 		distanceCheck(firstTurn, secondTurn);
 

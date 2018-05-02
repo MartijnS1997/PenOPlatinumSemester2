@@ -1,14 +1,11 @@
 package internal.Autopilot;
 
 import AutopilotInterfaces.AutopilotConfig;
-import AutopilotInterfaces.AutopilotInputs;
 import AutopilotInterfaces.AutopilotInputs_v2;
 import AutopilotInterfaces.AutopilotOutputs;
 import TestbedAutopilotInterface.Overseer.AutopilotDelivery;
 import TestbedAutopilotInterface.Overseer.AutopilotInfo;
-import TestbedAutopilotInterface.Overseer.DeliveryPackage;
 import TestbedAutopilotInterface.Overseer.MapAirport;
-import com.sun.org.apache.bcel.internal.generic.LAND;
 import internal.Helper.Vector;
 
 import static internal.Autopilot.AutopilotState.*;
@@ -34,7 +31,8 @@ public class AutopilotFiniteStateMachine {
         this.flightController = new AirportNavigationController(autopilot);
         this.descendController = new DescendController(autopilot);
         this.landingController = new AutopilotLandingController(autopilot);
-        this.taxiingController = new AutopilotTaxiingController(autopilot);
+        this.gateTaxiingController = new GateTaxiingController(autopilot);
+        this.runwayTaxiingController = new RunwayTaxiingController(autopilot);
         this.autopilot = autopilot;
 
     }
@@ -99,11 +97,11 @@ public class AutopilotFiniteStateMachine {
                 //check if we're on ground, if not continue landing, otherwise, start taxiing
                 return landingController.hasReachedObjective(currentInputs, previousInputs) ? TAXIING_TO_GATE : LANDING;
             case TAXIING_TO_GATE:
-                AutopilotTaxiingController taxiingControllerGate = this.getTaxiingController();
+                GateTaxiingController taxiingControllerGate = this.getGateTaxiingController();
                 //check if we've reached the gate, if not keep on going, if so start taxiing to the runway
                 return taxiingControllerGate.hasReachedObjective(currentInputs, previousInputs) ? TAXIING_TO_RUNWAY : TAXIING_TO_GATE;
             case TAXIING_TO_RUNWAY:
-                AutopilotTaxiingController taxiingControllerRunway = this.getTaxiingController();
+                RunwayTaxiingController taxiingControllerRunway = this.getRunwayTaxiingController();
                 //check if we've reached the runway, if so start the takeoff, if not keep taxiing
                 return taxiingControllerRunway.hasReachedObjective(currentInputs, previousInputs) ? TAKEOFF : TAXIING_TO_RUNWAY;
             default:
@@ -217,9 +215,11 @@ public class AutopilotFiniteStateMachine {
         navigationController.reset();
 
         AutoPilot autopilot = this.getAutopilot();
-        OverseerCommunication communicator = autopilot.getCommunicator();
+        AutopilotCommunicator communicator = autopilot.getCommunicator();
         navigationController.setConfig(autopilot.getConfig());
         navigationController.setCruisingAltitude(communicator.getAssignedCruiseAltitude());
+        navigationController.setDescendActivationThreshold(this.getLandingDescendThreshold());
+        navigationController.setStandardLandingAltitude(this.getStandardLandingAltitude());
 
         //get the data about the package that we currently need to deliver
         AutopilotDelivery currentDelivery = communicator.getCurrentRequest();
@@ -241,6 +241,7 @@ public class AutopilotFiniteStateMachine {
         }
 
 
+
         //TODO implement, use the information available on the packages to set the parameters needed to fly to
         //TODO next airport for delivery --> all the info needed is in the autopilot communicator class
         //TODO can be accessed via api chain: this.getAutopilot().getCommunicator();
@@ -254,8 +255,16 @@ public class AutopilotFiniteStateMachine {
      */
     private void configureDescend(AutopilotInputs_v2 inputs_v2){
         //always reset before usage
-        this.getDescendController().reset();
-        this.getDescendController().setConfig(this.getAutopilot().getConfig());
+        DescendController descendController = this.getDescendController();
+        descendController.reset();
+        descendController.setConfig(this.getAutopilot().getConfig());
+
+        float activationThreshold = this.getLandingDescendThreshold();
+        float targetAltitude = this.getStandardLandingAltitude();
+
+        descendController.setActivationThreshold(activationThreshold);
+        descendController.setTargetAltitude(targetAltitude);
+
     }
 
     /**
@@ -264,7 +273,9 @@ public class AutopilotFiniteStateMachine {
      */
     private void configureLanding(AutopilotInputs_v2 inputs){
     	//Set airport where to land
-    	int airportID = this.getAutopilot().getCommunicator().getCurrentRequest().getDestinationAirport();
+        AutopilotCommunicator communicator = this.getAutopilot().getCommunicator();
+        AutopilotDelivery delivery = communicator.getCurrentRequest();
+        int airportID = delivery.isPickedUp() ? delivery.getDestinationAirport() : delivery.getSourceAirport();
     	MapAirport airport = this.getAutopilot().getCommunicator().getAirportByID(airportID);
     	AutopilotLandingController landingController = this.getLandingController();
     	landingController.setTargetAirport(airport);
@@ -291,12 +302,12 @@ public class AutopilotFiniteStateMachine {
         //TODO and then calling the .getAirportByID() in the communicator class
 
 
-        AutopilotTaxiingController taxiingController = this.getTaxiingController();
+        GateTaxiingController taxiingController = this.getGateTaxiingController();
 
         //package that has to be delivered
         AutopilotDelivery packageToDeliver = this.getAutopilot().getCommunicator().getCurrentRequest();
 
-        taxiingController.gateTaxiing(inputs, packageToDeliver);
+        taxiingController.configureGateTaxiing(inputs, packageToDeliver);
 
         //set the config for the controller
         AutopilotConfig config = this.getAutopilot().getConfig();
@@ -312,15 +323,16 @@ public class AutopilotFiniteStateMachine {
         //TODO get the current airport to configure for by the following API chain:
         //TODO this.getAutopilot().getCommunicator().getAirportAtLocation();
 
-        AutopilotTaxiingController taxiingController = this.getTaxiingController();
+        RunwayTaxiingController taxiingController = this.getRunwayTaxiingController();
 
         //AutopilotDelivery packageToDeliver = this.getAutopilot().getCommunicator().getCurrentRequest();
 
-        taxiingController.runwayTaxiing(inputs);
+        //taxiingController.runwayTaxiing(inputs);
 
         //set the config for the controller
         AutopilotConfig config = this.getAutopilot().getConfig();
         taxiingController.setConfig(config);
+        taxiingController.configureRunwayController(inputs);
 
     }
 
@@ -358,8 +370,10 @@ public class AutopilotFiniteStateMachine {
         //get the cruising altitude form the communicator
         float cruisingAltitude = autopilot.getCommunicator().getAssignedCruiseAltitude();
 
+        //get the flight path
         FlightPath anonymousFlightPath = flightPath;
-        OverseerCommunication communicator = this.getAutopilot().getCommunicator();
+        //get the current delivery
+        AutopilotCommunicator communicator = this.getAutopilot().getCommunicator();
         AutopilotDelivery currentDelivery = communicator.getCurrentRequest();
         //now generate the info to be sent to the overseer
         AutopilotInfo info = new AutopilotInfo() {
@@ -457,9 +471,9 @@ public class AutopilotFiniteStateMachine {
             case LANDING:
                 return this.getLandingController();
             case TAXIING_TO_GATE:
-                return this.getTaxiingController();
+                return this.getGateTaxiingController();
             case TAXIING_TO_RUNWAY:
-                return this.getTaxiingController();
+                return this.getRunwayTaxiingController();
             default:
                 return this.getInitController();
         }
@@ -522,13 +536,19 @@ public class AutopilotFiniteStateMachine {
     }
 
     /**
-     * Getter for the taxiing controller, the controller that guides the drone during the taxiing phase
-     * used for two actions, first getting to the gate (while staying on the tarmac) and second
-     * getting into position for takeoff
-     * @return the contoller to guide the taxiing of the drone
+     * Getter for the gate taxiing controller, this is the controller used to drive the drone to the destination gate
+     * @return the gate controller used to taxi to the gate with
      */
-    private AutopilotTaxiingController getTaxiingController() {
-        return taxiingController;
+    private GateTaxiingController getGateTaxiingController() {
+        return gateTaxiingController;
+    }
+
+    /**
+     * Getter for the taxiing controller responsible for taxiing to the runway for takeoff
+     * @return the runway taxiing controller
+     */
+    private RunwayTaxiingController getRunwayTaxiingController() {
+        return runwayTaxiingController;
     }
 
     /**
@@ -592,6 +612,24 @@ public class AutopilotFiniteStateMachine {
     }
 
     /**
+     * Getter for the standard landing altitude this is the altitude to which the drone drops before actually initiating
+     * the landing if the landing descend threshold is breached
+     * @return the standard landing altitude in meters
+     */
+    private float getStandardLandingAltitude() {
+        return standardLandingAltitude;
+    }
+
+    /**
+     * Getter for the landing descend threshold, this is the cruising altitude wherefore the descend phase is triggered
+     * before initiating the landing, this is done to gain a favorable position for the landing
+     * @return the descend threshold in meters
+     */
+    private float getLandingDescendThreshold() {
+        return landingDescendThreshold;
+    }
+
+    /**
      * The state of the finite state machine, is initialized on takeoff
      */
     private AutopilotState state = AutopilotState.INIT_FLIGHT;
@@ -615,6 +653,23 @@ public class AutopilotFiniteStateMachine {
      */
     private AutopilotInfo autopilotInfo = AutopilotInfo.generateInitInfo();
 
+    /*
+    Some landing parameters needed for coordination between landing descend and navigation controller
+     */
+
+    /**
+     * The standard altitude to start the landing of the drone for
+     * this altitude is used when the drone is assigned a higher altitude than the landing descend
+     * threshold
+     */
+    private final float standardLandingAltitude = 50f;
+
+    /**
+     * The threshold wherefore the descend phase will be activating previous to the actual landing
+     * --> used to get a safe altitude to initiate the landing
+     */
+    private final float landingDescendThreshold = 100f;
+
     /**
      * The controllers used by the finite state machine to generate the control actions
      */
@@ -623,7 +678,8 @@ public class AutopilotFiniteStateMachine {
     private AirportNavigationController flightController;
     private DescendController descendController;
     private AutopilotLandingController landingController;
-    private AutopilotTaxiingController taxiingController;
+    private GateTaxiingController gateTaxiingController;
+    private RunwayTaxiingController runwayTaxiingController;
 
     private Controller initController = new Controller(null) {
         @Override

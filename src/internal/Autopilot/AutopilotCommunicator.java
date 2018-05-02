@@ -10,14 +10,14 @@ import TestbedAutopilotInterface.Overseer.MapAirport;
  * Created by Martijn on 27/03/2018.
  * A class that assists the autopilot with the overseer communication
  */
-public class OverseerCommunication {
+public class AutopilotCommunicator {
 
     /**
      * Constructor for the overseer communication class
      * @param autopilot the autopilot used to verify our communication with the overseer
      * @param overseer the overseer that is currently governing all the autopilots
      */
-    public OverseerCommunication(AutoPilot autopilot, AutopilotOverseer overseer){
+    public AutopilotCommunicator(AutoPilot autopilot, AutopilotOverseer overseer){
         this.autopilot = autopilot;
         this.overseer = overseer;
     }
@@ -60,10 +60,15 @@ public class OverseerCommunication {
         return this.getOverseer().getAirportAt(this.getAutopilot());
     }
 
+    /**
+     * Reads the queue for the next delivery request
+     * if the queue is empty the current request is set to null
+     * @param autopilot the autopilot to get the queue entry for
+     * @param overseer th overseer to get the delivery request from
+     */
     private void readForDeliveryRequest(AutoPilot autopilot, AutopilotOverseer overseer){
-        AutopilotDelivery currentDeliveryRequest = this.getCurrentRequest();
         //check if we are currently serving a request
-        if(currentDeliveryRequest != null){
+        if(!mayRequestNextDelivery()){
             return;
         }
         //if not look for a new one
@@ -72,7 +77,23 @@ public class OverseerCommunication {
         //System.out.println(deliveryQueue);
         //now poll the queue, if not empty, take a new one, if empty return null
         //set the delivery request
+        System.out.println("nextDelivery: " + nextDelivery);
         this.setCurrentRequest(nextDelivery);
+    }
+
+    /**
+     * Checks if the communicator may request a new package from the drone
+     * @return true if the current package is a null reference or
+     * if the current package is delivered
+     */
+    private boolean mayRequestNextDelivery(){
+        AutopilotDelivery currentDelivery = this.getCurrentRequest();
+        //if the current delivery is null, we may request for a new one
+        //if the current delivery is delivered we also may request a new one
+        if(currentDelivery!= null && currentDelivery.isDelivered()){
+            System.out.println("Package delivery flag on");
+        }
+        return currentDelivery == null ||currentDelivery.isDelivered();
     }
 
     /**

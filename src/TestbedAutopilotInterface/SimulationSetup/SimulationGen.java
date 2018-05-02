@@ -168,7 +168,7 @@ public class SimulationGen {
         DeliverySpec delivery = new DeliverySpec() {
             @Override
             public int getSourceAirport() {
-                return 0;
+                return 1;
             }
 
             @Override
@@ -178,7 +178,7 @@ public class SimulationGen {
 
             @Override
             public int getDestinationAirport() {
-                return 1;
+                return 0;
             }
 
             @Override

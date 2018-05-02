@@ -590,7 +590,7 @@ public class DescendController extends Controller {
      * Setter for the target altitude, this is the altitude to reach after the turn
      * @param targetAltitude the altitude to reach after the turn in meters
      */
-    private void setTargetAltitude(float targetAltitude) {
+    protected void setTargetAltitude(float targetAltitude) {
         this.targetAltitude = targetAltitude;
     }
 
@@ -704,8 +704,17 @@ public class DescendController extends Controller {
      * if not, this controller is triggered and we will start a downwards descend to the target altitude
      * @return the acitvation threshold in meters
      */
-    private static float getActivationThreshold() {
+    private float getActivationThreshold() {
         return activationThreshold;
+    }
+
+    /**
+     * Setter for the activation threshold, if the cruising altitude exceeds this value the descend phase is
+     * triggered, if not the descend is skipped
+     * @param activationThreshold the activation threshold for the descend phase in meters
+     */
+    public void setActivationThreshold(float activationThreshold){
+        this.activationThreshold = activationThreshold;
     }
 
     /**
@@ -781,11 +790,6 @@ public class DescendController extends Controller {
     private AutopilotTurn turn;
 
     /**
-     * Getter for the cruising altitude of the drone assigned to it by the testbed
-     */
-    private float cruisingAltitude;
-
-    /**
      * The radius of the turn used to descend to the desired altitude
      */
     private float descendTurnRadius = 1000f;
@@ -848,7 +852,7 @@ public class DescendController extends Controller {
      * if the altitude of the drone is below this threshold the controller will be skipped
      * and the next controller (landing) will be invoked
      */
-    private final static float activationThreshold = 100f;
+    private float activationThreshold = 100f;
 
      /*
     Configuration of the steering angles of the controller

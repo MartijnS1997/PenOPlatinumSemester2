@@ -2,6 +2,7 @@ package internal.Autopilot;
 
 import AutopilotInterfaces.AutopilotInputs_v2;
 import AutopilotInterfaces.AutopilotOutputs;
+import TestbedAutopilotInterface.Overseer.AutopilotDelivery;
 import internal.Helper.Vector;
 import internal.Physics.PhysXEngine;
 
@@ -24,11 +25,17 @@ public class AutopilotTakeoffController extends Controller {
      * @param currentInputs the outputs currently received by the autopilot from the testbed
      * @param previousInputs the inputs previously received by the autopilot from the testbed
      * @return the control outputs needed for a takeoff
+     * note that the drone waits for a valid package to deliver if there is no such package the drone will not take off
      */
     @Override
     public AutopilotOutputs getControlActions(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs) {
         //generate the control outputs
         ControlOutputs outputs = new ControlOutputs(getStandardOutputs());
+        //check if it has a package to deliver
+        if(!hasPackageToDeliver()){
+            //if not, we do not take off yet
+            return outputs;
+        }
         //then get the pitch controls
         this.pitchControl(outputs, currentInputs, previousInputs);
         //check for AOA
@@ -37,6 +44,17 @@ public class AutopilotTakeoffController extends Controller {
         this.thrustControl(outputs, currentInputs, previousInputs);
         //return the current outputs
         return outputs;
+    }
+
+    /**
+     * Checks if the drone has any packages to deliver, if not the drone remains idle and does not take off
+     * @return true if the drone has a package to deliver
+     */
+    private boolean hasPackageToDeliver(){
+        //get the autopilot
+        AutopilotCommunicator communicator = this.getAutopilot().getCommunicator();
+        AutopilotDelivery delivery = communicator.getCurrentRequest();
+        return delivery != null;
     }
 
     /**

@@ -44,7 +44,8 @@ public class AutopilotLandingController extends Controller {
      */
     @Override
     public boolean hasReachedObjective(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs) {
-        return isObjectiveReached();
+        float absVel = getVelocityApprox(currentInputs, previousInputs).getSize();
+        return absVel < 1.0;
     }
     private boolean objectiveReached = false;
 
@@ -93,7 +94,7 @@ public class AutopilotLandingController extends Controller {
 //            	break;
 //        }
         LandingPhases landingPhase = toNextState(inputs, prevInputs);
-        LandingController controller = getStateController(landingPhase);
+        LandingPhaseController controller = getStateController(landingPhase);
         AutopilotOutputs outputs = controller.getControlActions(inputs, prevInputs);
         // System.out.println(Controller.extractPosition(inputs).getyValue());
 
@@ -201,7 +202,7 @@ public class AutopilotLandingController extends Controller {
      * @param state the state to get the controller for
      * @return the controller assiciated with the state
      */
-    private LandingController getStateController(LandingPhases state){
+    private LandingPhaseController getStateController(LandingPhases state){
         switch(state){
             case RAPID_DESCEND:
                 return getDescendController();
@@ -465,6 +466,64 @@ public class AutopilotLandingController extends Controller {
 //        float outputInclination = min(abs(HOR_STABILIZER_MAX), abs(desiredAngle));
 //        outputs.setHorStabInclination(outputInclination*signum(desiredAngle));
 //    }
+    /**
+     * Calculates the error in the heading of the drone against the given reference point
+     * the error contains the magnitude of the error as well as the direction of the error
+     * positive angle means the drone needs to be steered to the left
+     * negative angle means the drone needs to be steered to the right
+     * @param currentInputs the inputs most recently received from the testbed
+     * @param referencePoint the reference point used by the controller for calculating the heading error for
+     * @return the error angle between the current heading vector and the vector pointing from the drone to the
+     *         reference point ( =difference vector). The angle is positive if the difference vector is to the
+     *         left of the heading vector and negative if to the right.
+     */
+    private static float getHeadingError(AutopilotInputs_v2 currentInputs, Vector referencePoint){
+        //grab the parameters & other stuff to calculate the heading error for the controller
+        Vector headingDroneHa = new Vector(0,0,-1 ); //the heading vector in the heading axis
+        Vector xzNormal = new Vector(0,1,0);
+        Vector dronePosition = extractGroundPosition(currentInputs);
+        Vector droneOrientation = extractOrientation(currentInputs);
+
+        //transform the heading vector onto the world
+        Vector headingWorld = PhysXEngine.headingOnWorld(headingDroneHa, droneOrientation);
+
+        //get the difference vector between the drone and the set point (points from drone to set point)
+        Vector diffVector = referencePoint.vectorDifference(dronePosition);
+        //project both of them on the xz plane
+        Vector headingWorldXZ = headingWorld.orthogonalProjection(xzNormal);
+        Vector diffVectorXZ = diffVector.orthogonalProjection(xzNormal);
+
+        //calculate the angle between the heading of the world and the difference vector
+        float headingAngle = headingWorldXZ.getAngleBetween(diffVectorXZ);
+
+        //now we also need to get the direction of the angle (vector product between heading and the difference)
+        //headingWorld.crossProduct(diffVector) is positive if diff is to the left of the heading
+        //and negative if the difference vector is to the right of the heading vector (the sign of the resulting y component)
+        float direction = signum(headingWorldXZ.crossProduct(diffVectorXZ).getyValue());
+
+        //the resulting error
+        float headingError = direction*abs(headingAngle);
+
+        //errorLog(headingError);
+        //for some reason the result can be NaN, better to avert controller spouting errors
+        //just return some default value that will cause no harm(?)
+        return Float.isNaN(headingError) ? 0 : headingError;
+    }
+
+    /**
+     * Writes rhe main wing inclination to the outputs specified in the arguments, the provided wing inclinations
+     * are capped with the getMainDeltaIncl as specified in the capInclination method in the super class
+     * @param outputs the outputs to write the main wing inclinations to
+     * @param mainLeftWingInclination the left main wing inclination to set (and to cap)
+     * @param mainRightWingInclination the right main wing inclination to set (and to cap)
+     */
+    private void setMainWingInclinations(ControlOutputs outputs, float mainLeftWingInclination, float mainRightWingInclination) {
+        mainLeftWingInclination = capInclination(mainLeftWingInclination, getMainStable(), getMainDeltaIncl());
+        mainRightWingInclination = capInclination(mainRightWingInclination, getMainStable(), getMainDeltaIncl());
+
+        outputs.setLeftWingInclination(mainLeftWingInclination);
+        outputs.setRightWingInclination(mainRightWingInclination);
+    }
 
 
     /**
@@ -635,15 +694,6 @@ public class AutopilotLandingController extends Controller {
         this.startSoftDescendPhaseHeight = startSoftDescendPhaseHeight;
     }
 
-//    private VectorPID getVelocityPID() {
-//        return this.velocityPID;
-//    }
-
-    private PIDController getAltitudePID() {
-        return altitudePID;
-    }
-
-
 
     public PIDController getRollPIDController(){
         return rollPIDController;
@@ -682,6 +732,7 @@ public class AutopilotLandingController extends Controller {
         return HOR_STABILIZER_MAX;
     }
 
+    protected static float getAoaResultMargin(){ return AOA_RESULT_MARGIN;}
     /**
      * Getter for the standard outputs of the controller
      * @return the standard outputs
@@ -720,13 +771,16 @@ public class AutopilotLandingController extends Controller {
     };
 
     /**
+     * Safeguard for rounding and approximation errors for the AOA control
+     */
+    private final static float AOA_RESULT_MARGIN = (float) (2*PI/180);
+
+    /**
      * Enumerations for the landing phases
      */
     private enum LandingPhases {
         RAPID_DESCEND, SOFT_DESCEND, BRAKE, DONE}
-    private DescendController descendController;
-    private SoftDescendController softDescendController;
-    private BrakeController brakeController;
+
 
     private void setDescendController(DescendController descendController){
         this.descendController = descendController;
@@ -734,29 +788,38 @@ public class AutopilotLandingController extends Controller {
     private void setSoftDescendController(SoftDescendController softDescendController){
         this.softDescendController = softDescendController;
     }
+
     private void setBrakeController(BrakeController brakeController){
         this.brakeController = brakeController;
     }
+
     private DescendController getDescendController(){
         return descendController;
     }
+
     private SoftDescendController getSoftDescendController(){
         return softDescendController;
     }
+
     private BrakeController getBrakeController(){
         return brakeController;
     }
 
 
+    private DescendController descendController;
+    private SoftDescendController softDescendController;
+    private BrakeController brakeController;
+
+
     //TODO should this do anything?
-    private abstract class LandingController{
-        public abstract boolean hasReachedGoal(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 prevInputs);
+    private interface LandingPhaseController {
+         boolean hasReachedGoal(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 prevInputs);
 
 
-        public abstract AutopilotOutputs getControlActions(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 prevInputs);
+         AutopilotOutputs getControlActions(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 prevInputs);
 
     }
-    private class DescendController extends LandingController{
+    private class DescendController implements LandingPhaseController {
 
         public DescendController(AutoPilot autopilot) /*extends Controller*/ {
             //super(autopilot);
@@ -765,8 +828,8 @@ public class AutopilotLandingController extends Controller {
 
         public AutopilotOutputs getControlActions(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs) {
             ControlOutputs outputs = new ControlOutputs(getStandardOutputs());
-            getRollControls(outputs,currentInputs,previousInputs);
             getHeadingControls(outputs,currentInputs,previousInputs);
+            getRollControls(outputs,currentInputs,previousInputs);
             getPitchControls(outputs,currentInputs,previousInputs);
             angleOfAttackControl((float) (2*PI/180),outputs,currentInputs,previousInputs);
             return outputs;
@@ -780,7 +843,7 @@ public class AutopilotLandingController extends Controller {
 
         /**
          * Getter for the controls for the roll of the drone, this controller steers against the heading controller
-         * to keep the over-steering in check
+         * to keep the over-steering in check, should be invoked after the call to the heading contoller
          * @param outputs the outputs to
          * @param currentInputs the inputs most recently received from the testbed
          * @param previousInputs the inputs previously received from the testbed
@@ -789,7 +852,7 @@ public class AutopilotLandingController extends Controller {
             //get the current roll (the error) & the other variables needed to calculate the control actions
             float roll = extractRoll(currentInputs);
             float deltaTime = getDeltaTime(currentInputs, previousInputs);
-            if(abs(roll) < 1.0f*PI/180){
+            if(abs(roll) < 180*PI/180){
                 return;
             }
 
@@ -819,8 +882,11 @@ public class AutopilotLandingController extends Controller {
          * @param previousInputs the inputs previously received from the testbed
          */
         private void getHeadingControls(ControlOutputs outputs, AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs){
+            //get the target for the heading error
+            MapAirport targetAirport = AutopilotLandingController.this.getTargetAirport();
+            Vector referencePoint = targetAirport.getLocation();
             //get the error on the heading and the delta time
-            float headingError = this.getHeadingError(currentInputs);
+            float headingError = AutopilotLandingController.getHeadingError(currentInputs, referencePoint);
             //headingError = abs(headingError) < 10E-3 ? 0 : headingError; //to counter oscillating behavior
             float deltaTime = Controller.getDeltaTime(currentInputs, previousInputs);
             //get the heading PID
@@ -832,64 +898,17 @@ public class AutopilotLandingController extends Controller {
             //errorLog((float) (headingError*180/PI));
 
             //get the cap on the inclinations (prevent over steering)
-            mainLeftWingInclination = capInclination(mainLeftWingInclination, getMainStable(), getMainDeltaIncl());
-            mainRightWingInclination = capInclination(mainRightWingInclination, getMainStable(), getMainDeltaIncl());
-
-            outputs.setLeftWingInclination(mainLeftWingInclination);
-            outputs.setRightWingInclination(mainRightWingInclination);
+            setMainWingInclinations(outputs, mainLeftWingInclination, mainRightWingInclination);
 
         }
 
+
         /**
-         * Calculates the error in the heading of the drone against the given reference point
-         * the error contains the magnitude of the error as well as the direction of the error
-         * positive angle means the drone needs to be steered to the left
-         * negative angle means the drone needs to be steered to the right
+         * Getter for the control actions for the pitch of the drone during the descend phase
+         * the controls that are generated are written to the outputs provided
+         * @param outputs the outputs to write the results to
          * @param currentInputs the inputs most recently received from the testbed
-         * @return the error angle between the current heading vector and the vector pointing from the drone to the
-         *         reference point ( =difference vector). The angle is positive if the difference vector is to the
-         *         left of the heading vector and negative if to the right.
-         */
-        private float getHeadingError(AutopilotInputs_v2 currentInputs){
-            MapAirport targetAirport = AutopilotLandingController.this.getTargetAirport();
-            Vector referencePoint = targetAirport.getLocation();
-            //grab the parameters & other stuff to calculate the heading error for the controller
-            Vector headingDroneHa = new Vector(0,0,-1 ); //the heading vector in the heading axis
-            Vector xzNormal = new Vector(0,1,0);
-            Vector dronePosition = extractGroundPosition(currentInputs);
-            Vector droneOrientation = extractOrientation(currentInputs);
-
-            //transform the heading vector onto the world
-            Vector headingWorld = PhysXEngine.headingOnWorld(headingDroneHa, droneOrientation);
-
-            //get the difference vector between the drone and the set point (points from drone to set point)
-            Vector diffVector = referencePoint.vectorDifference(dronePosition);
-            //project both of them on the xz plane
-            Vector headingWorldXZ = headingWorld.orthogonalProjection(xzNormal);
-            Vector diffVectorXZ = diffVector.orthogonalProjection(xzNormal);
-
-            //calculate the angle between the heading of the world and the difference vector
-            float headingAngle = headingWorldXZ.getAngleBetween(diffVectorXZ);
-
-            //now we also need to get the direction of the angle (vector product between heading and the difference)
-            //headingWorld.crossProduct(diffVector) is positive if diff is to the left of the heading
-            //and negative if the difference vector is to the right of the heading vector (the sign of the resulting y component)
-            float direction = signum(headingWorldXZ.crossProduct(diffVectorXZ).getyValue());
-
-            //the resulting error
-            float headingError = direction*abs(headingAngle);
-
-            //errorLog(headingError);
-            //for some reason the result can be NaN, better to avert controller spouting errors
-            //just return some default value that will cause no harm(?)
-            return Float.isNaN(headingError) ? 0 : headingError;
-        }
-
-        /**
-         * @param outputs
-         * @param currentInputs
-         * @param previousInputs
-         * @return
+         * @param previousInputs the inputs previously received from the testbed
          */
         private void getPitchControls(ControlOutputs outputs, AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs){
 
@@ -1021,7 +1040,7 @@ public class AutopilotLandingController extends Controller {
 
     }
 
-    private class SoftDescendController extends LandingController{
+    private class SoftDescendController implements LandingPhaseController {
 
         public SoftDescendController(AutoPilot autopilot) {
             //super(autopilot);
@@ -1036,6 +1055,21 @@ public class AutopilotLandingController extends Controller {
 
         public AutopilotOutputs getControlActions(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 prevInputs) {
             ControlOutputs outputs = new ControlOutputs(getStandardOutputs());
+            getDescendControls(outputs, currentInputs, prevInputs);
+            toTargetControls(outputs, currentInputs, prevInputs);
+            angleOfAttackControl(getAoaResultMargin(), outputs, prevInputs, currentInputs);
+
+            return outputs;
+        }
+
+        /**
+         * Getter for the pitch controls of the drone, these should steer the drone during the soft descending phase of
+         * the landing
+         * @param outputs the outputs to write the result to
+         * @param currentInputs the inputs most recently received from the testbed
+         * @param prevInputs the inputs previously received from the testbed
+         */
+        private void getDescendControls(ControlOutputs outputs, AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 prevInputs) {
             AutopilotConfig config = getConfig();
             PIDController pitchPID = getPitchPIDController();
             pitchPID.setSetPoint(SOFT_DESCEND_PHASE_REF_PITCH);
@@ -1045,11 +1079,104 @@ public class AutopilotLandingController extends Controller {
             outputs.setRightBrakeForce(config.getRMax());
             outputs.setLeftBrakeForce(config.getRMax());
             outputs.setFrontBrakeForce(config.getRMax());
-            return outputs;
         }
+
+        /**
+         * Control actions needed to keep the drone on track for the landing
+         * @param outputs the outputs to write the result to
+         * @param currentInputs current inputs
+         * @param previousInputs previous inputs
+         */
+        private void toTargetControls(ControlOutputs outputs, AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs){
+           this.getHeadingControls(outputs, currentInputs, previousInputs);
+           this.getRollControls(outputs, currentInputs, previousInputs);
+        }
+
+        /**
+         * Getter for the heading controls of the soft landing phase, these are meant to keep the drone on track during
+         * the landing
+         * @param outputs the outputs to write the control outputs to
+         * @param currentInputs current inputs
+         * @param previousInputs previous inputs
+         */
+        private void getHeadingControls(ControlOutputs outputs, AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs){
+            //get the target for the heading error
+            MapAirport targetAirport = AutopilotLandingController.this.getTargetAirport();
+            Vector referencePoint = targetAirport.getLocation();
+            //get the error on the heading and the delta time
+            float headingError = AutopilotLandingController.getHeadingError(currentInputs, referencePoint);
+            //headingError = abs(headingError) < 10E-3 ? 0 : headingError; //to counter oscillating behavior
+            float deltaTime = Controller.getDeltaTime(currentInputs, previousInputs);
+            //get the heading PID
+            PIDController bankControl = this.getHeadingPID();
+            float pidOutput = bankControl.getPIDOutput(headingError, deltaTime);
+            //and inclining the main wings
+            float mainLeftWingInclination = getMainStable() + pidOutput;
+            float mainRightWingInclination = getMainStable() - pidOutput;
+            //errorLog((float) (headingError*180/PI));
+
+            //get the cap on the inclinations (prevent over steering)
+            setMainWingInclinations(outputs, mainLeftWingInclination, mainRightWingInclination);
+        }
+
+        /**
+         * Getter for the roll controls used to keep the oscillations of the heading controls in check
+         * this controller should be invoked after the heading controls
+         * @param outputs the outputs to write the result to
+         * @param currentInputs the current inputs of the drone
+         * @param previousInputs the inputs previously received
+         */
+        private void getRollControls(ControlOutputs outputs, AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs){
+            //get the current roll (the error) & the other variables needed to calculate the control actions
+            float roll = extractRoll(currentInputs);
+            float deltaTime = getDeltaTime(currentInputs, previousInputs);
+            if(abs(roll) < 1f*PI/180){
+                return;
+            }
+
+            //get the PID controller used to steer for the roll
+            PIDController rollPid = this.getRollPID();
+            //get the outputs based on the error (the roll itself is the error on the wanted situation)
+            float pidResult = rollPid.getPIDOutput(roll, deltaTime);
+            //if we need to roll to the left the roll is negative & the error generated will be positive
+            //thus we need to lift the right main wing a larger inclination than the left one if we want to go to the left
+            //the converse for a negative error we need to steer to the right (left wing larger than right)
+            float leftWingInclination = getMainStable() - pidResult;
+            float rightWingInclination = getMainStable() + pidResult;
+
+            //cap the results
+            leftWingInclination = capInclination(outputs.getLeftWingInclination() + leftWingInclination, getMainStable(), getMainDeltaIncl());
+            rightWingInclination = capInclination(outputs.getRightWingInclination() + rightWingInclination, getMainStable(), getMainDeltaIncl());
+
+            //save the results
+            outputs.setLeftWingInclination(leftWingInclination);
+            outputs.setRightWingInclination(rightWingInclination);
+        }
+
+        private PIDController getHeadingPID() {
+            return headingPID;
+        }
+
+        private PIDController getRollPID() {
+            return rollPID;
+        }
+
+        private final static float HEADING_GAIN = 0.8f;
+        private final static float HEADING_INTEGRAL = 0.0f;
+        private final static float HEADING_DERIVATIVE = 1.0f ;
+        private final PIDController headingPID = new PIDController(HEADING_GAIN, HEADING_INTEGRAL, HEADING_DERIVATIVE);
+
+        /**
+         * Constants for the roll controller and the pid controller itself
+         */
+        private final static float ROLL_GAIN = 1.0f;
+        private final static float ROLL_INTEGRAL = 1.0f;
+        private final static float ROLL_DERIVATIVE =1.0f;
+        private final PIDController rollPID = new PIDController(ROLL_GAIN, ROLL_INTEGRAL, ROLL_DERIVATIVE);
+
     }
 
-    private class BrakeController extends LandingController{
+    private class BrakeController implements LandingPhaseController {
 
         public BrakeController(AutoPilot autopilot) {
             //super(autopilot);
@@ -1058,7 +1185,7 @@ public class AutopilotLandingController extends Controller {
         @Override
         public boolean hasReachedGoal(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 prevInputs) {
             Vector velocity = Controller.getVelocityApprox(currentInputs, prevInputs);
-            return (velocity.getSize() <STOP_VELOCITY) ;//TODO Velocity
+            return (velocity.getSize() < STOP_VELOCITY) ;//TODO Velocity
         }
 
         @Override
@@ -1075,9 +1202,6 @@ public class AutopilotLandingController extends Controller {
             return outputs;
         }
     }
-
-
-
 
 
     private PIDController getPitchPIDController() {

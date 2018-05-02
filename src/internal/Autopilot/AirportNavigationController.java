@@ -134,9 +134,11 @@ public class AirportNavigationController extends AutopilotFlightController {
         //we've fixed the destination airport as the true destination... for now
         MapAirport targetAirport = this.getTargetAirport();
         float cruisingAltitude = this.getCruisingAltitude();
+        float descendThreshold = this.getDescendActivationThreshold();
+        float standardDescendAltitude = this.getStandardLandingAltitude();
         System.out.println(targetAirport);
         //generate the new path planner
-        PathGenerator_v2 pathGenerator = new PathGenerator_v2(currentInputs, targetAirport, cruisingAltitude);
+        PathGenerator_v2 pathGenerator = new PathGenerator_v2(currentInputs, targetAirport, cruisingAltitude, descendThreshold, standardDescendAltitude);
         this.setPathGenerator(pathGenerator);
         this.setFlightPath(pathGenerator.getFlightPath());
     }
@@ -428,14 +430,15 @@ public class AirportNavigationController extends AutopilotFlightController {
                 break;
             case TO_NEXT_TURN:
                 //call the configuration method
-                configureToNextTurnController();
+                configureNextTurn();
                 break;
         }
     }
 
     /**
      * Configures the turn controller for the next turn that has to be made
-     * method should be called every time the controller is switched to a turn controller
+     * method only has effect if the previous state was a init state, otherwise the turn controller is configured
+     * simultaneously with the next turn controller
      */
     private void configureTurningController(){
         //get the turn physics
@@ -451,8 +454,7 @@ public class AirportNavigationController extends AutopilotFlightController {
                 nextTurn = this.getNextTurn();
                 break;
             default:
-                ToNextTurnControl toNextTurnControl = this.getToNextTurnControl();
-                nextTurn = toNextTurnControl.getNextTurn();
+                return;
         }
 
         //then generate the next turn controller
@@ -462,14 +464,15 @@ public class AirportNavigationController extends AutopilotFlightController {
     }
 
     /**
-     * Configures the to next turn controller
+     * Configures the to next turn controller and the turn controller if the turn is not the
+     * previous turn
      * this method should be called every time the state is switched to the to next turn controller
      * --> generates a new controller configured to fly to the next turn
      * note: this method relies on the previously active controller being the turning controller
      *       if we decide to start with the to next turn controller this method should be changed & make use
      *       of a dummy turn to begin with
      */
-    private void configureToNextTurnController(){
+    private void configureNextTurn(){
         //get the turn physics
         PhysXEngine.TurnPhysX turnPhysX = this.getTurnPhysX();
         //get the previous turn from the previous turning controller
@@ -483,7 +486,7 @@ public class AirportNavigationController extends AutopilotFlightController {
         ToNextTurnControl toNextTurnControl = new ToNextTurnControl(nextTurn, previousTurn, turnPhysX);
         this.setToNextTurnControl(toNextTurnControl);
 
-//        //TODO bug-fix, check for more elegant solution
+        //also already set the next turn controller
         TurnControl turnControl = new TurnControl(nextTurn, turnPhysX);
         this.setTurnControl(turnControl);
 
@@ -575,6 +578,41 @@ public class AirportNavigationController extends AutopilotFlightController {
         return cruisingAltitude > 0;
     }
 
+    /**
+     * Getter fo the standard landing altitude, the altitude to which the drone descends if the descend threshold
+     * is breached. Only needed for the path generator to determine the landing distance
+     * @return the standard landing altitude in meters
+     */
+    private float getStandardLandingAltitude() {
+        return standardLandingAltitude;
+    }
+
+    /**
+     * Setter for the standard landing altitude (see getter for more info || the autopilot finite state machine)
+     * Only needed for the path generator to determine the landing distance
+     * @param standardLandingAltitude the standard landing altitude for the drone > 0
+     */
+    protected void setStandardLandingAltitude(float standardLandingAltitude) {
+        this.standardLandingAltitude = standardLandingAltitude;
+    }
+
+    /**
+     * Getter for the descend threshold, if this threshold is breached the drone will enter the descend phase
+     * before the actual landing. Only needed for the path generator to determine the landing distance
+     * @return the descend threshold in meters
+     */
+    private float getDescendActivationThreshold() {
+        return descendActivationThreshold;
+    }
+
+    /**
+     * Setter for the descend activation threshold (see getter || finite state machine)
+     * Only needed for the path generator to determine the landing distance
+     * @param descendActivationThreshold the activation threshold > 0
+     */
+    protected void setDescendActivationThreshold(float descendActivationThreshold) {
+        this.descendActivationThreshold = descendActivationThreshold;
+    }
 
     /**
      * Getter for the control turn object(containing all the info needed to make the currently specified turn)
@@ -762,6 +800,18 @@ public class AirportNavigationController extends AutopilotFlightController {
      * altitude PID controllers ( there are different controllers for different scenario's)
      */
     private float cruisingAltitude;
+
+    /**
+     * The standard landing altitude, this is the altitude where to the drone starts descending if the
+     * descend activation threshold is breached, this parameter is only needed for the path generator
+     */
+    private float standardLandingAltitude;
+
+    /**
+     * The activation threshold for the descend phase, if this value is breached the drone will enter the
+     * descend phase before actual landing, only needed for the path generator
+     */
+    private float descendActivationThreshold;
 
     /**
      * The physics engine turn physics used for calculating the reference velocity and the banking roll
