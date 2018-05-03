@@ -102,6 +102,9 @@ public class World {
 
         }
 //		System.out.println("Drone velocity after" + this.getDroneSet());
+		if(allPackagesDelivered()){
+			throw new SimulationEndedException();
+		}
 	}
 
 	/**
@@ -179,15 +182,15 @@ public class World {
 	 */
 	private void movePackages(){
 		//get the package set
-		Map<String, Drone>  drones = this.getDroneMap();
+		Set<Drone> droneSet = this.getDroneSet();
 		PackageService packageService = this.getPackageService();
 		//get all the packages that need to be delivered and are assigned a drone (these are the only
 		//ones that need to be loaded and unloaded
 		Set<WorldDelivery> packages = packageService.getAllUndeliveredAssignedWorldDeliveries();
 		//first check if all the drones can unload their packages
-		unloadPackages(new HashSet<>(drones.values()));
+		unloadPackages(droneSet);
 		//then load all the packages
-		loadPackages(drones, packages);
+		loadPackages(droneSet, packages);
 
 	}
 
@@ -216,29 +219,94 @@ public class World {
 	 * @param drones the map of drones to check for
 	 * @param packages the set of packages to check for
 	 */
-	private void loadPackages(Map<String, Drone> drones, Set<WorldDelivery> packages){
+	private void loadPackages(Set<Drone> drones, Set<WorldDelivery> packages){
 		//cycle trough all the packages, filter for all the packages that are not
 		//delivered yet
 		Set<WorldDelivery> unDelivered = packages.stream().filter(p -> !p.isDelivered()).collect(Collectors.toSet());
-		for(WorldDelivery delivery: unDelivered){
-			//now check for the drone with the corresponding ID
-			String deliveryDroneID = delivery.getDeliveryDroneID();
-			//check if null, if so continue:
-			if(deliveryDroneID == null){
+		for(Drone drone: drones){
+			//first check if the drone has the right state to pick up a package
+			if(!readyToPickUp(drone)){
+				//if the drone is going to fast or is already delivering a package, continue no further calculation is needed
 				continue;
 			}
-			//if not, check if the drone can be loaded
-			Drone drone = drones.get(deliveryDroneID);
-			//check if the drone can be loaded with the package
-			if(canPickUpPackage(drone, delivery)){
-				System.out.println("delivery loading: " + delivery);
+			String droneID = drone.getDroneID();
+			//now get the next package to be delivered by the drone
+			WorldDelivery delivery = getNextDelivery(droneID, unDelivered);
+			//check if this particular package can be delivered
+			if(delivery != null && canPickUpPackage(drone, delivery)){
+				System.out.println("\npicked up delivery: " + delivery + "\n");
 				drone.loadPackage(delivery);
 			}
 		}
 
-		//all packages are checked
 	}
 
+//	for(WorldDelivery delivery: unDelivered){
+//			//now check for the drone with the corresponding ID
+//			String deliveryDroneID = delivery.getDeliveryDroneID();
+//			//check if null, if so continue:
+//			if(deliveryDroneID == null){
+//				continue;
+//			}
+//			//if not, check if the drone can be loaded
+//			Drone drone = drones.get(deliveryDroneID);
+//			//check if the drone can be loaded with the package
+//			if(canPickUpPackage(drone, delivery)){
+//				System.out.println("delivery loading: " + delivery);
+//				drone.loadPackage(delivery);
+//			}
+//		}
+
+		//all packages are checked
+
+	/**
+	 * Checks if the drone is in the right state to pick up a package from the airport
+	 * --> check is used as an easy (non calculation intensive) first check to see if the drone can pick up a package
+	 * @param drone the drone to check
+	 * @return false if the drone is already delivering a package or if the drone is going faster than the
+	 * 		   package transfer velocity
+	 */
+	private static boolean readyToPickUp(Drone drone){
+		//check first if the drone is already delivering a package
+		if(drone.isDelivering()){
+			return false;
+		}
+		//check if the velocity is low enough
+		Vector droneVelocity = drone.getVelocity();
+		if(droneVelocity.getSize()  > MAX_TRANSFER_VELOCITY){
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Gets the package with the lowest delivery sequence number, as documented in the overseer the undelivered
+	 * package with the lowest sequence number must be delivered first by the drone
+	 * @param droneID the id of the drone to get the next delivery for
+	 * @param undeliveredDeliveries the delivery packages that are not yet delivered by the drone package system
+	 * @return the next delivery to be done by the drone if available, if not, returns null
+	 */
+	private WorldDelivery getNextDelivery(String droneID, Set<WorldDelivery> undeliveredDeliveries){
+
+		WorldDelivery lowestSeqNbDelivery = null;
+		long lowestSeqNb = Long.MAX_VALUE;
+		for(WorldDelivery delivery: undeliveredDeliveries){
+			//check if this package is destined for the currently selected drone
+			if(!droneID.equals(delivery.getDeliveryDroneID())){
+				continue;
+			}
+			long currentSeqNb = delivery.getSequenceNumber();
+
+			//and also if the sequence number is lower
+			if( currentSeqNb < lowestSeqNb){
+				lowestSeqNb = currentSeqNb;
+				lowestSeqNbDelivery = delivery;
+			}
+		}
+
+		return lowestSeqNbDelivery;
+	}
 
 	/**
 	 * Method that returns a set containing all the drones in the world
@@ -264,6 +332,10 @@ public class World {
 		return this.airports;
 	}
 
+	/**
+	 * Getter for the set consisting of all airports in the world
+	 * @return the set with all airports in the world
+	 */
 	private Set<WorldAirport> getAirportSet(){
 		return new HashSet<WorldAirport>(this.getAirportMap().values());
 	}
@@ -414,15 +486,6 @@ public class World {
 	 * the required position and landing velocity to deliver the package
 	 */
 	private boolean canPickUpPackage(Drone drone, WorldDelivery delivery){
-		//check first if the drone is already delivering a package
-		if(drone.isDelivering()){
-			return false;
-		}
-		//check if the velocity is low enough
-		Vector droneVelocity = drone.getVelocity();
-		if(droneVelocity.getSize()  > MAX_TRANSFER_VELOCITY){
-			return false;
-		}
 		//check if the drone ID and the delivery drone ID match
 		String droneID = drone.getDroneID();
 		String deliveryDroneID = delivery.getDeliveryDroneID();

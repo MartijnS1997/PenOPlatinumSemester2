@@ -125,7 +125,9 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void>, Packa
             List<PlannerDelivery> droneDeliveryScheme = deliveryScheme.get(droneID);
 
             for(PlannerDelivery delivery: droneDeliveryScheme){
+                long sequenceNumber = getNextSequenceNumber();
                 delivery.setDeliveryDroneID(droneID);
+                delivery.setSequenceNumber(sequenceNumber);
                 droneDeliveryQueue.add((DeliveryPackage)delivery);
             }
         }
@@ -331,26 +333,6 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void>, Packa
         String autopilotID = autopilot.getID();
         this.getDroneDeliveryMap().put(autopilotID, new ConcurrentLinkedQueue<>());
     }
-//
-//    /**
-//     * Checks if there are any drones with empty queues
-//     * @return true if there is a drone with an empty queue
-//     */
-//    private boolean hasIdleDrone(){
-//        //get the map of all the queues
-//        Map<String, ConcurrentLinkedQueue<AutopilotDelivery>> deliveryQueues = this.getAutopilotDeliveriesAssignedPerDrone();
-//        //iterate trough all the queues and check if one is empty
-//        for(String droneID: deliveryQueues.keySet()){
-//            //get the queue associated with the id
-//            ConcurrentLinkedQueue<AutopilotDelivery> queue = deliveryQueues.get(droneID);
-//            //check if empty
-//            if(queue.isEmpty()){
-//                return true;
-//            }
-//        }
-//
-//        return false;
-//    }
 
     /**
      * Getter for the airport where the autopilot is currently at
@@ -595,6 +577,17 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void>, Packa
     }
 
     /**
+     * Getter for the next sequence number to be assigned, after the call the sequence number is auto incremented
+     * such that no two packages can have the same sequence number during the simulation
+     * --> only call once when assigning the sequence number to a single package, two calls will result in a different
+     *     sequence number
+     * @return the next sequence number
+     */
+    private long getNextSequenceNumber() {
+        return nextSequenceNumber++;
+    }
+
+    /**
      * Hash map that contains all the data about the autopilots needed to do crash avoidance
      * this map is queried by the autopilots to gain information about the whereabouts of the other drones
      */
@@ -634,6 +627,18 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void>, Packa
      * The planner used for distributing/assigning the packages to the drones (as optimally as possible)
      */
     private DeliveryPlanner planner;
+
+    /**
+     * The sequence number that will be assigned to the next package that will be delivered
+     * The sequence number is assigned to a package that will be delivered by a drone to tell the testbed
+     * which packages (if they have the same source airport) should be assigned first to the drone
+     * meaning that the package with the lower sequence number must be passed first to the drone
+     * note that there is no inherent relation between the sequence number of packages that must be delivered
+     * by different drones, if the sequence number of a package to be delivered by drone A is lower than the one
+     * to be delivered by drone B doesn't mean that the package of A will be delivered earlier. The sequence number
+     * only indicates the order in which the packages must be delivered for a SINGLE drone
+     */
+    private long nextSequenceNumber = 0L;
 
     /**
      * The base altitude to assign to the drones (incremented from here)

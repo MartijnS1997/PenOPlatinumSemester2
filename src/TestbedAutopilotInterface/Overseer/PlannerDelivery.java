@@ -55,4 +55,11 @@ public interface PlannerDelivery extends AutopilotDelivery{
      * the planner should be able to assign ID's to packages after the planning phase is finished
      */
     void setDeliveryDroneID(String droneID);
+
+    /**
+     * Setter for the sequence number of the drone
+     * the sequence number indicates in which order the packages should be given to the drones by the testbed
+     * @param sequenceNumber the sequence number for the package
+     */
+    void setSequenceNumber(long sequenceNumber);
 }

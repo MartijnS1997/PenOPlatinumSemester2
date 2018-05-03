@@ -499,10 +499,18 @@ public class PathGenerator_v2{
 			if(signum(angleDir) != signum(direction)){
 				angle = (float) (2*PI - angle);
 			}
+			//if the angle is very close to 2PI, we should just fly straight instead of making a full 360
+			if(floatEquals(abs(angle), (float) (2*PI))){
+				angle = 0f;
+			}
 			//now set the sign of the angle right (pos for counter, neg for clock --> contained within direction)
 			float turnAngle = angle*signum(direction);
 
 			this.turnAngle = turnAngle;
+		}
+
+		private boolean floatEquals(float f1, float f2){
+			return Math.abs(f1 - f2)/f1 < EPSILON;
 		}
 
 		//TODO document getters and setters
@@ -635,6 +643,11 @@ public class PathGenerator_v2{
 		 * and a positive angle represents a counter clockwise turn
 		 */
 		private float turnAngle;
+
+		/**
+		 * The maximum relative error when comparing two floats
+		 */
+		private final static float EPSILON = 10E-4f;
 	}
 
 	/**

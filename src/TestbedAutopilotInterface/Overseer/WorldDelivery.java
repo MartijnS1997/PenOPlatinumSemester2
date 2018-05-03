@@ -59,4 +59,11 @@ public interface WorldDelivery {
      * @return the ID of the drone that is assigned with the delivery
      */
     String getDeliveryDroneID();
+
+    /**
+     * Getter for the sequence number of the delivery, if for the same drone there are multiple deliveries available
+     * at an airport, the package with the lowest sequence number should be given first to the drone to deliver
+     * @return the sequence number of the drone
+     */
+    long getSequenceNumber();
 }

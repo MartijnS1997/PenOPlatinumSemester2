@@ -77,7 +77,7 @@ public class AutopilotCommunicator {
         //System.out.println(deliveryQueue);
         //now poll the queue, if not empty, take a new one, if empty return null
         //set the delivery request
-        System.out.println("nextDelivery: " + nextDelivery);
+//        System.out.println("nextDelivery: " + nextDelivery);
         this.setCurrentRequest(nextDelivery);
     }
 
@@ -90,9 +90,6 @@ public class AutopilotCommunicator {
         AutopilotDelivery currentDelivery = this.getCurrentRequest();
         //if the current delivery is null, we may request for a new one
         //if the current delivery is delivered we also may request a new one
-        if(currentDelivery!= null && currentDelivery.isDelivered()){
-            System.out.println("Package delivery flag on");
-        }
         return currentDelivery == null ||currentDelivery.isDelivered();
     }
 

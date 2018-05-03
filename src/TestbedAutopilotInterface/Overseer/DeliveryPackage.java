@@ -84,6 +84,36 @@ public class DeliveryPackage implements AutopilotDelivery, WorldDelivery, Planne
     }
 
     /**
+     * Getter for the sequence number, this number is set by the planner and is an indication in which order the
+     * packages should be delivered by a single drone.
+     * If the sequence number of one package is lower than the other and the same drone should deliver it, the
+     * package with the lower sequence number should be delivered first
+     * @return the sequence number of the package
+     */
+    public long getSequenceNumber(){
+        return this.sequenceNumber;
+    }
+
+    /**
+     * Setter for the sequence number, this number indicates in which order the packages should be delivered
+     * by a specific drone (see getter for more information)
+     * @param sequenceNumber the sequence number of the package >= 0;
+     */
+    @Override
+    public void setSequenceNumber(long sequenceNumber) {
+        this.sequenceNumber = sequenceNumber;
+    }
+
+    /**
+     * Checker for the validity of the sequence number
+     * @param sequenceNumber the sequence number to assign to the package
+     * @return true if and only if the sequence number >= 0
+     */
+    private boolean isValidSequenceNumber(long sequenceNumber){
+        return sequenceNumber >= 0;
+    }
+
+    /**
      * Checks if the package is loaded onto the drone or not, if it is, it means that the drone should navigate
      * to the destination airport, if not, the drone should navigate to the source airport
      * @return true if the drone is carrying a package
@@ -108,6 +138,7 @@ public class DeliveryPackage implements AutopilotDelivery, WorldDelivery, Planne
     private final int destinationAirport;
     private final int destinationAirportGate;
     private String deliveryDroneID;
+    private long sequenceNumber;
 
 
     /*

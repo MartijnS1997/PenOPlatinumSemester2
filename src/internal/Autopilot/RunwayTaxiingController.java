@@ -125,6 +125,7 @@ public class RunwayTaxiingController extends TaxiingController{
         //we can't rely on the package that we have to deliver so we ask the overseer on which airport we're standing
         //and use it to get our takeoff direction
         MapAirport taxiingAirport = communicator.getAirportAtCurrentLocation();
+        System.out.println("Current at airport: " + taxiingAirport);
 
         //now get the main heading of the airport
         Vector takeoffHeading = takeOffHeading(currentInputs, taxiingAirport);
@@ -157,6 +158,8 @@ public class RunwayTaxiingController extends TaxiingController{
         float takeoffDir = signum(airportHeading.scalarProduct(droneHeading));
 
         //now do a scalar multiplication with the takeoff direction and return
+        System.out.println("heading runway zero: " + airportHeading);
+        System.out.println("takeoff direction: " + airportHeading.scalarMult(takeoffDir));
         return airportHeading.scalarMult(takeoffDir);
     }
 

@@ -92,12 +92,10 @@ public class AutopilotLandingController extends Controller {
         switch(state){
             case RAPID_DESCEND:
                 //check if we've already passed a single iteration (needed to configure the autopilot)
-                System.out.println("Current phase: " + RAPID_DESCEND);
                 return descendController.hasReachedGoal(currentInputs,prevInputs) ? SOFT_DESCEND : RAPID_DESCEND;
             case SOFT_DESCEND:
                 //get the takeoff controller
                 //check if it has reached its Goal, if so return the next state, if not continue the takeoff
-                System.out.println("Current phase: " + SOFT_DESCEND);
                 return softDescendController.hasReachedGoal(currentInputs, prevInputs ) ? BRAKE : SOFT_DESCEND;
             case BRAKE:
                 //get the takeoff stabilization controller
@@ -127,8 +125,8 @@ public class AutopilotLandingController extends Controller {
         if(!nextState.equals(prevState)){
             //configureState(nextState, inputs);
             this.setState(nextState);
-            System.out.println("Switched states, from " + prevState +
-                    ", to " + nextState);
+//            System.out.println("Switched states, from " + prevState +
+//                    ", to " + nextState);
         }
 
         //now return the next state
@@ -562,7 +560,7 @@ public class AutopilotLandingController extends Controller {
             //get the current roll (the error) & the other variables needed to calculate the control actions
             float roll = extractRoll(currentInputs);
             float deltaTime = getDeltaTime(currentInputs, previousInputs);
-            if(abs(roll) < 180*PI/180){
+            if(abs(roll) < 25*PI/180){
                 return;
             }
 

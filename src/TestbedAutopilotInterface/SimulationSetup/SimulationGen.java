@@ -104,49 +104,9 @@ public class SimulationGen {
 
         //generate the airport specs
         List<AirportSpec> airports = new ArrayList<>();
-        AirportSpec airport1 = new AirportSpec() {
-            @Override
-            public Vector getPosition() {
-                return airport1Pos;
-            }
+        AirportSpec airport1 = generateAirportAt(airport1Pos, heading1);
 
-            @Override
-            public Vector getPrimaryRunWay() {
-                return heading1;
-            }
-
-            @Override
-            public float getRunwayWidth() {
-                return airportRunwayWidth;
-            }
-
-            @Override
-            public float getRunwayLength() {
-                return airportRunwayLength;
-            }
-        };
-
-        AirportSpec airport2 = new AirportSpec() {
-            @Override
-            public Vector getPosition() {
-                return airport2Pos;
-            }
-
-            @Override
-            public Vector getPrimaryRunWay() {
-                return heading2;
-            }
-
-            @Override
-            public float getRunwayWidth() {
-                return airportRunwayWidth;
-            }
-
-            @Override
-            public float getRunwayLength() {
-                return airportRunwayLength;
-            }
-        };
+        AirportSpec airport2 = generateAirportAt(airport2Pos, heading2);
         airports.add(airport1);
         airports.add(airport2);
 
@@ -165,27 +125,7 @@ public class SimulationGen {
             }
         };
 
-        DeliverySpec delivery = new DeliverySpec() {
-            @Override
-            public int getSourceAirport() {
-                return 1;
-            }
-
-            @Override
-            public int getSourceAirportGate() {
-                return 0;
-            }
-
-            @Override
-            public int getDestinationAirport() {
-                return 0;
-            }
-
-            @Override
-            public int getDestinationAirportGate() {
-                return 0;
-            }
-        };
+        DeliverySpec delivery = generateDelivery(1,0,0,0);
 
         //generate the lists
         List<DroneSpec> drones = new ArrayList<>();
@@ -209,10 +149,176 @@ public class SimulationGen {
                 return deliveries;
             }
         };
-
-
     }
 
+    public SimulationEnvironment generate4AirportWorld(){
+        float worldXSize = this.getWorldXSize();
+        float worldZSize = this.getWorldZSize();
+
+        //airport 1: located at upper left
+        //airport 2: located at upper right
+        //airport 3: located at lower left
+        //airport 4: located at lower right
+        Vector airport1Pos = new Vector(-worldXSize, 0, -worldZSize);
+        Vector airport2Pos = new Vector(worldXSize, 0, -worldZSize);
+        Vector airport3Pos = new Vector(-worldXSize, 0, worldZSize);
+        Vector airprot4Pos = new Vector(worldXSize, 0, worldZSize);
+
+        //the first airport in the upper right corner faces to the left with the main runway
+        float airportRunwayLength = this.getAirportRunwayLength();
+        float airportRunwayWidth = this.getAirportRunwayWidth();
+        //generate all runways heading to the center of the world
+        Vector heading1 = new Vector(1, 0,1);
+        Vector heading2 = new Vector(-1,0, 1);
+        Vector heading3 = new Vector(1,0,-1);
+        Vector heading4 = new Vector(-1, 0,-1);
+
+
+        //generate the airport specs
+        List<AirportSpec> airports = new ArrayList<>();
+        AirportSpec airport1 = generateAirportAt(airport1Pos, heading1);
+        AirportSpec airport2 = generateAirportAt(airport2Pos, heading2);
+        AirportSpec airport3 = generateAirportAt(airport3Pos, heading3);
+        AirportSpec airport4 = generateAirportAt(airprot4Pos, heading4);
+        airports.add(airport1);
+        airports.add(airport2);
+        airports.add(airport3);
+        airports.add(airport4);
+
+        //place the package & the drone: destination airport 2 & drone airport = 1
+        Vector drone1Orientation = new Vector(getHeadingAngle(heading1),0,0);
+        Vector drone1Pos = airport1Pos.vectorSum(getDroneYPos());
+        Vector drone2Orientation = new Vector(getHeadingAngle(heading3), 0,0);
+        Vector drone2Pos = airport3Pos.vectorSum(getDroneYPos());
+
+
+        DroneSpec drone1 = generateDrone(drone1Pos, drone1Orientation);
+        DroneSpec drone2 = generateDrone(drone2Pos, drone2Orientation);
+
+        //make a delivery for every airport starting at the first airport
+        DeliverySpec delivery1 = generateDelivery(0,0,1,0);
+        DeliverySpec delivery2 = generateDelivery(0,0,2,0);
+        DeliverySpec delivery3 = generateDelivery(0,0,3,0);
+        DeliverySpec delivery4 = generateDelivery(3, 0,0,1);
+
+
+        //generate the lists
+        List<DroneSpec> drones = new ArrayList<>();
+        drones.add(drone1);
+        drones.add(drone2);
+        Set<DeliverySpec> deliveries = new HashSet<>();
+        deliveries.add(delivery1);
+        deliveries.add(delivery2);
+        deliveries.add(delivery3);
+        deliveries.add(delivery4);
+
+        return new SimulationEnvironment() {
+            @Override
+            public List<DroneSpec> getDroneSpecifications() {
+                return drones;
+            }
+
+            @Override
+            public List<AirportSpec> getAirportSpecifications() {
+                return airports;
+            }
+
+            @Override
+            public Set<DeliverySpec> getDeliveryPackages() {
+                return deliveries;
+            }
+        };
+    }
+
+    /**
+     * Generates an airport at the specified location with the given heading for runway zero
+     * @param airportPos the position of the airport
+     * @param airportHeading the orientation of runway zero
+     * @return an airport at the given location with the given heading
+     */
+    private AirportSpec generateAirportAt(Vector airportPos, Vector airportHeading){
+        float runwayWidth = this.getAirportRunwayWidth();
+        float runwayLength = this.getAirportRunwayLength();
+        AirportSpec airport = new AirportSpec() {
+            @Override
+            public Vector getPosition() {
+                return airportPos;
+            }
+
+            @Override
+            public Vector getPrimaryRunWay() {
+                return airportHeading;
+            }
+
+            @Override
+            public float getRunwayWidth() {
+                return runwayWidth;
+            }
+
+            @Override
+            public float getRunwayLength() {
+                return runwayLength;
+            }
+        };
+
+        return airport;
+    }
+
+    /**
+     * Generates the delivery specification with the desired sources and destinations
+     * @param sourceAirport the id of the airport where to pick up the package
+     * @param sourceGate the id of the gate where the package must be picked up
+     * @param destinationAirport the id of the airport where the package is destined to
+     * @param destinationGate the id of the gate where the package must be dropped of
+     * @return a delivery spec matching the specifications of the parameters defined above
+     */
+    private DeliverySpec generateDelivery(int sourceAirport, int sourceGate, int destinationAirport, int destinationGate){
+        DeliverySpec delivery = new DeliverySpec() {
+            @Override
+            public int getSourceAirport() {
+                return sourceAirport;
+            }
+
+            @Override
+            public int getSourceAirportGate() {
+                return sourceGate;
+            }
+
+            @Override
+            public int getDestinationAirport() {
+                return destinationAirport;
+            }
+
+            @Override
+            public int getDestinationAirportGate() {
+                return destinationGate;
+            }
+        };
+
+        return delivery;
+    }
+
+    /**
+     * Generates the drone spec with the given specifications
+     * @param dronePos the position of the drone in the world axis system
+     * @param droneOrientation the orientation of the drone (in heading pitch and roll)
+     * @return the droneSpec with the given specifications
+     */
+    private DroneSpec generateDrone(Vector dronePos, Vector droneOrientation){
+        DroneSpec droneSpec = new DroneSpec() {
+            @Override
+            public Vector getDronePosition() {
+                return dronePos;
+            }
+
+            @Override
+            public Vector getDroneOrientation() {
+                return droneOrientation;
+            }
+        };
+
+        return droneSpec;
+    }
     /**
      * Generates the deliveries for the simulation environment based on the airports that are present in the world
      * The deliveries are distributed randomly across all the airports in the world

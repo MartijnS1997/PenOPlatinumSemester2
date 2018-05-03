@@ -186,7 +186,7 @@ public class MapAirport {
         //to get the relative position (account for translation of the projection)
         position = position.vectorDifference(location);
         //only keep the x and z components of the position
-        position = new Vector(position.getxValue(), 0f, position.getyValue());
+        position = new Vector(position.getxValue(), 0f, position.getzValue());
         Vector projection = position.projectOn(heading);
         //check if the size is smaller than the length of the airport
         if(projection.getSize() > length) {
