@@ -179,6 +179,7 @@ public class AutopilotFiniteStateMachine {
         float cruisingAlt = this.getAutopilot().getCommunicator().getAssignedCruiseAltitude();
         System.out.println("Assigned altitude for this flight: " + cruisingAlt);
         AutopilotTakeoffController takeoffController = this.getTakeoffController();
+        takeoffController.reset();
         takeoffController.setCruisingAltitude(cruisingAlt);
 
         //set the config for the controller
@@ -195,6 +196,7 @@ public class AutopilotFiniteStateMachine {
         //set the cruising altitude
         float cruisingAlt = this.getAutopilot().getCommunicator().getAssignedCruiseAltitude();
         AutopilotStabilization stabilization = this.getTakeoffStabilizerController();
+        stabilization.reset();
         stabilization.setCruisingAltitude(cruisingAlt);
 
         //set the config for the controller
@@ -257,6 +259,7 @@ public class AutopilotFiniteStateMachine {
         //always reset before usage
         DescendController descendController = this.getDescendController();
         descendController.reset();
+
         descendController.setConfig(this.getAutopilot().getConfig());
 
         float activationThreshold = this.getLandingDescendThreshold();
@@ -272,13 +275,19 @@ public class AutopilotFiniteStateMachine {
      * @param inputs the inputs  to configure the controller with
      */
     private void configureLanding(AutopilotInputs_v2 inputs){
-    	//Set airport where to land
+        AutopilotLandingController landingController = this.getLandingController();
+        landingController.reset();
+
+    	//get airport where to land
         AutopilotCommunicator communicator = this.getAutopilot().getCommunicator();
         AutopilotDelivery delivery = communicator.getCurrentRequest();
+        //check if the delivery is picked up or not, if not we fly to the source airport otherwise to the destination
         int airportID = delivery.isPickedUp() ? delivery.getDestinationAirport() : delivery.getSourceAirport();
-    	MapAirport airport = this.getAutopilot().getCommunicator().getAirportByID(airportID);
-    	AutopilotLandingController landingController = this.getLandingController();
+
+        //set the target airport
+    	MapAirport airport = communicator.getAirportByID(airportID);
     	landingController.setTargetAirport(airport);
+
     	//Set configuration of the autopilot
     	AutopilotConfig config = this.getAutopilot().getConfig();
         landingController.setConfig(config);
@@ -303,7 +312,7 @@ public class AutopilotFiniteStateMachine {
 
 
         GateTaxiingController taxiingController = this.getGateTaxiingController();
-
+        taxiingController.reset();
         //package that has to be delivered
         AutopilotDelivery packageToDeliver = this.getAutopilot().getCommunicator().getCurrentRequest();
 
@@ -324,7 +333,7 @@ public class AutopilotFiniteStateMachine {
         //TODO this.getAutopilot().getCommunicator().getAirportAtLocation();
 
         RunwayTaxiingController taxiingController = this.getRunwayTaxiingController();
-
+        taxiingController.reset();
         //AutopilotDelivery packageToDeliver = this.getAutopilot().getCommunicator().getCurrentRequest();
 
         //taxiingController.runwayTaxiing(inputs);
@@ -731,6 +740,11 @@ public class AutopilotFiniteStateMachine {
         @Override
         public boolean hasReachedObjective(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs) {
             return AutopilotFiniteStateMachine.this.previousInputs != null;
+        }
+
+        @Override
+        public void reset() {
+            //literally does nothing for this case
         }
     };
 }

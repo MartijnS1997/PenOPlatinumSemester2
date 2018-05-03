@@ -53,6 +53,12 @@ public class AutopilotStabilization extends Controller {
                 && abs(cruisingAltitude - altitude) < abs(this.getAltitudeErrorMargin());
     }
 
+    @Override
+    public void reset() {
+        this.getPitchStabilizerPID().reset();
+        this.getThrustController().reset();
+    }
+
     /**
      * Getter for the controls to control the horizontal stabilizer of the drone
      * @param outputs the outputs to write the result to

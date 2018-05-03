@@ -38,6 +38,11 @@ public abstract class AutopilotFlightController extends Controller {
         return false;
     }
 
+    @Override
+    public void reset() {
+
+    }
+
     abstract void setCruisingAltitude(float cruisingAltitude);
 
     /**

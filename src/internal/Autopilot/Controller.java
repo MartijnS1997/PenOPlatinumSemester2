@@ -47,6 +47,11 @@ public abstract class Controller {
     }
 
     /**
+     * Clears all the state from the controller such that it can be used for a next iteration
+     */
+    public abstract void reset();
+
+    /**
      * Debugging method used to save data to a .txt file
      * @param error the error to write to the file
      */

@@ -46,6 +46,13 @@ public class AutopilotTakeoffController extends Controller {
         return outputs;
     }
 
+    @Override
+    public void reset() {
+        this.getPitchController().reset();
+        this.getPitchStabilizerPID().reset();
+        this.getThrustController().reset();
+    }
+
     /**
      * Checks if the drone has any packages to deliver, if not the drone remains idle and does not take off
      * @return true if the drone has a package to deliver

@@ -58,6 +58,11 @@ public class RunwayTaxiingController extends TaxiingController{
         return false;
     }
 
+    @Override
+    public void reset() {
+        this.getBrakeController().reset();
+    }
+
     /**
      * Checks if the angle between the target and the heading-orientation of the drone is smaller than the error margin
      * described in getMaxTakeoffErrorAngle()

@@ -35,6 +35,11 @@ public class AutopilotTaxiingController extends Controller {
 
     }
 
+    @Override
+    public void reset() {
+
+    }
+
     /**
      * Setter for the next target of the taxiing controller
      * @param location the location to taxi to

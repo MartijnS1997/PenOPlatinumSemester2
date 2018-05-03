@@ -44,6 +44,10 @@ public class AirportNavigationController extends AutopilotFlightController {
             //if so check also if we've finished it
             TurnControl turnControl = this.getTurnControl();
             //if so we may switch to the landing controller
+            boolean willFinish = willFinishTurn(currentInputs, previousInputs, turnControl);
+            if(willFinish){
+                System.out.println("exited turn at: " + extractPosition(currentInputs));
+            }
             return willFinishTurn(currentInputs, previousInputs, turnControl);
         }
         //if not return false

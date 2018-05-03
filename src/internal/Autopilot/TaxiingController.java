@@ -54,6 +54,60 @@ public abstract class TaxiingController extends Controller {
 //        System.out.println("Turning " + (outputs.getRightBrakeForce() > 0? "right" : "left"));
     }
 
+    public void stayWithinAirportBorders(Vector[] airportBorders, ControlOutputs outputs, AutopilotInputs_v2 inputs){
+        Vector topLeft = airportBorders[0];
+        Vector topRight = airportBorders[1];
+        Vector bottomLeft = airportBorders[2];
+        Vector bottomRight = airportBorders[3];
+
+        Vector position = Controller.extractPosition(inputs);
+        float maxBrake = this.getConfig().getRMax();
+
+
+        float x = position.getxValue();
+        float z = position.getzValue();
+
+        float x1 = topLeft.getxValue();
+        float z1 = topLeft.getzValue();
+        float x2 = bottomLeft.getxValue();
+        float z2 = bottomLeft.getzValue();
+
+        float x3 = topRight.getxValue();
+        float z3 = topRight.getzValue();
+        float x4 = bottomRight.getxValue();
+        float z4 = bottomRight.getzValue();
+
+        float d;
+
+        //check on what side of a line A(x1,y1) & B(x2,y2) a point (x,y) is:
+        //d = (x-x1)(y2-y1)-(y-y1)(x2-x1)
+        //d < 0 = left, d > 0 right
+        if (topLeft.getxValue() < topRight.getxValue()){
+            d = (x-(x1+AIRPORT_BOUND_BUFFER))*(z2-z1) - (z-z1)*((x2+AIRPORT_BOUND_BUFFER)-(x1+AIRPORT_BOUND_BUFFER));
+            if (d < 0){
+                outputs.setRightBrakeForce(maxBrake);
+            }
+
+            d = (x-(x3-AIRPORT_BOUND_BUFFER))*(z4-z3) - (z-z3)*((x4-AIRPORT_BOUND_BUFFER)-(x3-AIRPORT_BOUND_BUFFER));
+            if (d > 0){
+                outputs.setLeftBrakeForce(maxBrake);
+            }
+        }
+        else{
+            d = (x-(x1-AIRPORT_BOUND_BUFFER))*(z2-z1) - (z-z1)*((x2-AIRPORT_BOUND_BUFFER)-(x1-AIRPORT_BOUND_BUFFER));
+            if (d > 0){
+                outputs.setRightBrakeForce(maxBrake);
+            }
+
+            d = (x-(x3+AIRPORT_BOUND_BUFFER))*(z4-z3) - (z-z3)*((x4+AIRPORT_BOUND_BUFFER)-(x3+AIRPORT_BOUND_BUFFER));
+            if (d < 0){
+                outputs.setLeftBrakeForce(maxBrake);
+            }
+        }
+    }
+
+    private final static float AIRPORT_BOUND_BUFFER = 2f;
+
     /**
      * Calculates the angle between vector difference of the current target and the drone, and the drone's heading vector
      * positive angles indicate a need for steering to the left

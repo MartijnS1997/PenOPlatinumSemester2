@@ -111,6 +111,7 @@ public class DescendController extends Controller {
      * Resets all the parameters of the controller that were calculated for the previous descend
      * this method should be called every time the controller is used for a new descend
      */
+    @Override
     public void reset(){
         this.turn = null;
         this.turnPhysX = null;

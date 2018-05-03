@@ -50,6 +50,10 @@ public class GateTaxiingController extends TaxiingController{
         return false;
     }
 
+    @Override
+    public void reset() {
+        this.getBrakeController().reset();
+    }
 
     /**
      * Checks if the drone is close enough to the target
