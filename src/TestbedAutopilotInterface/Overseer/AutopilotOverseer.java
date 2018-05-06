@@ -423,6 +423,9 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void>, Packa
      * Cancels the reservation made by the specified autopilot.
      * A reservation cancellation makes the airport available for other drones to land on
      * @param autopilot the autopilot to release the reservation for
+     * note: the autopilot should call this method every time it has finished the takeoff phase
+     *       even if it hasn't made a reservation to begin with (on init, the drones are all standing on the airport)
+     *       the method just has no effect if there was no reservation for the airport (fail safe)
      */
     public synchronized void releaseAirport(AutoPilot autopilot){
         OverseerAirportMap airportMap = this.getAirportMap();

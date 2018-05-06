@@ -49,7 +49,7 @@ public class ControllerSelector {
 ////            activeController = nextActiveController;
 ////            nextActiveController = this.getNextController(activeController);
 ////            //configure the active controller if needed  controller if needed
-////            this.configureController(activeController);
+////            this.configureWaitController(activeController);
 ////
 ////            this.setActiveController(activeController);
 ////            this.setFollowUpController(nextActiveController);
@@ -128,7 +128,7 @@ public class ControllerSelector {
 //     * Configures the provided controller by invoking its corresponding configuring method
 //     * @param controller the controller to be configured
 //     */
-//    private void configureController(Controller controller){
+//    private void configureWaitController(Controller controller){
 //        if(controller instanceof AutopilotTakeoffController){
 //            this.configureTakeoffController((AutopilotTakeoffController) controller);
 //            return;

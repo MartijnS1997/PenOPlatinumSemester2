@@ -1,5 +1,6 @@
 package internal.Autopilot;
 
+import AutopilotInterfaces.AutopilotConfig;
 import AutopilotInterfaces.AutopilotInputs_v2;
 import AutopilotInterfaces.AutopilotOutputs;
 import TestbedAutopilotInterface.Overseer.MapAirport;
@@ -44,8 +45,7 @@ public class AirportNavigationController extends AutopilotFlightController {
             //if so check also if we've finished it
             TurnControl turnControl = this.getTurnControl();
             //if so we may switch to the landing controller
-            boolean willFinish = willFinishTurn(currentInputs, previousInputs, turnControl);
-            return willFinishTurn(currentInputs, previousInputs, turnControl)&&getNextState(currentInputs, previousInputs) != NavigatorState.TO_NEXT_TURN;
+            return willFinishTurn(currentInputs, previousInputs, turnControl);
         }
         //if not return false
         return false;
@@ -78,9 +78,8 @@ public class AirportNavigationController extends AutopilotFlightController {
      * the finite state machine transitions to the navigator state (we need to reconfigure)
      */
     public void reset(){
-        this.navigatorState = NavigatorState.INIT;
+        this.navigatorState = NavigatorState.TURNING;
         this.pathGenerator = null;
-        this.targetAirport = null;
         this.turnPhysX = null;
     }
 
@@ -122,26 +121,33 @@ public class AirportNavigationController extends AutopilotFlightController {
     }
 
     /**
-     * Initializes the airport navigation controller
+     * Configures the airport navigation controller
      * --> creates the turn physX object needed to do the physics calculations
-     * @param currentInputs the inputs most recently received from the testbed
-     * @param previousInputs the inputs previously received from the testbed
+     * --> initializes the path generator
+     * --> initializes the first turn
+     * @param config the configuration of the autopilot (needed for calculations)
+     * @param pathGenerator the generator used to navigate from the current location to the next location
      */
-    private void initializeNavigation(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs){
+    public void configureNavigation(AutopilotConfig config, PathGenerator_v2 pathGenerator){
+        //get the autopilot
+        AutoPilot autopilot = this.getAutopilot();
+        //save the config
+        this.setConfig(config);
+        //generate the turn physics (needed for the next calulations)
         PhysXEngine.TurnPhysX turnPhysX = this.getAutopilot().getPhysXEngine().createTurnPhysics();
         //save the turn physX
         this.setTurnPhysX(turnPhysX);
         //initialize the path generator
         //we've fixed the destination airport as the true destination... for now
-        MapAirport targetAirport = this.getTargetAirport();
-        float cruisingAltitude = this.getCruisingAltitude();
-        float descendThreshold = this.getDescendActivationThreshold();
-        float standardDescendAltitude = this.getStandardLandingAltitude();
-        System.out.println(targetAirport);
-        //generate the new path planner
-        PathGenerator_v2 pathGenerator = new PathGenerator_v2(currentInputs, targetAirport, cruisingAltitude, descendThreshold, standardDescendAltitude);
+        float cruisingAltitude = autopilot.getCommunicator().getAssignedCruiseAltitude();
+        this.setCruisingAltitude(cruisingAltitude);
+
+        //Save the path planner
         this.setPathGenerator(pathGenerator);
         this.setFlightPath(pathGenerator.getFlightPath());
+
+        //we also need to configure the first turn (needed to skip the extra 'init' iteration)
+        this.configureTurningControllerFirstTurn();
     }
 
     /**
@@ -376,11 +382,6 @@ public class AirportNavigationController extends AutopilotFlightController {
         NavigatorState currentState = this.getNavigatorState();
         //open a switch to check which controls are next
         switch(currentState){
-            case INIT:
-                //when we're initializing we'll only need to return that we'll be turning next
-                //but first initialize the controller
-                this.initializeNavigation(currentInputs, previousInputs);
-                return NavigatorState.TURNING;
             case TURNING:
                 //check if we've finished the turn, if so we have to navigate to the next turn, if not keep turning
                 TurnControl turnController = this.getTurnControl();
@@ -425,10 +426,6 @@ public class AirportNavigationController extends AutopilotFlightController {
     private void configureStateController(NavigatorState navigatorState){
         //open a switch to call the configurators
         switch(navigatorState){
-            case TURNING:
-                //call the configuration method
-                configureTurningController();
-                break;
             case TO_NEXT_TURN:
                 //call the configuration method
                 configureNextTurn();
@@ -437,27 +434,15 @@ public class AirportNavigationController extends AutopilotFlightController {
     }
 
     /**
-     * Configures the turn controller for the next turn that has to be made
-     * method only has effect if the previous state was a init state, otherwise the turn controller is configured
-     * simultaneously with the next turn controller
+     * Configures the turn controller for the first turn, in this case we cannot use the configure toNextTurn
+     * because we start turning once the controller is activated for the first time
      */
-    private void configureTurningController(){
+    private void configureTurningControllerFirstTurn(){
         //get the turn physics
         PhysXEngine.TurnPhysX turnPhysX = this.getTurnPhysX();
         //generate the next turn
         NavigatorState state = this.getNavigatorState();
-        AutopilotTurn nextTurn;
-        //the controller needs a turn to do, in the case that the navigator was initializing
-        //we need to generate a new turn, otherwise the next turn can be extracted from the to next turn controller
-        //that was responsible for flying to the turn
-        switch(state){
-            case INIT:
-                nextTurn = this.getNextTurn();
-                break;
-            default:
-                return;
-        }
-
+        AutopilotTurn nextTurn = this.getNextTurn();
         //then generate the next turn controller
         TurnControl nextTurnControl = new TurnControl(nextTurn, turnPhysX);
         //after generation save the newly generated controller
@@ -496,25 +481,6 @@ public class AirportNavigationController extends AutopilotFlightController {
     /*
     Controller instances
      */
-
-
-    /**
-     * Getter for the target airport this is the airport to which the drone has to fly
-     * this variable is set by the finite state machine
-     * @return the target airport, this is the airport to which the drone has to fly
-     */
-    private MapAirport getTargetAirport() {
-        return targetAirport;
-    }
-
-    /**
-     * Setter for the target airport, this is the airport to which the drone has to fly. The target is set by the
-     * autopilot finite state machine
-     * @param targetAirport the airport that is the target of this flight
-     */
-    public void setTargetAirport(MapAirport targetAirport) {
-        this.targetAirport = targetAirport;
-    }
 
     /**
      * Getter for the path generator, this generator is used to query the next turns for the controller to follow
@@ -580,42 +546,6 @@ public class AirportNavigationController extends AutopilotFlightController {
     }
 
     /**
-     * Getter fo the standard landing altitude, the altitude to which the drone descends if the descend threshold
-     * is breached. Only needed for the path generator to determine the landing distance
-     * @return the standard landing altitude in meters
-     */
-    private float getStandardLandingAltitude() {
-        return standardLandingAltitude;
-    }
-
-    /**
-     * Setter for the standard landing altitude (see getter for more info || the autopilot finite state machine)
-     * Only needed for the path generator to determine the landing distance
-     * @param standardLandingAltitude the standard landing altitude for the drone > 0
-     */
-    protected void setStandardLandingAltitude(float standardLandingAltitude) {
-        this.standardLandingAltitude = standardLandingAltitude;
-    }
-
-    /**
-     * Getter for the descend threshold, if this threshold is breached the drone will enter the descend phase
-     * before the actual landing. Only needed for the path generator to determine the landing distance
-     * @return the descend threshold in meters
-     */
-    private float getDescendActivationThreshold() {
-        return descendActivationThreshold;
-    }
-
-    /**
-     * Setter for the descend activation threshold (see getter || finite state machine)
-     * Only needed for the path generator to determine the landing distance
-     * @param descendActivationThreshold the activation threshold > 0
-     */
-    protected void setDescendActivationThreshold(float descendActivationThreshold) {
-        this.descendActivationThreshold = descendActivationThreshold;
-    }
-
-    /**
      * Getter for the control turn object(containing all the info needed to make the currently specified turn)
      * @return the control turn specified for the current turn
      */
@@ -651,12 +581,15 @@ public class AirportNavigationController extends AutopilotFlightController {
 
     /**
      * Checks if the final turn of this flight has been initiated
-     * @return true if and only if the remaining turns have reached zero
+     * --> the final turn is only initiated if the controller has switched to the Turn state and there
+     *     are no new turns to be generated by the path generator
+     * @return true if and only if the remaining turns have reached zero and we're in the turning state
      */
     private boolean finalTurnInitiated(){
         PathGenerator_v2 pathGenerator = this.getPathGenerator();
+        NavigatorState state = this.getNavigatorState();
         int remainingTurns = pathGenerator.getNbOfRemainingTurns();
-        return remainingTurns <= 0;
+        return state != NavigatorState.TO_NEXT_TURN && remainingTurns <= 0;
     }
 
     /**
@@ -782,7 +715,7 @@ public class AirportNavigationController extends AutopilotFlightController {
      * --> 2. fly to next turn
      * --> goto 1. until we're landing
      */
-    private NavigatorState navigatorState = NavigatorState.INIT;
+    private NavigatorState navigatorState = NavigatorState.TURNING;
 
     /**
      * The path generator used to generates the turns to follow by the controller
@@ -791,28 +724,10 @@ public class AirportNavigationController extends AutopilotFlightController {
     private PathGenerator_v2 pathGenerator;
 
     /**
-     * Getter for the target airport, this is the airport to which the drone has to fly, is set by the finite state machine
-     * which decides in which phase the package is in
-     */
-    private MapAirport targetAirport;
-
-    /**
      * The cruising altitude assigned to the drone by the overseer, this is the reference altitude for the
      * altitude PID controllers ( there are different controllers for different scenario's)
      */
     private float cruisingAltitude;
-
-    /**
-     * The standard landing altitude, this is the altitude where to the drone starts descending if the
-     * descend activation threshold is breached, this parameter is only needed for the path generator
-     */
-    private float standardLandingAltitude;
-
-    /**
-     * The activation threshold for the descend phase, if this value is breached the drone will enter the
-     * descend phase before actual landing, only needed for the path generator
-     */
-    private float descendActivationThreshold;
 
     /**
      * The physics engine turn physics used for calculating the reference velocity and the banking roll
@@ -917,7 +832,7 @@ public class AirportNavigationController extends AutopilotFlightController {
      */
     //TODO ADD WRAP UP CONTROLS FOR WHEN THE TOTAL CONTROLS ARE FINISHED FOR THIS NAVIGATION
     private enum NavigatorState{
-        INIT, TURNING, TO_NEXT_TURN
+        TURNING, TO_NEXT_TURN
     }
 
 

@@ -5,6 +5,7 @@ import AutopilotInterfaces.AutopilotInputs_v2;
 import AutopilotInterfaces.AutopilotOutputs;
 import TestbedAutopilotInterface.Overseer.AutopilotDelivery;
 import TestbedAutopilotInterface.Overseer.AutopilotInfo;
+import TestbedAutopilotInterface.Overseer.DeliveryPackage;
 import TestbedAutopilotInterface.Overseer.MapAirport;
 import internal.Helper.Vector;
 
@@ -29,6 +30,7 @@ public class AutopilotFiniteStateMachine {
         this.takeoffController = new AutopilotTakeoffController(autopilot);
         this.takeoffStabilizerController = new AutopilotStabilization(autopilot);
         this.flightController = new AirportNavigationController(autopilot);
+        this.descendWaitController = new DescendWaitController(autopilot);
         this.descendController = new DescendController(autopilot);
         this.landingController = new AutopilotLandingController(autopilot);
         this.gateTaxiingController = new GateTaxiingController(autopilot);
@@ -65,13 +67,11 @@ public class AutopilotFiniteStateMachine {
      * @param currentInputs the inputs used to determine the next state
      * @return the next active state of the autopilot
      */
-    private AutopilotState getNextActiveState(AutopilotInputs_v2 currentInputs){
-        //get the current state
-        AutopilotState state = this.getState();
+    private AutopilotState getNextActiveState(AutopilotInputs_v2 currentInputs, AutopilotState currentState){
         //get the previous inputs
         AutopilotInputs_v2 previousInputs = this.getPreviousInputs();
         //determine which controller is next
-        switch(state){
+        switch(currentState){
             case INIT_FLIGHT:
                 //check if we've already passed a single iteration (needed to configure the autopilot)
                 return this.getInitController().hasReachedObjective(currentInputs, previousInputs) ? TAKEOFF : INIT_FLIGHT;
@@ -83,11 +83,14 @@ public class AutopilotFiniteStateMachine {
             case STABILIZE_TAKEOFF:
                 //get the takeoff stabilization controller
                 AutopilotStabilization stabilizationController = this.getTakeoffStabilizerController();
-                return stabilizationController.hasReachedObjective(currentInputs, previousInputs) ? FLIGHT : STABILIZE_TAKEOFF;
+                return stabilizationController.hasReachedObjective(currentInputs, previousInputs) ? /*DESCEND_WAIT*/ FLIGHT: STABILIZE_TAKEOFF;
             case FLIGHT:
                 AutopilotFlightController flightController = this.getFlightController();
                 //check if the controller has finished doing its job
-                return flightController.hasReachedObjective(currentInputs, previousInputs) ? DESCEND : FLIGHT;
+                return flightController.hasReachedObjective(currentInputs, previousInputs) ? /*DESCEND*/ DESCEND_WAIT : FLIGHT;
+            case DESCEND_WAIT:
+                DescendWaitController descendWaitController = this.getDescendWaitController();
+                return descendWaitController.hasReachedObjective(currentInputs, previousInputs) ? DESCEND : DESCEND_WAIT;
             case DESCEND:
                 DescendController descendController = this.getDescendController();
                 //check if the controller is done doing its job
@@ -120,17 +123,20 @@ public class AutopilotFiniteStateMachine {
      * note: usecase --> should be called every iteration to get the next state
      */
     private AutopilotState toNextState(AutopilotInputs_v2 inputs){
+
+        //get the current state
+        AutopilotState currentState = this.getState();
         //get the next state needed by the controller
-        AutopilotState nextState = this.getNextActiveState(inputs);
-        //get the previous state
-        AutopilotState prevState = this.getState();
+        AutopilotState nextState = this.getNextActiveState(inputs, currentState);
 
         //check if they are the same, if not, configure the controller & save the next state
-        if(!nextState.equals(prevState)){
+        if(!nextState.equals(currentState)){
             configureState(nextState, inputs);
             this.setState(nextState);
-            System.out.println("Switched states, from " + AutopilotState.getString(prevState) +
+            System.out.println("Switched states, from " + AutopilotState.getString(currentState) +
                     ", to " + AutopilotState.getString(nextState));
+            //we do a recursive call until the states are stable
+            toNextState(inputs);
         }
 
         //now return the next state
@@ -154,6 +160,8 @@ public class AutopilotFiniteStateMachine {
             case FLIGHT:
                 configureFlight(inputs);
                 break;
+            case DESCEND_WAIT:
+                configureDescendWait(inputs);
             case DESCEND:
                 configureDescend(inputs);
                 break;
@@ -180,11 +188,9 @@ public class AutopilotFiniteStateMachine {
         System.out.println("Assigned altitude for this flight: " + cruisingAlt);
         AutopilotTakeoffController takeoffController = this.getTakeoffController();
         takeoffController.reset();
-        takeoffController.setCruisingAltitude(cruisingAlt);
-
-        //set the config for the controller
+        //configure the controller
         AutopilotConfig config = this.getAutopilot().getConfig();
-        takeoffController.setConfig(config);
+        takeoffController.configureController(config);
     }
 
     /**
@@ -193,6 +199,9 @@ public class AutopilotFiniteStateMachine {
      * @param inputs the inputs used to configure the stabilizer
      */
     private void configureTakeoffStabilization(AutopilotInputs_v2 inputs){
+        //we need to release the lock on the airport
+        //TODO create more general API for the requests to be called --> the collision avoidance overlay
+        this.getAutopilot().getCommunicator().removeRequest();
         //set the cruising altitude
         float cruisingAlt = this.getAutopilot().getCommunicator().getAssignedCruiseAltitude();
         AutopilotStabilization stabilization = this.getTakeoffStabilizerController();
@@ -218,10 +227,10 @@ public class AutopilotFiniteStateMachine {
 
         AutoPilot autopilot = this.getAutopilot();
         AutopilotCommunicator communicator = autopilot.getCommunicator();
-        navigationController.setConfig(autopilot.getConfig());
-        navigationController.setCruisingAltitude(communicator.getAssignedCruiseAltitude());
-        navigationController.setDescendActivationThreshold(this.getLandingDescendThreshold());
-        navigationController.setStandardLandingAltitude(this.getStandardLandingAltitude());
+        AutopilotConfig config = autopilot.getConfig();
+        float cruisingAltitude = communicator.getAssignedCruiseAltitude();
+        float descendThreshold = this.getLandingDescendThreshold();
+        float standardLandingAlt = this.getStandardLandingAltitude();
 
         //get the data about the package that we currently need to deliver
         AutopilotDelivery currentDelivery = communicator.getCurrentRequest();
@@ -232,14 +241,20 @@ public class AutopilotFiniteStateMachine {
             System.out.println("need to pick up package at source airport");
             int sourceAirportID = currentDelivery.getSourceAirport();
             MapAirport targetAirport = communicator.getAirportByID(sourceAirportID);
-            navigationController.setTargetAirport(targetAirport);
+            System.out.println(targetAirport);
+            //generate the path generator for the controller
+            PathGenerator_v2 pathGenerator = new PathGenerator_v2(inputs, targetAirport, cruisingAltitude, descendThreshold, standardLandingAlt);
+            navigationController.configureNavigation(config, pathGenerator);
 
         }else{
             //if the delivery is already picked up, get to the destination address
             System.out.println("package must be delivered to destination airport");
             int destinationAirportID = currentDelivery.getDestinationAirport();
             MapAirport targetAirport = communicator.getAirportByID(destinationAirportID);
-            navigationController.setTargetAirport(targetAirport);
+            System.out.println(targetAirport);
+            //create the path generator
+            PathGenerator_v2 pathGenerator = new PathGenerator_v2(inputs, targetAirport, cruisingAltitude, descendThreshold, standardLandingAlt);
+            navigationController.configureNavigation(config, pathGenerator);
         }
 
 
@@ -249,6 +264,22 @@ public class AutopilotFiniteStateMachine {
         //TODO can be accessed via api chain: this.getAutopilot().getCommunicator();
     }
 
+
+    /**
+     * Configures the descend wait controller
+     * @param inputs the inputs used to configure the wait controller
+     */
+    private void configureDescendWait(AutopilotInputs_v2 inputs){
+        DescendWaitController descendWaitController = this.getDescendWaitController();
+        descendWaitController.reset();
+        AutopilotCommunicator communicator = this.getAutopilot().getCommunicator();
+        float cruisingAltitude = communicator.getAssignedCruiseAltitude();
+        AutopilotDelivery delivery = communicator.getCurrentRequest();
+        int airportToLock = delivery.isPickedUp() ? delivery.getDestinationAirport() : delivery.getSourceAirport();
+
+        descendWaitController.configureWaitController(inputs,cruisingAltitude,airportToLock);
+        descendWaitController.setConfig(this.getAutopilot().getConfig());
+    }
     /**
      * Configures the descend controller for the drone this is the controller used to descend to a landing
      * friendly altitude once an airport has been reached, will be skipped if the altitude reaches a certain
@@ -260,13 +291,12 @@ public class AutopilotFiniteStateMachine {
         DescendController descendController = this.getDescendController();
         descendController.reset();
 
-        descendController.setConfig(this.getAutopilot().getConfig());
+        AutopilotConfig config = this.getAutopilot().getConfig();
 
         float activationThreshold = this.getLandingDescendThreshold();
         float targetAltitude = this.getStandardLandingAltitude();
 
-        descendController.setActivationThreshold(activationThreshold);
-        descendController.setTargetAltitude(targetAltitude);
+        descendController.configureController(config,inputs_v2, activationThreshold, targetAltitude);
 
     }
 
@@ -446,6 +476,8 @@ public class AutopilotFiniteStateMachine {
             case STABILIZE_TAKEOFF:
                 return FLIGHT;
             case FLIGHT:
+                return DESCEND_WAIT;
+            case DESCEND_WAIT:
                 return DESCEND;
             case DESCEND:
                 return LANDING;
@@ -475,6 +507,8 @@ public class AutopilotFiniteStateMachine {
                 return this.getTakeoffStabilizerController();
             case FLIGHT:
                 return this.getFlightController();
+            case DESCEND_WAIT:
+                return this.getDescendWaitController();
             case DESCEND:
                 return this.getDescendController();
             case LANDING:
@@ -524,6 +558,15 @@ public class AutopilotFiniteStateMachine {
      */
     private AirportNavigationController getFlightController() {
         return flightController;
+    }
+
+    /**
+     * Getter for the descend wait controller, this is the controller used when the drone has to wait for descend
+     * permission, if the permission is not granted, the drone has to wait until it has it (thus circling above the airport)
+     * @return the descend wait controller, responsible for waiting and reserving the airport for the drone
+     */
+    private DescendWaitController getDescendWaitController(){
+        return descendWaitController;
     }
 
     /**
@@ -685,6 +728,7 @@ public class AutopilotFiniteStateMachine {
     private AutopilotTakeoffController takeoffController;
     private AutopilotStabilization takeoffStabilizerController;
     private AirportNavigationController flightController;
+    private DescendWaitController descendWaitController;
     private DescendController descendController;
     private AutopilotLandingController landingController;
     private GateTaxiingController gateTaxiingController;

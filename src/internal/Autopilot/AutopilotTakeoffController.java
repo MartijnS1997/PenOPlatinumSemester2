@@ -1,5 +1,6 @@
 package internal.Autopilot;
 
+import AutopilotInterfaces.AutopilotConfig;
 import AutopilotInterfaces.AutopilotInputs_v2;
 import AutopilotInterfaces.AutopilotOutputs;
 import TestbedAutopilotInterface.Overseer.AutopilotDelivery;
@@ -51,6 +52,18 @@ public class AutopilotTakeoffController extends Controller {
         this.getPitchController().reset();
         this.getPitchStabilizerPID().reset();
         this.getThrustController().reset();
+    }
+
+    /**
+     * Configures the takeoff controller for a single takeoff (we assign the cruising altitude dynamically
+     * by calling the autopilot communicator)
+     * @param config the configuration to set
+     */
+    protected void configureController(AutopilotConfig config){
+        AutopilotCommunicator communicator = this.getAutopilot().getCommunicator();
+        float cruisingAltitude = communicator.getAssignedCruiseAltitude();
+        this.setCruisingAltitude(cruisingAltitude);
+        this.setConfig(config);
     }
 
     /**

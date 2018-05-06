@@ -1,9 +1,6 @@
 package internal.Autopilot;
 
-import AutopilotInterfaces.Autopilot;
-import AutopilotInterfaces.AutopilotInputs;
-import AutopilotInterfaces.AutopilotInputs_v2;
-import AutopilotInterfaces.AutopilotOutputs;
+import AutopilotInterfaces.*;
 import internal.Helper.Vector;
 import internal.Physics.PhysXEngine;
 
@@ -33,9 +30,6 @@ public class DescendController extends Controller {
     public AutopilotOutputs getControlActions(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs){
         //create the control outputs object to store the control actions for the drone
         ControlOutputs outputs = new ControlOutputs(this.getStandardOutputs());
-        if(this.getTurnPhysX() == null){
-            configureController(currentInputs);
-        }
 
         //update the angle to go
         AutopilotTurn turn = this.getTurn();
@@ -127,7 +121,9 @@ public class DescendController extends Controller {
      * --> sets the velocity needed to make the specified turn
      * @param currentInputs the current inputs of the drone, this will also be the target of the descend
      */
-    private void configureController(AutopilotInputs_v2 currentInputs){
+    protected void configureController(AutopilotConfig config, AutopilotInputs_v2 currentInputs, float descendThreshold, float targetAltitude){
+        //save the configuration
+        this.setConfig(config);
         //generate the turnPhysics
         PhysXEngine.TurnPhysX turnPhysX = this.getAutopilot().getPhysXEngine().createTurnPhysics();
         this.setTurnPhysX(turnPhysX);
@@ -135,6 +131,8 @@ public class DescendController extends Controller {
         AutopilotTurn turn = this.generateTurn(currentInputs);
         this.setTurn(turn);
 
+        this.setActivationThreshold(descendThreshold);
+        this.setTargetAltitude(targetAltitude);
         //calculate the reference roll and velocity for making the turn
         float roll = calculateBankingRoll(turn);
         float velocity = calculateTurnVelocity(roll);
@@ -146,8 +144,7 @@ public class DescendController extends Controller {
         //calculate the descend rate for the drone
         float turnAngle = turn.getTurnAngle();
         float currentAltitude = extractAltitude(currentInputs);
-        float targetAltitude = this.getTargetAltitude();
-        float descendRate = (float) ((currentAltitude - targetAltitude)/(turn.getTurnAngle()));
+        float descendRate = (currentAltitude - targetAltitude)/(turn.getTurnAngle());
         this.setDescendRate(descendRate);
 
         this.angleToGo = turnAngle;

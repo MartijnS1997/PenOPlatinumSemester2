@@ -170,11 +170,11 @@ public class PathGenerator_v2{
 		float diagonalSign = signum(entryDiagonal.crossProduct(dTangentVector).getyValue());
 
 		if(parallelSign == signum(turnDirection)){
-			System.out.println("parallel chosen");
+			//System.out.println("parallel chosen");
 			return parallelTangent;
 		}
 		if(diagonalSign == signum(turnDirection)){
-			System.out.println("diagonal chosen");
+			//System.out.println("diagonal chosen");
 			return diagonalTangent;
 		}
 
@@ -351,7 +351,7 @@ public class PathGenerator_v2{
 
 		//get the relative position to the center of the first turn of the exit point
 		Vector exitPoint = connectionCenter.vectorSum(scaledConCenterToExit);
-		System.out.println("exit point: " + exitPoint);
+		//System.out.println("exit point: " + exitPoint);
 
 		//now calculate the tangent, this is the connection center to exit vector times -2 (to turn it around and
 		Vector tangent = scaledConCenterToExit.scalarMult(-2f);

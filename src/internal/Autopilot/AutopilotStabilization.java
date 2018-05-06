@@ -22,7 +22,7 @@ public class AutopilotStabilization extends Controller {
      * Getter for the controls used to stabilize the drone in between flight states
      * @param currentInputs the outputs currently received by the autopilot from the testbed
      * @param previousInputs the inputs previously received by the autopilot from the testbed
-     * @return
+     * @return the control actions needed to stabilize the drone after takeoff
      */
     @Override
     public AutopilotOutputs getControlActions(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs) {
