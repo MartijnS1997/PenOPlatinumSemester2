@@ -6,6 +6,8 @@ import TestbedAutopilotInterface.Overseer.AutopilotInfo;
 import TestbedAutopilotInterface.Overseer.AutopilotOverseer;
 import TestbedAutopilotInterface.Overseer.MapAirport;
 
+import java.util.Set;
+
 /**
  * Created by Martijn on 27/03/2018.
  * A class that assists the autopilot with the overseer communication
@@ -38,6 +40,19 @@ public class AutopilotCommunicator {
         //registered yet, it will assign a cruising altitude)
         float cruisingAltitude = overseer.getCruisingAltitude(autopilot);
         this.setAssignedCruiseAltitude(cruisingAltitude);
+    }
+
+    /**
+     * Getter for the set that contains all the information about the other drones that the current drone is
+     * sharing its airspace with
+     * @return a set containing all the autopilot info objects containing info from all drones with a different
+     *         id from the caller.
+     */
+    protected Set<AutopilotInfo> getOtherAutopilotsInformation(){
+        AutopilotOverseer overseer = this.getOverseer();
+        AutoPilot autopilot = this.getAutopilot();
+        Set<AutopilotInfo> infoSet = overseer.getOtherAutopilotInfo(autopilot);
+        return infoSet;
     }
 
     /**

@@ -17,17 +17,6 @@ public abstract class TaxiingController extends Controller {
     }
 
     /**
-     * Sets the brakes of the drone to the maximum brake force they can achieve
-     * @param outputs the outputs to write the full brake to
-     */
-    protected void setMaxBrake(ControlOutputs outputs){
-        float maxBrake = this.getConfig().getRMax();
-        outputs.setRightBrakeForce(maxBrake);
-        outputs.setLeftBrakeForce(maxBrake);
-        outputs.setFrontBrakeForce(maxBrake);
-    }
-
-    /**
      * The controller for the brakes while navigating for turning the drone to the target
      *
      * @param outputs       the outputs to write the control actions to

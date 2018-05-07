@@ -103,7 +103,7 @@ public class DescendWaitController extends Controller {
         //get the exit point, this is the same point as the entry point
         Vector turnExit = turnEntry;
         //and we will turn anticlockwise for a full 360 degrees
-        float turnAngle = (float) (2*PI);
+        float turnAngle = getTurnAngle();
 
         this.setTurn(createTurn(turnCenter, turnEntry, turnExit, turnAngle, turnRadius));
         PhysXEngine.TurnPhysX turnPhysX = this.getAutopilot().getPhysXEngine().createTurnPhysics();
@@ -170,6 +170,14 @@ public class DescendWaitController extends Controller {
      */
     private static float getTurnRadius() {
         return turnRadius;
+    }
+
+    /**
+     * Getter for the turn angle, this is the nb of radians the drone has to turn before it has finished the turn
+     * @return the turn angle in radians
+     */
+    private static float getTurnAngle() {
+        return turnAngle;
     }
 
     /**
@@ -297,6 +305,11 @@ public class DescendWaitController extends Controller {
      * The radius of the turn to execute
      */
     private final static float turnRadius = 1000f;
+
+    /**
+     * The turn angle used for making the turn while waiting
+     */
+    private final static float turnAngle = (float) (2*PI);
 
 
     /**

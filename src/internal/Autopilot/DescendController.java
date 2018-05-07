@@ -11,8 +11,7 @@ import static java.lang.Math.signum;
 /**
  * Created by Martijn on 24/04/2018.
  * A class of controllers to make a turn based descend for the drone
- * TODO adjust the reference velocity to fit our needs
- * TODO make reset functionality to make the controller re-usable
+ * TODO implement the cas controller in the pitch reference method (we need to adjust the pitch accordingly)
  */
 public class DescendController extends Controller {
 
@@ -35,9 +34,13 @@ public class DescendController extends Controller {
         AutopilotTurn turn = this.getTurn();
         updateAngleToGo(currentInputs, previousInputs, turn);
 
+        //get the cas commands to avoid collisions
+        DescendTurnCAS descendTurnCAS = this.getDescendTurnCAS();
+        CasCommand command = descendTurnCAS.getCASCommand(currentInputs, previousInputs);
+
         //get all the control actions needed to make the turn
         rollControl(outputs, currentInputs, previousInputs);
-        pitchControl(outputs, currentInputs, previousInputs);
+        pitchControl(outputs, currentInputs, previousInputs, command);
         angleOfAttackControl(getAoaErrorMargin(), outputs, currentInputs, previousInputs);
         thrustControl(outputs, currentInputs, previousInputs);
 
@@ -148,6 +151,12 @@ public class DescendController extends Controller {
         this.setDescendRate(descendRate);
 
         this.angleToGo = turnAngle;
+
+        //configure the CAS
+        AutopilotCommunicator communicator = this.getAutopilot().getCommunicator();
+        DescendTurnCAS descendTurnCAS = new DescendTurnCAS(communicator);
+        descendTurnCAS.configureDescendCas(getThreatDistance());
+        setDescendTurnCAS(descendTurnCAS);
     }
 
     /**
@@ -174,7 +183,7 @@ public class DescendController extends Controller {
 
         //define the other parameters of the turn
         Vector entryPoint = dronePosGround.vectorDifference(turnCenterWorld);
-        float turnAngle = (float) (2*PI);
+        float turnAngle = TURN_ANGLE;
         float turnRadius = descendRadius;
 
         return new AutopilotTurn() {
@@ -330,9 +339,9 @@ public class DescendController extends Controller {
      * @param currentInputs the inputs most recently received from the testbed
      * @param previousInputs the inputs previously received from the testbed
      */
-    private void pitchControl(ControlOutputs outputs, AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs){
+    private void pitchControl(ControlOutputs outputs, AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs, CasCommand casCommand){
         //get the reference value
-        Vector pitchReferencePoint = this.getPitchReferencePoint(currentInputs);
+        Vector pitchReferencePoint = this.getPitchReferencePoint(currentInputs, casCommand);
         float pitchError = this.getPitchError(currentInputs, pitchReferencePoint);
         float deltaTime = getDeltaTime(currentInputs, previousInputs);
         //feed the results into the pid controller
@@ -349,20 +358,23 @@ public class DescendController extends Controller {
      * Calculates the reference point for the pitch controller, it is used to descend to the given altitude
      * the reference point will descend based on the angle to go parameter (if it hits zero the drone shouldn't descend anymore
      * @param currentInputs the current inputs, used to calculate the reference point
+     * @param casCommand the collision avoidance command, used to adjust the reference point position
+     *                   to fulfill the command
      * @return a reference point for the controller in the world axis system to fly to
      */
-    private Vector getPitchReferencePoint(AutopilotInputs_v2 currentInputs){
+    private Vector getPitchReferencePoint(AutopilotInputs_v2 currentInputs, CasCommand casCommand){
+
         //grab the parameters needed for the calculations
         Vector groundPosition = extractGroundPosition(currentInputs);
         Vector orientation = extractOrientation(currentInputs);
         Vector headingHa = new Vector(0,0,-1); //the heading vector in the heading axis system
-        float targetAltitude = this.getTargetAltitude();
-        float descendRate = this.getDescendRate();
-        float angleToGo = this.getAngleToGo();
+//        float targetAltitude = this.getTargetAltitude();
+//        float descendRate = this.getDescendRate();
+//        float angleToGo = this.getAngleToGo();
         float lookaheadDistance = this.getLookaheadDistance();
 
         //calculate the reference altitude, the current angle to go and the descend rate should be used
-        float referenceAltitude = angleToGo*descendRate + targetAltitude;
+        float referenceAltitude = getReferenceAltitude(currentInputs, casCommand);/*angleToGo*descendRate + targetAltitude;*/
         Vector altitudeVector = new Vector(0,referenceAltitude,0);
 
         //calculate the reference point by setting a point in front of the drone (using the lookahead distance)
@@ -374,6 +386,52 @@ public class DescendController extends Controller {
         return lookaheadVector;
     }
 
+    /**
+     * Getter for the reference altitude needed for calculating the pitch reference point
+     * The reference altitude is based on the different Cas commands
+     * --> see getCasAscendReferenceAltitude() for the ASCEND case
+     * --> see getNormalOpReferenceAltitude() for other cases
+     * @param currentInputs the inputs most recently received from the testbed
+     * @param casCommand the command used to determine the reference altitude
+     * @return the reference altitude needed to handle the cas command
+     */
+    private float getReferenceAltitude(AutopilotInputs_v2 currentInputs, CasCommand casCommand){
+        switch (casCommand){
+            case ASCEND:
+                return getCasAscendReferenceAltitude(currentInputs);
+            default:
+                return getNormalOpReferenceAltitude();
+        }
+    }
+
+    /**
+     * Getter for the reference altitude in the case that the cas command is an ascend command
+     * @param currentInputs the inputs most recently received from the testbed
+     * @return the reference altitude for the ascend command
+     */
+    private float getCasAscendReferenceAltitude(AutopilotInputs_v2 currentInputs){
+        //get the lookahead distance and extract the current altitude
+        float lookaheadDistance = this.getLookaheadDistance();
+        float lookaheadFraction = this.getCasAscendFraction();
+        float extraAltitude = lookaheadDistance*lookaheadFraction;
+
+        float currentAltitude = extractAltitude(currentInputs);
+
+        return currentAltitude + extraAltitude;
+    }
+
+    /**
+     * Getter for the reference altitude in normal operation of the descending contoller
+     * @return the reference altitude needed for a steady descend
+     */
+    private float getNormalOpReferenceAltitude(){
+        float targetAltitude = this.getTargetAltitude();
+        float descendRate = this.getDescendRate();
+        float angleToGo = this.getAngleToGo();
+
+        return angleToGo*descendRate + targetAltitude;
+
+    }
 
     /**
      * Calculates the error on the pitch of the drone against the reference point of the flight
@@ -387,6 +445,7 @@ public class DescendController extends Controller {
      *         if the pitch error is negative, lesser pitch is required (steering downwards)
      */
     private float getPitchError(AutopilotInputs_v2 currentInputs, Vector referencePoint){
+
         //grab the parameters needed fo the calculation
         Vector droneHeadingPa = new Vector(0,0,-1); //the heading vector of the drone in pitch axis
         Vector yzNormalPa = new Vector(1,0,0); // normal of the yz-plane in pitch axis
@@ -415,6 +474,8 @@ public class DescendController extends Controller {
         //return the result while checking for NaN, if so return harmless (?) value
         return Float.isNaN(pitchError) ? 0 : pitchError;
     }
+
+
 
     /**
      * Checks if the drone has finished making the current specified turn
@@ -662,6 +723,22 @@ public class DescendController extends Controller {
     }
 
     /**
+     * Getter for the collision avoidance system used during the descend of the drone
+     * @return the CAS used during the descend of the drone
+     */
+    private DescendTurnCAS getDescendTurnCAS() {
+        return descendTurnCAS;
+    }
+
+    /**
+     * Setter for the descend turn CAS used by the controller to avoid a collision during the descend turn
+     * @param descendTurnCAS the control avoidance system used during the descend of the drone
+     */
+    private void setDescendTurnCAS(DescendTurnCAS descendTurnCAS) {
+        this.descendTurnCAS = descendTurnCAS;
+    }
+
+    /**
      * Getter for the lookahead distance, the distance between the drone and the pitch reference point
      * expressed in ground coordinates (the distance in the xz-plane)
      * @return the lookahead distance used to generate the pitch reference point in meters
@@ -677,6 +754,25 @@ public class DescendController extends Controller {
     private void setLookaheadDistance(float lookaheadDistance) {
         this.lookaheadDistance = lookaheadDistance;
     }
+
+    /**
+     * Getter for the ascend fraction, used to adjust the reference pitch for the pitch controller in case
+     * the cas commanded an ascend. The altitude added to the current altitude of the drone
+     * is the specified fraction of the lookahead distance
+     * @return the ascend fraction ( 0 < x < 1)
+     */
+    private float getCasAscendFraction() {
+        return casAscendFraction;
+    }
+
+    /**
+     * Setter for the ascend fraction --> see getter for more info
+     * @param casAscendFraction the fraction of of the lookahead distance used for adjusting the reference point
+     */
+    private void setCasAscendFraction(float casAscendFraction) {
+        this.casAscendFraction = casAscendFraction;
+    }
+
 
     /**
      * Getter for the percentage cap on the reference roll
@@ -704,6 +800,14 @@ public class DescendController extends Controller {
      */
     private float getActivationThreshold() {
         return activationThreshold;
+    }
+
+    /**
+     * Getter for the threat distance, this is the distance wherefore a drone is considered a threat to the current drone
+     * @return the threat distance
+     */
+    private static float getThreatDistance() {
+        return threatDistance;
     }
 
     /**
@@ -788,6 +892,11 @@ public class DescendController extends Controller {
     private AutopilotTurn turn;
 
     /**
+     * The collision avoidance system used during the descend turn of the drone
+     */
+    private DescendTurnCAS descendTurnCAS;
+
+    /**
      * The radius of the turn used to descend to the desired altitude
      */
     private float descendTurnRadius = 1000f;
@@ -825,6 +934,12 @@ public class DescendController extends Controller {
     private float lookaheadDistance = 100f;
 
     /**
+     * The fraction of the lookahead altitude used for calculating the pitch reference point
+     * if a ascend command was given (for 0.15 gives approx 8.5 degree pitch reference)
+     */
+    private float casAscendFraction = 0.15f;
+
+    /**
      * The turn PhysX object used by the autopilot to make turns
      * --> calculates banking angles and such
      */
@@ -851,6 +966,11 @@ public class DescendController extends Controller {
      * and the next controller (landing) will be invoked
      */
     private float activationThreshold = 100f;
+
+    /**
+     * Getter for the threat distance, used for setting the reaction distance for the collision avoidance system
+     */
+    private final static float threatDistance = 50f;
 
      /*
     Configuration of the steering angles of the controller
@@ -886,6 +1006,11 @@ public class DescendController extends Controller {
      * the real inclination will be 13° to account for errors in the velocity approx
      */
     private float aoaErrorMargin = (float) (2*PI/180);
+
+    /**
+     * The turn angle used for making the turn while descending
+     */
+    private float TURN_ANGLE = (float) (2*PI);
 
     /**
      * The standard outputs used to construct the control outputs used by the controller
@@ -993,4 +1118,20 @@ public class DescendController extends Controller {
     private final static float ROLL_CORRECT_INTEGRAL = 0.f;
     private final static float ROLL_CORRECT_DERIVATIVE = 1.0f;
     private final PIDController rollCorrectController = new PIDController(ROLL_CORRECT_GAIN, ROLL_CORRECT_INTEGRAL, ROLL_CORRECT_DERIVATIVE);
+
+    /**
+     * The descend turn CAS used to avoid mid-air collisions during the descending turn
+     */
+    private class DescendTurnCAS extends DescendCas{
+
+        public DescendTurnCAS(AutopilotCommunicator communicator) {
+            super(communicator);
+        }
+
+        @Override
+        protected void configureDescendCas(float threatDistance) {
+            this.setThreatDistance(threatDistance);
+        }
+
+    }
 }

@@ -49,7 +49,6 @@ public abstract class Controller {
      */
     public abstract boolean hasReachedObjective(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs);
 
-
     /**
      * Clears all the state from the controller such that it can be used for a next iteration
      */
@@ -606,6 +605,17 @@ public abstract class Controller {
 
         return pathList;
     }
+    /**
+     * Sets the brakes of the drone to the maximum brake force they can achieve
+     * @param outputs the outputs to write the full brake to
+     */
+    protected void setMaxBrake(ControlOutputs outputs){
+        float maxBrake = this.getConfig().getRMax();
+        outputs.setRightBrakeForce(maxBrake);
+        outputs.setLeftBrakeForce(maxBrake);
+        outputs.setFrontBrakeForce(maxBrake);
+    }
+
 
 
     /**
@@ -1513,7 +1523,7 @@ public abstract class Controller {
          * Getter for the turn wherefore this instance was configured
          * @return the autopilot turn object wherefore this instance was configured
          */
-        private AutopilotTurn getTurn() {
+        protected AutopilotTurn getTurn() {
             return turn;
         }
 
@@ -1531,7 +1541,7 @@ public abstract class Controller {
          * @return the rotation that the drone has to do before it has finished the turn in radians
          *         note: angleToGo is negative for clockwise rotations and positive for counter clockwise rotations
          */
-        private float getAngleToGo() {
+        protected float getAngleToGo() {
             return angleToGo;
         }
 

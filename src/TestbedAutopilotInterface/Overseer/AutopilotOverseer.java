@@ -2,7 +2,6 @@ package TestbedAutopilotInterface.Overseer;
 
 import AutopilotInterfaces.*;
 import internal.Autopilot.AutoPilot;
-import internal.Autopilot.AutopilotState;
 import internal.Helper.Vector;
 
 import java.util.*;
@@ -44,7 +43,7 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void>, Packa
     @Override
     public Void call() throws Exception {
         //only start the delivery if all drones to spread the deliveries across have been added
-        while(this.getAutopilotInfo().size() != this.getInitNbOfAutopilots()||!this.autopilotsInitialized()){
+        while(this.getAutopilotInfoCenter().getSize() != this.getInitNbOfAutopilots()||!this.autopilotsInitialized()){
             //do nothing
         }
 
@@ -87,7 +86,8 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void>, Packa
         //get the map of the drones and their current assigned deliveries
         Map<String, List<PlannerDelivery>> assignedDeliveries = this.getUndeliveredPackagesPerDrone();
         //get the map of the drones and their current positions
-        Map<String, Vector> autopilotPositions = this.getAutopilotPositions();
+        AutopilotInfoCenter infoCenter = this.getAutopilotInfoCenter();
+        Map<String, Vector> autopilotPositions = infoCenter.getAutopilotPositions();
         //initialize the search
         planner.initializeSearch(submittedDeliveries, assignedDeliveries, autopilotPositions);
         //execute the search
@@ -105,10 +105,11 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void>, Packa
      */
     private boolean autopilotsInitialized(){
         //get all the states
-        Map<String, AutopilotInfo> infoMap = this.getAutopilotInfo();
-        Set<AutopilotInfo> infoSet = new HashSet<>(infoMap.values());
-        Set<AutopilotInfo> initSet = infoSet.stream().filter(info -> info.getAutopilotState() != AutopilotState.INIT_FLIGHT).collect(Collectors.toSet());
-        return initSet.size() == infoSet.size();
+        AutopilotInfoCenter infoCenter = this.getAutopilotInfoCenter();
+        return infoCenter.allAutopilotsInitialized();
+//        Set<AutopilotInfo> infoSet = new HashSet<>(infoMap.values());
+//        Set<AutopilotInfo> initSet = infoSet.stream().filter(info -> info.getAutopilotState() != AutopilotState.INIT_FLIGHT).collect(Collectors.toSet());
+//        return initSet.size() == infoSet.size();
     }
 
     /**
@@ -133,27 +134,27 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void>, Packa
         }
     }
 
-    /**
-     * Getter for the positions of the active autopilots, copies the map of inputs maintained by the autopilots
-     * into a map with as key the drone ID and as value the current position of that drone
-     * This method is also synchronized so no changes can be made to the map during the copying
-     * after that we can use the copy to start the package distribution
-     * @return a map with as key the id of the drone and as value the position of the drone linked to the ID
-     */
-    private synchronized Map<String, Vector> getAutopilotPositions(){
-        Map<String, AutopilotInfo> infoEntries = this.getAutopilotInfo();
-        Map<String, Vector> autopilotPositions = new HashMap<>();
-        for(String droneID: infoEntries.keySet()){
-            //first get the inputs associated with the ID
-            AutopilotInfo info = infoEntries.get(droneID);
-            //then extract the inputs
-            Vector position = info.getCurrentPosition();
-            //then put the positions in the map
-            autopilotPositions.put(droneID, position);
-        }
-        //return the map
-        return autopilotPositions;
-    }
+//    /**
+//     * Getter for the positions of the active autopilots, copies the map of inputs maintained by the autopilots
+//     * into a map with as key the drone ID and as value the current position of that drone
+//     * This method is also synchronized so no changes can be made to the map during the copying
+//     * after that we can use the copy to start the package distribution
+//     * @return a map with as key the id of the drone and as value the position of the drone linked to the ID
+//     */
+//    private synchronized Map<String, Vector> getAutopilotPositions(){
+//        Map<String, AutopilotInfo> infoEntries = this.getAutopilotInfo();
+//        Map<String, Vector> autopilotPositions = new HashMap<>();
+//        for(String droneID: infoEntries.keySet()){
+//            //first get the inputs associated with the ID
+//            AutopilotInfo info = infoEntries.get(droneID);
+//            //then extract the inputs
+//            Vector position = info.getCurrentPosition();
+//            //then put the positions in the map
+//            autopilotPositions.put(droneID, position);
+//        }
+//        //return the map
+//        return autopilotPositions;
+//    }
 
     /**
      * Gets the undelivered packages per drone
@@ -282,28 +283,39 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void>, Packa
     /**
      * Invoked by the autopilot, used to store (or initialize) the state data associated with the
      * autopilot invoking the method (synchronized to prevent thread issues)
-     * @param autoPilot the autopilot updating his status (used for identification)
+     * @param autopilot the autopilot updating his status (used for identification)
      * @param autopilotInfo the information object created by the autopilot, containing all data needed for
      *                      the collision detection
      * note: has to be called every time when using the autopilot
      */
-    public synchronized void autopilotStatusUpdate(AutoPilot autoPilot, AutopilotInfo autopilotInfo){
+    public void autopilotStatusUpdate(AutoPilot autopilot, AutopilotInfo autopilotInfo){
         //TODO check if concurrency issues arise, use a check-in first and lock the map
         //get the id
-        String autopilotId = autoPilot.getID();
+        String autopilotId = autopilot.getID();
         //get the map we write to
-        ConcurrentMap<String, AutopilotInfo> infoEntries = this.getAutopilotInfo();
+        AutopilotInfoCenter infoCenter = this.getAutopilotInfoCenter();
         //check if the drone was already present in the overseer
-        if(infoEntries.get(autopilotId ) == null){
+        if(!infoCenter.hasEntry(autopilot)){
             //assign it an cruising altitude
             setCruisingAltitude(autopilotId);
             //assign a queue
-            setDeliveryQueue(autoPilot);
+            setDeliveryQueue(autopilot);
 
         }
         //replace the old entry
 //        System.out.println("Autopilot ID: " + autopilotId + ", Autopilot location: " + extractPosition(inputs));
-        infoEntries.put(autopilotId, autopilotInfo);
+        infoCenter.updateEntry(autopilot, autopilotInfo);
+    }
+
+    /**
+     * Getter for the autopilot information set containing the autopilot info objects describing all the drones
+     * that share the airspace with the same drone
+     * @param autopilot the autopilot that has called the method, the info about this autopilot will be excluded
+     * @return a set containing all the autopilot info's from drones with a different ID from the caller
+     */
+    public synchronized Set<AutopilotInfo> getOtherAutopilotInfo(AutoPilot autopilot){
+        AutopilotInfoCenter infoCenter = getAutopilotInfoCenter();
+        return infoCenter.getInfoOtherAutopilots(autopilot);
     }
 
     /**
@@ -341,10 +353,9 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void>, Packa
      * @return the MapAirport object containing all the information needed for the autopilot
      * --> the position used by the method is the position submitted by the autopilot during the communication
      */
-   public MapAirport getAirportAt(AutoPilot autopilot){
+   public synchronized MapAirport getAirportAt(AutoPilot autopilot){
         //get the position of the autopilot
-       String autopilotID = autopilot.getID();
-       AutopilotInfo info = this.getAutopilotInfo().get(autopilotID);
+       AutopilotInfo info = this.getAutopilotInfoCenter().getEntry(autopilot);
        Vector position = info.getCurrentPosition();
        OverseerAirportMap airportMap = this.getAirportMap();
        return airportMap.getAirportAt(position);
@@ -355,7 +366,7 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void>, Packa
      * @param airportID the id used to get the airport
      * @return the airport with the same id as the argument, returns null if no such airport exists
      */
-   public MapAirport getAirportByID(int airportID){
+   public synchronized MapAirport getAirportByID(int airportID){
        OverseerAirportMap map = this.getAirportMap();
        return map.getAirport(airportID);
    }
@@ -435,12 +446,11 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void>, Packa
 
 
     /**
-     * Getter for the autopilot info map, this map contains the id's of the drones and their respective whereabouts
-     * every autopilot should report its status on each iteration such that the other drones can do crash avoidance
-     * @return a map with as keys the ID of the drone and value the information about it
+     * Getter for the autopilot information center, is used to save all the states that are reported by the autopilots
+     * with the same overseer
      */
-    private ConcurrentMap<String, AutopilotInfo> getAutopilotInfo() {
-        return autopilotInfo;
+    private AutopilotInfoCenter getAutopilotInfoCenter() {
+        return infoCenter;
     }
 
     /**
@@ -591,10 +601,9 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void>, Packa
     }
 
     /**
-     * Hash map that contains all the data about the autopilots needed to do crash avoidance
-     * this map is queried by the autopilots to gain information about the whereabouts of the other drones
+     * An object that contains all the info about the drones that are currently active in the world
      */
-    private ConcurrentMap<String, AutopilotInfo> autopilotInfo = new ConcurrentHashMap<>();
+    private AutopilotInfoCenter infoCenter = new AutopilotInfoCenter();
 
     /**
      * Getter for the number of autopilots that are active upon creation of the world
@@ -646,7 +655,7 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void>, Packa
     /**
      * The base altitude to assign to the drones (incremented from here)
      */
-    private final static float BASE_ALTITUDE =30f;
+    private final static float BASE_ALTITUDE =150f;
 
     /**
      * The minimal cruising altitude difference between two drones
