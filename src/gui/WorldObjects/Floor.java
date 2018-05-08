@@ -16,17 +16,17 @@ public class Floor implements WorldObject {
 
     public Floor() {
         n = 51; // n moet oneven zijn
-        nx = 20f;
-        nz = 20f;
-        this.position = new Vector3f(-n*nx/2, 0, -n*nz/2);
+        nx = 250f;
+        nz = 250f;
+        this.position = new Vector3f(-n*nx/2, 0f, -n*nz/2);
         initGraphicsObjects();
     }
 
     @Override
     public void initGraphicsObjects() {
-        Tile tile1 = new Tile(new Vector3f(0, -5f, 0), new Vector3f(90, 1, 0.6f), false);
-        tile1.setSize(new Vector3f(10000, 1, 10000));
-        this.addGraphicsObject(tile1);
+//        Tile tile1 = new Tile(new Vector3f(0, -20f, 0), new Vector3f(90, 1, 0.6f), false);
+//        tile1.setSize(new Vector3f(100000, 1, 100000));
+//        this.addGraphicsObject(tile1);
         for (int i = 0; i < n*n; i++) {
             Vector3f delta = new Vector3f(nx*(i%n), 0, nz*(i/n));
             Vector3f position = delta.add(getPosition());

@@ -43,7 +43,7 @@ public class Window {
 	
     private float FOV;
 	private static final float NEAR = 0.01f;
-	private static final float FAR = 1000.f;
+	private static final float FAR = 10000.f;
 	
 	private String title;
 
