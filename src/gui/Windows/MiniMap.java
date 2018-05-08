@@ -24,7 +24,7 @@ public class MiniMap extends Frame {
 
     private String mainDroneID;
     private Map<Vector2f, MiniMapObject> dronePositions = new HashMap<Vector2f, MiniMapObject>();
-    private Map<Vector2f, Color> airportPositions = new HashMap<Vector2f, Color>();
+    private Map<Vector2f, MiniMapObject> airportPositions = new HashMap<Vector2f, MiniMapObject>();
 
     public MiniMap(String title, int width, int height, int xPos, int yPos, Map<String, DroneGuiState> droneStates, String mainDrone, Set<AirportGuiState> airportGuiStates, Set<DeliveryGuiState> deliveryGuiStates) {
         super(title);
@@ -73,7 +73,7 @@ public class MiniMap extends Frame {
         for (AirportGuiState airportGuiState: airportGuiStates) {
             Vector2f position = new Vector2f(airportGuiState.getPosition().getxValue(), airportGuiState.getPosition().getzValue());
             Color color = Color.darkGray;
-            airportPositions.put(position, color);
+            airportPositions.put(position, new MiniMapObject(color, airportGuiState.getAirportID()));
         }
     }
 
@@ -108,7 +108,26 @@ public class MiniMap extends Frame {
         this.mainDroneID = mainDroneID;
         dronePositions.clear();
         setDronePositions(droneStates, deliveryGuiStates);
+        setAirportStats(deliveryGuiStates);
         paint(this.getGraphics());
+    }
+
+    public void setAirportStats(Set<DeliveryGuiState> deliveryGuiStates) {
+
+        for (Vector2f position: airportPositions.keySet()) {
+            int ID = airportPositions.get(position).getID();
+            int packagesToDeliver = 0;
+            int packagesDelivered = 0;
+            for (DeliveryGuiState delivery: deliveryGuiStates) {
+                if (delivery.getSourceAirport() == ID && !delivery.isPickedUp()) {
+                    packagesToDeliver++;
+                }
+                if (delivery.getDestinationAirport() == ID && delivery.isDelivered()) {
+                    packagesDelivered++;
+                }
+            }
+            airportPositions.get(position).setPackagesdelivery(packagesToDeliver, packagesDelivered);
+        }
     }
 
     public void paint(Graphics g) {
@@ -120,11 +139,11 @@ public class MiniMap extends Frame {
         Graphics2D g2d = (Graphics2D)g;
 
         for (Vector2f position: airportPositions.keySet()) {
-            g.setColor(airportPositions.get(position));
+            g.setColor(airportPositions.get(position).getColor());
             Vector2f rectPos = new Vector2f((((position.x-realSurf.x)/realSurf.z)*map.z+map.x) - radius, (((position.y-realSurf.y)/realSurf.w)*map.w+map.y) - radius);
             g.fillRect((int) rectPos.x, (int) rectPos.y, radius * 2, radius * 2);
-            g2d.drawString("01", rectPos.x-20, rectPos.y);
-            g2d.drawString("02", rectPos.x+15, rectPos.y);
+            g2d.drawString(Integer.toString(airportPositions.get(position).getPackagesToDeliver()), rectPos.x-20, rectPos.y);
+            g2d.drawString(Integer.toString(airportPositions.get(position).getPackagesDelivered()), rectPos.x+20, rectPos.y);
         }
         for (Vector2f position: dronePositions.keySet()) {
             if (flickr%5 != 0 || !dronePositions.get(position).hasPackage()) {
