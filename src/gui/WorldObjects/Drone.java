@@ -120,6 +120,10 @@ public class Drone implements WorldObject{
         this.position = position;
     }
 
+    public Vector3f getColor() {
+        return color;
+    }
+
     public Vector3f getVelocity() {
         return velocity;
     }

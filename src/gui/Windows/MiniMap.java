@@ -3,17 +3,17 @@ package gui.Windows;
 import TestbedAutopilotInterface.GUI.AirportGuiState;
 import TestbedAutopilotInterface.GUI.DroneGuiState;
 import gui.GraphicsObjects.Tile;
+import gui.WorldObjects.Objects;
+import internal.Helper.HSVconverter;
 import internal.Helper.Vector;
 import math.Vector2f;
+import math.Vector3f;
 import math.Vector4f;
 
 import java.awt.*;
 import java.awt.Graphics;
 import java.awt.event.*;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 public class MiniMap extends Frame {
@@ -55,9 +55,9 @@ public class MiniMap extends Frame {
         for (String droneID : droneStates.keySet()) {
             Vector2f position = new Vector2f(droneStates.get(droneID).getPosition().getxValue(), droneStates.get(droneID).getPosition().getzValue());
             if (!dronePositions.containsKey(position)) {
-                Color color = Color.black;
-                if (droneID == mainDroneID)
-                    color = Color.blue;
+                Vector3f colour = Objects.getDrones().get(droneID).getColor();
+                Vector3f col = Vector3f.ArrayToVector3f(HSVconverter.HSVtoRGB2(colour.x, colour.y, colour.z));
+                Color color = new Color(col.x, col.y, col.z);
                 dronePositions.put(position, color);
             }
         }
@@ -66,7 +66,7 @@ public class MiniMap extends Frame {
     public void setAirportPositions(Set<AirportGuiState> airportGuiStates) {
         for (AirportGuiState airportGuiState: airportGuiStates) {
             Vector2f position = new Vector2f(airportGuiState.getPosition().getxValue(), airportGuiState.getPosition().getzValue());
-            Color color = Color.red;
+            Color color = Color.darkGray;
             airportPositions.put(position, color);
         }
     }
@@ -116,7 +116,12 @@ public class MiniMap extends Frame {
             g.fillOval((int) (((position.x-realSurf.x)/realSurf.z)*map.z+map.x) - radius, (int) (((position.y-realSurf.y)/realSurf.w)*map.w+map.y) - radius, radius * 2, radius * 2);
         }
 
-
+        Vector3f mainPosition = Objects.getDrones().get(mainDroneID).getPosition();
+        g.setColor(Color.white);
+        g.drawOval((int) (((mainPosition.x-realSurf.x)/realSurf.z)*map.z+map.x) - (int) (radius*1.5)-2, (int) (((mainPosition.z-realSurf.y)/realSurf.w)*map.w+map.y) - (int) (radius*1.5)-2, radius * 3+2, radius * 3+2);
+        g.setColor(Color.black);
+        g.drawOval((int) (((mainPosition.x-realSurf.x)/realSurf.z)*map.z+map.x) - (int) (radius*1.5)-1, (int) (((mainPosition.z-realSurf.y)/realSurf.w)*map.w+map.y) - (int) (radius*1.5)-1, radius * 3, radius * 3);
+        g.drawOval((int) (((mainPosition.x-realSurf.x)/realSurf.z)*map.z+map.x) - (int) (radius*1.5)-3, (int) (((mainPosition.z-realSurf.y)/realSurf.w)*map.w+map.y) - (int) (radius*1.5)-3, radius * 3+4, radius * 3+4);
     }
 
 //    public void createFloor(int n, float nx, float nz) {
