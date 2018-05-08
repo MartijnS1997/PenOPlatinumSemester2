@@ -1,20 +1,18 @@
 package gui.Windows;
 
 import TestbedAutopilotInterface.GUI.AirportGuiState;
+import TestbedAutopilotInterface.GUI.DeliveryGuiState;
 import TestbedAutopilotInterface.GUI.DroneGuiState;
-import gui.GraphicsObjects.Tile;
-import internal.Helper.Vector;
+import gui.WorldObjects.Objects;
+import internal.Helper.HSVconverter;
 import math.Vector2f;
+import math.Vector3f;
 import math.Vector4f;
 
 import java.awt.*;
 import java.awt.Graphics;
 import java.awt.event.*;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
+import java.util.*;
 
 public class MiniMap extends Frame {
     int width;
@@ -22,12 +20,13 @@ public class MiniMap extends Frame {
     static int radius = 5;
     Vector4f map;
     Vector4f realSurf;
+    int flickr = 0;
 
     private String mainDroneID;
-    private Map<Vector2f, Color> dronePositions = new HashMap<Vector2f, Color>();
+    private Map<Vector2f, MiniMapObject> dronePositions = new HashMap<Vector2f, MiniMapObject>();
     private Map<Vector2f, Color> airportPositions = new HashMap<Vector2f, Color>();
 
-    public MiniMap(String title, int width, int height, int xPos, int yPos, Map<String, DroneGuiState> droneStates, String mainDrone, Set<AirportGuiState> airportGuiStates) {
+    public MiniMap(String title, int width, int height, int xPos, int yPos, Map<String, DroneGuiState> droneStates, String mainDrone, Set<AirportGuiState> airportGuiStates, Set<DeliveryGuiState> deliveryGuiStates) {
         super(title);
         setLocation(xPos, yPos);
         this.width = width;
@@ -38,7 +37,7 @@ public class MiniMap extends Frame {
         setVisible(true);
 
         this.mainDroneID = mainDrone;
-        setDronePositions(droneStates);
+        setDronePositions(droneStates, deliveryGuiStates);
         setAirportPositions(airportGuiStates);
         calcRealSurf();
 
@@ -51,14 +50,21 @@ public class MiniMap extends Frame {
         );
     }
 
-    public void setDronePositions(Map<String, DroneGuiState> droneStates) {
+    public void setDronePositions(Map<String, DroneGuiState> droneStates, Set<DeliveryGuiState> deliveryGuiStates) {
+        Set<String> packageDrones = new HashSet<String>();
+        for (DeliveryGuiState delivery: deliveryGuiStates) {
+            if (delivery.isPickedUp() && !delivery.isDelivered()) {
+                packageDrones.add(delivery.getDeliveryDrone());
+            }
+        }
+
         for (String droneID : droneStates.keySet()) {
             Vector2f position = new Vector2f(droneStates.get(droneID).getPosition().getxValue(), droneStates.get(droneID).getPosition().getzValue());
             if (!dronePositions.containsKey(position)) {
-                Color color = Color.black;
-                if (droneID == mainDroneID)
-                    color = Color.blue;
-                dronePositions.put(position, color);
+                Vector3f colour = Objects.getDrones().get(droneID).getColor();
+                Vector3f col = Vector3f.ArrayToVector3f(HSVconverter.HSVtoRGB2(colour.x, colour.y, colour.z));
+                Color color = new Color(col.x, col.y, col.z);
+                dronePositions.put(position, new MiniMapObject(packageDrones.contains(droneID), color, droneID));
             }
         }
     }
@@ -66,7 +72,7 @@ public class MiniMap extends Frame {
     public void setAirportPositions(Set<AirportGuiState> airportGuiStates) {
         for (AirportGuiState airportGuiState: airportGuiStates) {
             Vector2f position = new Vector2f(airportGuiState.getPosition().getxValue(), airportGuiState.getPosition().getzValue());
-            Color color = Color.red;
+            Color color = Color.darkGray;
             airportPositions.put(position, color);
         }
     }
@@ -92,12 +98,16 @@ public class MiniMap extends Frame {
         realSurf.z = realSurf.z-realSurf.x;
         realSurf.w = realSurf.w-realSurf.y;
 
-        realSurf = realSurf.scale(1.5f);
+        realSurf = realSurf.scale(2f);
     }
 
-    public void update(Map<String, DroneGuiState> droneStates) {
+    public void update(Map<String, DroneGuiState> droneStates, String mainDroneID, Set<DeliveryGuiState> deliveryGuiStates) {
+        flickr ++;
+        if (flickr%60 == 0)
+            flickr = 0;
+        this.mainDroneID = mainDroneID;
         dronePositions.clear();
-        setDronePositions(droneStates);
+        setDronePositions(droneStates, deliveryGuiStates);
         paint(this.getGraphics());
     }
 
@@ -105,17 +115,32 @@ public class MiniMap extends Frame {
         g.clearRect((int) map.x-radius, (int) map.y-radius, (int) map.z+radius, (int) map.w+radius);
         g.setColor(Color.green);
         g.fillRect((int) map.x, (int) map.y, (int) map.z, (int) map.w);
+        int fontSize = 15;
+        g.setFont(new Font("TimesRoman", Font.PLAIN, fontSize));
+        Graphics2D g2d = (Graphics2D)g;
 
         for (Vector2f position: airportPositions.keySet()) {
             g.setColor(airportPositions.get(position));
-            g.fillRect((int) (((position.x-realSurf.x)/realSurf.z)*map.z+map.x) - radius, (int) (((position.y-realSurf.y)/realSurf.w)*map.w+map.y) - radius, radius * 2, radius * 2);
+            Vector2f rectPos = new Vector2f((((position.x-realSurf.x)/realSurf.z)*map.z+map.x) - radius, (((position.y-realSurf.y)/realSurf.w)*map.w+map.y) - radius);
+            g.fillRect((int) rectPos.x, (int) rectPos.y, radius * 2, radius * 2);
+            g2d.drawString("01", rectPos.x-20, rectPos.y);
+            g2d.drawString("02", rectPos.x+15, rectPos.y);
         }
         for (Vector2f position: dronePositions.keySet()) {
-            g.setColor(dronePositions.get(position));
-            g.fillOval((int) (((position.x-realSurf.x)/realSurf.z)*map.z+map.x) - radius, (int) (((position.y-realSurf.y)/realSurf.w)*map.w+map.y) - radius, radius * 2, radius * 2);
+            if (flickr%5 != 0 || !dronePositions.get(position).hasPackage()) {
+                g.setColor(dronePositions.get(position).getColor());
+                g.fillOval((int) (((position.x - realSurf.x) / realSurf.z) * map.z + map.x) - radius, (int) (((position.y - realSurf.y) / realSurf.w) * map.w + map.y) - radius, radius * 2, radius * 2);
+                g.setColor(Color.black);
+                g.drawOval((int) (((position.x - realSurf.x) / realSurf.z) * map.z + map.x) - (radius) - 1, (int) (((position.y - realSurf.y) / realSurf.w) * map.w + map.y) - (radius) - 1, radius * 2 + 1, radius * 2 + 1);
+            }
         }
 
-
+        Vector3f mainPosition = Objects.getDrones().get(mainDroneID).getPosition();
+        g.setColor(Color.white);
+        g.drawOval((int) (((mainPosition.x-realSurf.x)/realSurf.z)*map.z+map.x) - (int) (radius*1.5)-3, (int) (((mainPosition.z-realSurf.y)/realSurf.w)*map.w+map.y) - (int) (radius*1.5)-3, radius * 3+4, radius * 3+4);
+        g.setColor(Color.black);
+        g.drawOval((int) (((mainPosition.x-realSurf.x)/realSurf.z)*map.z+map.x) - (int) (radius*1.5)-2, (int) (((mainPosition.z-realSurf.y)/realSurf.w)*map.w+map.y) - (int) (radius*1.5)-2, radius * 3+2, radius * 3+2);
+        g.drawOval((int) (((mainPosition.x-realSurf.x)/realSurf.z)*map.z+map.x) - (int) (radius*1.5)-4, (int) (((mainPosition.z-realSurf.y)/realSurf.w)*map.w+map.y) - (int) (radius*1.5)-4, radius * 3+6, radius * 3+6);
     }
 
 //    public void createFloor(int n, float nx, float nz) {

@@ -4,6 +4,7 @@ import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 import TestbedAutopilotInterface.GUI.AirportGuiState;
+import TestbedAutopilotInterface.GUI.DeliveryGuiState;
 import TestbedAutopilotInterface.GUI.DroneGuiState;
 import gui.GraphicsObjects.GraphicsObject;
 import gui.WorldObjects.Drone;
@@ -49,24 +50,24 @@ public class Graphics {
 		this.textWindow = TextWindow.createAndShowWindow(this, title, width, height, xPos, yPos, droneState);
 	}
 
-	public void makeMiniMap(String title, int width, int height, int xPos, int yPos, Map<String, DroneGuiState> droneStates, String mainDrone, Set<AirportGuiState> airportGuiStates) {
+	public void makeMiniMap(String title, int width, int height, int xPos, int yPos, Map<String, DroneGuiState> droneStates, String mainDrone, Set<AirportGuiState> airportGuiStates, Set<DeliveryGuiState> deliveryGuiStates) {
 
-		this.miniMap = new MiniMap(title, width, height, xPos, yPos, droneStates, mainDrone, airportGuiStates);
+		this.miniMap = new MiniMap(title, width, height, xPos, yPos, droneStates, mainDrone, airportGuiStates, deliveryGuiStates);
 	}
 	
 	public void makeButtonWindow() {
 		ButtonWindow.createAndShowWindow(this);
 	}
 	
-	public void renderWindows(Set<GraphicsObject> renderObjects, Map<String, DroneGuiState> droneStates, String mainDrone) {
+	public void renderWindows(Set<GraphicsObject> renderObjects, Map<String, DroneGuiState> droneStates, String mainDrone, Set<DeliveryGuiState> deliveryGuiStates) {
 		// Poll for window events. The key callback above will only be
 		// invoked during this call.
 		glfwPollEvents();
 		
 		if (this.textWindow != null)
-			this.textWindow.update(droneStates.get(mainDrone));
+			this.textWindow.update(droneStates.get(mainDrone), deliveryGuiStates);
 		if (this.miniMap != null)
-			this.miniMap.update(droneStates);
+			this.miniMap.update(droneStates, mainDrone, deliveryGuiStates);
 		
 		for (String key: windows.keySet()) {
 			Window window = windows.get(key);

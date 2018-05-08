@@ -100,7 +100,7 @@ public class Tile implements GraphicsObject {
 		if (moves)
 			return this.position.add(new Vector3f(2*size.x * (int) (positionOffset.x/(2*size.x)), 2*size.y * (int) (positionOffset.y/(2*size.y)), 2*size.z * (int) (positionOffset.z/(2*size.z))));
 		else
-			return getPos();
+			return getPos().add(positionOffset);
 	}
 	
 	public static void setPosOffset(Vector3f offset) {

@@ -6,13 +6,16 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.util.Set;
 
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SpringLayout;
 
+import TestbedAutopilotInterface.GUI.DeliveryGuiState;
 import TestbedAutopilotInterface.GUI.DroneGuiState;
 import gui.WorldObjects.Drone;
+import gui.WorldObjects.Objects;
 import math.Vector3f;
 
 import javax.swing.AbstractButton;
@@ -24,7 +27,7 @@ public class TextWindow extends JPanel implements ActionListener{
 	private static final long serialVersionUID = 1L;
 	private static JFrame frame;
 	static Container contentPane;
-	protected JButton button1, button2, button3, button4;
+	protected JButton button1, button2, button3, button4, button5;
 	SpringLayout layout;
 	private static Graphics graphics;
 	byte counter = 0;
@@ -32,8 +35,24 @@ public class TextWindow extends JPanel implements ActionListener{
 	Vector3f lastPosition;
 	Vector3f firstPosition = null;
 	Vector3f position;
+	int deliveredPackages;
+	int pickedUpPackages;
+	int totalPackages;
     
-    public void update(DroneGuiState droneState) {
+    public void update(DroneGuiState droneState, Set<DeliveryGuiState> deliveryGuiStates) {
+
+		this.deliveredPackages = 0;
+		this.pickedUpPackages = 0;
+		this.totalPackages = 0;
+		for (DeliveryGuiState dgs: deliveryGuiStates) {
+			totalPackages++;
+			if (dgs.isDelivered()) {
+				deliveredPackages++;
+			}
+			if (dgs.isPickedUp()) {
+				pickedUpPackages++;
+			}
+		}
 
     	counter++;
     	counter %= 5;
@@ -48,6 +67,7 @@ public class TextWindow extends JPanel implements ActionListener{
     
     private void addToContentPane(DroneGuiState droneState) {
     	Vector3f velocity = new Vector3f();
+    	float speed = 0;
     	Vector3f orientation = new Vector3f();
     	float heading = 0;
     	float pitch = 0;
@@ -55,6 +75,7 @@ public class TextWindow extends JPanel implements ActionListener{
     	float distanceOrigin = 0;
 
     	velocity = droneState.getVelocity().convertToVector3f();
+    	speed = droneState.getVelocity().convertToVector3f().length();
 
         if (firstPosition == null) {
 			position = droneState.getPosition().convertToVector3f();
@@ -65,7 +86,6 @@ public class TextWindow extends JPanel implements ActionListener{
 			position = droneState.getPosition().convertToVector3f();
 		}
         totalDistance += position.subtract(lastPosition).length();
-        //System.out.println(position.subtract(lastPosition).length());
         orientation = droneState.getOrientation().convertToVector3f();
         heading = orientation.x;
         pitch = orientation.y;
@@ -78,6 +98,12 @@ public class TextWindow extends JPanel implements ActionListener{
     	velocityField.setEditable(false);
     	contentPane.add(velocityLabel);
     	contentPane.add(velocityField); 
+    	
+    	JLabel speedLabel = new JLabel("Speed: ");
+    	JTextField speedField = new JTextField(" ( " + String.format("%.2f", speed) + " ) ");
+    	speedField.setEditable(false);
+    	contentPane.add(speedLabel);
+    	contentPane.add(speedField); 
     	
     	JLabel positionLabel = new JLabel("Position: ");
     	JTextField positionField = new JTextField(" ( " + String.format("%.2f", position.x) + ", " + String.format("%.2f", position.y) + ", " + String.format("%.2f", position.z) + " ) ");
@@ -113,9 +139,21 @@ public class TextWindow extends JPanel implements ActionListener{
     	JTextField totalDistField = new JTextField(" ( " + String.format("%.2f", totalDistance) + " ) ");
 		totalDistField.setEditable(false);
     	contentPane.add(totalDistLabel);
-    	contentPane.add(totalDistField); 
-    	
-    	layout = new SpringLayout();
+    	contentPane.add(totalDistField);
+
+    	JLabel packagesPickedUpLabel = new JLabel("Packages picked up: ");
+		JTextField packagesPickedUpField = new JTextField(" ( " + pickedUpPackages + "/" + totalPackages + " ) ");
+		packagesPickedUpField.setEditable(false);
+		contentPane.add(packagesPickedUpLabel);
+		contentPane.add(packagesPickedUpField);
+
+		JLabel packagesDeliveredLabel = new JLabel("Packages delivered: ");
+		JTextField packagesDeliveredField = new JTextField(" ( " + deliveredPackages + "/" + totalPackages + " ) ");
+		packagesDeliveredField.setEditable(false);
+		contentPane.add(packagesDeliveredLabel);
+		contentPane.add(packagesDeliveredField);
+
+		layout = new SpringLayout();
         contentPane.setLayout(layout);
         
     	layout.putConstraint(SpringLayout.WEST, velocityLabel, 5, SpringLayout.WEST, contentPane);
@@ -123,10 +161,15 @@ public class TextWindow extends JPanel implements ActionListener{
     	layout.putConstraint(SpringLayout.WEST, velocityField, 5, SpringLayout.EAST, totalDistLabel);
     	layout.putConstraint(SpringLayout.NORTH, velocityField, 45, SpringLayout.NORTH, contentPane);
     	
+    	layout.putConstraint(SpringLayout.WEST, speedLabel, 5, SpringLayout.WEST, contentPane);
+    	layout.putConstraint(SpringLayout.NORTH, speedLabel, 25, SpringLayout.NORTH, velocityField);
+    	layout.putConstraint(SpringLayout.WEST, speedField, 5, SpringLayout.EAST, totalDistLabel);
+    	layout.putConstraint(SpringLayout.NORTH, speedField, 25, SpringLayout.NORTH, velocityField);
+    	
     	layout.putConstraint(SpringLayout.WEST, positionLabel, 5, SpringLayout.WEST, contentPane);
-    	layout.putConstraint(SpringLayout.NORTH, positionLabel, 25, SpringLayout.NORTH, velocityField);
+    	layout.putConstraint(SpringLayout.NORTH, positionLabel, 25, SpringLayout.NORTH, speedField);
     	layout.putConstraint(SpringLayout.WEST, positionField, 5, SpringLayout.EAST, totalDistLabel);
-    	layout.putConstraint(SpringLayout.NORTH, positionField, 25, SpringLayout.NORTH, velocityField);
+    	layout.putConstraint(SpringLayout.NORTH, positionField, 25, SpringLayout.NORTH, speedField);
     	
     	layout.putConstraint(SpringLayout.WEST, headingLabel, 5, SpringLayout.WEST, contentPane);
     	layout.putConstraint(SpringLayout.NORTH, headingLabel, 25, SpringLayout.NORTH, positionField);
@@ -152,6 +195,16 @@ public class TextWindow extends JPanel implements ActionListener{
     	layout.putConstraint(SpringLayout.NORTH, totalDistLabel, 25, SpringLayout.NORTH, distOriginField);
     	layout.putConstraint(SpringLayout.WEST, totalDistField, 5, SpringLayout.EAST, totalDistLabel);
     	layout.putConstraint(SpringLayout.NORTH, totalDistField, 25, SpringLayout.NORTH, distOriginField);
+
+		layout.putConstraint(SpringLayout.WEST, packagesPickedUpLabel, 5, SpringLayout.WEST, contentPane);
+		layout.putConstraint(SpringLayout.NORTH, packagesPickedUpLabel, 25, SpringLayout.NORTH, totalDistField);
+		layout.putConstraint(SpringLayout.WEST, packagesPickedUpField, 5, SpringLayout.EAST, totalDistLabel);
+		layout.putConstraint(SpringLayout.NORTH, packagesPickedUpField, 25, SpringLayout.NORTH, totalDistField);
+
+		layout.putConstraint(SpringLayout.WEST, packagesDeliveredLabel, 5, SpringLayout.WEST, contentPane);
+		layout.putConstraint(SpringLayout.NORTH, packagesDeliveredLabel, 25, SpringLayout.NORTH, packagesPickedUpField);
+		layout.putConstraint(SpringLayout.WEST, packagesDeliveredField, 5, SpringLayout.EAST, totalDistLabel);
+		layout.putConstraint(SpringLayout.NORTH, packagesDeliveredField, 25, SpringLayout.NORTH, packagesPickedUpField);
     }
     
     public void initButtons() {
@@ -172,21 +225,28 @@ public class TextWindow extends JPanel implements ActionListener{
         button4 = new JButton("side view");
         button4.setMnemonic(KeyEvent.VK_4);
         button4.setActionCommand("DRONE_SIDE_CAM");
+
+		button5 = new JButton("Next drone");
+		button5.setMnemonic(KeyEvent.VK_5);
+		button5.setActionCommand("DRONE_NEXT");
  
         button1.setBackground(Color.CYAN);
         button2.setBackground(Color.lightGray);
         button3.setBackground(Color.lightGray);
         button4.setBackground(Color.lightGray);
+        button5.setBackground(Color.WHITE);
  
         button1.setToolTipText("Shows the drone from its perspective.");
         button2.setToolTipText("Shows the drone from behind.");
         button3.setToolTipText("Shows the drone from the top.");
         button4.setToolTipText("Shows the drone from the side.");
+		button5.setToolTipText("Switch to the next drone.");
         
         button1.addActionListener(this);
         button2.addActionListener(this);
         button3.addActionListener(this);
         button4.addActionListener(this);
+		button5.addActionListener(this);
  
         addButtons();
     }
@@ -197,6 +257,7 @@ public class TextWindow extends JPanel implements ActionListener{
         contentPane.add(button2);
         contentPane.add(button3);
         contentPane.add(button4);
+		contentPane.add(button5);
         
         layout.putConstraint(SpringLayout.WEST, button1, 10, SpringLayout.WEST, contentPane);
     	layout.putConstraint(SpringLayout.NORTH, button1, 10, SpringLayout.NORTH, contentPane);
@@ -209,6 +270,9 @@ public class TextWindow extends JPanel implements ActionListener{
     	
     	layout.putConstraint(SpringLayout.WEST, button4, 10, SpringLayout.EAST, button3);
     	layout.putConstraint(SpringLayout.NORTH, button4, 10, SpringLayout.NORTH, contentPane);
+
+		layout.putConstraint(SpringLayout.WEST, button5, 10, SpringLayout.EAST, button3);
+		layout.putConstraint(SpringLayout.SOUTH, button5, -20, SpringLayout.SOUTH, contentPane);
     }
 
     public static TextWindow createAndShowWindow(Graphics graphics, String title, int xDimension, int yDimension, int xPos, int yPos, DroneGuiState droneState) {
@@ -275,6 +339,10 @@ public class TextWindow extends JPanel implements ActionListener{
     			break;
         	}
         }
+
+		if ("DRONE_NEXT".equals(e.getActionCommand()))  {
+			Objects.nextDrone();
+		}
 	}
 }
 

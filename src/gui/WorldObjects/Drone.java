@@ -14,6 +14,7 @@ public class Drone implements WorldObject{
     private Vector3f position;
     private Vector3f velocity;
     private Vector3f orientation;
+    private Vector3f color;
     private float scalingFactor = 1;
     private Set<GraphicsObject> graphicsObjectSet = new HashSet<GraphicsObject>();
 
@@ -21,6 +22,8 @@ public class Drone implements WorldObject{
 
     public Drone(DroneGuiState droneGuiState) {
         setState(droneGuiState);
+        float randfloat = (float)Math.random()*360;
+        this.color = new Vector3f( randfloat, 1f, 0.8f);
         initGraphicsObjects();
     }
 
@@ -40,43 +43,43 @@ public class Drone implements WorldObject{
     }
 
     public void initGraphicsObjects() {
-        Cube wings = new Cube(getPosition(), new Vector3f(240f, 1f, 1f), false);
+        Cube wings = new Cube(getPosition(), color, false);
         wings.setSize(new Vector3f(5f, 0.1f, 0.7f).scale(scalingFactor));
         this.addGraphicsObject(wings);
 
         Vector3f position2 = new Vector3f(0f, 0f, 1.75f).scale(scalingFactor);
-        Cube middleFrame = new Cube(position2, new Vector3f(240f, 1f, 1f), wings, false);
+        Cube middleFrame = new Cube(position2, color, wings, false);
         middleFrame.setSize(new Vector3f(0.6f, 0.6f, 2.5f).scale(scalingFactor));
         this.addGraphicsObject(middleFrame);
 
         Vector3f position3 = new Vector3f(0f, 0.6f, 4.5f).scale(scalingFactor);
-        Cube verticalStabilizer = new Cube(position3, new Vector3f(240f, 1f, 1f), wings, false);
+        Cube verticalStabilizer = new Cube(position3, color, wings, false);
         verticalStabilizer.setSize(new Vector3f(0.2f, 1.2f, 0.5f).scale(scalingFactor));
         this.addGraphicsObject(verticalStabilizer);
 
         Vector3f position4 = new Vector3f(0f, 1f, 4.5f).scale(scalingFactor);
-        Cube horizontalStabilizer = new Cube(position4, new Vector3f(240f, 1f, 1f), wings, false);
+        Cube horizontalStabilizer = new Cube(position4, color, wings, false);
         horizontalStabilizer.setSize(new Vector3f(1.7f, 0.1f, 0.5f).scale(scalingFactor));
         this.addGraphicsObject(horizontalStabilizer);
 
         Vector3f position5 = new Vector3f(0f, 0f, 3.6f).scale(scalingFactor);
-        Cube longFrame = new Cube(position5, new Vector3f(240f, 1f, 1f), wings, false);
+        Cube longFrame = new Cube(position5, color, wings, false);
         longFrame.setSize(new Vector3f(0.3f, 0.3f, 1.5f).scale(scalingFactor));
         this.addGraphicsObject(longFrame);
 
         Vector3f position6 = new Vector3f(0f, 0.4f, -0.5f).scale(scalingFactor);
-        Cube shortFrame = new Cube(position6, new Vector3f(240f, 1f, 1f), wings, false);
+        Cube shortFrame = new Cube(position6, color, wings, false);
         shortFrame.setSize(new Vector3f(1f, 1f, 2f).scale(scalingFactor));
         this.addGraphicsObject(shortFrame);
 
         Vector3f position7 = new Vector3f(0f, 0f, -1.5f).scale(scalingFactor);
-        Cube front = new Cube(position7, new Vector3f(240f, 1f, 1f), wings, false);
+        Cube front = new Cube(position7, color, wings, false);
         front.setSize(new Vector3f(0.8f, 0.5f, 1f).scale(scalingFactor));
         this.addGraphicsObject(front);
 
 
         Vector3f positioncp1 = new Vector3f(0f, 0.8f, -0.5f).scale(scalingFactor);
-        Cube cockpit1 = new Cube(positioncp1, new Vector3f(30f, 1f, 1f), wings, false);
+        Cube cockpit1 = new Cube(positioncp1, color, wings, false);
         cockpit1.setSize(new Vector3f(0.7f, 0.8f, 1f).scale(scalingFactor));
         this.addGraphicsObject(cockpit1);
 
@@ -86,17 +89,17 @@ public class Drone implements WorldObject{
 //			this.addGraphicsObject(cockpit1);
 
         Vector3f rearwheel1position = new Vector3f(0.5f, -0.5f, 0f).scale(scalingFactor);
-        Wheel rearwheel1 = new Wheel(rearwheel1position, new Vector3f(0f, 1f, 1f), wings, 25);
+        Wheel rearwheel1 = new Wheel(rearwheel1position, new Vector3f(0f, 0f, 0f), wings, 25);
         rearwheel1.setSize(new Vector3f(0.1f, 0.2f, 0.2f).scale(scalingFactor));
         this.addGraphicsObject(rearwheel1);
 
         Vector3f rearwheel2position = new Vector3f(-0.5f, -0.5f, 0f).scale(scalingFactor);
-        Wheel rearwheel2 = new Wheel(rearwheel2position, new Vector3f(0f, 1f, 1f), wings, 25);
+        Wheel rearwheel2 = new Wheel(rearwheel2position, new Vector3f(0f, 0f, 0f), wings, 25);
         rearwheel2.setSize(new Vector3f(0.1f, 0.2f, 0.2f).scale(scalingFactor));
         this.addGraphicsObject(rearwheel2);
 
         Vector3f frontwheelposition = new Vector3f(0f, -0.5f, -1.5f).scale(scalingFactor);
-        Wheel frontwheel = new Wheel(frontwheelposition, new Vector3f(0f, 1f, 1f), wings, 25);
+        Wheel frontwheel = new Wheel(frontwheelposition, new Vector3f(0f, 0f, 0f), wings, 25);
         frontwheel.setSize(new Vector3f(0.1f, 0.2f, 0.2f).scale(scalingFactor));
         this.addGraphicsObject(frontwheel);
     }
@@ -115,6 +118,10 @@ public class Drone implements WorldObject{
 
     public void setPosition(Vector3f position) {
         this.position = position;
+    }
+
+    public Vector3f getColor() {
+        return color;
     }
 
     public Vector3f getVelocity() {
