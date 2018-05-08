@@ -13,6 +13,7 @@ import javax.swing.SpringLayout;
 
 import TestbedAutopilotInterface.GUI.DroneGuiState;
 import gui.WorldObjects.Drone;
+import gui.WorldObjects.Objects;
 import math.Vector3f;
 
 import javax.swing.AbstractButton;
@@ -24,7 +25,7 @@ public class TextWindow extends JPanel implements ActionListener{
 	private static final long serialVersionUID = 1L;
 	private static JFrame frame;
 	static Container contentPane;
-	protected JButton button1, button2, button3, button4;
+	protected JButton button1, button2, button3, button4, button5;
 	SpringLayout layout;
 	private static Graphics graphics;
 	byte counter = 0;
@@ -185,21 +186,28 @@ public class TextWindow extends JPanel implements ActionListener{
         button4 = new JButton("side view");
         button4.setMnemonic(KeyEvent.VK_4);
         button4.setActionCommand("DRONE_SIDE_CAM");
+
+		button5 = new JButton("Next drone");
+		button5.setMnemonic(KeyEvent.VK_5);
+		button5.setActionCommand("DRONE_NEXT");
  
         button1.setBackground(Color.CYAN);
         button2.setBackground(Color.lightGray);
         button3.setBackground(Color.lightGray);
         button4.setBackground(Color.lightGray);
+        button5.setBackground(Color.WHITE);
  
         button1.setToolTipText("Shows the drone from its perspective.");
         button2.setToolTipText("Shows the drone from behind.");
         button3.setToolTipText("Shows the drone from the top.");
         button4.setToolTipText("Shows the drone from the side.");
+		button5.setToolTipText("Switch to the next drone.");
         
         button1.addActionListener(this);
         button2.addActionListener(this);
         button3.addActionListener(this);
         button4.addActionListener(this);
+		button5.addActionListener(this);
  
         addButtons();
     }
@@ -210,6 +218,7 @@ public class TextWindow extends JPanel implements ActionListener{
         contentPane.add(button2);
         contentPane.add(button3);
         contentPane.add(button4);
+		contentPane.add(button5);
         
         layout.putConstraint(SpringLayout.WEST, button1, 10, SpringLayout.WEST, contentPane);
     	layout.putConstraint(SpringLayout.NORTH, button1, 10, SpringLayout.NORTH, contentPane);
@@ -222,6 +231,9 @@ public class TextWindow extends JPanel implements ActionListener{
     	
     	layout.putConstraint(SpringLayout.WEST, button4, 10, SpringLayout.EAST, button3);
     	layout.putConstraint(SpringLayout.NORTH, button4, 10, SpringLayout.NORTH, contentPane);
+
+		layout.putConstraint(SpringLayout.WEST, button5, 10, SpringLayout.WEST, contentPane);
+		layout.putConstraint(SpringLayout.SOUTH, button5, -30, SpringLayout.SOUTH, contentPane);
     }
 
     public static TextWindow createAndShowWindow(Graphics graphics, String title, int xDimension, int yDimension, int xPos, int yPos, DroneGuiState droneState) {
@@ -288,6 +300,10 @@ public class TextWindow extends JPanel implements ActionListener{
     			break;
         	}
         }
+
+		if ("DRONE_NEXT".equals(e.getActionCommand()))  {
+			Objects.nextDrone();
+		}
 	}
 }
 

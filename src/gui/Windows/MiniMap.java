@@ -92,10 +92,11 @@ public class MiniMap extends Frame {
         realSurf.z = realSurf.z-realSurf.x;
         realSurf.w = realSurf.w-realSurf.y;
 
-        realSurf = realSurf.scale(1.5f);
+        realSurf = realSurf.scale(2f);
     }
 
-    public void update(Map<String, DroneGuiState> droneStates) {
+    public void update(Map<String, DroneGuiState> droneStates, String mainDroneID) {
+        this.mainDroneID = mainDroneID;
         dronePositions.clear();
         setDronePositions(droneStates);
         paint(this.getGraphics());

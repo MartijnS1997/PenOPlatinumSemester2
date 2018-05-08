@@ -48,7 +48,7 @@ public class Airport implements WorldObject {
     public void createLandStrip(float W, float L, float number) {
 
         Vector3f position = getPosition().add(new Vector3f((float) (-(L+W)/2*(float)Math.pow(-1, number)*Math.sin(getOrientation().x)), 0, (float) (-(L+W)/2*(float)Math.pow(-1, number)*Math.cos(getOrientation().x))));
-        Vector3f color = new Vector3f(0, 0, 0.25f*number);
+        Vector3f color = new Vector3f(0, 0, 0.2f + 0.1f*number);
 //        Tile tile = new Tile(position, color, orientation);
         Cube tile = new Cube(position, color, false);
         tile.update(position, orientation);

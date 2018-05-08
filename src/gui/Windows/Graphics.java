@@ -66,7 +66,7 @@ public class Graphics {
 		if (this.textWindow != null)
 			this.textWindow.update(droneStates.get(mainDrone));
 		if (this.miniMap != null)
-			this.miniMap.update(droneStates);
+			this.miniMap.update(droneStates, mainDrone);
 		
 		for (String key: windows.keySet()) {
 			Window window = windows.get(key);

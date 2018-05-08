@@ -75,6 +75,25 @@ public class Objects {
         getGraphics().renderWindows(getObjectSet(), getDroneGuiStates(), getMainDroneID());
     }
 
+    public static void nextDrone() {
+        boolean next = false;
+        for (String droneID: drones.keySet()) {
+            if (next) {
+                mainDroneID = droneID;
+                next = false;
+                break;
+            }
+            if (droneID == mainDroneID)
+                next = true;
+        }
+        if (next == true) {
+            for (String droneID : drones.keySet()) {
+                mainDroneID = droneID;
+                break;
+            }
+        }
+    }
+
     /**
      * Method that returns a set of all the objects in the world that belong to a given subclass
      * @param type the class to which the requested objects should belong
