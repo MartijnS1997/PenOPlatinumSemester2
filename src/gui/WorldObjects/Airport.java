@@ -30,7 +30,7 @@ public class Airport implements WorldObject {
     }
 
     public Airport(Vector3f position, Vector3f orientationVector) {
-        setPosition(new Vector3f(0, 0.2f, 0).add(position));
+        setPosition(new Vector3f(0, 0.1f, 0).add(position));
         setOrientation(new Vector3f(Vector3f.getHeadingAngle(orientationVector),0,0));
         width = 15;
         length = 280;
@@ -49,7 +49,9 @@ public class Airport implements WorldObject {
 
         Vector3f position = getPosition().add(new Vector3f((float) (-(L+W)/2*(float)Math.pow(-1, number)*Math.sin(getOrientation().x)), 0, (float) (-(L+W)/2*(float)Math.pow(-1, number)*Math.cos(getOrientation().x))));
         Vector3f color = new Vector3f(0, 0, 0.25f*number);
-        Tile tile = new Tile(position, color, orientation);
+//        Tile tile = new Tile(position, color, orientation);
+        Cube tile = new Cube(position, color, false);
+        tile.update(position, orientation);
         tile.setSize(new Vector3f(2*W, 1, L));
         addGraphicsObject(tile);
     }
