@@ -59,6 +59,14 @@ public class AutopilotInfoCenter {
         return this.getAutopilotInfoMap().get(droneID);
     }
 
+    protected int getNbOfIdleDrones(){
+        //get all the entries
+        Set<AutopilotInfo> infoSet = new HashSet<>(this.getAutopilotInfoMap().values());
+        //filter for drones that do not have a package assigned
+        Set<AutopilotInfo> idleSet = infoSet.stream().filter(info -> info.isIdle()).collect(Collectors.toSet());
+        return idleSet.size();
+    }
+
 
     /**
      * Gets the number of entries (or the size) in the info center, this is equal to the number of autopilots

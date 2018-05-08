@@ -157,86 +157,86 @@ public class AutopilotTakeoffController extends Controller {
         this.flightCruiseControl(outputs,currentInputs, previousInputs, thrustControl, referenceVelocity);
     }
 
-    private void stabilizePitchControls(ControlOutputs outputs, AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs){
-        //get the pitch difference
-        float pitchDiffAngle = this.getRefPitchDiff(currentInputs);
-        Vector orientation = Controller.extractOrientation(currentInputs);
-        float pitchAngle = -this.getRefPitchDiff(currentInputs);
-        //the pitch should be 0;
-        //System.out.println(pitch);
-        PIDController pitchPid = this.getPitchStabilizerPID();
-        float deltaTime = Controller.getDeltaTime(currentInputs, previousInputs);
-        float PIDControlActions =  pitchPid.getPIDOutput(pitchAngle,  deltaTime);
-        //System.out.println("Pitch result PID" + PIDControlActions);
-        //adjust the horizontal stabilizer
-        float horizontalInclination = STANDARD_HORIZONTAL - PIDControlActions;
-        horizontalInclination = signum(horizontalInclination) * min(abs(horizontalInclination), MAX_HORIZONTAL);
-        outputs.setHorStabInclination(horizontalInclination);
-    }
+//    private void stabilizePitchControls(ControlOutputs outputs, AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs){
+//        //get the pitch difference
+//        float pitchDiffAngle = this.getRefPitchDiff(currentInputs);
+//        Vector orientation = Controller.extractOrientation(currentInputs);
+//        float pitchAngle = -this.getRefPitchDiff(currentInputs);
+//        //the pitch should be 0;
+//        //System.out.println(pitch);
+//        PIDController pitchPid = this.getPitchStabilizerPID();
+//        float deltaTime = Controller.getDeltaTime(currentInputs, previousInputs);
+//        float PIDControlActions =  pitchPid.getPIDOutput(pitchAngle,  deltaTime);
+//        //System.out.println("Pitch result PID" + PIDControlActions);
+//        //adjust the horizontal stabilizer
+//        float horizontalInclination = STANDARD_HORIZONTAL - PIDControlActions;
+//        horizontalInclination = signum(horizontalInclination) * min(abs(horizontalInclination), MAX_HORIZONTAL);
+//        outputs.setHorStabInclination(horizontalInclination);
+//    }
 
-    /**
-     * Calculates the pitch difference, the angle between the reference vector (the vector between
-     * the pitch reference point and the position of the drone) transformed to the drone axis system and
-     * projected onto the yz plane in the drone axis system, and the heading vector (0,0,-1) in the drone axis system.
-     * The direction is determined by the cross product of the heading vector and the projected and transformed reference
-     * vector.
-     * @return returns a pos angle if the drone needs to go up, and a negative angle if the drone needs to go down
-     */
-    private float getRefPitchDiff(AutopilotInputs_v2 currentInputs){
-        //get the difference vector
-        //get the position of the drone
-        Vector dronePos = Controller.extractPosition(currentInputs);
-        //get the position of the way point
-        Vector pitchRefPoint = this.getPitchReference(currentInputs);
-        //get the ref vector
-        Vector ref = pitchRefPoint.vectorDifference(dronePos);
-        //transform it to the drone axis system
-        //first get the current orientation
-        Vector orientation = Controller.extractOrientation(currentInputs);
-        Vector refDrone = PhysXEngine.worldOnDrone(ref, orientation);
-        //then project it onto the yz plane: normal vector (1,0,0)
-        Vector normalYZ = new Vector(1,0,0);
-        Vector projRefDrone = refDrone.orthogonalProjection(normalYZ);
-        //calculate the angle between the heading vector (0,0,-1) and the reference
-        Vector headingVect = new Vector(0,0,-1);
-        float angle = abs(projRefDrone.getAngleBetween(headingVect));
+//    /**
+//     * Calculates the pitch difference, the angle between the reference vector (the vector between
+//     * the pitch reference point and the position of the drone) transformed to the drone axis system and
+//     * projected onto the yz plane in the drone axis system, and the heading vector (0,0,-1) in the drone axis system.
+//     * The direction is determined by the cross product of the heading vector and the projected and transformed reference
+//     * vector.
+//     * @return returns a pos angle if the drone needs to go up, and a negative angle if the drone needs to go down
+//     */
+//    private float getRefPitchDiff(AutopilotInputs_v2 currentInputs){
+//        //get the difference vector
+//        //get the position of the drone
+//        Vector dronePos = Controller.extractPosition(currentInputs);
+//        //get the position of the way point
+//        Vector pitchRefPoint = this.getPitchReference(currentInputs);
+//        //get the ref vector
+//        Vector ref = pitchRefPoint.vectorDifference(dronePos);
+//        //transform it to the drone axis system
+//        //first get the current orientation
+//        Vector orientation = Controller.extractOrientation(currentInputs);
+//        Vector refDrone = PhysXEngine.worldOnDrone(ref, orientation);
+//        //then project it onto the yz plane: normal vector (1,0,0)
+//        Vector normalYZ = new Vector(1,0,0);
+//        Vector projRefDrone = refDrone.orthogonalProjection(normalYZ);
+//        //calculate the angle between the heading vector (0,0,-1) and the reference
+//        Vector headingVect = new Vector(0,0,-1);
+//        float angle = abs(projRefDrone.getAngleBetween(headingVect));
+//
+//        //then get the vector product for the direction(the x-component)
+//        float direction = headingVect.crossProduct(projRefDrone).getxValue();
+//
+//        float res = angle*signum(direction);
+//        //check for NaN
+//        if(Float.isNaN(res)){
+//            return 0; // NaN comes from the angle
+//        }
+//        //else return the result
+//        return res;
+//
+//    }
 
-        //then get the vector product for the direction(the x-component)
-        float direction = headingVect.crossProduct(projRefDrone).getxValue();
-
-        float res = angle*signum(direction);
-        //check for NaN
-        if(Float.isNaN(res)){
-            return 0; // NaN comes from the angle
-        }
-        //else return the result
-        return res;
-
-    }
-
-    /**
-     * Get the reference point for the pitch used by the takeoff controller
-     * @param currentInputs the inputs most recently received from the testbed used to infer the parameters from
-     * @return a vector containing a reference point for the drone in the world axis system
-     */
-    private Vector getPitchReference(AutopilotInputs_v2 currentInputs){
-        //get the position & orientation of the drone
-        Vector position = extractPosition(currentInputs);
-        Vector orientation = extractOrientation(currentInputs);
-        float cruisingAltitude = this.getCruisingAltitude();
-        //get the relative distance for the reference point (located on the negative z-axis in the
-        //heading axis system
-        float pitchReferenceDistance = this.getPitchRefDistance();
-        Vector refPointHeadingAxis = new Vector(0,0,-pitchReferenceDistance);
-        //transform the reference point to the world axis system (relative to drone position)
-        Vector refPointWorldAxisRel = PhysXEngine.headingOnWorld(refPointHeadingAxis, orientation);
-        //add the x and z position of the drone to the heading vector and there after add
-        //the cruising altitude to get the real set point
-        Vector relativePos = new Vector(position.getxValue(), cruisingAltitude, position.getzValue());
-        Vector refPointWorldAxis = refPointWorldAxisRel.vectorSum(relativePos);
-
-        return refPointWorldAxis;
-    }
+//    /**
+//     * Get the reference point for the pitch used by the takeoff controller
+//     * @param currentInputs the inputs most recently received from the testbed used to infer the parameters from
+//     * @return a vector containing a reference point for the drone in the world axis system
+//     */
+//    private Vector getPitchReference(AutopilotInputs_v2 currentInputs){
+//        //get the position & orientation of the drone
+//        Vector position = extractPosition(currentInputs);
+//        Vector orientation = extractOrientation(currentInputs);
+//        float cruisingAltitude = this.getCruisingAltitude();
+//        //get the relative distance for the reference point (located on the negative z-axis in the
+//        //heading axis system
+//        float pitchReferenceDistance = this.getPitchRefDistance();
+//        Vector refPointHeadingAxis = new Vector(0,0,-pitchReferenceDistance);
+//        //transform the reference point to the world axis system (relative to drone position)
+//        Vector refPointWorldAxisRel = PhysXEngine.headingOnWorld(refPointHeadingAxis, orientation);
+//        //add the x and z position of the drone to the heading vector and there after add
+//        //the cruising altitude to get the real set point
+//        Vector relativePos = new Vector(position.getxValue(), cruisingAltitude, position.getzValue());
+//        Vector refPointWorldAxis = refPointWorldAxisRel.vectorSum(relativePos);
+//
+//        return refPointWorldAxis;
+//    }
 
     /**
      * Checks if the take off controller has reached its current objective

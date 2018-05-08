@@ -23,4 +23,10 @@ public interface AirportGuiState {
      * @return a vector containing the direction of the primary runway (x, 0, z)
      */
     Vector getPrimaryRunWay();
+
+    /**
+     * Getter for the ID of the airport
+     * @return the ID of the airport
+     */
+    int getAirportID();
 }

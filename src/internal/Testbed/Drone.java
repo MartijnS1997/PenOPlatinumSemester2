@@ -13,6 +13,8 @@ import internal.Physics.PhysXEngine;
 import internal.Physics.PhysicsEngineState;
 import internal.Helper.Vector;
 
+import static java.lang.Math.PI;
+
 /**
  * @author Anthony Rathé & MartijnSauwens & Bart
  * Immutable variables: maxThrust, engineMass, enginePosition, leftWing, rightWing,
@@ -124,7 +126,7 @@ public class Drone implements Callable<Void> {
 	 * @throws IOException
 	 * @author Martijn Sauwens & Bart Jacobs
 	 */
-	public void toNextState(float deltaTime) throws IOException {
+	public void toNextState(float deltaTime) {
 		if (!WorldObject.isValidTimeStep(deltaTime))
 			throw new IllegalArgumentException(INVALID_TIMESTEP);
 		float INSIGNIFICANCE = 0.0001f;
@@ -271,11 +273,11 @@ public class Drone implements Callable<Void> {
 		for (int index = 0; index != Vector.VECTOR_SIZE; index++) {
 			float tempValue = orientation.getElementAt(index);
 			//first set the value between the range [0, 2PI]
-			tempValue = (float) (tempValue % (2 * Math.PI));
+			tempValue = (float) (tempValue % (2 * PI));
 			//then if the value is larger than PI subtract PI*2
 			//so the range becomes [-PI, PI]
-			if (tempValue > Math.PI) {
-				tempValue = (float) (tempValue - Math.PI * 2);
+			if (tempValue > PI) {
+				tempValue = (float) (tempValue - PI * 2);
 			}
 			vectorArray[index] = tempValue;
 		}

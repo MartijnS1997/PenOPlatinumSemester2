@@ -30,6 +30,7 @@ public class WorldAirport extends MapAirport {
 	public AirportGuiState getGuiState(){
 		Vector location = this.getLocation();
 		Vector headingVector = this.getHeadingVector();
+		int airportID = WorldAirport.this.getAirportID();
 
 		return new AirportGuiState() {
 			@Override
@@ -40,6 +41,11 @@ public class WorldAirport extends MapAirport {
 			@Override
 			public Vector getPrimaryRunWay() {
 				return headingVector;
+			}
+
+			@Override
+			public int getAirportID(){
+				return airportID;
 			}
 		};
 	}

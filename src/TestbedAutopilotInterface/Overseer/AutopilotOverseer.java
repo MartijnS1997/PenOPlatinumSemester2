@@ -60,14 +60,16 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void>, Packa
         DeliveryPlanner planner = new DeliveryPlanner(airportMap);
         this.setPlanner(planner);
 
+        AutopilotInfoCenter infoCenter = this.getAutopilotInfoCenter();
+
         //loop until the simulation has been ended by the testbed
 //        while(!this.isSimulationEnded()){
-            //distribute the packages
+//           //distribute the packages
         distributePackages();
-            //then wait until one of the drone's queues is empty
-//            while(!hasIdleDrone()){
-                //TODO we may also use the autopilots to wake the overseer thread if they spot that their queue is empty
-                //TODO make mechanism that the planner is not invoked if there are no packages to deliver
+//            //then wait until one of the drone's queues is empty
+//            while(infoCenter.getNbOfIdleDrones() == 0 && !hasPackagesAdded()){
+//                //TODO we may also use the autopilots to wake the overseer thread if they spot that their queue is empty
+//                //TODO make mechanism that the planner is not invoked if there are no packages to deliver
 //            }
 //        }
     }
@@ -163,6 +165,9 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void>, Packa
      * @return a map containing the drone ID as the keys and the corresponding deliveries as lists for the value
      */
     private synchronized Map<String, List<PlannerDelivery>> getUndeliveredPackagesPerDrone(){
+        //adjust the flag (no packages can be added during this call
+        this.setPackagesAdded(false);
+
         //first get for each drone the packages that it still needs to deliver
         Map<String, ConcurrentLinkedQueue<DeliveryPackage>> assignedDeliveries = this.getDroneDeliveryMap();
         //initialize the map that will contain the undelivered packages
@@ -269,6 +274,7 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void>, Packa
         System.out.println(fromAirport +" " + toAirport);
         DeliveryPackage delivery = new DeliveryPackage(fromAirport, fromGate, toAirport, toGate);
         this.addPackageToDeliver(delivery);
+        this.setPackagesAdded(true);
     }
 
     /**
@@ -655,7 +661,7 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void>, Packa
     /**
      * The base altitude to assign to the drones (incremented from here)
      */
-    private final static float BASE_ALTITUDE =150f;
+    private final static float BASE_ALTITUDE =500f;
 
     /**
      * The minimal cruising altitude difference between two drones
@@ -685,6 +691,30 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void>, Packa
     }
 
     private boolean simulationEnded = false;
+
+    /**
+     * Getter for the flag that is set if packages were added to the overseer (and are not assigned yet)
+     * @return true if the flag is set to true
+     * --> flag is set to true on every invocation of deliver package
+     * --> the flag is set to false on every invocation of distribute packages
+     */
+    private boolean hasPackagesAdded() {
+        return packagesAdded;
+    }
+
+    /**
+     * Setter for the packages added flag --> see getter for more info
+     * @param packagesAdded the value for the flag
+     */
+    private void setPackagesAdded(boolean packagesAdded) {
+        this.packagesAdded = packagesAdded;
+    }
+
+    /**
+     * Setter for the package added flag
+     * --> is set false by the package distributor and is set true by the add package method
+     */
+    private boolean packagesAdded = false;
 
 
 }

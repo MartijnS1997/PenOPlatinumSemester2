@@ -108,7 +108,7 @@ public interface AutopilotInfo {
             
             @Override
             public boolean isIdle() {
-            	return true;
+            	return false;
             }
         };
     }

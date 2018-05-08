@@ -638,7 +638,7 @@ public abstract class Controller {
     /**
      * Setter for the configuration
      */
-    protected void setConfig(AutopilotConfig config){
+    public void setConfig(AutopilotConfig config){
         this.config = config;
     }
 
