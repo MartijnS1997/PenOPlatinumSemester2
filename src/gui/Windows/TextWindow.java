@@ -48,6 +48,7 @@ public class TextWindow extends JPanel implements ActionListener{
     
     private void addToContentPane(DroneGuiState droneState) {
     	Vector3f velocity = new Vector3f();
+    	float speed = 0;
     	Vector3f orientation = new Vector3f();
     	float heading = 0;
     	float pitch = 0;
@@ -55,6 +56,7 @@ public class TextWindow extends JPanel implements ActionListener{
     	float distanceOrigin = 0;
 
     	velocity = droneState.getVelocity().convertToVector3f();
+    	speed = droneState.getVelocity().convertToVector3f().length();
 
         if (firstPosition == null) {
 			position = droneState.getPosition().convertToVector3f();
@@ -78,6 +80,12 @@ public class TextWindow extends JPanel implements ActionListener{
     	velocityField.setEditable(false);
     	contentPane.add(velocityLabel);
     	contentPane.add(velocityField); 
+    	
+    	JLabel speedLabel = new JLabel("Speed: ");
+    	JTextField speedField = new JTextField(" ( " + String.format("%.2f", speed) + " ) ");
+    	speedField.setEditable(false);
+    	contentPane.add(speedLabel);
+    	contentPane.add(speedField); 
     	
     	JLabel positionLabel = new JLabel("Position: ");
     	JTextField positionField = new JTextField(" ( " + String.format("%.2f", position.x) + ", " + String.format("%.2f", position.y) + ", " + String.format("%.2f", position.z) + " ) ");
@@ -123,10 +131,15 @@ public class TextWindow extends JPanel implements ActionListener{
     	layout.putConstraint(SpringLayout.WEST, velocityField, 5, SpringLayout.EAST, totalDistLabel);
     	layout.putConstraint(SpringLayout.NORTH, velocityField, 45, SpringLayout.NORTH, contentPane);
     	
+    	layout.putConstraint(SpringLayout.WEST, speedLabel, 5, SpringLayout.WEST, contentPane);
+    	layout.putConstraint(SpringLayout.NORTH, speedLabel, 25, SpringLayout.NORTH, velocityField);
+    	layout.putConstraint(SpringLayout.WEST, speedField, 5, SpringLayout.EAST, totalDistLabel);
+    	layout.putConstraint(SpringLayout.NORTH, speedField, 25, SpringLayout.NORTH, velocityField);
+    	
     	layout.putConstraint(SpringLayout.WEST, positionLabel, 5, SpringLayout.WEST, contentPane);
-    	layout.putConstraint(SpringLayout.NORTH, positionLabel, 25, SpringLayout.NORTH, velocityField);
+    	layout.putConstraint(SpringLayout.NORTH, positionLabel, 25, SpringLayout.NORTH, speedField);
     	layout.putConstraint(SpringLayout.WEST, positionField, 5, SpringLayout.EAST, totalDistLabel);
-    	layout.putConstraint(SpringLayout.NORTH, positionField, 25, SpringLayout.NORTH, velocityField);
+    	layout.putConstraint(SpringLayout.NORTH, positionField, 25, SpringLayout.NORTH, speedField);
     	
     	layout.putConstraint(SpringLayout.WEST, headingLabel, 5, SpringLayout.WEST, contentPane);
     	layout.putConstraint(SpringLayout.NORTH, headingLabel, 25, SpringLayout.NORTH, positionField);
