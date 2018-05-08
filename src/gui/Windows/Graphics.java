@@ -4,6 +4,7 @@ import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 import TestbedAutopilotInterface.GUI.AirportGuiState;
+import TestbedAutopilotInterface.GUI.DeliveryGuiState;
 import TestbedAutopilotInterface.GUI.DroneGuiState;
 import gui.GraphicsObjects.GraphicsObject;
 import gui.WorldObjects.Drone;
@@ -58,13 +59,13 @@ public class Graphics {
 		ButtonWindow.createAndShowWindow(this);
 	}
 	
-	public void renderWindows(Set<GraphicsObject> renderObjects, Map<String, DroneGuiState> droneStates, String mainDrone) {
+	public void renderWindows(Set<GraphicsObject> renderObjects, Map<String, DroneGuiState> droneStates, String mainDrone, Set<DeliveryGuiState> deliveryGuiStates) {
 		// Poll for window events. The key callback above will only be
 		// invoked during this call.
 		glfwPollEvents();
 		
 		if (this.textWindow != null)
-			this.textWindow.update(droneStates.get(mainDrone));
+			this.textWindow.update(droneStates.get(mainDrone), deliveryGuiStates);
 		if (this.miniMap != null)
 			this.miniMap.update(droneStates, mainDrone);
 		

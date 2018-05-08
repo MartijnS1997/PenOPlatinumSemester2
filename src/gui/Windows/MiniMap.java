@@ -1,6 +1,7 @@
 package gui.Windows;
 
 import TestbedAutopilotInterface.GUI.AirportGuiState;
+import TestbedAutopilotInterface.GUI.DeliveryGuiState;
 import TestbedAutopilotInterface.GUI.DroneGuiState;
 import gui.GraphicsObjects.Tile;
 import gui.WorldObjects.Objects;
@@ -114,14 +115,16 @@ public class MiniMap extends Frame {
         for (Vector2f position: dronePositions.keySet()) {
             g.setColor(dronePositions.get(position));
             g.fillOval((int) (((position.x-realSurf.x)/realSurf.z)*map.z+map.x) - radius, (int) (((position.y-realSurf.y)/realSurf.w)*map.w+map.y) - radius, radius * 2, radius * 2);
+            g.setColor(Color.black);
+            g.drawOval((int) (((position.x-realSurf.x)/realSurf.z)*map.z+map.x) - (radius)-1, (int) (((position.y-realSurf.y)/realSurf.w)*map.w+map.y) - (radius)-1, radius * 2+1, radius * 2+1);
         }
 
         Vector3f mainPosition = Objects.getDrones().get(mainDroneID).getPosition();
         g.setColor(Color.white);
-        g.drawOval((int) (((mainPosition.x-realSurf.x)/realSurf.z)*map.z+map.x) - (int) (radius*1.5)-2, (int) (((mainPosition.z-realSurf.y)/realSurf.w)*map.w+map.y) - (int) (radius*1.5)-2, radius * 3+2, radius * 3+2);
-        g.setColor(Color.black);
-        g.drawOval((int) (((mainPosition.x-realSurf.x)/realSurf.z)*map.z+map.x) - (int) (radius*1.5)-1, (int) (((mainPosition.z-realSurf.y)/realSurf.w)*map.w+map.y) - (int) (radius*1.5)-1, radius * 3, radius * 3);
         g.drawOval((int) (((mainPosition.x-realSurf.x)/realSurf.z)*map.z+map.x) - (int) (radius*1.5)-3, (int) (((mainPosition.z-realSurf.y)/realSurf.w)*map.w+map.y) - (int) (radius*1.5)-3, radius * 3+4, radius * 3+4);
+        g.setColor(Color.black);
+        g.drawOval((int) (((mainPosition.x-realSurf.x)/realSurf.z)*map.z+map.x) - (int) (radius*1.5)-2, (int) (((mainPosition.z-realSurf.y)/realSurf.w)*map.w+map.y) - (int) (radius*1.5)-2, radius * 3+2, radius * 3+2);
+        g.drawOval((int) (((mainPosition.x-realSurf.x)/realSurf.z)*map.z+map.x) - (int) (radius*1.5)-4, (int) (((mainPosition.z-realSurf.y)/realSurf.w)*map.w+map.y) - (int) (radius*1.5)-4, radius * 3+6, radius * 3+6);
     }
 
 //    public void createFloor(int n, float nx, float nz) {

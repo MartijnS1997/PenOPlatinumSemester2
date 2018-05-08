@@ -6,11 +6,13 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.util.Set;
 
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SpringLayout;
 
+import TestbedAutopilotInterface.GUI.DeliveryGuiState;
 import TestbedAutopilotInterface.GUI.DroneGuiState;
 import gui.WorldObjects.Drone;
 import gui.WorldObjects.Objects;
@@ -33,8 +35,24 @@ public class TextWindow extends JPanel implements ActionListener{
 	Vector3f lastPosition;
 	Vector3f firstPosition = null;
 	Vector3f position;
+	int deliveredPackages;
+	int pickedUpPackages;
+	int totalPackages;
     
-    public void update(DroneGuiState droneState) {
+    public void update(DroneGuiState droneState, Set<DeliveryGuiState> deliveryGuiStates) {
+
+		this.deliveredPackages = 0;
+		this.pickedUpPackages = 0;
+		this.totalPackages = 0;
+		for (DeliveryGuiState dgs: deliveryGuiStates) {
+			totalPackages++;
+			if (dgs.isDelivered()) {
+				deliveredPackages++;
+			}
+			if (dgs.isPickedUp()) {
+				pickedUpPackages++;
+			}
+		}
 
     	counter++;
     	counter %= 5;
@@ -68,7 +86,6 @@ public class TextWindow extends JPanel implements ActionListener{
 			position = droneState.getPosition().convertToVector3f();
 		}
         totalDistance += position.subtract(lastPosition).length();
-        //System.out.println(position.subtract(lastPosition).length());
         orientation = droneState.getOrientation().convertToVector3f();
         heading = orientation.x;
         pitch = orientation.y;
@@ -122,9 +139,21 @@ public class TextWindow extends JPanel implements ActionListener{
     	JTextField totalDistField = new JTextField(" ( " + String.format("%.2f", totalDistance) + " ) ");
 		totalDistField.setEditable(false);
     	contentPane.add(totalDistLabel);
-    	contentPane.add(totalDistField); 
-    	
-    	layout = new SpringLayout();
+    	contentPane.add(totalDistField);
+
+    	JLabel packagesPickedUpLabel = new JLabel("Packages picked up: ");
+		JTextField packagesPickedUpField = new JTextField(" ( " + pickedUpPackages + "/" + totalPackages + " ) ");
+		packagesPickedUpField.setEditable(false);
+		contentPane.add(packagesPickedUpLabel);
+		contentPane.add(packagesPickedUpField);
+
+		JLabel packagesDeliveredLabel = new JLabel("Packages delivered: ");
+		JTextField packagesDeliveredField = new JTextField(" ( " + deliveredPackages + "/" + totalPackages + " ) ");
+		packagesDeliveredField.setEditable(false);
+		contentPane.add(packagesDeliveredLabel);
+		contentPane.add(packagesDeliveredField);
+
+		layout = new SpringLayout();
         contentPane.setLayout(layout);
         
     	layout.putConstraint(SpringLayout.WEST, velocityLabel, 5, SpringLayout.WEST, contentPane);
@@ -166,6 +195,16 @@ public class TextWindow extends JPanel implements ActionListener{
     	layout.putConstraint(SpringLayout.NORTH, totalDistLabel, 25, SpringLayout.NORTH, distOriginField);
     	layout.putConstraint(SpringLayout.WEST, totalDistField, 5, SpringLayout.EAST, totalDistLabel);
     	layout.putConstraint(SpringLayout.NORTH, totalDistField, 25, SpringLayout.NORTH, distOriginField);
+
+		layout.putConstraint(SpringLayout.WEST, packagesPickedUpLabel, 5, SpringLayout.WEST, contentPane);
+		layout.putConstraint(SpringLayout.NORTH, packagesPickedUpLabel, 25, SpringLayout.NORTH, totalDistField);
+		layout.putConstraint(SpringLayout.WEST, packagesPickedUpField, 5, SpringLayout.EAST, totalDistLabel);
+		layout.putConstraint(SpringLayout.NORTH, packagesPickedUpField, 25, SpringLayout.NORTH, totalDistField);
+
+		layout.putConstraint(SpringLayout.WEST, packagesDeliveredLabel, 5, SpringLayout.WEST, contentPane);
+		layout.putConstraint(SpringLayout.NORTH, packagesDeliveredLabel, 25, SpringLayout.NORTH, packagesPickedUpField);
+		layout.putConstraint(SpringLayout.WEST, packagesDeliveredField, 5, SpringLayout.EAST, totalDistLabel);
+		layout.putConstraint(SpringLayout.NORTH, packagesDeliveredField, 25, SpringLayout.NORTH, packagesPickedUpField);
     }
     
     public void initButtons() {
@@ -232,8 +271,8 @@ public class TextWindow extends JPanel implements ActionListener{
     	layout.putConstraint(SpringLayout.WEST, button4, 10, SpringLayout.EAST, button3);
     	layout.putConstraint(SpringLayout.NORTH, button4, 10, SpringLayout.NORTH, contentPane);
 
-		layout.putConstraint(SpringLayout.WEST, button5, 10, SpringLayout.WEST, contentPane);
-		layout.putConstraint(SpringLayout.SOUTH, button5, -30, SpringLayout.SOUTH, contentPane);
+		layout.putConstraint(SpringLayout.WEST, button5, 10, SpringLayout.EAST, button3);
+		layout.putConstraint(SpringLayout.SOUTH, button5, -20, SpringLayout.SOUTH, contentPane);
     }
 
     public static TextWindow createAndShowWindow(Graphics graphics, String title, int xDimension, int yDimension, int xPos, int yPos, DroneGuiState droneState) {

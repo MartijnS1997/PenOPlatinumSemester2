@@ -1,9 +1,6 @@
 package gui.WorldObjects;
 
-import TestbedAutopilotInterface.GUI.AirportGuiState;
-import TestbedAutopilotInterface.GUI.CubeGuiState;
-import TestbedAutopilotInterface.GUI.DroneGuiState;
-import TestbedAutopilotInterface.GUI.GUIQueueElement;
+import TestbedAutopilotInterface.GUI.*;
 import gui.GraphicsObjects.GraphicsObject;
 import gui.Windows.Graphics;
 
@@ -14,6 +11,7 @@ public class Objects {
     private static Map<String, DroneGuiState> droneGuiStates = new HashMap<String, DroneGuiState>();
     private static Set<CubeGuiState> cubeGuiStates = new HashSet<CubeGuiState>();
     private static Set<AirportGuiState> airportGuiStates = new HashSet<AirportGuiState>();
+    private static Set<DeliveryGuiState> deliveryGuiStates = new HashSet<DeliveryGuiState>();
 
     private static Map<String, Drone> drones = new HashMap<String, Drone>();
     private static Set<WorldObject> worldObjects = new HashSet<WorldObject>();
@@ -47,6 +45,7 @@ public class Objects {
         setDroneGuiStates(queueElement.getDroneStates());
         setAirportGuiStates(queueElement.getAirports());
         setCubeGuiStates(queueElement.getCubePositions());
+        setDeliveryGuiStates(queueElement.getDeliveries());
     }
 
     public static void update(GUIQueueElement queueElement) {
@@ -72,7 +71,7 @@ public class Objects {
 
     public static void renderAll() {
         updateGraphicsObjects();
-        getGraphics().renderWindows(getObjectSet(), getDroneGuiStates(), getMainDroneID());
+        getGraphics().renderWindows(getObjectSet(), getDroneGuiStates(), getMainDroneID(), getDeliveryGuiStates());
     }
 
     public static void nextDrone() {
@@ -179,5 +178,13 @@ public class Objects {
 
     public static void setAirportGuiStates(Set<AirportGuiState> airportGuiStates) {
         Objects.airportGuiStates = airportGuiStates;
+    }
+
+    public static void setDeliveryGuiStates(Set<DeliveryGuiState> deliveryGuiStates) {
+        Objects.deliveryGuiStates = deliveryGuiStates;
+    }
+
+    public static Set<DeliveryGuiState> getDeliveryGuiStates() {
+        return Objects.deliveryGuiStates;
     }
 }
