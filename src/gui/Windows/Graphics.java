@@ -50,9 +50,9 @@ public class Graphics {
 		this.textWindow = TextWindow.createAndShowWindow(this, title, width, height, xPos, yPos, droneState);
 	}
 
-	public void makeMiniMap(String title, int width, int height, int xPos, int yPos, Map<String, DroneGuiState> droneStates, String mainDrone, Set<AirportGuiState> airportGuiStates) {
+	public void makeMiniMap(String title, int width, int height, int xPos, int yPos, Map<String, DroneGuiState> droneStates, String mainDrone, Set<AirportGuiState> airportGuiStates, Set<DeliveryGuiState> deliveryGuiStates) {
 
-		this.miniMap = new MiniMap(title, width, height, xPos, yPos, droneStates, mainDrone, airportGuiStates);
+		this.miniMap = new MiniMap(title, width, height, xPos, yPos, droneStates, mainDrone, airportGuiStates, deliveryGuiStates);
 	}
 	
 	public void makeButtonWindow() {
@@ -67,7 +67,7 @@ public class Graphics {
 		if (this.textWindow != null)
 			this.textWindow.update(droneStates.get(mainDrone), deliveryGuiStates);
 		if (this.miniMap != null)
-			this.miniMap.update(droneStates, mainDrone);
+			this.miniMap.update(droneStates, mainDrone, deliveryGuiStates);
 		
 		for (String key: windows.keySet()) {
 			Window window = windows.get(key);
