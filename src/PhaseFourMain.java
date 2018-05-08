@@ -29,11 +29,12 @@ public class PhaseFourMain {
         Files.write(Paths.get("vectorErrorLog.txt"), "".getBytes());
 
         //create a simulation generator
-        SimulationGen generator = new SimulationGen(worldXSize, worldZSize, nbDrones, nbAirports, nbPackages);
+        SimulationGen generator = new SimulationGen(worldXSize, worldZSize);
         //set the seed so we generate the same world
         generator.setRandomSeed(0);
         //create the simulation environment
-        SimulationEnvironment environment = generator.generate4AirportWorld();//generator.generateGridWorld(gridWorldRows, gridWorldColumns);
+        SimulationEnvironment environment = generator.generateBigWorld();
+        //SimulationEnvironment environment = generator.generate4AirportWorld();//generator.generateGridWorld(gridWorldRows, gridWorldColumns);
         //print the environment
         System.out.println(SimulationGen.environmentToString(environment));
         //generate the overseer
@@ -42,7 +43,7 @@ public class PhaseFourMain {
         TestbedServer testbedServer = generator.generateTestbedServer(environment, overseer);
         testbedServer.setPlaybackSpeed(playbackSpeed);
         //create the autopilot initializer
-        AutopilotInitializer initializer = new AutopilotInitializer(host, tcpPort, nbDrones, overseer);
+        AutopilotInitializer initializer = new AutopilotInitializer(host, tcpPort, generator.getNbDrones(), overseer);
         //run server (will also initiate gui
         Thread serverThread = new Thread(testbedServer);
         serverThread.start();
@@ -163,13 +164,11 @@ public class PhaseFourMain {
     }
 
     //specify world parameters
-    private static float worldXSize = 4000;
-    private static float worldZSize = 4000;
-    private static int nbDrones = 2;
-    private static int nbAirports = 2;
-    private static int nbPackages = 2;
-    private static int gridWorldRows = 1;
-    private static int gridWorldColumns = 2;
+    private static float worldXSize = 10000;
+    private static float worldZSize = 10000;
+    private static int nbAirports = 8;
+    private static int nbPackages = 4;
+
     //TODO add/implement the packages
     private static Set<DeliveryPackage> getDeliveries(){
         return null;
@@ -179,7 +178,7 @@ public class PhaseFourMain {
     private static int stepsPerCycle = 50;
     private static int stepsPerSubCycle = 10;
     private static float timeStep = 0.001f;
-    private static int playbackSpeed = 25;
+    private static int playbackSpeed = 5;
 
     private static int tcpPort = 4242;
     private static String host = "localhost";

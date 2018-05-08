@@ -221,6 +221,12 @@ public class TestbedServer implements Runnable {
 //        System.out.println("drone states: " + newFrame.getDroneStates());
         //insert the frame into the queue
         renderQueue.add(newFrame);
+        if(System.currentTimeMillis() %100 == 0) {
+            String bufferSize = Integer.toString(renderQueue.size());
+            System.out.print(("\rbuffer size: " + bufferSize));
+        }
+
+
         //check if the queue size is smaller than the maximum allowed, if not, wait
         while(renderQueue.size() > MAX_FRAMES_AHEAD){
             if(!guiBNsignaled){
@@ -655,7 +661,7 @@ public class TestbedServer implements Runnable {
      * The amount of frames the testbed may go ahead of the renderer before issuing a pause, this
      * prevents the queue from becoming to large
      */
-    private final static int MAX_FRAMES_AHEAD = 5000; //1000 ahead gives approx of 100mb data on heap --> gui utilizes about 150mb so seems fair
+    private final static int MAX_FRAMES_AHEAD = 2000; //1000 ahead gives approx of 100mb data on heap --> gui utilizes about 150mb so seems fair
 
     /*
     Message strings

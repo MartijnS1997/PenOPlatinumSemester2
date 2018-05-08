@@ -24,7 +24,7 @@ public class CasTestController extends Controller {
         //get thrust controls
         outputs.setThrust(1000f);
         //return the current outputs
-        System.out.println(outputs);
+//        System.out.println(outputs);
         return outputs;
     }
 
@@ -112,7 +112,7 @@ public class CasTestController extends Controller {
     /**
      * The reference pitch used for the tests
      */
-    private float referencePitch = (float) (-15*PI/180f);
+    private float referencePitch = (float) (15*PI/180f);
 
     /**
      * Main wing configuration

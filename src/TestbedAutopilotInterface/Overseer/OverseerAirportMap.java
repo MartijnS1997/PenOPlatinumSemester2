@@ -51,7 +51,7 @@ public class OverseerAirportMap {
         }
         //if not reserve the airport
         reservations.put(autopilotId, airportID);
-        System.out.println("\nReservation added, drone: " + autopilotId + ", on airport: " + airportID +"\n");
+//        System.out.println("\nReservation added, drone: " + autopilotId + ", on airport: " + airportID +"\n");
         return true;
     }
 
@@ -64,7 +64,7 @@ public class OverseerAirportMap {
         //get the map consisting of all the current reservations
         Map<String, Integer> reservations = this.getReservations();
         Integer removed = reservations.remove(droneID);
-        System.out.println("Removed reservation, drone: " + droneID + ", on airport: " + removed);
+//        System.out.println("Removed reservation, drone: " + droneID + ", on airport: " + removed);
     }
 
     /**

@@ -95,7 +95,7 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void>, Packa
         //execute the search
         Map<String, List<PlannerDelivery>> deliveryScheme = planner.executeSearch();
         //and apply the found scheme
-        System.out.println();
+//        System.out.println();
         planner.printSchedule(deliveryScheme, getAirportMap());
         assignDeliveriesToQueue(deliveryScheme);
     }
@@ -271,7 +271,7 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void>, Packa
     @Override
     public synchronized void deliverPackage(int fromAirport, int fromGate, int toAirport, int toGate) {
         //create the package
-        System.out.println(fromAirport +" " + toAirport);
+//        System.out.println(fromAirport +" " + toAirport);
         DeliveryPackage delivery = new DeliveryPackage(fromAirport, fromGate, toAirport, toGate);
         this.addPackageToDeliver(delivery);
         this.setPackagesAdded(true);
@@ -405,21 +405,24 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void>, Packa
      * Determines a cruising altitude for the given drone (plz don't use if the drone already has an assigned altitude)
      * @param autopilotID the id used to identify the drone in the altitude list
      */
-    private void setCruisingAltitude(String autopilotID){
+    private synchronized void setCruisingAltitude(String autopilotID){
         //get the max of all the values
         ConcurrentMap<String, Float> altitudeMap = this.getCruisingAltitudes();
         int numberOfDrones = altitudeMap.keySet().size();
         Set<Float> altitudes = new HashSet<>(altitudeMap.values());
-        Optional<Float> maxAltitudeOpt = altitudes.stream().reduce((a, b) -> a >= b ? a : b );
+//        System.out.println(altitudeMap);
+
         float assignedAltitude;
 
-        if(!maxAltitudeOpt.isPresent()){
+        if(altitudes.size() == 0){
             assignedAltitude = BASE_ALTITUDE;
         }else{
-            assignedAltitude = maxAltitudeOpt.get() + ALTITUDE_DELTA;
+            Float maxAltitudeOpt = Collections.max(altitudes);
+            assignedAltitude = maxAltitudeOpt + ALTITUDE_DELTA;
         }
 
         altitudeMap.put(autopilotID, assignedAltitude);
+//        System.out.println(altitudeMap);
     }
 
     /**
@@ -661,7 +664,7 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void>, Packa
     /**
      * The base altitude to assign to the drones (incremented from here)
      */
-    private final static float BASE_ALTITUDE =500f;
+    private final static float BASE_ALTITUDE =30f;
 
     /**
      * The minimal cruising altitude difference between two drones

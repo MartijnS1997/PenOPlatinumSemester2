@@ -45,11 +45,37 @@ public class SimulationGen {
     }
 
     /**
+     * Constructor for when a standard world format is generated
+     * @param worldXSize the size of the world in the x-direction
+     * @param worldZSize the size of the world in the z-direction
+     */
+    public SimulationGen(float worldXSize, float worldZSize){
+        this(worldXSize, worldZSize, 0,0,0);
+    }
+
+    /**
+     * warning, overwrites the previous configuration
+     * @return a big world for the demo
+     */
+    public SimulationEnvironment generateBigWorld(){
+        //first overwrite the provided parameters
+        this.worldXSize = 4E4f;
+        this.worldZSize = 4E4f;
+        this.nbDrones = 25;
+        this.nbAirports = 25;
+        this.nbPackages = 40;
+
+        int nbRows = 5;
+        int nbColumns = 5;
+        return  generateGridWorld(nbRows, nbColumns);
+    }
+
+    /**
      * Generates a world where the airports are located in a grid like fashion with only a random orientation of
      * the heading vector of the airports
      * @return a similation environment object containing the specifications for the simulation environment
      */
-    public SimulationEnvironment generateGridWorld(int nbRows, int nbColumns){
+    private SimulationEnvironment generateGridWorld(int nbRows, int nbColumns){
         if(!canGenerateGrid(nbRows, nbColumns)){
             throw new IllegalArgumentException(GRID_SIZE_ERROR);
 
@@ -1254,7 +1280,7 @@ public class SimulationGen {
      * Getter for the nb of drones to be added to the simulation
      * @return the number of drones to add
      */
-    private int getNbDrones() {
+    public int getNbDrones() {
         return nbDrones;
     }
 

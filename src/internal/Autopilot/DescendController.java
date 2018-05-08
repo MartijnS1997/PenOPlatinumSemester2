@@ -115,6 +115,11 @@ public class DescendController extends Controller {
         this.descendRate = 0;
         this.bankingTurnRoll = 0;
         this.turnVelocity = 0;
+        try {
+            this.descendTurnCAS.getCasPitchPid().reset();
+        }catch(NullPointerException e){
+            //do nothing, no descend cas was configured
+        }
     }
 
 
@@ -333,15 +338,33 @@ public class DescendController extends Controller {
         return input;
     }
 
+    private void pitchControl(ControlOutputs outputs, AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs, CasCommand casCommand){
+        //create a switch to select the right action
+        switch(casCommand){
+            case ASCEND:
+                //abnormal behavior of drone, invoke the cas pitch controller
+                DescendTurnCAS descendTurnCAS = this.getDescendTurnCAS();
+                descendTurnCAS.casPitchControls(outputs, currentInputs, previousInputs);
+                break;
+            default:
+                //reset to be sure
+                this.getDescendTurnCAS().getCasPitchPid().reset();
+                //reset the pitch controls
+                normalPitchControl(outputs, currentInputs, previousInputs);
+                //break the case
+                break;
+        }
+    }
+
     /**
      * Getter for the control actions needed to keep the drone at the cruising altitude during the turn
      * @param outputs the outputs of the drone to write the result to
      * @param currentInputs the inputs most recently received from the testbed
      * @param previousInputs the inputs previously received from the testbed
      */
-    private void pitchControl(ControlOutputs outputs, AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs, CasCommand casCommand){
+    private void normalPitchControl(ControlOutputs outputs, AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs){
         //get the reference value
-        Vector pitchReferencePoint = this.getPitchReferencePoint(currentInputs, casCommand);
+        Vector pitchReferencePoint = this.getPitchReferencePoint(currentInputs);
         float pitchError = this.getPitchError(currentInputs, pitchReferencePoint);
         float deltaTime = getDeltaTime(currentInputs, previousInputs);
         //feed the results into the pid controller
@@ -358,11 +381,9 @@ public class DescendController extends Controller {
      * Calculates the reference point for the pitch controller, it is used to descend to the given altitude
      * the reference point will descend based on the angle to go parameter (if it hits zero the drone shouldn't descend anymore
      * @param currentInputs the current inputs, used to calculate the reference point
-     * @param casCommand the collision avoidance command, used to adjust the reference point position
-     *                   to fulfill the command
      * @return a reference point for the controller in the world axis system to fly to
      */
-    private Vector getPitchReferencePoint(AutopilotInputs_v2 currentInputs, CasCommand casCommand){
+    private Vector getPitchReferencePoint(AutopilotInputs_v2 currentInputs){
 
         //grab the parameters needed for the calculations
         Vector groundPosition = extractGroundPosition(currentInputs);
@@ -374,7 +395,7 @@ public class DescendController extends Controller {
         float lookaheadDistance = this.getLookaheadDistance();
 
         //calculate the reference altitude, the current angle to go and the descend rate should be used
-        float referenceAltitude = getReferenceAltitude(currentInputs, casCommand);/*angleToGo*descendRate + targetAltitude;*/
+        float referenceAltitude = getNormalOpReferenceAltitude();/*angleToGo*descendRate + targetAltitude;*/
         Vector altitudeVector = new Vector(0,referenceAltitude,0);
 
         //calculate the reference point by setting a point in front of the drone (using the lookahead distance)
@@ -474,7 +495,6 @@ public class DescendController extends Controller {
         //return the result while checking for NaN, if so return harmless (?) value
         return Float.isNaN(pitchError) ? 0 : pitchError;
     }
-
 
 
     /**
@@ -1128,10 +1148,92 @@ public class DescendController extends Controller {
             super(communicator);
         }
 
+
+        /**
+         * Resets the pitch PID, must be called every time the cas controller is used for the first time
+         * after a normal descend phase
+         */
+        private void resetPitchControls(){
+            this.getCasPitchPid().reset();
+        }
+
+
+        /**
+         * The pitch controller employed for CAS corrections during the flight
+         * @param outputs the outputs to write the results to
+         * @param currentInputs the inputs most recently received from the testbed
+         * @param previousInputs the inputs previously received from the testbed
+         */
+        private void casPitchControls(ControlOutputs outputs, AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs){
+            //get the set point for the pitch
+            float referencePitch = this.getReferencePitch();
+            //get the current pitch from the inputs
+            float currentPitch = Controller.extractPitch(currentInputs);
+            //calculate te error
+            float errorPitch = referencePitch - currentPitch;
+            //get the outputs from the pid controller
+            PIDController pitchPid = this.getCasPitchPid();
+            float deltaTime = Controller.getDeltaTime(currentInputs, previousInputs);
+            //if the reference pitch is larger than the current pitch we have a positive error pitch fed into
+            //the PID, the pid will return a negative output --> negative PID output = steer upwards
+            //if reference pitch < current pitch, we'll get a negative PID input and a positive output
+            //we'll need to steer upwards
+            float pidOutputs = pitchPid.getPIDOutput(errorPitch,deltaTime);
+
+            //now calculate the control actions based on the error on the pitch
+            //take the linear approach, we want the same inclination of the horizontal stabilizer as the error
+            //if possible (first iteration) if we need to go up, negative inclination, if we need to go down
+            //positive inclination
+            float horizontalInclination = capInclination(pidOutputs, HORIZONTAL_STABLE, HORIZONTAL_DELTA_INCL);
+            //put it into the outputs
+            outputs.setHorStabInclination(horizontalInclination);
+        }
+
+        public float getReferencePitch() {
+            return referencePitch;
+        }
+
+        /**
+         * Configures the descend cas
+         * @param descendRate the rate of descend employed by the descend controller
+         */
         @Override
-        protected void configureDescendCas(float threatDistance) {
+        protected void configureDescendCas(float descendRate) {
+            float threatDistance = calcThreatRadius(descendRate);
             this.setThreatDistance(threatDistance);
         }
 
+        /**
+         * Calculates the threat radius based on the descend rate of the current turn
+         * @param descendRate the descend rate to get the threat radius for
+         * @return the threat radius needed to avoid collision
+         */
+        protected float calcThreatRadius(float descendRate){
+            //use the fitted poly
+            float a0 = 15.93f;
+            float a1 = 0.1722f;
+            float radiusMult = 2;
+
+            return (a0 + abs(descendRate)*a1)/*/*radiusMult*/;
+        }
+
+        /*
+        Some controls stuff
+         */
+
+        /**
+         * Getter for the PID used by the CAS controller
+         * @return the pid used for the cas pitch control
+         */
+        private PIDController getCasPitchPid() {
+            return casPitchPid;
+        }
+
+        private final static float CAS_PITCH_GAIN = 1.0f;
+        private final static float CAS_PITCH_INTEGRAL = 0.2f;
+        private final static float CAS_PITCH_DERIVATIVE = 0.5f;
+        private final PIDController casPitchPid = new PIDController(CAS_PITCH_GAIN, CAS_PITCH_INTEGRAL, CAS_PITCH_DERIVATIVE);
+
+        private final float referencePitch = (float) (15*PI/180);
     }
 }

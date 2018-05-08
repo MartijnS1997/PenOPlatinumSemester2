@@ -52,6 +52,10 @@ public abstract class CollisionAvoidanceSystem {
         return toMonitor;
     }
 
+    protected boolean isAscending(AutopilotInputs_v2 currentInputs){
+        return currentInputs.getPitch() >= 0;
+    }
+
     /**
      * Checks if the two directions are the same
      * @param ownDirection the direction of the drone calling the method
@@ -66,45 +70,28 @@ public abstract class CollisionAvoidanceSystem {
     }
 
     /**
-     * Checks if the provided drone is in front of the caller
-     * @param currentInputs the current inputs of the caller
-     * @param other the other drone to check if in front
-     * @return true if and only if the scalar product of the heading vector of the caller and the difference vector
-     *         (vector pointing from caller to other) is positive
-     */
-    protected static boolean isInFrontOfDrone(AutopilotInputs_v2 currentInputs, AutopilotInfo other){
-        //get parameters needed for the calculation
-        Vector currentPos = Controller.extractPosition(currentInputs);
-        Vector otherPos = other.getCurrentPosition();
-        Vector headingWorld = getHeadingVector(currentInputs);
-
-
-        //take the difference vector between the position of the caller and the other drone
-        Vector diffVector = otherPos.vectorDifference(currentPos);
-
-        //now make the scalar product with the heading in the world axis system, if positive, the other drone is flying
-        //in front of the caller, negative if not
-        return diffVector.scalarProduct(headingWorld) > 0;
-    }
-
-    /**
      * Checks if the other drone has a higher altitude than the calling drone
      * @param currentInputs the inputs most recently received from the testbed by the calling drone
      * @param other the info about the other drone
      * @return true if and only id the y-value of the position of the other drone is greater than the
      *         y-value of the current inputs
      */
-    protected static boolean hasHigherAltitude(AutopilotInputs_v2 currentInputs, AutopilotInfo other){
+    protected static boolean threatHasHigherAltitude(AutopilotInputs_v2 currentInputs, AutopilotInfo other){
         float currentAltitude = Controller.extractAltitude(currentInputs);
         float otherAltitude = other.getCurrentPosition().getyValue();
         return currentAltitude < otherAltitude;
     }
 
+    /**
+     * Getter for the heading of the drone in the world axis system starting in the roll axis systeem
+     * @param currentInputs
+     * @return
+     */
     protected static Vector getHeadingVector(AutopilotInputs_v2 currentInputs) {
         //get the heading of the caller
-        Vector headingHa = new Vector(0,0,-1);
+        Vector headingDrone = new Vector(0,0,-1);
         Vector orientation = Controller.extractOrientation(currentInputs);
-        return PhysXEngine.headingOnWorld(headingHa, orientation);
+        return PhysXEngine.droneOnWorld(headingDrone, orientation);
     }
 
     /**
@@ -119,6 +106,29 @@ public abstract class CollisionAvoidanceSystem {
         Vector previousPosition = autopilotInfo.getPreviousPosition();
         Vector diffVector = currentPosition.vectorDifference(previousPosition);
         return diffVector.normalizeVector();
+    }
+
+    /**
+     * ONLY USE IF DIRECTIONS OF THREAT AND DRONE ARE DIFFERENT
+     * @param currentInputs
+     * @param threatInfo
+     * @return
+     */
+    protected static boolean isBehindThreat(AutopilotInputs_v2 currentInputs, AutopilotInfo threatInfo){
+        //get the vector pointing from the threat to the drone
+        Vector dronePos = Controller.extractPosition(currentInputs);
+        Vector threatPos = threatInfo.getCurrentPosition();
+
+        Vector threatDirection = getNormalizedDirection(threatInfo);
+
+        //diff vector
+        Vector diff = dronePos.vectorDifference(threatPos);
+
+        //take scalar product, if positive the drone is still in front of the threat
+        //if not the drone has already passed it
+        float scalar = diff.scalarProduct(threatDirection);
+
+        return scalar <= 0;
     }
 
     /**
@@ -189,5 +199,5 @@ public abstract class CollisionAvoidanceSystem {
     /**
      * The radius wherein the collision avoidance system scans for potential threats
      */
-    private float threatDistance = 50f;
+    private float threatDistance = 100f;
 }

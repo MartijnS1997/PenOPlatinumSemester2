@@ -1,16 +1,13 @@
 package internal.Autopilot;
 
 import AutopilotInterfaces.AutopilotConfig;
-import AutopilotInterfaces.AutopilotInputs;
 import AutopilotInterfaces.AutopilotInputs_v2;
 import AutopilotInterfaces.AutopilotOutputs;
 import TestbedAutopilotInterface.Overseer.AutopilotDelivery;
 import TestbedAutopilotInterface.Overseer.AutopilotInfo;
 import internal.Helper.Vector;
-import internal.Physics.PhysXEngine;
 
 import java.util.*;
-import java.util.logging.Level;
 
 import static java.lang.Math.*;
 
@@ -302,7 +299,7 @@ public class AutopilotTakeoffController extends Controller {
                 this.referencePitch = getDescendRefPitch();
                 break;
             default:
-                this.referencePitch = getNormalRefpitch();
+                this.referencePitch = getAscendPitch();
         }
     }
 
@@ -311,7 +308,7 @@ public class AutopilotTakeoffController extends Controller {
      * Getter for the reference pitch in normal flight conditions
      * @return the reference pitch for a normal flight (in radians)
      */
-    private static float getNormalRefpitch() {
+    private static float getAscendPitch() {
         return normalRefpitch;
     }
 
@@ -338,7 +335,7 @@ public class AutopilotTakeoffController extends Controller {
      * @param referenceVelocity the reference velocity of the drone (must be > 0)
      */
     private void setReferenceVelocity(float referenceVelocity) {
-        System.out.println("reference velocity: " + referenceVelocity);
+//        System.out.println("reference velocity: " + referenceVelocity);
         if(!isValidReferenceVelocity(referenceVelocity)){
             throw new IllegalArgumentException("velocity is not strictly positive");
         }
@@ -452,7 +449,7 @@ public class AutopilotTakeoffController extends Controller {
     /**
      * The reference pitch in case the CAS command is descend
      */
-    private final static float descendRefPitch = (float) (-3f*PI/180);
+    private final static float descendRefPitch = (float) (-15f*PI/180);
 
     /**
      * The reference velocity, used during the takeoff to cap the maxiumum velocity for the next part of the flight
@@ -610,10 +607,59 @@ public class AutopilotTakeoffController extends Controller {
          *         --> if the threat has a lower altitude, the drone ascends
          */
         private CasCommand handleThreat(AutopilotInputs_v2 currentInputs, AutopilotInfo threatInfo){
-            float currentAltitude = extractAltitude(currentInputs);
-            float threatAltitude = threatInfo.getCurrentPosition().getyValue();
 
-            return threatAltitude > currentAltitude ? CasCommand.DESCEND : CasCommand.ASCEND;
+            //first check if the drone is ascending and descending
+            if(isAscending(currentInputs)){
+                return handleAscendingThreat(currentInputs, threatInfo);
+
+            }
+
+            //if not, the drone is descending
+            else{
+                //check if the threat is at a lower altiude, if not, we dc
+                if(threatHasHigherAltitude(currentInputs, threatInfo)){
+                    return CasCommand.NOP;
+                }
+
+                //check if the threat has the same direction
+                Vector ownDirection = getHeadingVector(currentInputs);
+                if(isFlyingInSameDirection(ownDirection, threatInfo)){
+                    //if so, the drone always needs to ascend
+                    return CasCommand.ASCEND;
+                }
+
+                //if the drone is oriented in a different direction
+                //we need to check if we've already flown by
+                if(isBehindThreat(currentInputs, threatInfo)){
+                    //if we're behind NOP(E)
+                    return CasCommand.NOP;
+                }
+
+                //resting case: descend
+                return CasCommand.ASCEND;
+            }
+
+        }
+
+        private CasCommand handleAscendingThreat(AutopilotInputs_v2 currentInputs, AutopilotInfo threatInfo) {
+            //check if the threat is at a higher altitude than the drone, if not no threat
+            if(!threatHasHigherAltitude(currentInputs, threatInfo)){
+                return CasCommand.NOP;
+            }
+
+            Vector ownDirection = getHeadingVector(currentInputs);
+            //if so, check if the threat is headed in the same direction
+            if(isFlyingInSameDirection(ownDirection, threatInfo)){
+                return CasCommand.DESCEND;
+            }
+
+            //if not, check if we're behind the threat or not
+            if(isBehindThreat(currentInputs, threatInfo)){
+                return CasCommand.NOP;
+            }
+
+            //resting case: in front and diff direction: descend
+            return CasCommand.DESCEND;
         }
     }
 
@@ -638,7 +684,7 @@ public class AutopilotTakeoffController extends Controller {
 //        }
 //
 //        //check if the altitude of the threat is lower than the current
-//        if(!hasHigherAltitude(currentInputs, threatInfo)){
+//        if(!threatHasHigherAltitude(currentInputs, threatInfo)){
 //            //if so we only need to take action if we're facing downward (pitch < 0)
 //            //this case means that we have avoided (a now further) threat by descending
 //            return currentInputs.getPitch() < 0 ? CasCommand.ASCEND : CasCommand.DESCEND;

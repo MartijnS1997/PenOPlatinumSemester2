@@ -234,7 +234,7 @@ public class World {
 			WorldDelivery delivery = getNextDelivery(droneID, unDelivered);
 			//check if this particular package can be delivered
 			if(delivery != null && canPickUpPackage(drone, delivery)){
-				System.out.println("\npicked up delivery: " + delivery + "\n");
+//				System.out.println("\npicked up delivery: " + delivery + "\n");
 				drone.loadPackage(delivery);
 			}
 		}

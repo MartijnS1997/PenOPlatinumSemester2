@@ -132,8 +132,8 @@ public class AutopilotFiniteStateMachine {
         if(!nextState.equals(currentState)){
             configureState(nextState, inputs);
             this.setState(nextState);
-            System.out.println("Switched states, from " + AutopilotState.getString(currentState) +
-                    ", to " + AutopilotState.getString(nextState));
+//            System.out.println("Switched states, from " + AutopilotState.getString(currentState) +
+//                    ", to " + AutopilotState.getString(nextState));
             //we do a recursive call until the states are stable
             toNextState(inputs);
         }
@@ -184,7 +184,7 @@ public class AutopilotFiniteStateMachine {
     private void configureTakeoff(AutopilotInputs_v2 inputs){
         //set the cruising altitude
         float cruisingAlt = this.getAutopilot().getCommunicator().getAssignedCruiseAltitude();
-        System.out.println("Assigned altitude for this flight: " + cruisingAlt);
+//        System.out.println("Assigned altitude for this flight: " + cruisingAlt);
         AutopilotTakeoffController takeoffController = this.getTakeoffController();
         takeoffController.reset();
         //configure the controller
@@ -237,20 +237,20 @@ public class AutopilotFiniteStateMachine {
         //select the airport needed by the navigator
         if(!currentDelivery.isPickedUp()){
             //if the delivery is not yet picked up, get the source address
-            System.out.println("need to pick up package at source airport");
+//            System.out.println("need to pick up package at source airport");
             int sourceAirportID = currentDelivery.getSourceAirport();
             MapAirport targetAirport = communicator.getAirportByID(sourceAirportID);
-            System.out.println(targetAirport);
+//            System.out.println(targetAirport);
             //generate the path generator for the controller
             PathGenerator_v2 pathGenerator = new PathGenerator_v2(inputs, targetAirport, cruisingAltitude, descendThreshold, standardLandingAlt);
             navigationController.configureNavigation(config, pathGenerator);
 
         }else{
             //if the delivery is already picked up, get to the destination address
-            System.out.println("package must be delivered to destination airport");
+//            System.out.println("package must be delivered to destination airport");
             int destinationAirportID = currentDelivery.getDestinationAirport();
             MapAirport targetAirport = communicator.getAirportByID(destinationAirportID);
-            System.out.println(targetAirport);
+//            System.out.println(targetAirport);
             //create the path generator
             PathGenerator_v2 pathGenerator = new PathGenerator_v2(inputs, targetAirport, cruisingAltitude, descendThreshold, standardLandingAlt);
             navigationController.configureNavigation(config, pathGenerator);
@@ -713,13 +713,13 @@ public class AutopilotFiniteStateMachine {
      * this altitude is used when the drone is assigned a higher altitude than the landing descend
      * threshold
      */
-    private final float standardLandingAltitude = 50f;
+    private final float standardLandingAltitude = 30f;
 
     /**
      * The threshold wherefore the descend phase will be activating previous to the actual landing
      * --> used to get a safe altitude to initiate the landing
      */
-    private final float landingDescendThreshold = 100f;
+    private final float landingDescendThreshold = 35f;
 
     /**
      * The controllers used by the finite state machine to generate the control actions

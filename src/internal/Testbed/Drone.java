@@ -580,7 +580,7 @@ public class Drone implements Callable<Void> {
 		}
 		//if it has the same ID, go ahead and transport it
 		packageToDeliver.setPickedUp();
-		System.out.println("package picked up");
+//		System.out.println("package picked up");
 		this.deliveryPackage = packageToDeliver;
 	}
 
@@ -590,7 +590,7 @@ public class Drone implements Callable<Void> {
 	public void unloadPackage(){
 		WorldDelivery deliveryPackage = this.getDeliveryPackage();
 		deliveryPackage.setDelivered();
-		System.out.println("package delivered");
+//		System.out.println("package delivered");
 		this.deliveryPackage = null;
 	}
 

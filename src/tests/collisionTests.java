@@ -16,8 +16,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
+import java.util.List;
 
 import static java.lang.Math.PI;
+import static java.lang.Math.atan;
 import static java.lang.Math.copySign;
 
 /**
@@ -168,13 +171,18 @@ public class collisionTests {
     @Test
     public final void descendTest() throws IOException {
         Files.write(Paths.get("collisionLog.txt"), "".getBytes());
+
+
         //create the drone configured in ascend position
+        float altitudeDiff = 1000f;
+        float totalTravelled = 6300f;
+        float TOA = altitudeDiff / totalTravelled;
         float heading = 0;
-        float pitch = (float) (15*PI/180f);
+        float pitch = -(float) atan(TOA);
         float roll = 0;
 
         float xPos = 0;
-        float yPos = 100;
+        float yPos = 1000;
         float zPos = 0;
 
         float velocitySize = 50f;
@@ -188,26 +196,98 @@ public class collisionTests {
         drone.setAutopilotOutputs(dummyOutputs);
         AutoPilot autopilot = new AutoPilot(null);
         autopilot.setConfig(config);
-        System.out.println(autopilot.getConfig());
 
         CasTestController testController = new CasTestController(autopilot);
         testController.setConfig(config);
         AutopilotInputs_v2 prevInputs = new testOutputs();
-        int nbSteps = 5000;
+        int nbSteps = 3000;
         float deltaTime = 0.001f;
 
-        for(int i = 0; i != nbSteps; i++){
+        //add the temporary minimum
+        float currentMin = yPos;
+        for (int i = 0; i != nbSteps; i++) {
             drone.toNextState(deltaTime);
             elapsedTime += deltaTime;
             AutopilotInputs_v2 currentInputs = new testOutputs();
             AutopilotOutputs outputs = testController.getControlActions(currentInputs, prevInputs);
             drone.setAutopilotOutputs(outputs);
             prevInputs = currentInputs;
-            System.out.println(drone.getPosition());
+
+            if(drone.getPosition().getyValue() < currentMin){
+                currentMin = drone.getPosition().getyValue();
+            }
+
             collisionLog(drone.getPosition());
+
         }
 
+        System.out.println("minimal altitude " + currentMin);
 
+    }
+
+    @Test
+    public void descendRegression() throws IOException {
+        Files.write(Paths.get("collisionLog.txt"), "".getBytes());
+
+        float deltaAltitude = 50;
+        float baseDiff = 0;
+        float maxDiff = 1500;
+        List<Float> minAltitudes = new ArrayList<>();
+        for (float altitudeDiff = baseDiff; altitudeDiff <= maxDiff; altitudeDiff += deltaAltitude) {
+
+            //create the drone configured in ascend position
+            float totalTravelled = 6300f;
+            float TOA = altitudeDiff / totalTravelled;
+            float heading = 0;
+            float pitch = -(float) atan(TOA);
+            float roll = 0;
+
+            float xPos = 0;
+            float yPos = 1000;
+            float zPos = 0;
+
+            float velocitySize = 50f;
+
+            Vector position = new Vector(xPos, yPos, zPos);
+            Vector orientation = new Vector(heading, pitch, roll);
+            Vector velocity = getVelocityVector(velocitySize, orientation);
+            Vector rotation = new Vector();
+
+            drone = new Drone(position, velocity, orientation, rotation, config);
+            drone.setAutopilotOutputs(dummyOutputs);
+            AutoPilot autopilot = new AutoPilot(null);
+            autopilot.setConfig(config);
+
+            CasTestController testController = new CasTestController(autopilot);
+            testController.setConfig(config);
+            AutopilotInputs_v2 prevInputs = new testOutputs();
+            int nbSteps = 3000;
+            float deltaTime = 0.001f;
+
+            //add the temporary minimum
+            float currentMin = yPos;
+            float zMinPos = xPos;
+            for (int i = 0; i != nbSteps; i++) {
+                drone.toNextState(deltaTime);
+                elapsedTime += deltaTime;
+                AutopilotInputs_v2 currentInputs = new testOutputs();
+                AutopilotOutputs outputs = testController.getControlActions(currentInputs, prevInputs);
+                drone.setAutopilotOutputs(outputs);
+                prevInputs = currentInputs;
+
+                if (drone.getPosition().getyValue() < currentMin) {
+                    currentMin = drone.getPosition().getyValue();
+                    zMinPos = drone.getPosition().getzValue();
+                }
+
+            }
+
+            System.out.println("Current altitude diff: " + altitudeDiff);
+            System.out.println("min altitude: " + currentMin);
+
+            minAltitudes.add(currentMin);
+            collisionLog(new Vector((float) (altitudeDiff/(2*PI)), -zMinPos, 0));
+        }
     }
 
     protected static void collisionLog(Vector errorVector){

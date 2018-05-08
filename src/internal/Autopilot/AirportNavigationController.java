@@ -97,17 +97,17 @@ public class AirportNavigationController extends AutopilotFlightController {
         NavigatorState nextState = this.getNextState(currentInputs, previousInputs);
         //check if the same state as previous one
         if(nextState != currentState){
-            System.out.println();
+//            System.out.println();
             //if not configure the controller
             configureStateController(nextState);
             //and save the state
             this.setNavigatorState(nextState);
             //note: we only have to save the next state if the state is indeed changed, if not we would be doing
             //duplicate work
-            System.out.println("switched state from: " + currentState +  ", to: " + nextState);
-            System.out.println("drone position: " + extractPosition(currentInputs));
+//            System.out.println("switched state from: " + currentState +  ", to: " + nextState);
+//            System.out.println("drone position: " + extractPosition(currentInputs));
             AutopilotTurn turn = this.getTurnControl().getTurn();
-            System.out.println("turn exit point: " + (turn.getExitPoint().vectorSum(turn.getTurnCenter())));
+//            System.out.println("turn exit point: " + (turn.getExitPoint().vectorSum(turn.getTurnCenter())));
         }
 
         //TODO remove once done debugging
@@ -159,7 +159,7 @@ public class AirportNavigationController extends AutopilotFlightController {
         //get the path generator
         PathGenerator_v2 pathGenerator = this.getPathGenerator();
         AutopilotTurn nextTurn = pathGenerator.getNextTurn();
-        System.out.println("next turn specified: " + nextTurn.getTurnCenter() + "turning angle: " + nextTurn.getTurnAngle());
+//        System.out.println("next turn specified: " + nextTurn.getTurnCenter() + "turning angle: " + nextTurn.getTurnAngle());
         //decrement the number of remaining turns
         return nextTurn;
 
@@ -262,8 +262,8 @@ public class AirportNavigationController extends AutopilotFlightController {
         turns.add(turn2);
 
         firstCall = false;
-        System.out.println("Turn data, turn 1 center: " + turn1.getTurnCenter() + ", entry: " + turn1.getEntryPoint());
-        System.out.println("Turn data, turn 2 center: " + turn2.getTurnCenter() + ", entry: " + turn2.getEntryPoint());
+//        System.out.println("Turn data, turn 1 center: " + turn1.getTurnCenter() + ", entry: " + turn1.getEntryPoint());
+//        System.out.println("Turn data, turn 2 center: " + turn2.getTurnCenter() + ", entry: " + turn2.getEntryPoint());
     }
 
     /**
@@ -558,7 +558,6 @@ public class AirportNavigationController extends AutopilotFlightController {
      * @param turnControl the next turn to make with the navigation controller
      */
     private void setTurnControl(TurnControlBeta turnControl) {
-        System.out.println(turnControl);
         this.turnControl = turnControl;
     }
 

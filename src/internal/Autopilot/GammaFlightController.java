@@ -77,7 +77,7 @@ public class GammaFlightController extends AutopilotFlightController {
     private Vector rollCorrectCenterCubes(AutopilotInputs_v2 inputs, Vector currentCoord){
         //get the roll from the inputs
         float roll = inputs.getRoll();
-        System.out.println("Current roll: " + roll);
+//        System.out.println("Current roll: " + roll);
         //make the transformation matrix
         SquareMatrix rollMatrix = new SquareMatrix(new float[]{(float) cos(roll), (float) -sin(roll), 0,
                 (float) sin(roll), (float) cos(roll) , 0,

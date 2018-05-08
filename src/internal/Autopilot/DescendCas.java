@@ -23,44 +23,97 @@ public abstract class DescendCas extends CollisionAvoidanceSystem{
      * Used to configure the CAS for different needs (a landing controller may want to take more risks during
      * the descend because its landing deadline is tight, while the descending controller has a lot of time to spend
      * to configure the descending
-     * @param threatDistance the distance for which another drone is considered a "threat" and must be handled
-     *                       by the system
+     * @param descendRate the rate of descend employed by the descend controller
      */
-    protected abstract void configureDescendCas(float threatDistance);
+    protected abstract void configureDescendCas(float descendRate);
 
 
     @Override
     protected CasCommand getCASCommand(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs) {
         Vector currentPosition = Controller.extractPosition(currentInputs);
-        //get all the threats for the drone
-        List<AutopilotInfo> threatList = new ArrayList<>(this.getThreats(currentPosition));
-        //sort the list based on the threat comparator
-        threatList.sort(getThreatComparator(currentPosition));
-
-        CasCommand currentCommand = CasCommand.NOP;
-        for(AutopilotInfo threat : threatList){
-            currentCommand = handleThreat(currentInputs, threat);
-            if(currentCommand != CasCommand.NOP){
+        List<AutopilotInfo> threats = new ArrayList<>(this.getThreats(currentPosition));
+        //sort the threats --> closest to farthest threats
+        threats.sort(getThreatComparator(currentPosition));
+        //cycle trough all the threats sorted by distance, we handle the closest one first
+        //if the threat doesn't require an action (is not an active threat) handle the next one
+        CasCommand command = CasCommand.NOP;
+        for(AutopilotInfo threatInfo: threats){
+            //handle the threat
+            command = handleThreat(currentInputs, threatInfo);
+            //if the drone may continue its flight, handle the next threat
+            if(command != CasCommand.NOP){
                 break;
             }
         }
 
-        return currentCommand;
+        //return the command to handle the closest threat that doesn't require a NOP
+
+        return command;
     }
 
     /**
-     * Handler for a threat
+     * Threat handler
+     * A threat is handled by ascending or descending depending on the type of the threat
      * @param currentInputs the inputs most recently received from the testbed
-     * @param threatInfo info about the current threat
-     * @return the cas commando used to avoid a collision
-     *         --> ascend if the threat is at a lower altitude than the drone
-     *         --> descend if the threat is at a higher altitude than the drone
+     * @param threatInfo the info about the threat (needed to handle it)
+     * @return the cas command needed to avoid collision
+     *         --> if the threat has a higher altitude, the drone descends
+     *         --> if the threat has a lower altitude, the drone ascends
      */
     private CasCommand handleThreat(AutopilotInputs_v2 currentInputs, AutopilotInfo threatInfo){
-        float currentAltitude = Controller.extractAltitude(currentInputs);
-        float threatAltitude = threatInfo.getCurrentPosition().getyValue();
 
-        return threatAltitude < currentAltitude ? CasCommand.ASCEND : CasCommand.DESCEND;
+        //first check if the drone is ascending and descending
+        if(isAscending(currentInputs)){
+            return handleAscendingThreat(currentInputs, threatInfo);
+
+        }
+
+        //if not, the drone is descending
+        else{
+            //check if the threat is at a lower altiude, if not, we dc
+            if(threatHasHigherAltitude(currentInputs, threatInfo)){
+                return CasCommand.NOP;
+            }
+
+            //check if the threat has the same direction
+            Vector ownDirection = getHeadingVector(currentInputs);
+            if(isFlyingInSameDirection(ownDirection, threatInfo)){
+                //if so, the drone always needs to ascend
+                return CasCommand.ASCEND;
+            }
+
+            //if the drone is oriented in a different direction
+            //we need to check if we've already flown by
+            if(isBehindThreat(currentInputs, threatInfo)){
+                //if we're behind NOP(E)
+                return CasCommand.NOP;
+            }
+
+            //resting case: descend
+            return CasCommand.ASCEND;
+        }
+
+    }
+
+    private CasCommand handleAscendingThreat(AutopilotInputs_v2 currentInputs, AutopilotInfo threatInfo) {
+        //check if the threat is at a higher altitude than the drone, if not no threat
+        if(!threatHasHigherAltitude(currentInputs, threatInfo)){
+            return CasCommand.NOP;
+        }
+
+        Vector ownDirection = getHeadingVector(currentInputs);
+        //if so, check if the threat is headed in the same direction
+        if(isFlyingInSameDirection(ownDirection, threatInfo)){
+            return CasCommand.DESCEND;
+        }
+
+        //if not, check if we're behind the threat or not
+        if(isBehindThreat(currentInputs, threatInfo)){
+            return CasCommand.NOP;
+        }
+
+        //resting case: in front and diff direction: descend
+        return CasCommand.DESCEND;
     }
 
 
@@ -80,7 +133,7 @@ public abstract class DescendCas extends CollisionAvoidanceSystem{
 //        }
 //
 //        //check if the threat is above the drone, if so, we may ignore it except we're pitching upwards
-//        if(hasHigherAltitude(currentInputs, threatInfo)){
+//        if(threatHasHigherAltitude(currentInputs, threatInfo)){
 //            return handleHigherAltitudeThreat(currentInputs, threatInfo);
 //        }
 //
