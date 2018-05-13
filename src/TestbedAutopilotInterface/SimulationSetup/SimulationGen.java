@@ -159,6 +159,9 @@ public class SimulationGen {
         Set<DeliverySpec> deliveries = new HashSet<>();
         deliveries.add(delivery);
 
+        //used for thread creation
+        nbDrones = drones.size();
+
         return new SimulationEnvironment() {
             @Override
             public List<DroneSpec> getDroneSpecifications() {
@@ -237,6 +240,9 @@ public class SimulationGen {
         deliveries.add(delivery2);
         deliveries.add(delivery3);
         deliveries.add(delivery4);
+
+        //needed for thread creation
+        nbDrones = drones.size();
 
         return new SimulationEnvironment() {
             @Override

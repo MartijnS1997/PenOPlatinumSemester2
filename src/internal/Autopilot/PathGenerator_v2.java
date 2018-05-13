@@ -6,7 +6,6 @@ import internal.Helper.SquareMatrix;
 import internal.Helper.Vector;
 import internal.Physics.PhysXEngine;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -83,7 +82,12 @@ public class PathGenerator_v2{
 		TurnSpec firstTurn = this.getFirstTurnSpec(dronePosGround, droneOrientation, airportLocation);
 		TurnSpec secondTurn = this.getSecondTurnSpec(dronePosGround, destinationAirport, landingAltitude);
 
-		distanceCheck(firstTurn, secondTurn);
+		if(turnsOverlap(firstTurn, secondTurn)){
+			System.out.println("generating backup");
+			System.out.println("old center = " + secondTurn.getTurnCenter());
+			secondTurn = getBackupSecondTurn(secondTurn, destinationAirport);
+			System.out.println("backup center = " + secondTurn.getTurnCenter());
+		}
 
 		//calculate the two tangents of the first turn (the base turn in tangent terminology)
 		Tangent parallelTangent = calcParallelTangent(firstTurn, secondTurn);
@@ -97,6 +101,8 @@ public class PathGenerator_v2{
 		Vector entrySecondTurn = pathToNextTurn.getEndPoint().vectorDifference(secondTurn.getTurnCenter());
 		firstTurn.setEntryPoint(entryFirstTurn);
 		secondTurn.setEntryPoint(entrySecondTurn);
+//		System.out.println("second turn exit point: " + secondTurn.getExitPoint().vectorSum(secondTurn.getTurnCenter()));
+//		System.out.println("second turn entry point: " + secondTurn.getEntryPoint().vectorSum(secondTurn.getTurnCenter()));
 
 		//also set the exit point for both turns relative to the turn center for the first turn
 		Vector exitFirstTurn = pathToNextTurn.getStartPoint();
@@ -104,6 +110,8 @@ public class PathGenerator_v2{
 
 		firstTurn.setTurnAngle();
 		secondTurn.setTurnAngle();
+
+//		System.out.println("second turn turn angle: " + secondTurn.getTurnAngle()*180/PI);
 
 		//save the generated turns in the list containing all the turns
 		List<AutopilotTurn> turns = this.getTurnList();
@@ -120,13 +128,15 @@ public class PathGenerator_v2{
 	 * @param turn1 the first turn
 	 * @param turn2 the second turn
 	 */
-	private void distanceCheck(TurnSpec turn1, TurnSpec turn2){
+	private boolean turnsOverlap(TurnSpec turn1, TurnSpec turn2){
 		Vector center1 = turn1.getTurnCenter();
 		Vector center2 = turn2.getTurnCenter();
 		float radius = this.getTurnRadius();
 		if(center1.distanceBetween(center2) < 4*radius){
-			System.out.println("Warning, the generated turns will overlap, may cause unpredictable behavior");
+			System.out.println("Warning, the generated turns will overlap, may cause unpredictable behavior --> generating backup turn");
+			return true;
 		}
+		return false;
 	}
 
 	/**
@@ -170,11 +180,11 @@ public class PathGenerator_v2{
 		float diagonalSign = signum(entryDiagonal.crossProduct(dTangentVector).getyValue());
 
 		if(parallelSign == signum(turnDirection)){
-			//System.out.println("parallel chosen");
+			System.out.println("parallel chosen");
 			return parallelTangent;
 		}
 		if(diagonalSign == signum(turnDirection)){
-			//System.out.println("diagonal chosen");
+			System.out.println("diagonal chosen");
 			return diagonalTangent;
 		}
 
@@ -270,6 +280,91 @@ public class PathGenerator_v2{
 		secondTurn.setExitPoint(exitPointRel);
 
 		return secondTurn;
+	}
+
+	/**
+	 * Generates the turn specifications of the backup second turn, this turn is generated in the case that the
+	 * best turn scenario was too close. The generator tries again by generating the turn the furthest away
+	 * from the first turn center (mirrored along the center point of the airport --> uneven symmetry)
+	 * @param secondTurn the previous second turn that failed
+	 * @param airport the airport at which to perform the turn
+	 * @return a turn that lies the furthest away from the previous first turn
+	 */
+	private TurnSpec getBackupSecondTurn(TurnSpec secondTurn, MapAirport airport){
+		//first get the data of the "failed turn" that was to close such that the turns overlapped
+		//as a backup the planner tries to generate a turn at the other side of the airport
+		//--> re-use as much as data as possible
+		Vector secondTurnCenter = secondTurn.getTurnCenter();
+		Vector secondTurnExit = secondTurn.getExitPoint();
+		float secondTurnDirection = secondTurn.getDirection();
+		float secondTurnTurnRadius = secondTurn.getTurnRadius();
+
+		//get the data of the airport
+		Vector airportLocation = airport.getLocation();
+		Vector airportHeading = airport.getHeadingVector();
+
+		//first we 'flip' the turn center --> mirror the turn center along the center --> uneven symmetry
+		//and also the center the furthest away from the first turn center
+		Vector backupCenter = mirrorTurnCenter(secondTurnCenter, airportLocation, airportHeading);
+
+		//then we also need to flip the exit point
+		Vector backupExitAbs = mirrorTurnExitPoint(secondTurnCenter, secondTurnExit, airportLocation, airportHeading);
+		Vector backupExit =  backupExitAbs.vectorDifference(backupCenter);
+
+		//we don't need to flip the dir, just use signum to ge-establish |dir| = 1
+		float backupDir = signum(secondTurnDirection);
+
+		//generate the second backup turn
+		TurnSpec turnSpec = new TurnSpec(backupCenter, secondTurnTurnRadius, backupDir);
+		turnSpec.setExitPoint(backupExit);
+
+		return turnSpec;
+	}
+
+	/**
+	 * Mirrors the given vector (turn center) along the airport center (uneven symmetry)
+	 * @param turnCenter the center of the turn to mirror
+	 * @param airportLocation the location of the airport
+	 * @param airportHeading the heading of the primary runway
+	 * @return the mirrored turn center in the world axis system (ground coordinates)
+	 */
+	private Vector mirrorTurnCenter(Vector turnCenter, Vector airportLocation, Vector airportHeading){
+		//determine the right orthogonal
+		Vector rightOrthogonal = getRightOrthogonal(airportHeading);
+		//determine the vector pointing from airport location to turn center
+		Vector diff = turnCenter.vectorDifference(airportLocation);
+		//factor the difference into its components along the heading and orthogonal
+		Vector headingDiff = diff.projectOn(airportHeading);
+		Vector headingOrth = diff.projectOn(rightOrthogonal);
+		//flip the components
+		Vector flippedHeadingDiff = headingDiff.scalarMult(-1);
+		Vector flippedOrthDiff = headingOrth.scalarMult(-1);
+		//sum up to get the relative center that is mirrored
+		Vector relCenter = flippedHeadingDiff.vectorSum(flippedOrthDiff);
+
+		//sum with the airport center to get the absolute result
+		return  relCenter.vectorSum(airportLocation);
+	}
+
+	/**
+	 * Mirrors the exit point of the turn around the right orthogonal (see mirror turn center for def)
+	 * @param turnCenter  the turn center, used to convert the relative exit to an absolute exit point
+	 * @param exitPoint the exit point to mirror
+	 * @param airportLocation the location of the airport to mirror around
+	 * @param airportHeading the heading of the airport
+	 * @return the mirrored exit point of the turn in world axis (ground coordinates)
+	 */
+	private Vector mirrorTurnExitPoint(Vector turnCenter, Vector exitPoint, Vector airportLocation, Vector airportHeading){
+		Vector exitPointAbs = exitPoint.vectorSum(turnCenter);
+		//determine the difference vector, pointing from the center of the airport to the exit point
+		Vector diff = exitPointAbs.vectorDifference(airportLocation);
+		//in this case we will only keep the component along the heading of the airport (so the calculation errors
+		//on the entry point along the right orthogonal are discarded
+		Vector headingDiff = diff.projectOn(airportHeading);
+		//flip the heading by multiplying with one
+		Vector relExit = headingDiff.scalarMult(-1);
+		//now sum it again with the airport center and return
+		return relExit.vectorSum(airportLocation);
 	}
 
 	/**

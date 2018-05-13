@@ -27,7 +27,7 @@ public class AutopilotStabilization extends Controller {
     @Override
     public AutopilotOutputs getControlActions(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs) {
         //create the control outputs
-        //Controller.trajectoryLog(currentInputs);
+//        Controller.trajectoryLog(currentInputs);
         ControlOutputs outputs = new ControlOutputs(this.getStandardOutputs());
         stabilizePitchControls(outputs, currentInputs, previousInputs);
         angleOfAttackControl(getAoaErrorMargin(), outputs, currentInputs, previousInputs);

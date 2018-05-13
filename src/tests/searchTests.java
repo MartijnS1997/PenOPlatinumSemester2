@@ -12,6 +12,7 @@ import java.util.*;
  */
 public class searchTests {
 
+
     @Test
     public void testSearch() throws Exception {
         //generate the airports
@@ -24,20 +25,21 @@ public class searchTests {
         System.out.println(airportMap);
         long startTime = System.currentTimeMillis();
         DeliveryPlanner planner = new DeliveryPlanner(packages, airportMap, drones);
+        planner.setSearchAlgorithm(DeliveryPlanner.SearchAlgorithm.TOTAL_COST);
         Map<String, List<PlannerDelivery>> schedule = planner.call();
         long endTime = System.currentTimeMillis();
         long totalTime = endTime - startTime;
         printSchedule(schedule, airportMap, drones);
-
-        //add new deliveries
-        startTime = System.currentTimeMillis();
-        Set<PlannerDelivery> newPackages = generateDeliveries(airportMap, 1);
-        planner.addPackages(newPackages);
-        Map<String, List<PlannerDelivery>> addedSchedule = planner.call();
-        endTime = System.currentTimeMillis();
-        printSchedule(addedSchedule, airportMap, drones);
-        totalTime = totalTime + (endTime - startTime);
         System.out.println("total execution time: " + totalTime);
+        //add new deliveries
+//        startTime = System.currentTimeMillis();
+//        Set<PlannerDelivery> newPackages = generateDeliveries(airportMap, 1);
+//        planner.addPackages(newPackages);
+//        Map<String, List<PlannerDelivery>> addedSchedule = planner.call();
+//        endTime = System.currentTimeMillis();
+//        printSchedule(addedSchedule, airportMap, drones);
+//        totalTime = totalTime + (endTime - startTime);
+//        System.out.println("total execution time: " + totalTime);
 
     }
 

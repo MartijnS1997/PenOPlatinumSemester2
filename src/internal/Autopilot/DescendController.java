@@ -1214,7 +1214,7 @@ public class DescendController extends Controller {
             float a1 = 0.1722f;
             float radiusMult = 2;
 
-            return (a0 + abs(descendRate)*a1)/*/*radiusMult*/;
+            return (a0 + abs(descendRate)*a1)*radiusMult;
         }
 
         /*

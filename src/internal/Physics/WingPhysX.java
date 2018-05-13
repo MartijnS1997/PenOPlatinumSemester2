@@ -90,7 +90,7 @@ public abstract class WingPhysX {
         //if the lift on the wing is lower than the threshold, AOA is disabled
         if(lift.getSize() >= AOA_LIFT_THRESHOLD &&  Math.abs(angleOfAttack) >= this.getMaximumAngleOfAttack()) {
 //            System.out.println("wing: " + this.getRelativePosition());
-//            System.out.println("AOA exception thrown, AOA: " + angleOfAttack*180/PI);
+            System.out.println("AOA exception thrown, AOA: " + angleOfAttack*180/PI);
 //            System.out.println("Wing inclination: " + this.getWingInclination()*180/PI);
 //            System.out.println("AOA exception with orientation: " + orientation.scalarMult((float) (180/PI)));
 //            System.out.println();

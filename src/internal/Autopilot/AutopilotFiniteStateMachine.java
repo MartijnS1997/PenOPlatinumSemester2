@@ -134,6 +134,7 @@ public class AutopilotFiniteStateMachine {
             this.setState(nextState);
 //            System.out.println("Switched states, from " + AutopilotState.getString(currentState) +
 //                    ", to " + AutopilotState.getString(nextState));
+//            System.out.println("current position: " + Controller.extractPosition(inputs));
             //we do a recursive call until the states are stable
             toNextState(inputs);
         }
@@ -156,11 +157,13 @@ public class AutopilotFiniteStateMachine {
                 break;
             case STABILIZE_TAKEOFF:
                 configureTakeoffStabilization(inputs);
+                break;
             case FLIGHT:
                 configureFlight(inputs);
                 break;
             case DESCEND_WAIT:
                 configureDescendWait(inputs);
+                break;
             case DESCEND:
                 configureDescend(inputs);
                 break;
@@ -240,7 +243,7 @@ public class AutopilotFiniteStateMachine {
 //            System.out.println("need to pick up package at source airport");
             int sourceAirportID = currentDelivery.getSourceAirport();
             MapAirport targetAirport = communicator.getAirportByID(sourceAirportID);
-//            System.out.println(targetAirport);
+//            System.out.println("target airport: " + targetAirport);
             //generate the path generator for the controller
             PathGenerator_v2 pathGenerator = new PathGenerator_v2(inputs, targetAirport, cruisingAltitude, descendThreshold, standardLandingAlt);
             navigationController.configureNavigation(config, pathGenerator);
@@ -250,7 +253,7 @@ public class AutopilotFiniteStateMachine {
 //            System.out.println("package must be delivered to destination airport");
             int destinationAirportID = currentDelivery.getDestinationAirport();
             MapAirport targetAirport = communicator.getAirportByID(destinationAirportID);
-//            System.out.println(targetAirport);
+//            System.out.println("target airport: " + targetAirport);
             //create the path generator
             PathGenerator_v2 pathGenerator = new PathGenerator_v2(inputs, targetAirport, cruisingAltitude, descendThreshold, standardLandingAlt);
             navigationController.configureNavigation(config, pathGenerator);

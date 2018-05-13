@@ -7,6 +7,8 @@ import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
+import static java.lang.Math.PI;
+
 /**
  * Created by Martijn on 27/03/2018.
  * A planner for the package assignment of the drones
@@ -540,6 +542,8 @@ public class DeliveryPlanner implements Callable<Map<String, List<PlannerDeliver
      */
     private SearchAlgorithm searchAlgorithm = SearchAlgorithm.BEAM_SEARCH;
 
+    private final static float LANDING_COST = 6283.185307179586f; //2*PI*1000f
+
     /**
      * A node of our delivery search tree
      * Has the following properties:
@@ -675,7 +679,9 @@ public class DeliveryPlanner implements Callable<Map<String, List<PlannerDeliver
             //get the distance (from current position, to the source to the destination
             float droneToSourceDistance = dronePos.distanceBetween(sourceAirportLocation);
             float sourceToDestination = destinationAirportLocation.distanceBetween(sourceAirportLocation);
-            return droneToSourceDistance + sourceToDestination;
+            //also add the landing cost to get more accurate cost, we do not want one drone to be constantly delivering
+            //all drones are flying above the landing altitude so is always true
+            return droneToSourceDistance + sourceToDestination + LANDING_COST;
         }
 
 
@@ -1047,7 +1053,7 @@ public class DeliveryPlanner implements Callable<Map<String, List<PlannerDeliver
     /**
      * An enumeration used to determine the current search algorithm used to assign the packages
      */
-    private enum SearchAlgorithm {
+    public enum SearchAlgorithm {
         TOTAL_COST, HILL_CLIMBING_1, BEAM_SEARCH
     }
 

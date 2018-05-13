@@ -97,7 +97,8 @@ public class AirportNavigationController extends AutopilotFlightController {
         NavigatorState nextState = this.getNextState(currentInputs, previousInputs);
         //check if the same state as previous one
         if(nextState != currentState){
-//            System.out.println();
+            System.out.println("switched navigation state at position : " + extractPosition(currentInputs));
+            System.out.println("next state: " + nextState);
             //if not configure the controller
             configureStateController(nextState);
             //and save the state
@@ -1032,7 +1033,7 @@ public class AirportNavigationController extends AutopilotFlightController {
             //get the current roll (the error) & the other variables needed to calculate the control actions
             float roll = extractRoll(currentInputs);
             float deltaTime = getDeltaTime(currentInputs, previousInputs);
-            if(abs(roll) < 1.0f*PI/180){
+            if(abs(roll) < 2.0f*PI/180){
                 return;
             }
 
@@ -1124,7 +1125,6 @@ public class AirportNavigationController extends AutopilotFlightController {
             //project the relative drone position onto the ideal path (connection vector) to get the progress relative
             //to the end point (ideal path is of form (x, 0, z)
             Vector idealDronePos = exitRelativeDrone.projectOn(connectionVector);
-//            errorLog(idealDronePos.distanceBetween(exitRelativeDrone));
 
             //we need a reference point for the ideal path of the drone therefore we place a reference point
             //lookahead distance meters away from the projection along the ideal path
@@ -1161,7 +1161,7 @@ public class AirportNavigationController extends AutopilotFlightController {
             Vector diffVector = referencePoint.vectorDifference(dronePosition);
             //project both of them on the xz plane
             Vector headingWorldXZ = headingWorld.orthogonalProjection(xzNormal);
-            Vector diffVectorXZ = diffVector.orthogonalProjection(xzNormal);
+            Vector diffVectorXZ = new Vector(diffVector.getxValue(), 0, diffVector.getzValue());//diffVector.orthogonalProjection(xzNormal);
 
             //calculate the angle between the heading of the world and the difference vector
             float headingAngle = headingWorldXZ.getAngleBetween(diffVectorXZ);
@@ -1204,7 +1204,7 @@ public class AirportNavigationController extends AutopilotFlightController {
             Vector diffPa = PhysXEngine.worldOnPitch(diffVector, droneOrientation);
 
             //project the diff vector in pitch axis system onto the yz plane of the pitch axis
-            Vector projDiffPa = diffPa.orthogonalProjection(yzNormalPa);
+            Vector projDiffPa = new Vector(0, diffPa.getyValue(), diffPa.getzValue());//diffPa.orthogonalProjection(yzNormalPa);
 
             //calculate the angle between the heading vector and the projected diff vector
             float pitchErrorAngle = projDiffPa.getAngleBetween(droneHeadingPa);

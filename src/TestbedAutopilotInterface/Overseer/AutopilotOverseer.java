@@ -63,15 +63,15 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void>, Packa
         AutopilotInfoCenter infoCenter = this.getAutopilotInfoCenter();
 
         //loop until the simulation has been ended by the testbed
-//        while(!this.isSimulationEnded()){
-//           //distribute the packages
+        while(!this.isSimulationEnded()){
+           //distribute the packages
         distributePackages();
-//            //then wait until one of the drone's queues is empty
-//            while(infoCenter.getNbOfIdleDrones() == 0 && !hasPackagesAdded()){
-//                //TODO we may also use the autopilots to wake the overseer thread if they spot that their queue is empty
-//                //TODO make mechanism that the planner is not invoked if there are no packages to deliver
-//            }
-//        }
+            //then wait until one of the drone's queues is empty
+            while(infoCenter.getNbOfIdleDrones() == 0 || !hasPackagesAdded()){
+                //TODO we may also use the autopilots to wake the overseer thread if they spot that their queue is empty
+                //TODO make mechanism that the planner is not invoked if there are no packages to deliver
+            }
+        }
     }
 
     /**
@@ -664,7 +664,7 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void>, Packa
     /**
      * The base altitude to assign to the drones (incremented from here)
      */
-    private final static float BASE_ALTITUDE =30f;
+    private final static float BASE_ALTITUDE = 100f;
 
     /**
      * The minimal cruising altitude difference between two drones

@@ -221,10 +221,10 @@ public class TestbedServer implements Runnable {
 //        System.out.println("drone states: " + newFrame.getDroneStates());
         //insert the frame into the queue
         renderQueue.add(newFrame);
-        if(System.currentTimeMillis() %100 == 0) {
-            String bufferSize = Integer.toString(renderQueue.size());
-            System.out.print(("\rbuffer size: " + bufferSize));
-        }
+//        if(System.currentTimeMillis() %100 == 0) {
+//            String bufferSize = Integer.toString(renderQueue.size());
+//            System.out.print(("\rbuffer size: " + bufferSize));
+//        }
 
 
         //check if the queue size is smaller than the maximum allowed, if not, wait

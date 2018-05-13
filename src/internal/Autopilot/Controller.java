@@ -1267,7 +1267,6 @@ public abstract class Controller {
             float scalingFactor = this.getCorrectRollFactor();
             //get the correction based on the error and a scaling factor
             float correctedReference = (referenceRoll  -  errorOutput*scalingFactor);
-            //log the error TODO remove after debugging
             float percentageCap = this.getRollReferenceCorrectCapPercentage();
             correctedReference = percentageCap(correctedReference, referenceRoll, percentageCap);
             //errorLog(correctedReference);
@@ -1378,7 +1377,7 @@ public abstract class Controller {
             Vector diffPa = PhysXEngine.worldOnPitch(diffVector, droneOrientation);
 
             //project the diff vector in pitch axis system onto the yz plane of the pitch axis
-            Vector projDiffPa = diffPa.orthogonalProjection(yzNormalPa);
+            Vector projDiffPa = new Vector(0, diffPa.getyValue(), diffPa.getzValue());//diffPa.orthogonalProjection(yzNormalPa);
 
             //calculate the angle between the heading vector and the projected diff vector
             float pitchErrorAngle = projDiffPa.getAngleBetween(droneHeadingPa);
