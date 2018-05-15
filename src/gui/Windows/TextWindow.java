@@ -6,6 +6,8 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import javax.swing.JPanel;
@@ -16,6 +18,7 @@ import TestbedAutopilotInterface.GUI.DeliveryGuiState;
 import TestbedAutopilotInterface.GUI.DroneGuiState;
 import gui.WorldObjects.Drone;
 import gui.WorldObjects.Objects;
+import math.Vector2f;
 import math.Vector3f;
 
 import javax.swing.AbstractButton;
@@ -24,6 +27,8 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
  
 public class TextWindow extends JPanel implements ActionListener{
+	
+	private Map<Vector2f, MiniMapObject> dronePositions = new HashMap<Vector2f, MiniMapObject>();
 	private static final long serialVersionUID = 1L;
 	private static JFrame frame;
 	static Container contentPane;
@@ -38,12 +43,14 @@ public class TextWindow extends JPanel implements ActionListener{
 	int deliveredPackages;
 	int pickedUpPackages;
 	int totalPackages;
+	String hasPackage;
     
     public void update(DroneGuiState droneState, Set<DeliveryGuiState> deliveryGuiStates) {
 
 		this.deliveredPackages = 0;
 		this.pickedUpPackages = 0;
 		this.totalPackages = 0;
+		hasPackage = "No";
 		for (DeliveryGuiState dgs: deliveryGuiStates) {
 			totalPackages++;
 			if (dgs.isDelivered()) {
@@ -52,7 +59,11 @@ public class TextWindow extends JPanel implements ActionListener{
 			if (dgs.isPickedUp()) {
 				pickedUpPackages++;
 			}
+			if (dgs.isPickedUp() && !dgs.isDelivered() && dgs.getDeliveryDrone().equals(Objects.getMainDroneID())) {
+				hasPackage = "Yes";
+			}
 		}
+		
 
     	counter++;
     	counter %= 5;
@@ -91,7 +102,6 @@ public class TextWindow extends JPanel implements ActionListener{
         pitch = orientation.y;
         roll = orientation.z;
 		distanceOrigin = droneState.getPosition().convertToVector3f().subtract(firstPosition).length();
-
     	
     	JLabel velocityLabel = new JLabel("Velocity: ");
     	JTextField velocityField = new JTextField(" ( " + String.format("%.2f", velocity.x) + ", " + String.format("%.2f", velocity.y) + ", " + String.format("%.2f", velocity.z) + " ) ");
@@ -100,7 +110,7 @@ public class TextWindow extends JPanel implements ActionListener{
     	contentPane.add(velocityField); 
     	
     	JLabel speedLabel = new JLabel("Speed: ");
-    	JTextField speedField = new JTextField(" ( " + String.format("%.2f", speed) + " ) ");
+    	JTextField speedField = new JTextField(String.format("%.2f", speed));
     	speedField.setEditable(false);
     	contentPane.add(speedLabel);
     	contentPane.add(speedField); 
@@ -112,99 +122,110 @@ public class TextWindow extends JPanel implements ActionListener{
     	contentPane.add(positionField); 
     	
     	JLabel headingLabel = new JLabel("Heading: ");
-    	JTextField headingField = new JTextField(" ( " + String.format("%.2f", heading) + " ) ");
+    	JTextField headingField = new JTextField(String.format("%.2f", heading));
     	headingField.setEditable(false);
     	contentPane.add(headingLabel);
     	contentPane.add(headingField); 
     	
     	JLabel pitchLabel = new JLabel("Pitch: ");
-    	JTextField pitchField = new JTextField(" ( " + String.format("%.2f", pitch) + " ) ");
+    	JTextField pitchField = new JTextField(String.format("%.2f", pitch));
     	pitchField.setEditable(false);
     	contentPane.add(pitchLabel);
     	contentPane.add(pitchField); 
     	
     	JLabel rollLabel = new JLabel("Roll: ");
-    	JTextField rollField = new JTextField(" ( " + String.format("%.2f", roll) + " ) ");
+    	JTextField rollField = new JTextField(String.format("%.2f", roll));
     	rollField.setEditable(false);
     	contentPane.add(rollLabel);
     	contentPane.add(rollField); 
     	
     	JLabel distOriginLabel = new JLabel("Distance to origin: ");
-    	JTextField distOriginField = new JTextField(" ( " + String.format("%.2f", distanceOrigin) + " ) ");
+    	JTextField distOriginField = new JTextField(String.format("%.2f", distanceOrigin));
 		distOriginField.setEditable(false);
     	contentPane.add(distOriginLabel);
     	contentPane.add(distOriginField); 
     	
     	JLabel totalDistLabel = new JLabel("Total distance traveled: ");
-    	JTextField totalDistField = new JTextField(" ( " + String.format("%.2f", totalDistance) + " ) ");
+    	JTextField totalDistField = new JTextField(String.format("%.2f", totalDistance));
 		totalDistField.setEditable(false);
     	contentPane.add(totalDistLabel);
     	contentPane.add(totalDistField);
 
     	JLabel packagesPickedUpLabel = new JLabel("Packages picked up: ");
-		JTextField packagesPickedUpField = new JTextField(" ( " + pickedUpPackages + "/" + totalPackages + " ) ");
+		JTextField packagesPickedUpField = new JTextField(pickedUpPackages + "/" + totalPackages);
 		packagesPickedUpField.setEditable(false);
 		contentPane.add(packagesPickedUpLabel);
 		contentPane.add(packagesPickedUpField);
 
 		JLabel packagesDeliveredLabel = new JLabel("Packages delivered: ");
-		JTextField packagesDeliveredField = new JTextField(" ( " + deliveredPackages + "/" + totalPackages + " ) ");
+		JTextField packagesDeliveredField = new JTextField(deliveredPackages + "/" + totalPackages);
 		packagesDeliveredField.setEditable(false);
 		contentPane.add(packagesDeliveredLabel);
 		contentPane.add(packagesDeliveredField);
+		
+		JLabel hasPackageLabel = new JLabel("Does this drone have a package? ");
+		JTextField hasPackageField = new JTextField(hasPackage);
+		hasPackageField.setEditable(false);
+		contentPane.add(hasPackageLabel);
+		contentPane.add(hasPackageField);
 
 		layout = new SpringLayout();
         contentPane.setLayout(layout);
         
     	layout.putConstraint(SpringLayout.WEST, velocityLabel, 5, SpringLayout.WEST, contentPane);
-    	layout.putConstraint(SpringLayout.NORTH, velocityLabel, 45, SpringLayout.NORTH, contentPane);
-    	layout.putConstraint(SpringLayout.WEST, velocityField, 5, SpringLayout.EAST, totalDistLabel);
-    	layout.putConstraint(SpringLayout.NORTH, velocityField, 45, SpringLayout.NORTH, contentPane);
+    	layout.putConstraint(SpringLayout.NORTH, velocityLabel, 50, SpringLayout.NORTH, contentPane);
+    	layout.putConstraint(SpringLayout.WEST, velocityField, 5, SpringLayout.EAST, hasPackageLabel);
+    	layout.putConstraint(SpringLayout.NORTH, velocityField, 50, SpringLayout.NORTH, contentPane);
     	
     	layout.putConstraint(SpringLayout.WEST, speedLabel, 5, SpringLayout.WEST, contentPane);
-    	layout.putConstraint(SpringLayout.NORTH, speedLabel, 25, SpringLayout.NORTH, velocityField);
-    	layout.putConstraint(SpringLayout.WEST, speedField, 5, SpringLayout.EAST, totalDistLabel);
-    	layout.putConstraint(SpringLayout.NORTH, speedField, 25, SpringLayout.NORTH, velocityField);
+    	layout.putConstraint(SpringLayout.NORTH, speedLabel, 22, SpringLayout.NORTH, velocityField);
+    	layout.putConstraint(SpringLayout.WEST, speedField, 5, SpringLayout.EAST, hasPackageLabel);
+    	layout.putConstraint(SpringLayout.NORTH, speedField, 22, SpringLayout.NORTH, velocityField);
     	
     	layout.putConstraint(SpringLayout.WEST, positionLabel, 5, SpringLayout.WEST, contentPane);
-    	layout.putConstraint(SpringLayout.NORTH, positionLabel, 25, SpringLayout.NORTH, speedField);
-    	layout.putConstraint(SpringLayout.WEST, positionField, 5, SpringLayout.EAST, totalDistLabel);
-    	layout.putConstraint(SpringLayout.NORTH, positionField, 25, SpringLayout.NORTH, speedField);
+    	layout.putConstraint(SpringLayout.NORTH, positionLabel, 22, SpringLayout.NORTH, speedField);
+    	layout.putConstraint(SpringLayout.WEST, positionField, 5, SpringLayout.EAST, hasPackageLabel);
+    	layout.putConstraint(SpringLayout.NORTH, positionField, 22, SpringLayout.NORTH, speedField);
     	
     	layout.putConstraint(SpringLayout.WEST, headingLabel, 5, SpringLayout.WEST, contentPane);
-    	layout.putConstraint(SpringLayout.NORTH, headingLabel, 25, SpringLayout.NORTH, positionField);
-    	layout.putConstraint(SpringLayout.WEST, headingField, 5, SpringLayout.EAST, totalDistLabel);
-    	layout.putConstraint(SpringLayout.NORTH, headingField, 25, SpringLayout.NORTH, positionField);
+    	layout.putConstraint(SpringLayout.NORTH, headingLabel, 22, SpringLayout.NORTH, positionField);
+    	layout.putConstraint(SpringLayout.WEST, headingField, 5, SpringLayout.EAST, hasPackageLabel);
+    	layout.putConstraint(SpringLayout.NORTH, headingField, 22, SpringLayout.NORTH, positionField);
     	
     	layout.putConstraint(SpringLayout.WEST, pitchLabel, 5, SpringLayout.WEST, contentPane);
-    	layout.putConstraint(SpringLayout.NORTH, pitchLabel, 25, SpringLayout.NORTH, headingField);
-    	layout.putConstraint(SpringLayout.WEST, pitchField, 5, SpringLayout.EAST, totalDistLabel);
-    	layout.putConstraint(SpringLayout.NORTH, pitchField, 25, SpringLayout.NORTH, headingField);
+    	layout.putConstraint(SpringLayout.NORTH, pitchLabel, 22, SpringLayout.NORTH, headingField);
+    	layout.putConstraint(SpringLayout.WEST, pitchField, 5, SpringLayout.EAST, hasPackageLabel);
+    	layout.putConstraint(SpringLayout.NORTH, pitchField, 22, SpringLayout.NORTH, headingField);
     	
     	layout.putConstraint(SpringLayout.WEST, rollLabel, 5, SpringLayout.WEST, contentPane);
-    	layout.putConstraint(SpringLayout.NORTH, rollLabel, 25, SpringLayout.NORTH, pitchField);
-    	layout.putConstraint(SpringLayout.WEST, rollField, 5, SpringLayout.EAST, totalDistLabel);
-    	layout.putConstraint(SpringLayout.NORTH, rollField, 25, SpringLayout.NORTH, pitchField);
+    	layout.putConstraint(SpringLayout.NORTH, rollLabel, 22, SpringLayout.NORTH, pitchField);
+    	layout.putConstraint(SpringLayout.WEST, rollField, 5, SpringLayout.EAST, hasPackageLabel);
+    	layout.putConstraint(SpringLayout.NORTH, rollField, 22, SpringLayout.NORTH, pitchField);
     	
     	layout.putConstraint(SpringLayout.WEST, distOriginLabel, 5, SpringLayout.WEST, contentPane);
-    	layout.putConstraint(SpringLayout.NORTH, distOriginLabel, 25, SpringLayout.NORTH, rollField);
-    	layout.putConstraint(SpringLayout.WEST, distOriginField, 5, SpringLayout.EAST, totalDistLabel);
-    	layout.putConstraint(SpringLayout.NORTH, distOriginField, 25, SpringLayout.NORTH, rollField);
+    	layout.putConstraint(SpringLayout.NORTH, distOriginLabel, 22, SpringLayout.NORTH, rollField);
+    	layout.putConstraint(SpringLayout.WEST, distOriginField, 5, SpringLayout.EAST, hasPackageLabel);
+    	layout.putConstraint(SpringLayout.NORTH, distOriginField, 22, SpringLayout.NORTH, rollField);
     	
     	layout.putConstraint(SpringLayout.WEST, totalDistLabel, 5, SpringLayout.WEST, contentPane);
-    	layout.putConstraint(SpringLayout.NORTH, totalDistLabel, 25, SpringLayout.NORTH, distOriginField);
-    	layout.putConstraint(SpringLayout.WEST, totalDistField, 5, SpringLayout.EAST, totalDistLabel);
-    	layout.putConstraint(SpringLayout.NORTH, totalDistField, 25, SpringLayout.NORTH, distOriginField);
+    	layout.putConstraint(SpringLayout.NORTH, totalDistLabel, 22, SpringLayout.NORTH, distOriginField);
+    	layout.putConstraint(SpringLayout.WEST, totalDistField, 5, SpringLayout.EAST, hasPackageLabel);
+    	layout.putConstraint(SpringLayout.NORTH, totalDistField, 22, SpringLayout.NORTH, distOriginField);
 
 		layout.putConstraint(SpringLayout.WEST, packagesPickedUpLabel, 5, SpringLayout.WEST, contentPane);
-		layout.putConstraint(SpringLayout.NORTH, packagesPickedUpLabel, 25, SpringLayout.NORTH, totalDistField);
-		layout.putConstraint(SpringLayout.WEST, packagesPickedUpField, 5, SpringLayout.EAST, totalDistLabel);
-		layout.putConstraint(SpringLayout.NORTH, packagesPickedUpField, 25, SpringLayout.NORTH, totalDistField);
+		layout.putConstraint(SpringLayout.NORTH, packagesPickedUpLabel, 22, SpringLayout.NORTH, totalDistField);
+		layout.putConstraint(SpringLayout.WEST, packagesPickedUpField, 5, SpringLayout.EAST, hasPackageLabel);
+		layout.putConstraint(SpringLayout.NORTH, packagesPickedUpField, 22, SpringLayout.NORTH, totalDistField);
 
 		layout.putConstraint(SpringLayout.WEST, packagesDeliveredLabel, 5, SpringLayout.WEST, contentPane);
-		layout.putConstraint(SpringLayout.NORTH, packagesDeliveredLabel, 25, SpringLayout.NORTH, packagesPickedUpField);
-		layout.putConstraint(SpringLayout.WEST, packagesDeliveredField, 5, SpringLayout.EAST, totalDistLabel);
-		layout.putConstraint(SpringLayout.NORTH, packagesDeliveredField, 25, SpringLayout.NORTH, packagesPickedUpField);
+		layout.putConstraint(SpringLayout.NORTH, packagesDeliveredLabel, 22, SpringLayout.NORTH, packagesPickedUpField);
+		layout.putConstraint(SpringLayout.WEST, packagesDeliveredField, 5, SpringLayout.EAST, hasPackageLabel);
+		layout.putConstraint(SpringLayout.NORTH, packagesDeliveredField, 22, SpringLayout.NORTH, packagesPickedUpField);
+		
+		layout.putConstraint(SpringLayout.WEST, hasPackageLabel, 5, SpringLayout.WEST, contentPane);
+		layout.putConstraint(SpringLayout.NORTH, hasPackageLabel, 22, SpringLayout.NORTH, packagesDeliveredField);
+		layout.putConstraint(SpringLayout.WEST, hasPackageField, 5, SpringLayout.EAST, hasPackageLabel);
+		layout.putConstraint(SpringLayout.NORTH, hasPackageField, 22, SpringLayout.NORTH, packagesDeliveredField);
     }
     
     public void initButtons() {
