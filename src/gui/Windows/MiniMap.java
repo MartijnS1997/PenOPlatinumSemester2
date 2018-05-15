@@ -31,7 +31,7 @@ public class MiniMap extends Frame {
         setLocation(xPos, yPos);
         this.width = width;
         this.height = height;
-        map = new Vector4f(9, 38, this.width-19, this.height-48);
+        map = new Vector4f(9, 38, this.width-18, this.height-47);
 //        map = new Vector4f(50, 50, 1000, 1000);
         setSize(width, height);
         setVisible(true);
@@ -89,7 +89,7 @@ public class MiniMap extends Frame {
             if (position.y > realSurf.w)
                 realSurf.w = position.y;
         }
-        float value = Math.max(Math.max(Math.abs(realSurf.x), Math.abs(realSurf.y)), Math.max(Math.abs(realSurf.z), Math.abs(realSurf.w)));
+        float value = Math.max(Math.max(Math.abs(realSurf.x), Math.abs(realSurf.y)), Math.max(Math.abs(realSurf.z), Math.abs(realSurf.w)))+2000f;
         realSurf.x = -value;
         realSurf.y = -value;
         realSurf.z = value;
@@ -98,7 +98,7 @@ public class MiniMap extends Frame {
         realSurf.z = realSurf.z-realSurf.x;
         realSurf.w = realSurf.w-realSurf.y;
 
-        realSurf = realSurf.scale(2f);
+        realSurf = realSurf.scale(1.2f);
     }
 
     public void update(Map<String, DroneGuiState> droneStates, String mainDroneID, Set<DeliveryGuiState> deliveryGuiStates) {
@@ -142,8 +142,8 @@ public class MiniMap extends Frame {
             g.setColor(airportPositions.get(position).getColor());
             Vector2f rectPos = new Vector2f((((position.x-realSurf.x)/realSurf.z)*map.z+map.x) - radius, (((position.y-realSurf.y)/realSurf.w)*map.w+map.y) - radius);
             g.fillRect((int) rectPos.x, (int) rectPos.y, radius * 2, radius * 2);
-            g2d.drawString(Integer.toString(airportPositions.get(position).getPackagesToDeliver()), rectPos.x-20, rectPos.y);
-            g2d.drawString(Integer.toString(airportPositions.get(position).getPackagesDelivered()), rectPos.x+20, rectPos.y);
+            g2d.drawString(Integer.toString(airportPositions.get(position).getPackagesToDeliver()), rectPos.x-15, rectPos.y);
+            g2d.drawString(Integer.toString(airportPositions.get(position).getPackagesDelivered()), rectPos.x+15, rectPos.y);
         }
         for (Vector2f position: dronePositions.keySet()) {
             if (flickr%5 != 0 || !dronePositions.get(position).hasPackage()) {
