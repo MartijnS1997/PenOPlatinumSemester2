@@ -150,7 +150,7 @@ public class MapAirport {
      * @param headingVector  the heading vector of the airport
      * @return a normalized vector orthogonal and to the left of the heading vector of the airport
      */
-    private Vector getLeftOrthogonal(Vector headingVector){
+    protected Vector getLeftOrthogonal(Vector headingVector){
         //if heading is (x1, 0, z1) then scalar product with (z1,0,-x1) will result in a zero
         //the orthogonal will always be located on the left of the heading vector (see drawings)
         Vector leftOrthogonal = new Vector(headingVector.getzValue(),0, -headingVector.getxValue());
@@ -162,7 +162,7 @@ public class MapAirport {
      * @param headingVector  the heading vector of the airport
      * @return a normalized vector orthogonal and to the right of the heading vector of the airport
      */
-    private Vector getRightOrthogonal(Vector headingVector){
+    protected Vector getRightOrthogonal(Vector headingVector){
         //if heading is (x1, 0, z1) then scalar product with (-z1, 0, x1) will give zero
         //the orthogonal will always be located to the right of the heading vector
         Vector secondOrthogonal = new Vector(-headingVector.getzValue(),0, headingVector.getxValue());

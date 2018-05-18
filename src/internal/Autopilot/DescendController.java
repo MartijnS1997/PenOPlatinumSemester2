@@ -13,7 +13,7 @@ import static java.lang.Math.signum;
  * A class of controllers to make a turn based descend for the drone
  * TODO implement the cas controller in the pitch reference method (we need to adjust the pitch accordingly)
  */
-public class DescendController extends Controller {
+public class DescendController extends TurnBasedController {
 
     public DescendController(AutoPilot autopilot) {
         super(autopilot);
@@ -63,21 +63,46 @@ public class DescendController extends Controller {
        //close enough to the position of the entry point
 
         float altitude = extractAltitude(currentInputs);
-        //we only need to check if the altitude is lower than the activation threshold
-        if(altitude < getActivationThreshold()) {
-            AutopilotTurn turn = this.getTurn();
-            //calculate the entry point
-            Vector relEntry = turn.getEntryPoint();
-            Vector turnCenter = turn.getTurnCenter();
-            Vector entryPoint = relEntry.vectorSum(turnCenter);
-            //the call will be made only after the first invocation of the controller
-            Vector groundPosDrone = extractGroundPosition(previousInputs);
-            float distance = groundPosDrone.distanceBetween(entryPoint);
-            //we account for some distance to be covered after the previous iteration
-            return floatEquals(distance, 0, 10.0f);
+        if(altitude < getActivationThreshold()){
+            if(hasJustStartedTurn()){
+                return true;
+            }else{
+                AutopilotTurn turn = this.getTurn();
+                return hasFinishedTurn(turn, currentInputs, previousInputs);
+            }
         }
-        //standard objective
-        return hasFinishedTurn();
+
+        return false;
+//        //we only need to check if the altitude is lower than the activation threshold
+//        //check if the current turn has an angle to go of almost equal the turn angle
+//        if(altitude < getActivationThreshold()&&hasJustStartedTurn()) {
+//            return true;
+////            AutopilotTurn turn = this.getTurn();
+////            //calculate the entry point
+////            Vector relEntry = turn.getEntryPoint();
+////            Vector turnCenter = turn.getTurnCenter();
+////            Vector entryPoint = relEntry.vectorSum(turnCenter);
+////            //the call will be made only after the first invocation of the controller
+////            Vector groundPosDrone = extractGroundPosition(previousInputs);
+////            float distance = groundPosDrone.distanceBetween(entryPoint);
+////            //we account for some distance to be covered after the previous iteration
+////            return floatEquals(distance, 0, 10.0f);
+//////            return floatEquals(this.getAngleToGo(), TURN_ANGLE, 1E-2f);
+//        }
+//        //standard objective
+//        AutopilotTurn turn = this.getTurn();
+//        return (altitude < getActivationThreshold())&&!hasJustStartedTurn()&&hasFinishedTurn(turn, currentInputs, previousInputs); //this.hasFinishedTurn();
+    }
+
+    /**
+     * Checks if the drone has started the turn
+     * @return true if the angle to go is almost (within error) is equal to the turn angle
+     */
+    private boolean hasJustStartedTurn(){
+        float angleToGo = this.getAngleToGo();
+        float turnAngle = this.getTurn().getTurnAngle();
+        //check if we're still close enough to say that the turn hasn't started yet (with margin for rounding errors)
+        return floatEquals(angleToGo, turnAngle, 1E-3f);
     }
 
     /**
@@ -154,6 +179,7 @@ public class DescendController extends Controller {
         float currentAltitude = extractAltitude(currentInputs);
         float descendRate = (currentAltitude - targetAltitude)/(turn.getTurnAngle());
         this.setDescendRate(descendRate);
+        System.out.println("descend rate: " + descendRate + ", will reach altitude: " + (currentAltitude - turnAngle*descendRate) );
 
         this.angleToGo = turnAngle;
 

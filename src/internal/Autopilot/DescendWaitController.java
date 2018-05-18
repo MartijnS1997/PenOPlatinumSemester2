@@ -14,7 +14,7 @@ import static java.lang.Math.PI;
  * TODO now we're testing a single wait turn, configure controller that we can wait for multiple turns
  * TODO remove request for airport when taking off
  */
-public class DescendWaitController extends Controller {
+public class DescendWaitController extends TurnBasedController {
 
     public DescendWaitController(AutoPilot autopilot) {
         super(autopilot);
@@ -32,9 +32,10 @@ public class DescendWaitController extends Controller {
 
     @Override
     public AutopilotOutputs getControlActions(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs) {
-        TurnControlBeta turnControl = this.getTurnControl();
+        TurnControl turnControl = this.getTurnControl();
+        AutopilotTurn turn = turnControl.getTurn();
         //check if the turn control has finished making its turn, if so reset the turn controls
-        if(turnControl.hasFinishedTurn()){
+        if(hasFinishedTurn(turn, currentInputs, previousInputs)/*turnControl.hasFinishedTurn(*/){
             //normally this shouldn't cause any harm because the has reached objective is called before the
             //getControl actions, thus we may reset
             turnControl.resetAngleToGo();
@@ -57,7 +58,7 @@ public class DescendWaitController extends Controller {
 
         //there are two cases when the drone has reached its objective, for both is needed: a lock on the desired airport
         if(airportReserved){
-            TurnControlBeta turnController = this.getTurnControl();
+            TurnControl turnController = this.getTurnControl();
 
             //first case, the turn has not yet started (and thus the angle to go is equal to the turning angle)
             if(!turnController.hasStartedTurn()){
@@ -67,7 +68,8 @@ public class DescendWaitController extends Controller {
                 //second case, the turn has finished
                 //we may use the has finished turn because the has reached objective is invoked before
                 //the call to the controller so the state of has finished turn is maintained for exactly one iteration
-                return turnController.hasFinishedTurn();
+                AutopilotTurn turn = turnController.getTurn();
+                return hasFinishedTurn(turn, currentInputs, previousInputs);
             }
         }
 
@@ -122,7 +124,7 @@ public class DescendWaitController extends Controller {
         PhysXEngine.TurnPhysX turnPhysX = this.getTurnPhysX();
         StandardOutputs standardOutputs = this.getStandardOutputs();
         float cruisingAltitude = this.getCruisingAltitude();
-        TurnControlBeta turnControl = new TurnControlBeta(turn, turnPhysX, standardOutputs, cruisingAltitude);
+        TurnControl turnControl = new TurnControl(turn, turnPhysX, standardOutputs, cruisingAltitude);
         this.setTurnControl(turnControl);
     }
 
@@ -150,7 +152,7 @@ public class DescendWaitController extends Controller {
      * Getter for the turn controller, this is the controller used to make the turn while waiting for a lock
      * @return the turn controller used for a single turn
      */
-    private TurnControlBeta getTurnControl() {
+    private TurnControl getTurnControl() {
         return turnControl;
     }
 
@@ -160,7 +162,7 @@ public class DescendWaitController extends Controller {
      *                    note that the controller must be rebuilt (or reset) every time we need to do another turn
      *                    we may keep the old specified turn but we must reset the controller to avoid mishaps
      */
-    private void setTurnControl(TurnControlBeta turnControl) {
+    private void setTurnControl(TurnControl turnControl) {
         this.turnControl = turnControl;
     }
 
@@ -274,7 +276,7 @@ public class DescendWaitController extends Controller {
     /**
      * Getter for the turn controller responsible for making the turn while waiting for acquiring a lock
      */
-    private TurnControlBeta turnControl;
+    private TurnControl turnControl;
 
     /**
      * The turn to execute while waiting for the descend

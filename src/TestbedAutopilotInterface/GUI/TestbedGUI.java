@@ -12,6 +12,7 @@ import math.Vector3f;
 import org.lwjgl.glfw.GLFWVidMode;
 
 import java.io.IOException;
+import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static org.lwjgl.glfw.GLFW.glfwGetPrimaryMonitor;
@@ -145,16 +146,49 @@ public class TestbedGUI implements Runnable{
     private GUIQueueElement readElementFromGUIQueue() {
         ConcurrentLinkedQueue<GUIQueueElement> queue = this.getGuiQueue();
         //peek in the queue, check if it is empty or not
-        if(queue.isEmpty()){
-            //if empty, return the previous one
-            return this.getPrevGUIQueueElement();
-        }
-        //if not poll the head from the fifo queue
-        GUIQueueElement queueHead = queue.poll();
+        GUIQueueElement queueHead;
+//        do {
+            if (queue.isEmpty()) {
+                //if empty, return the previous one
+                queueHead = this.getPrevGUIQueueElement();
+            }
+            //if not poll the head from the fifo queue
+            else{
+                queueHead = queue.poll();
+            }
+//        }while(!deliveriesAssigned(queueHead));
+
         //set the previous one to the current
         this.setPrevGUIQueueElement(queueHead);
         //return the result
         return queueHead;
+    }
+
+    /**
+     * Checks if the deliveries are assigned to the drones
+     * used to skip the useless frames that do not contain any useful information (nobody likes to watch a drone standing still)
+     * @param queueElement the element to inspect
+     * @return true if and only if there is package that has a drone assigned
+     */
+    private boolean deliveriesAssigned(GUIQueueElement queueElement){
+
+        //check for null pointer
+        if(queueElement == null){
+            return false;
+        }
+
+        Set<DeliveryGuiState> deliveries = queueElement.getDeliveries();
+        //check if there is any delivery assigned to a drone, if not
+        for(DeliveryGuiState delivery: deliveries){
+            String deliveryDrone = delivery.getDeliveryDrone();
+            //check if the delivery is assigned to a drone
+            if(deliveryDrone != null){
+                return true;
+            }
+        }
+
+        //if there is no package assigned a drone yet return false
+        return false;
     }
 
     /**

@@ -5,7 +5,6 @@ import AutopilotInterfaces.AutopilotInputs_v2;
 import AutopilotInterfaces.AutopilotOutputs;
 import TestbedAutopilotInterface.Overseer.AutopilotDelivery;
 import TestbedAutopilotInterface.Overseer.AutopilotInfo;
-import TestbedAutopilotInterface.Overseer.DeliveryPackage;
 import TestbedAutopilotInterface.Overseer.MapAirport;
 import internal.Helper.Vector;
 
@@ -29,7 +28,7 @@ public class AutopilotFiniteStateMachine {
         //create all the controllers
         this.takeoffController = new AutopilotTakeoffController(autopilot);
         this.takeoffStabilizerController = new AutopilotStabilization(autopilot);
-        this.flightController = new AirportNavigationController(autopilot);
+        this.airportNavigationController = new AirportNavigationController(autopilot);
         this.descendWaitController = new DescendWaitController(autopilot);
         this.descendController = new DescendController(autopilot);
         this.landingController = new AutopilotLandingController(autopilot);
@@ -84,7 +83,7 @@ public class AutopilotFiniteStateMachine {
                 AutopilotStabilization stabilizationController = this.getTakeoffStabilizerController();
                 return stabilizationController.hasReachedObjective(currentInputs, previousInputs) ? /*DESCEND_WAIT*/ FLIGHT: STABILIZE_TAKEOFF;
             case FLIGHT:
-                AutopilotFlightController flightController = this.getFlightController();
+                AirportNavigationController flightController = this.getAirportNavigationController();
                 //check if the controller has finished doing its job
                 return flightController.hasReachedObjective(currentInputs, previousInputs) ? /*DESCEND*/ DESCEND_WAIT : FLIGHT;
             case DESCEND_WAIT:
@@ -132,9 +131,10 @@ public class AutopilotFiniteStateMachine {
         if(!nextState.equals(currentState)){
             configureState(nextState, inputs);
             this.setState(nextState);
-//            System.out.println("Switched states, from " + AutopilotState.getString(currentState) +
-//                    ", to " + AutopilotState.getString(nextState));
-//            System.out.println("current position: " + Controller.extractPosition(inputs));
+            System.out.println("\ndrone ID: " + this.getAutopilot().getID());
+            System.out.println("Switched states, from " + AutopilotState.getString(currentState) +
+                    ", to " + AutopilotState.getString(nextState));
+            System.out.println("current position: " + Controller.extractPosition(inputs));
             //we do a recursive call until the states are stable
             toNextState(inputs);
         }
@@ -222,7 +222,7 @@ public class AutopilotFiniteStateMachine {
      */
     private void configureFlight(AutopilotInputs_v2 inputs){
 
-        AirportNavigationController navigationController = this.getFlightController();
+        AirportNavigationController navigationController = this.getAirportNavigationController();
 
         //first we need to clear the controller
         navigationController.reset();
@@ -297,7 +297,7 @@ public class AutopilotFiniteStateMachine {
 
         float activationThreshold = this.getLandingDescendThreshold();
         float targetAltitude = this.getStandardLandingAltitude();
-
+        System.out.println("target altitude of drone: " + targetAltitude);
         descendController.configureController(config,inputs_v2, activationThreshold, targetAltitude);
 
     }
@@ -404,7 +404,7 @@ public class AutopilotFiniteStateMachine {
         FlightPath flightPath = null;
         if(currentState == FLIGHT){
             //get the flight controller
-            AirportNavigationController navigationController = this.getFlightController();
+            AirportNavigationController navigationController = this.getAirportNavigationController();
             flightPath = navigationController.getFlightPath();
         }
 
@@ -508,7 +508,7 @@ public class AutopilotFiniteStateMachine {
             case STABILIZE_TAKEOFF:
                 return this.getTakeoffStabilizerController();
             case FLIGHT:
-                return this.getFlightController();
+                return this.getAirportNavigationController();
             case DESCEND_WAIT:
                 return this.getDescendWaitController();
             case DESCEND:
@@ -558,8 +558,8 @@ public class AutopilotFiniteStateMachine {
      * drone's flight to the next airport
      * @return the controller to guide the flight
      */
-    private AirportNavigationController getFlightController() {
-        return flightController;
+    private AirportNavigationController getAirportNavigationController() {
+        return airportNavigationController;
     }
 
     /**
@@ -729,7 +729,7 @@ public class AutopilotFiniteStateMachine {
      */
     private AutopilotTakeoffController takeoffController;
     private AutopilotStabilization takeoffStabilizerController;
-    private AirportNavigationController flightController;
+    private AirportNavigationController airportNavigationController;
     private DescendWaitController descendWaitController;
     private DescendController descendController;
     private AutopilotLandingController landingController;

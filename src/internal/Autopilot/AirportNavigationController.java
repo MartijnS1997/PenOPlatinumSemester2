@@ -1,9 +1,9 @@
 package internal.Autopilot;
 
 import AutopilotInterfaces.AutopilotConfig;
+import AutopilotInterfaces.AutopilotInputs;
 import AutopilotInterfaces.AutopilotInputs_v2;
 import AutopilotInterfaces.AutopilotOutputs;
-import TestbedAutopilotInterface.Overseer.MapAirport;
 import internal.Helper.Vector;
 import internal.Physics.PhysXEngine;
 
@@ -24,7 +24,7 @@ import static java.lang.Math.*;
  *
  * note: all vectors are in the world axis system unless specified differently
  */
-public class AirportNavigationController extends AutopilotFlightController {
+public class AirportNavigationController extends TurnBasedController {
 
 
     public AirportNavigationController(AutoPilot autopilot) {
@@ -43,9 +43,10 @@ public class AirportNavigationController extends AutopilotFlightController {
         //first check if we're doing the final turn
         if(this.finalTurnInitiated()){
             //if so check also if we've finished it
-            TurnControlBeta turnControl = this.getTurnControl();
+            TurnControl turnControl = this.getTurnControl();
             //if so we may switch to the landing controller
-            return willFinishTurn(currentInputs, previousInputs, turnControl);
+            AutopilotTurn turn = turnControl.getTurn();
+            return hasFinishedTurn(turn, currentInputs, previousInputs);//willFinishTurn(currentInputs, previousInputs, turnControl);
         }
         //if not return false
         return false;
@@ -60,7 +61,7 @@ public class AirportNavigationController extends AutopilotFlightController {
      * @return true if the current turn will be finished if the delta angle caused by the current and previous inputs
      *         are added
      */
-    private static boolean willFinishTurn(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs, TurnControlBeta turnControl){
+    private static boolean willFinishTurn(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs, TurnControl turnControl){
         //get the specifications for the turn we're currently making
         AutopilotTurn turn = turnControl.getTurn();
         float turnAngle = turn.getTurnAngle();
@@ -97,8 +98,8 @@ public class AirportNavigationController extends AutopilotFlightController {
         NavigatorState nextState = this.getNextState(currentInputs, previousInputs);
         //check if the same state as previous one
         if(nextState != currentState){
-            System.out.println("switched navigation state at position : " + extractPosition(currentInputs));
-            System.out.println("next state: " + nextState);
+//            System.out.println("switched navigation state at position : " + extractPosition(currentInputs));
+//            System.out.println("next state: " + nextState);
             //if not configure the controller
             configureStateController(nextState);
             //and save the state
@@ -107,7 +108,7 @@ public class AirportNavigationController extends AutopilotFlightController {
             //duplicate work
 //            System.out.println("switched state from: " + currentState +  ", to: " + nextState);
 //            System.out.println("drone position: " + extractPosition(currentInputs));
-            AutopilotTurn turn = this.getTurnControl().getTurn();
+//            AutopilotTurn turn = this.getTurnControl().getTurn();
 //            System.out.println("turn exit point: " + (turn.getExitPoint().vectorSum(turn.getTurnCenter())));
         }
 
@@ -385,8 +386,9 @@ public class AirportNavigationController extends AutopilotFlightController {
         switch(currentState){
             case TURNING:
                 //check if we've finished the turn, if so we have to navigate to the next turn, if not keep turning
-                TurnControlBeta turnController = this.getTurnControl();
-                return turnController.hasFinishedTurn() ? NavigatorState.TO_NEXT_TURN : NavigatorState.TURNING;
+                TurnControl turnController = this.getTurnControl();
+                AutopilotTurn turn = turnController.getTurn();
+                return hasFinishedTurn(turn, currentInputs, previousInputs) ? NavigatorState.TO_NEXT_TURN : NavigatorState.TURNING;
             case TO_NEXT_TURN:
                 //check if we've reached the entry point of the next point, if so start next turn, if not keep flying
                 ToNextTurnControl toNextTurnControl = this.getToNextTurnControl();
@@ -409,7 +411,7 @@ public class AirportNavigationController extends AutopilotFlightController {
         //open a switch to pass the inputs to the right controller
         switch(navigatorState){
             case TURNING:
-                TurnControlBeta turnControl = this.getTurnControl();
+                TurnControl turnControl = this.getTurnControl();
                 return turnControl.getControlActions(currentInputs, previousInputs);
             case TO_NEXT_TURN:
                 ToNextTurnControl toNextTurnControl = this.getToNextTurnControl();
@@ -445,7 +447,7 @@ public class AirportNavigationController extends AutopilotFlightController {
         NavigatorState state = this.getNavigatorState();
         AutopilotTurn nextTurn = this.getNextTurn();
         //then generate the next turn controller
-        TurnControlBeta nextTurnControl = new TurnControlBeta(nextTurn, turnPhysX, getStandardOutputs(), getCruisingAltitude());
+        TurnControl nextTurnControl = new TurnControl(nextTurn, turnPhysX, getStandardOutputs(), getCruisingAltitude());
         //after generation save the newly generated controller
         this.setTurnControl(nextTurnControl);
     }
@@ -463,7 +465,7 @@ public class AirportNavigationController extends AutopilotFlightController {
         //get the turn physics
         PhysXEngine.TurnPhysX turnPhysX = this.getTurnPhysX();
         //get the previous turn from the previous turning controller
-        TurnControlBeta previousTurnControl = this.getTurnControl();
+        TurnControl previousTurnControl = this.getTurnControl();
         AutopilotTurn previousTurn = previousTurnControl.getTurn();
 
         //generate the next turn
@@ -474,7 +476,7 @@ public class AirportNavigationController extends AutopilotFlightController {
         this.setToNextTurnControl(toNextTurnControl);
 
         //also already set the next turn controller
-        TurnControlBeta turnControl = new TurnControlBeta(nextTurn, turnPhysX, getStandardOutputs(), getCruisingAltitude());
+        TurnControl turnControl = new TurnControl(nextTurn, turnPhysX, getStandardOutputs(), getCruisingAltitude());
         this.setTurnControl(turnControl);
 
     }
@@ -550,7 +552,7 @@ public class AirportNavigationController extends AutopilotFlightController {
      * Getter for the control turn object(containing all the info needed to make the currently specified turn)
      * @return the control turn specified for the current turn
      */
-    private TurnControlBeta getTurnControl() {
+    private TurnControl getTurnControl() {
         return turnControl;
     }
 
@@ -558,7 +560,7 @@ public class AirportNavigationController extends AutopilotFlightController {
      * Setter for the current control turn, must be invoked once the drone is finished making its previous turn
      * @param turnControl the next turn to make with the navigation controller
      */
-    private void setTurnControl(TurnControlBeta turnControl) {
+    private void setTurnControl(TurnControl turnControl) {
         this.turnControl = turnControl;
     }
 
@@ -743,7 +745,7 @@ public class AirportNavigationController extends AutopilotFlightController {
      * --> save the specifications of the turn we're currently making
      * --> calculates the control actions needed to make the turn
      */
-    private TurnControlBeta turnControl;
+    private TurnControl turnControl;
 
     /**
      * The control object used to manage all the in between turn state and checks used
@@ -917,8 +919,11 @@ public class AirportNavigationController extends AutopilotFlightController {
             this.thrustControl(outputs, currentInputs, previousInputs);
 
             outputs.capInclinations(getMainDeltaIncl(), getMainDeltaIncl(), getHorizontalDeltaIncl(), 0);
+
             return outputs;
         }
+
+
 
         /**
          * Checks if the controller is finished guiding the drone to the next turn

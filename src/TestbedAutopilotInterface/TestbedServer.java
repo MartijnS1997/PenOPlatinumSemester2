@@ -259,10 +259,6 @@ public class TestbedServer implements Runnable {
         this.initGui();
 
         this.initThreads();
-
-//
-//        // initialize the windows
-//        this.initWindows();
         // initialize the world that needs to be simulated
         this.initWorld();
         // initialize the server
@@ -377,7 +373,7 @@ public class TestbedServer implements Runnable {
      * Getter for the package service to be used by the world that is simulated by the testbed
      * @return a package service used by the world
      */
-    private PackageService getPackageService() {
+    protected PackageService getPackageService() {
         return packageService;
     }
 

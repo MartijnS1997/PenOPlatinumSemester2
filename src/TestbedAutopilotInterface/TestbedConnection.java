@@ -1,12 +1,15 @@
 package TestbedAutopilotInterface;
 
 import AutopilotInterfaces.*;
+import TestbedAutopilotInterface.Overseer.PackageService;
+import TestbedAutopilotInterface.Overseer.WorldDelivery;
 import internal.Testbed.Drone;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.Set;
 import java.util.concurrent.Callable;
 
 /**
@@ -39,24 +42,92 @@ public class TestbedConnection implements Callable<Void> {
      * note: upon init the testbed has not yet simulated a single step, it only sends the initial state of the world
      */
     @Override
-    public Void call() {
-        //first check if the autopilot is already configured
-        if(!this.isConfiguredAutopilot()){
-            //if not configure it
-            this.writeConfig();
-            //then set the flag to true
-            this.setConfiguredAutopilot();
-        }
+    public  Void call() {
+        ConnectionState connectionState = this.getConnectionState();
+        AutopilotOutputs droneInputs;
+        switch (connectionState){
+            case CONFIGURE:
+                this.writeConfig();
+                CommunicateWithAutopilot();
+                //set the next state
+                this.setConnectionState(ConnectionState.WAIT_FOR_DISTRIBUTION);
+                break;
 
-        //then send the newly generated state to the autopilot
+            //this state is made because we do not need a simulation on the first time the packages are distributed
+            case WAIT_FOR_DISTRIBUTION:
+                CommunicateWithAutopilot();
+
+                PackageService packageService = this.getTestBedServer().getPackageService();
+                //get the packages that were not yet assigned
+                Set<WorldDelivery> notYetAssigned = packageService.getAssignedWorldDeliveries();
+                System.out.println("Waiting for distribution of packages");
+
+                while(notYetAssigned.size() == 0){
+                    try {
+                        wait();
+                    } catch (InterruptedException e) {
+                        //its all good just check
+                        System.out.println("interruption: " + e);
+                        notYetAssigned = packageService.getAssignedWorldDeliveries();
+                    }
+                }
+                System.out.println("Packages assigned");
+
+                this.setConnectionState(ConnectionState.READY);
+                break;
+
+            default:
+                CommunicateWithAutopilot();
+                break;
+
+        }
+//        //first check if the autopilot is already configured
+//        if(connectionState == ConnectionState.CONFIGURE){
+//            //if not configure it
+//            this.writeConfig();
+//            //then set the flag to true
+//            this.setConfiguredAutopilot();
+//        }
+
+//        //then send the newly generated state to the autopilot
+//        this.writeOutputs();
+//        //then we wait for the response of the autopilot
+//        AutopilotOutputs droneInputs = this.readInputs();
+//        //write the acquired information to the drone
+//        this.writeInputsToDrone(droneInputs);
+//        //then we are finished and ready for the next cycle
+////
+//
+//        if(secondIter){
+//            //get the package service
+//            PackageService packageService = this.getTestBedServer().getPackageService();
+//            //get the packages that were not yet assigned
+//            Set<WorldDelivery> notYetAssigned = packageService.getAssignedWorldDeliveries();
+//            while(notYetAssigned.size() == 0){
+//                try {
+//                    System.out.println("Waiting for distribution of packages");
+//                    wait();
+//                } catch (InterruptedException e) {
+//                    //its all good just check
+//                    notYetAssigned = packageService.getAssignedWorldDeliveries();
+//                }
+//            }
+//            System.out.println("Packages assigned");
+//            secondIter = false;
+//        }
+//        if(!secondIter&&!){
+//            secondIter = true;
+//        }
+        return null;
+    }
+
+    private void CommunicateWithAutopilot() {
+        AutopilotOutputs droneInputs;
         this.writeOutputs();
         //then we wait for the response of the autopilot
-        AutopilotOutputs droneInputs = this.readInputs();
+        droneInputs = this.readInputs();
         //write the acquired information to the drone
         this.writeInputsToDrone(droneInputs);
-        //then we are finished and ready for the next cycle
-
-        return null;
     }
 
     /**
@@ -192,6 +263,22 @@ public class TestbedConnection implements Callable<Void> {
             this.configuredAutopilot = true;
     }
 
+    /**
+     * Getter for the connection state
+     * @return the connection state of the drone, may be either config, distribution or ready
+     */
+    private ConnectionState getConnectionState() {
+        return connectionState;
+    }
+
+    /**
+     * Setter for the connection state, indicates what the connection has to do (eg config or wait until packages are distributed)
+     * @param connectionState the state of the connection
+     */
+    private void setConnectionState(ConnectionState connectionState) {
+        this.connectionState = connectionState;
+    }
+
     /*
      * Instance variables
      */
@@ -231,6 +318,13 @@ public class TestbedConnection implements Callable<Void> {
      */
     private boolean configuredAutopilot = false;
 
+    private boolean secondIter = false;
+
+    private ConnectionState connectionState = ConnectionState.CONFIGURE;
+
+    private enum ConnectionState {
+        CONFIGURE, WAIT_FOR_DISTRIBUTION, READY
+    }
 
     /*
     Private classes used for the implementation of the threads

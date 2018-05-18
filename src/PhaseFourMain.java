@@ -33,8 +33,8 @@ public class PhaseFourMain {
         //set the seed so we generate the same world
         generator.setRandomSeed(0);
         //create the simulation environment
-//        SimulationEnvironment environment = generator.generateBigWorld();
-        SimulationEnvironment environment = generator.generate4AirportWorld();
+        SimulationEnvironment environment = generator.generateBigWorld();
+//        SimulationEnvironment environment = generator.generate4AirportWorld();
         // generator.generateGridWorld(gridWorldRows, gridWorldColumns);
         //print the environment
         System.out.println(SimulationGen.environmentToString(environment));
@@ -179,7 +179,7 @@ public class PhaseFourMain {
     private static int stepsPerCycle = 50;
     private static int stepsPerSubCycle = 10;
     private static float timeStep = 0.001f;
-    private static int playbackSpeed = 15;
+    private static int playbackSpeed = 25;
 
     private static int tcpPort = 4242;
     private static String host = "localhost";

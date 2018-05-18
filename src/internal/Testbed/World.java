@@ -469,13 +469,14 @@ public class World {
 		WorldDelivery delivery = drone.getDeliveryPackage();
 		//first get the package
 		int destinationAirportID = delivery.getDestinationAirport();
-		int destinationGateNumber = delivery.getDestinationAirportGate();
+//		int destinationGateNumber = delivery.getDestinationAirportGate();
 		//get the position of the gate
 		Map<Integer, WorldAirport> airports = this.getAirportMap();
 		WorldAirport airport = airports.get(destinationAirportID);
-		Vector dronePos = drone.getPosition();
-		float distanceToGate = airport.distanceToGate(destinationGateNumber, dronePos);
-		return distanceToGate <= MAX_TRANSFER_DISTANCE;
+		return airport.isAtGateZone(drone.getPosition());
+//		Vector dronePos = drone.getPosition();
+//		float distanceToGate = airport.distanceToGate(destinationGateNumber, dronePos);
+//		return distanceToGate <= MAX_TRANSFER_DISTANCE;
 	}
 
 	/**
@@ -495,14 +496,15 @@ public class World {
 		}
 		//get the package source airport and position
 		int sourceAirportID = delivery.getSourceAirport();
-		int sourceGateNumber = delivery.getSourceAirportGate();
+//		int sourceGateNumber = delivery.getSourceAirportGate();
 		//get the position of the gate
 		Map<Integer, WorldAirport> airports = this.getAirportMap();
 		WorldAirport airport = airports.get(sourceAirportID);
-		Vector dronePos = drone.getPosition();
-		float distanceToGate = airport.distanceToGate(sourceGateNumber, dronePos);
-
-		return distanceToGate <= MAX_TRANSFER_DISTANCE;
+//		Vector dronePos = drone.getPosition();
+//		float distanceToGate = airport.distanceToGate(sourceGateNumber, dronePos);
+//
+//		return distanceToGate <= MAX_TRANSFER_DISTANCE;
+		return airport.isAtGateZone(drone.getPosition());
 	}
 
 

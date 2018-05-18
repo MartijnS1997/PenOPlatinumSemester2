@@ -61,7 +61,7 @@ public class SimulationGen {
         //first overwrite the provided parameters
         this.worldXSize = 4E4f;
         this.worldZSize = 4E4f;
-        this.nbDrones = 25;
+        this.nbDrones = 10;
         this.nbAirports = 25;
         this.nbPackages = 40;
 

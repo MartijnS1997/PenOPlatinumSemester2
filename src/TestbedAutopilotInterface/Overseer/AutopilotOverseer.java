@@ -41,12 +41,14 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void>, Packa
      * @throws Exception
      */
     @Override
-    public Void call() throws Exception {
+    public  Void call() throws Exception {
         //only start the delivery if all drones to spread the deliveries across have been added
         while(this.getAutopilotInfoCenter().getSize() != this.getInitNbOfAutopilots()||!this.autopilotsInitialized()){
             //do nothing
+//            System.out.println("nb of autopilots: " + this.getAutopilotInfoCenter().allAutopilotsInitialized());
         }
 
+        System.out.println("ready to rumble");
         //call the main loop
         overseerMainLoop();
 
@@ -78,7 +80,8 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void>, Packa
      * Distributes the packages that have not been assigned yet to a drone
      * starts the delivery planner (may require some work --> beam search)
      */
-    private void distributePackages(){
+    private synchronized void distributePackages(){
+        long startMillis = System.currentTimeMillis();
         //get the planner
         DeliveryPlanner planner = this.getPlanner();
         //initialize the search
@@ -94,10 +97,14 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void>, Packa
         planner.initializeSearch(submittedDeliveries, assignedDeliveries, autopilotPositions);
         //execute the search
         Map<String, List<PlannerDelivery>> deliveryScheme = planner.executeSearch();
+        long endMillis = System.currentTimeMillis();
+        System.out.println("totalTime in ms = " + (endMillis-startMillis));
         //and apply the found scheme
 //        System.out.println();
         planner.printSchedule(deliveryScheme, getAirportMap());
         assignDeliveriesToQueue(deliveryScheme);
+        notifyAll();
+
     }
 
     /**

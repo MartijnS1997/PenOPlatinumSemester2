@@ -226,7 +226,28 @@ public class Vector {
 	public Vector makeHorizontal() {
 		return new Vector(this.getxValue(),0f,this.getzValue());
 	}
-	
+
+
+	/**
+	 * projects the vector onto the xz plane (ditches the y-component)
+	 * @return the same vector as before but without the y-component
+	 */
+	public Vector projectOntoXZplane(){
+		return new Vector (this.getxValue(), 0, this.getzValue());
+	}
+
+	/**
+	 * Getter for the vector standing orthonormal on the instance it is invoked against
+	 * the "right" orthogonal is viewed along the provided vector. Note that the orthogonal is calculated
+	 * for the projection of the vector onto the xz-plane
+	 * @return the normalized vector standing orthogonal on the projection of the provided instance and is
+	 * 		   located to the right if viewed along the vector
+	 */
+	public Vector getRightOrthonormal(){
+		Vector orthogonal =  new Vector(-this.getzValue(), 0, this.getxValue());
+		return orthogonal.normalizeVector();
+	}
+
 	/**
 	 * Returns the vector, rotated by a given angle around the y-axis. Positive angles result in counterclockwise rotation.
 	 * @param angle
