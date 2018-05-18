@@ -259,6 +259,10 @@ public class World {
 				//update if necessary
 				if(lowestSequenceSoFar == null || deliverySequenceNumber < lowestSequenceSoFar){
 					lowestSequenceNumberMap.put(deliveryDroneID, deliverySequenceNumber);
+					//also remove the current entry from the delivery sequence map, regardless from
+					//the fact if we can deliver the current package. Only the lowest sequence number should be
+					//delivered
+					deliverySequenceMap.remove(deliveryDroneID);
 				}else{
 					//if the sequence number is not lower than the lowest so far, we may not deliver the package, continue
 					continue;
