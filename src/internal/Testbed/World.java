@@ -220,24 +220,86 @@ public class World {
 	 * @param packages the set of packages to check for
 	 */
 	private void loadPackages(Set<Drone> drones, Set<WorldDelivery> packages){
+		//get the map of all drones
+		Map<String, Drone> droneMap = this.getDroneMap();
 		//cycle trough all the packages, filter for all the packages that are not
 		//delivered yet
 		Set<WorldDelivery> unDelivered = packages.stream().filter(p -> !p.isDelivered()).collect(Collectors.toSet());
-		for(Drone drone: drones){
-			//first check if the drone has the right state to pick up a package
-			if(!readyToPickUp(drone)){
-				//if the drone is going to fast or is already delivering a package, continue no further calculation is needed
-				continue;
+
+		//maps used during the algorithm to speed up the process
+
+		//the map containing the (temporary) package to deliver by the drone
+		Map<String, WorldDelivery> deliverySequenceMap = new HashMap<>();
+		//the map containing the lowest sequence number encountered for the drone
+		Map<String, Long> lowestSequenceNumberMap = new HashMap<>();
+		//both of the above maps are used to check if the package may be loaded onto the drone
+
+		//map used to look into if the drone can deliver, string --> drone ID and boolean to indicate if it can deliver
+		Map<String, Boolean> ableToDeliverMap = new HashMap<>();
+
+		//start iterating trough all the elements
+		for(WorldDelivery delivery: unDelivered){
+			String deliveryDroneID = delivery.getDeliveryDroneID();
+			//get the drone
+			Drone drone = droneMap.get(deliveryDroneID);
+
+			//first check the delivery map to see if drone can deliver
+			Boolean readyToPickUp = ableToDeliverMap.get(deliveryDroneID);
+			//if no entry was found add it
+			if(readyToPickUp == null){
+				readyToPickUp = readyToPickUp(drone);
+				ableToDeliverMap.put(deliveryDroneID, readyToPickUp);
 			}
-			String droneID = drone.getDroneID();
-			//now get the next package to be delivered by the drone
-			WorldDelivery delivery = getNextDelivery(droneID, unDelivered);
-			//check if this particular package can be delivered
-			if(delivery != null && canPickUpPackage(drone, delivery)){
-//				System.out.println("\npicked up delivery: " + delivery + "\n");
-				drone.loadPackage(delivery);
+
+			if(readyToPickUp){
+				//first check the lowest encountered so far map, if the sequence number of the package is higher, ignore
+				Long lowestSequenceSoFar = lowestSequenceNumberMap.get(deliveryDroneID);
+				long deliverySequenceNumber = delivery.getSequenceNumber();
+
+				//update if necessary
+				if(lowestSequenceSoFar == null || deliverySequenceNumber < lowestSequenceSoFar){
+					lowestSequenceNumberMap.put(deliveryDroneID, deliverySequenceNumber);
+				}else{
+					//if the sequence number is not lower than the lowest so far, we may not deliver the package, continue
+					continue;
+				}
+
+				//then check if the package can be picked up
+				if(canPickUpPackage(drone, delivery)){
+					//if so, put the package in the map
+					deliverySequenceMap.put(deliveryDroneID, delivery);
+				}
+				//if not we continue
+
 			}
+
 		}
+
+		//after the loop, load the packages for all the drones
+		for(String deliveryID : deliverySequenceMap.keySet()){
+			//get the corresponding drone
+			WorldDelivery delivery = deliverySequenceMap.get(deliveryID);
+			String deliveryDroneID = delivery.getDeliveryDroneID();
+			Drone drone = droneMap.get(deliveryDroneID);
+			drone.loadPackage(delivery);
+		}
+
+		//for reference:
+//		for(Drone drone: drones){
+//			//first check if the drone has the right state to pick up a package
+//			if(!readyToPickUp(drone)){
+//				//if the drone is going to fast or is already delivering a package, continue no further calculation is needed
+//				continue;
+//			}
+//			String droneID = drone.getDroneID();
+//			//now get the next package to be delivered by the drone
+//			WorldDelivery delivery = getNextDelivery(droneID, unDelivered);
+//			//check if this particular package can be delivered
+//			if(delivery != null && canPickUpPackage(drone, delivery)){
+////				System.out.println("\npicked up delivery: " + delivery + "\n");
+//				drone.loadPackage(delivery);
+//			}
+//		}
 
 	}
 

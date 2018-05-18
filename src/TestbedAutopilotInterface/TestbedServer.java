@@ -16,6 +16,9 @@ import internal.Testbed.WorldBuilder_v2;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
@@ -103,8 +106,10 @@ public class TestbedServer implements Runnable {
         boolean simulationActive = true;
         while(simulationActive){
             try{
+
                 //simulate the next step
                 this.simulateStep();
+
             }catch(java.io.EOFException | SimulationEndedException e) {
                 //the connection at the other side has closed or the simulation has ended
                 //terminate the testbed
@@ -128,6 +133,20 @@ public class TestbedServer implements Runnable {
 
         }
     }
+
+//    /**
+//     * Debugging method used to save data to a .txt file
+//     * @param error the error to write to the file
+//     */
+//    protected static void errorLog(float error){
+//
+//        String logString = error + "\n";
+//        try {
+//            Files.write(Paths.get("errorLog.txt"), logString.getBytes(), StandardOpenOption.APPEND);
+//        }catch (IOException e) {
+//            //exception handling left as an exercise for the reader
+//        }
+//    }
 
     /*
     Methods for the simulation cycle
