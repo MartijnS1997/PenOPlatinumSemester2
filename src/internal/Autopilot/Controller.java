@@ -155,7 +155,7 @@ public abstract class Controller {
         PhysXEngine engine = this.getAutopilot().getPhysXEngine();
 
         //calculate the forces working in on the drone
-        Vector airborneForces = engine.getAirborneForces(orientation, rotationApprox, velocityApprox, outputs);
+        Vector airborneForces = engine.getNoThrustAirborneForces(orientation, rotationApprox, velocityApprox, outputs);
 
         //transform the forces to the drone axis system
         Vector droneAxisAirborneForces = PhysXEngine.worldOnDrone(airborneForces, orientation);

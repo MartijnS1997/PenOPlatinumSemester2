@@ -106,9 +106,11 @@ public class TestbedServer implements Runnable {
         boolean simulationActive = true;
         while(simulationActive){
             try{
-
+                long startMillis = System.currentTimeMillis();
                 //simulate the next step
                 this.simulateStep();
+                long endMillis = System.currentTimeMillis();
+                errorLog(endMillis-startMillis);
 
             }catch(java.io.EOFException | SimulationEndedException e) {
                 //the connection at the other side has closed or the simulation has ended
@@ -134,19 +136,19 @@ public class TestbedServer implements Runnable {
         }
     }
 
-//    /**
-//     * Debugging method used to save data to a .txt file
-//     * @param error the error to write to the file
-//     */
-//    protected static void errorLog(float error){
-//
-//        String logString = error + "\n";
-//        try {
-//            Files.write(Paths.get("errorLog.txt"), logString.getBytes(), StandardOpenOption.APPEND);
-//        }catch (IOException e) {
-//            //exception handling left as an exercise for the reader
-//        }
-//    }
+    /**
+     * Debugging method used to save data to a .txt file
+     * @param error the error to write to the file
+     */
+    protected static void errorLog(float error){
+
+        String logString = error + "\n";
+        try {
+            Files.write(Paths.get("errorLog.txt"), logString.getBytes(), StandardOpenOption.APPEND);
+        }catch (IOException e) {
+            //exception handling left as an exercise for the reader
+        }
+    }
 
     /*
     Methods for the simulation cycle

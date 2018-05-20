@@ -7,7 +7,9 @@ import internal.Helper.SquareMatrix;
 import internal.Testbed.DroneState;
 import internal.Testbed.FlightRecorder;
 import internal.Helper.Vector;
-import tests.SquareMatrixTest;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static java.lang.Math.*;
 
@@ -53,49 +55,6 @@ public class PhysXEngine {
      */
     public PhysicsEngineState getNextStatePhysXEngine(float deltaTime, DroneState state, AutopilotOutputs inputs, float INSIGNIFICANCE){
 
-//        //todo comment later
-//        inputs = new AutopilotOutputs() {
-//            @Override
-//            public float getThrust() {
-//                return 300;
-//            }
-//
-//            @Override
-//            public float getLeftWingInclination() {
-//                return (float) (GammaFlightController.MAIN_STABLE_INCLINATION);
-//            }
-//
-//            @Override
-//            public float getRightWingInclination() {
-//                return (float) (GammaFlightController.MAIN_STABLE_INCLINATION/*-2.5*PI/180*/);
-//            }
-//
-//            @Override
-//            public float getHorStabInclination() {
-//                return (float) (-3*PI/180);
-//            }
-//
-//            @Override
-//            public float getVerStabInclination() {
-//                return 0;//(float) (7*PI/180);
-//            }
-//
-//            @Override
-//            public float getFrontBrakeForce() {
-//                return 0;
-//            }
-//
-//            @Override
-//            public float getLeftBrakeForce() {
-//                return 0;
-//            }
-//
-//            @Override
-//            public float getRightBrakeForce() {
-//                return 0;
-//            }
-//        };
-
         Vector orientation = state.getOrientation();
         Vector rotation = state.getRotation();
         Vector position = state.getPosition();
@@ -107,6 +66,8 @@ public class PhysXEngine {
         this.getHorizontalStabilizer().setWingInclination(inputs.getHorStabInclination());
         this.getVerticalStabilizer().setWingInclination(inputs.getVerStabInclination());
 
+        //Generate the fast transformation object
+        FastTransformations fastTransformations = new FastTransformations();
 
         if(this.flightRecorder != null){
             this.recordWingState(state.getOrientation(), state.getRotation(), state.getVelocity());
@@ -120,12 +81,17 @@ public class PhysXEngine {
         }
             
         Vector thrustVector = new Vector(0.f, 0.f, -inputs.getThrust());
+        //calculate the net force and moment exerted on the drone
+        DroneForces droneForces = this.getTotalExternalForcesWorld(fastTransformations, thrustVector, state, inputs, deltaTime);
+        Vector totalMoment = this.getTotalMomentDrone(fastTransformations, droneForces, state);
+        Vector netForce = droneForces.getTotalForce();
+
         // calculate the next position & velocity
-        Vector acceleration = this.calcAcceleration(thrustVector, state, inputs, deltaTime);
+        Vector acceleration = this.calcAcceleration(netForce, state, inputs, deltaTime);
         Vector nextVelocity = this.getNextVelocity(deltaTime, acceleration, velocity);
         Vector nextPosition = this.getNextPosition(deltaTime, acceleration, position, velocity);
 
-        Vector angularAcceleration = this.calcAngularAcceleration(state, inputs, deltaTime);
+        Vector angularAcceleration = this.calcAngularAcceleration(totalMoment, state);
         Vector angularAccelerationWorld = droneOnWorld(angularAcceleration, orientation);
         Vector nextRotation = this.getNextRotationVector(deltaTime, angularAccelerationWorld, rotation);
         //Vector nextRotation = this.getNextRotationCauchy(deltaTime, orientation, rotation, velocity);
@@ -181,33 +147,33 @@ public class PhysXEngine {
     }
 
     private void recordWingState(Vector orientation, Vector rotation, Vector velocity){
-        FlightRecorder flightRecorder = this.getFlightRecorder();
-        WingPhysX rightMain = this.getMainRight();
-        WingPhysX leftMain = this.getMainLeft();
-        WingPhysX horStab = this.getHorizontalStabilizer();
-        WingPhysX verStab = this.getVerticalStabilizer();
-
-        float CONVERSION = 180/(float)Math.PI;
-
-        //log the right wing
-        flightRecorder.appendRightMainInclLog(rightMain.getWingInclination()*CONVERSION);
-        float rightAOA = rightMain.calcAngleOfAttack(orientation, rotation, velocity);
-        flightRecorder.appendRightMainAOALog(rightAOA*CONVERSION);
-
-        //log the left wing
-        flightRecorder.appendLeftMainInclLog(leftMain.getWingInclination()*CONVERSION);
-        float leftAOA = leftMain.calcAngleOfAttack(orientation, rotation, velocity);
-        flightRecorder.appendLeftMainAOALog(leftAOA*CONVERSION);
-
-        //log the horStabilizer
-        flightRecorder.appendHorStabInclLog(horStab.getWingInclination()*CONVERSION);
-        float horStabAOA = horStab.calcAngleOfAttack(orientation, rotation, velocity);
-        flightRecorder.appendHorStabAOALog(horStabAOA*CONVERSION);
-
-        //log the verStabilizer
-        flightRecorder.appendVerStabInclLog(verStab.getWingInclination()*CONVERSION);
-        float verStabAOA = verStab.calcAngleOfAttack(orientation, rotation, velocity);
-        flightRecorder.appendVerStabAOALog(verStabAOA*CONVERSION);
+//        FlightRecorder flightRecorder = this.getFlightRecorder();
+//        WingPhysX rightMain = this.getMainRight();
+//        WingPhysX leftMain = this.getMainLeft();
+//        WingPhysX horStab = this.getHorizontalStabilizer();
+//        WingPhysX verStab = this.getVerticalStabilizer();
+//
+//        float CONVERSION = 180/(float)Math.PI;
+//
+//        //log the right wing
+//        flightRecorder.appendRightMainInclLog(rightMain.getWingInclination()*CONVERSION);
+//        float rightAOA = rightMain.calcAngleOfAttack(orientation, rotation, velocity);
+//        flightRecorder.appendRightMainAOALog(rightAOA*CONVERSION);
+//
+//        //log the left wing
+//        flightRecorder.appendLeftMainInclLog(leftMain.getWingInclination()*CONVERSION);
+//        float leftAOA = leftMain.calcAngleOfAttack(orientation, rotation, velocity);
+//        flightRecorder.appendLeftMainAOALog(leftAOA*CONVERSION);
+//
+//        //log the horStabilizer
+//        flightRecorder.appendHorStabInclLog(horStab.getWingInclination()*CONVERSION);
+//        float horStabAOA = horStab.calcAngleOfAttack(orientation, rotation, velocity);
+//        flightRecorder.appendHorStabAOALog(horStabAOA*CONVERSION);
+//
+//        //log the verStabilizer
+//        flightRecorder.appendVerStabInclLog(verStab.getWingInclination()*CONVERSION);
+//        float verStabAOA = verStab.calcAngleOfAttack(orientation, rotation, velocity);
+//        flightRecorder.appendVerStabAOALog(verStabAOA*CONVERSION);
     }
 
     private void recordEngineState(PhysicsEngineState state){
@@ -686,16 +652,15 @@ public class PhysXEngine {
      * Calculates the angular acceleration based on the moment, moment of inertia and rotation vector
      * the resulting vector is projected onto the drone axis system
      * @param state the state of the drone at the moment of method invocation
-     * @param inputs the inputs of the drone generated by the autopilot
-     * @param deltaTime the time between two simulation steps
+     * @param moment  the total moment exerted on the drone in dtone axis system
      * @return a vector containing the angular acceleration of the drone
      * @author Martijn Sauwens
      */
-    private Vector calcAngularAcceleration(DroneState state, AutopilotOutputs inputs, float deltaTime) {
+    private Vector calcAngularAcceleration(Vector moment, DroneState state/*, AutopilotOutputs inputs, float deltaTime*/) {
         Vector orientation = state.getOrientation();
         Vector rotationVector = state.getRotation();
         SquareMatrix inverseInertiaTensor = this.getInertiaTensor().invertDiagonal();
-        Vector moment = this.getTotalMomentDrone(state, inputs, deltaTime);
+//        Vector moment = this.getTotalMomentDrone(state, inputs, deltaTime);
         //System.out.println("total moment drone: " + moment);
         Vector rotationDrone = worldOnDrone(rotationVector, orientation);
         Vector rotationXImpulseMoment = rotationDrone.crossProduct(this.getImpulseMoment(orientation, rotationVector));
@@ -706,122 +671,123 @@ public class PhysXEngine {
 
     /**
      * calculates the acceleration vector of the drone in the world axis system
-     * @param thrustVector the thrust generated by the drone (given in the drone axis system)
+     * @param netForce the forces exerted on the drone
      * @param state the state of the drone at the moment of invocation of the method
      * @param inputs the inputs of the drone generated by the autopilot
      * @param deltaTime the time passed between two simulation steps
      * @return a vector containing the acceleration of the drone in the world axis system
      */
-    private Vector calcAcceleration(Vector thrustVector, DroneState state, AutopilotOutputs inputs, float deltaTime){
+    private Vector calcAcceleration(Vector netForce/*Vector thrustVector*/, DroneState state, AutopilotOutputs inputs, float deltaTime){
 
-        Vector externalForce = getTotalExternalForcesWorld(thrustVector, state, inputs, deltaTime);
+//        Vector externalForce = getTotalExternalForcesWorld(thrustVector, state, inputs, deltaTime);
 
         float totalMass = this.getTotalMass();
 
-        return externalForce.scalarMult(1/totalMass);
+        return netForce.scalarMult(1/totalMass);
 
     }
 
-    /**
-     * Calculates the total external forces with the assumption that the drone does not touch the ground
-     * @param thrust the thrust generated by the drone
-     * @param orientation the orientation of th drone
-     * @param rotation the rotation of the drone
-     * @param position the position of the drone
-     * @param velocity the velocity of the drone
-     * @param deltaTime the time difference between two simulation steps
-     * @return the total forces acting on the drone in the world axis system
-     * note: only use when the drone doesn't touch the ground
-     */
-    public Vector getTotalExternalForcesWorld(float thrust, Vector orientation, Vector rotation,
-                                              Vector position, Vector velocity, float deltaTime){
-        //first make the state object:
-        DroneState state = new DroneState() {
-            @Override
-            public Vector getPosition() {
-                return position;
-            }
-
-            @Override
-            public Vector getVelocity() {
-                return velocity;
-            }
-
-            @Override
-            public Vector getOrientation() {
-                return orientation;
-            }
-
-            @Override
-            public Vector getRotation() {
-                return rotation;
-            }
-
-            @Override
-            public float getPrevFrontTyreDelta() {
-                return 0;
-            }
-
-            @Override
-            public float getPrevRearLeftTyreDelta() {
-                return 0;
-            }
-
-            @Override
-            public float getPrevRearRightTyreDelta() {
-                return 0;
-            }
-        };
-
-        AutopilotOutputs inputs = new AutopilotOutputs() {
-            @Override
-            public float getThrust() {
-                return 0;
-            }
-
-            @Override
-            public float getLeftWingInclination() {
-                return 0;
-            }
-
-            @Override
-            public float getRightWingInclination() {
-                return 0;
-            }
-
-            @Override
-            public float getHorStabInclination() {
-                return 0;
-            }
-
-            @Override
-            public float getVerStabInclination() {
-                return 0;
-            }
-
-            @Override
-            public float getFrontBrakeForce() {
-                return 0;
-            }
-
-            @Override
-            public float getLeftBrakeForce() {
-                return 0;
-            }
-
-            @Override
-            public float getRightBrakeForce() {
-                return 0;
-            }
-        };
-
-        Vector thrustVector = new Vector(0,0, -thrust);
-
-        return this.getTotalExternalForcesWorld(thrustVector, state, inputs, deltaTime);
-    }
+//    /**
+//     * Calculates the total external forces with the assumption that the drone does not touch the ground
+//     * @param thrust the thrust generated by the drone
+//     * @param orientation the orientation of th drone
+//     * @param rotation the rotation of the drone
+//     * @param position the position of the drone
+//     * @param velocity the velocity of the drone
+//     * @param deltaTime the time difference between two simulation steps
+//     * @return the total forces acting on the drone in the world axis system
+//     * note: only use when the drone doesn't touch the ground
+//     */
+//    public Vector getTotalExternalForcesWorld(float thrust, Vector orientation, Vector rotation,
+//                                              Vector position, Vector velocity, float deltaTime){
+//        //first make the state object:
+//        DroneState state = new DroneState() {
+//            @Override
+//            public Vector getPosition() {
+//                return position;
+//            }
+//
+//            @Override
+//            public Vector getVelocity() {
+//                return velocity;
+//            }
+//
+//            @Override
+//            public Vector getOrientation() {
+//                return orientation;
+//            }
+//
+//            @Override
+//            public Vector getRotation() {
+//                return rotation;
+//            }
+//
+//            @Override
+//            public float getPrevFrontTyreDelta() {
+//                return 0;
+//            }
+//
+//            @Override
+//            public float getPrevRearLeftTyreDelta() {
+//                return 0;
+//            }
+//
+//            @Override
+//            public float getPrevRearRightTyreDelta() {
+//                return 0;
+//            }
+//        };
+//
+//        AutopilotOutputs inputs = new AutopilotOutputs() {
+//            @Override
+//            public float getThrust() {
+//                return 0;
+//            }
+//
+//            @Override
+//            public float getLeftWingInclination() {
+//                return 0;
+//            }
+//
+//            @Override
+//            public float getRightWingInclination() {
+//                return 0;
+//            }
+//
+//            @Override
+//            public float getHorStabInclination() {
+//                return 0;
+//            }
+//
+//            @Override
+//            public float getVerStabInclination() {
+//                return 0;
+//            }
+//
+//            @Override
+//            public float getFrontBrakeForce() {
+//                return 0;
+//            }
+//
+//            @Override
+//            public float getLeftBrakeForce() {
+//                return 0;
+//            }
+//
+//            @Override
+//            public float getRightBrakeForce() {
+//                return 0;
+//            }
+//        };
+//
+//        Vector thrustVector = new Vector(0,0, -thrust);
+//
+//        return this.getTotalExternalForcesWorld(thrustVector, state, inputs, deltaTime);
+//    }
 
     /**
      * Calculates the total external forces on the drone which are: lift, gravity and thrust
+     * @param transformations the fast transformations object used to generate the transformation matrices
      * @param thrustVector the thrust generated this simulation step
      * @param state the state of the drone at the moment of invocation of the method
      * @param inputs the inputs received by the drone from the autopilot
@@ -829,37 +795,54 @@ public class PhysXEngine {
      * @return the total external forces on the drone
      * @author Martijn Sauwens
      */
-    public Vector getTotalExternalForcesWorld(Vector thrustVector, DroneState state, AutopilotOutputs inputs, float deltaTime) {
+    public DroneForces getTotalExternalForcesWorld(FastTransformations transformations, Vector thrustVector, DroneState state, AutopilotOutputs inputs, float deltaTime) {
+
+        DroneForces droneForces = new DroneForces();
 
         Vector orientation = state.getOrientation();
         Vector rotation = state.getRotation();
         Vector velocity = state.getVelocity();
 
         // calculate the force exerted on the wings
-        WingPhysX[] wingArray = this.getWingArray();
-        int nbOfWings = wingArray.length;
-        Vector[] liftVectors = new Vector[nbOfWings];
+//        WingPhysX[] wingArray = this.getWingArray();
+//        int nbOfWings = wingArray.length;
+//        Vector[] liftVectors = new Vector[nbOfWings];
 
-        for (int index = 0; index != nbOfWings; index++) {
-            liftVectors[index] = wingArray[index].getLift(orientation, rotation, velocity);
-        }
+        //calculate the lift
+        Vector leftWingLift = this.getMainLeft().getLift(transformations, orientation, rotation, velocity);
+        Vector rightWingLift = this.getMainRight().getLift(transformations,orientation, rotation, velocity);
+        Vector horizontalStabLift = this.getHorizontalStabilizer().getLift(transformations, orientation, rotation, velocity);
+        Vector verticalStabLift = this.getVerticalStabilizer().getLift(transformations, orientation, rotation, velocity);
 
-        Vector totalLift = Vector.sumVectorArray(liftVectors);
+        //store the lift
+        droneForces.setLiftForces(leftWingLift, rightWingLift, horizontalStabLift, verticalStabLift);
+
+
+//        for (int index = 0; index != nbOfWings; index++) {
+//            liftVectors[index] = wingArray[index].getLift(orientation, rotation, velocity);
+//        }
+//
+//        Vector totalLift = Vector.sumVectorArray(liftVectors);
 
         // transform the thrust vector of the drone to the world axis
-        Vector thrust = droneOnWorld(thrustVector, orientation);
+        Vector thrust = transformations.droneOnWorld(thrustVector, orientation);
+        droneForces.setThrust(thrust);
 
         //calculate the scalar value of the gravity working on the drone
         float gravityYComp = - this.getPhysXEngineConfig().getGravity()*this.getTotalMass();
         // get the gravitational force exerted on the drone
         Vector gravity = new Vector(0, gravityYComp, 0);
-        Vector[] nonChassisForceArray = {totalLift, thrust, gravity};
-        //get the forces exerted by the chassis
-        Vector chassisForces = this.getDroneChassis().netChassisForces(state, inputs, deltaTime, Vector.sumVectorArray(nonChassisForceArray));
-        // create array containing all the forces exerted on the drone
-        Vector[] forceArray = {totalLift, thrust, gravity, chassisForces};
+        droneForces.setGravity(gravity);
 
-        return Vector.sumVectorArray(forceArray);
+        this.getDroneChassis().netChassisForces(droneForces, state, inputs, deltaTime);
+
+//        Vector[] nonChassisForceArray = {totalLift, thrust, gravity};
+//        //get the forces exerted by the chassis
+//        Vector chassisForces = this.getDroneChassis().netChassisForces(state, inputs, deltaTime, Vector.sumVectorArray(nonChassisForceArray));
+//        // create array containing all the forces exerted on the drone
+//        Vector[] forceArray = {totalLift, thrust, gravity, chassisForces};
+
+        return droneForces;//Vector.sumVectorArray(forceArray);
 
     }
 
@@ -874,7 +857,7 @@ public class PhysXEngine {
      *         given in the world axis system
      * note: the wing inclinations are changed during the calculation, this method is for controller use ONLY
      */
-    public Vector getAirborneForces(Vector orientation, Vector rotation, Vector velocity, AutopilotOutputs outputs){
+    public Vector getNoThrustAirborneForces(Vector orientation, Vector rotation, Vector velocity, AutopilotOutputs outputs){
         //extract the inclinations of the wings
         float leftWingInclination = outputs.getLeftWingInclination();
         float rightWingInclination = outputs.getRightWingInclination();
@@ -911,31 +894,48 @@ public class PhysXEngine {
     /**
      * Calculates the total moment exerted on the drone in the drone axis system
      * @param state the state of the drone at the moment of invocation
-     * @param inputs the inputs from the autopilot for the drone
-     * @param deltaTime the time between two simulation steps
+     * @param droneForces the forces exerted on the drone (pre-calculated)
      * @return a vector containing the total exerted moment on the drone in the drone axis system
      * @author Martijn Sauwens
      * note: the gravity and thrust force are ignored because they are parallel to their force arms
      */
-    public Vector getTotalMomentDrone(DroneState state, AutopilotOutputs inputs, float deltaTime) {
+    public Vector getTotalMomentDrone(FastTransformations transformations, DroneForces droneForces, DroneState state) {
 
+        //get the state elements needed for the calculation
         Vector orientation = state.getOrientation();
-        Vector rotation = state.getRotation();
-        Vector velocity = state.getVelocity();
+//        Vector rotation = state.getRotation();
+//        Vector velocity = state.getVelocity();
 
-        WingPhysX[] wingArray = this.getWingArray();
-        int nbOfWings = wingArray.length;
-        //the array containing the lift vectors projected on the drone axis
-        Vector[] momentVectorsDrone = new Vector[nbOfWings];
-        Vector[] forceVectorsDrone = new Vector[nbOfWings];
-        for (int index = 0; index != nbOfWings; index++) {
-            WingPhysX currentWing = wingArray[index];
-            Vector liftOnDrone = worldOnDrone(currentWing.getLift(orientation, rotation, velocity), orientation);
-            forceVectorsDrone[index] = liftOnDrone;
-            Vector positionWing = currentWing.getRelativePosition();
-            Vector momentOnDrone = positionWing.crossProduct(liftOnDrone);
-            momentVectorsDrone[index] = momentOnDrone;
-        }
+        //get the transformation matrix needed
+
+        List<Vector> moments = new ArrayList<>();
+
+        //calculate the moments
+        WingPhysX leftWing = this.getMainLeft();
+        moments.add(droneForces.getLeftWingMoment(leftWing, transformations, orientation));
+
+        WingPhysX rightWing = this.getMainRight();
+        moments.add(droneForces.getRightWingMoment(rightWing, transformations, orientation));
+
+        WingPhysX horStab = this.getHorizontalStabilizer();
+        moments.add(droneForces.getHorizontalStabilizerMoment(horStab, transformations, orientation));
+
+        WingPhysX verStab = this.getVerticalStabilizer();
+        moments.add(droneForces.getVerticalStabilizerMoment(verStab, transformations, orientation));
+
+//        WingPhysX[] wingArray = this.getWingArray();
+//        int nbOfWings = wingArray.length;
+//        //the array containing the lift vectors projected on the drone axis
+//        Vector[] momentVectorsDrone = new Vector[nbOfWings];
+//        Vector[] forceVectorsDrone = new Vector[nbOfWings];
+//        for (int index = 0; index != nbOfWings; index++) {
+//            WingPhysX currentWing = wingArray[index];
+//            Vector liftOnDrone = worldOnDrone(currentWing.getLift(orientation, rotation, velocity), orientation);
+//            forceVectorsDrone[index] = liftOnDrone;
+//            Vector positionWing = currentWing.getRelativePosition();
+//            Vector momentOnDrone = positionWing.crossProduct(liftOnDrone);
+//            momentVectorsDrone[index] = momentOnDrone;
+//        }
 
 //        System.out.println("Lift Right main: " + forceVectorsDrone[0]);
 //        System.out.println("Lift Left main: " +  forceVectorsDrone[1]);
@@ -943,8 +943,10 @@ public class PhysXEngine {
 //        System.out.println("Lift Vertical stabilizer: " + forceVectorsDrone[3]);
 
 
-        Vector chassisMoment = this.getDroneChassis().netChassisMoment(state, inputs, deltaTime);
-        return (Vector.sumVectorArray(momentVectorsDrone)).vectorSum(chassisMoment);
+        Vector chassisMoment = this.getDroneChassis().netChassisMoment(droneForces, state);
+        moments.add(chassisMoment);
+
+        return Vector.sumVectorList(moments);
     }
 
     /**
@@ -1328,6 +1330,7 @@ public class PhysXEngine {
     public final static String GAMMA_MODE = "GAMMA_MODE";
 
 
+
     public PhysXOptimisations createPhysXOptimisations(){
         return new PhysXOptimisations();
     }
@@ -1342,227 +1345,7 @@ public class PhysXEngine {
             // nothing to construct
         }
 
-        @Deprecated
-        public Vector[] balanceDrone(Vector orientation, float mainWingStable, float stabWingStable){
-            PhysXEngine.this.getMainLeft().setWingInclination(mainWingStable);
-            PhysXEngine.this.getMainRight().setWingInclination(mainWingStable);
-            PhysXEngine.this.getHorizontalStabilizer().setWingInclination(stabWingStable);
-            PhysXEngine.this.getVerticalStabilizer().setWingInclination(stabWingStable);
-            // use interval reduction to find the zero point for the lift, and initialize the thrust to
-            // be equal to the "drag" experienced by the aircraft.
-            float stepsize = 1.0f;
-            float velocity = 0.0f;
-            float frameRate = 1/20f;
-            float firstPositive;
-            float yForce = -1;
-            boolean positiveLift = false;
-            Vector zeroThrust = new Vector();
 
-            // first get the point where the total external forces are larger than zero
-            while(! positiveLift) {
-                //System.out.println("external forces " + PhysXEngine.this.getTotalExternalForcesWorld(zeroThrust, orientation, new Vector(), new Vector(0,0, -velocity)));
-                //System.out.println("Velocity: " + velocity);
-                float dummyVelocity = velocity;
-                yForce = PhysXEngine.this.getTotalExternalForcesWorld(zeroThrust, new DroneState() {
-                    @Override
-                    public Vector getPosition() {
-                        return new Vector(0, DRONE_YCOORD, 0);
-                    }
-
-                    @Override
-                    public Vector getVelocity() {
-                        return new Vector(0, 0, - dummyVelocity);
-                    }
-
-                    @Override
-                    public Vector getOrientation() {
-                        return new Vector();
-                    }
-
-                    @Override
-                    public Vector getRotation() {
-                        return new Vector();
-                    }
-
-                    @Override
-                    public float getPrevFrontTyreDelta() {
-                        return 0;
-                    }
-
-                    @Override
-                    public float getPrevRearLeftTyreDelta() {
-                        return 0;
-                    }
-
-                    @Override
-                    public float getPrevRearRightTyreDelta() {
-                        return 0;
-                    }
-                }, DUMMY_OUTPUTS, frameRate).getyValue();
-                if( yForce > 0.0f) {
-                    positiveLift = true;
-                    firstPositive = velocity;
-                }else{
-                    if(velocity > 1000)
-                        throw new IllegalArgumentException();
-                    velocity += stepsize;
-                }
-            }
-
-            System.out.println("Velocity: " + velocity + "Force: " + yForce);
-            // then call the find zero function, to find better approx
-            velocity = this.findZero(orientation, velocity-stepsize, velocity, frameRate);
-            float dummyvel = velocity;
-            float desiredThrust = -PhysXEngine.this.getTotalExternalForcesWorld(zeroThrust, new DroneState() {
-                @Override
-                public Vector getPosition() {
-                    return new Vector(0, DRONE_YCOORD, 0);
-                }
-
-                @Override
-                public Vector getVelocity() {
-                    return new Vector(0, 0, -dummyvel);
-                }
-
-                @Override
-                public Vector getOrientation() {
-                    return new Vector();
-                }
-
-                @Override
-                public Vector getRotation() {
-                    return new Vector();
-                }
-
-                @Override
-                public float getPrevFrontTyreDelta() {
-                    return 0;
-                }
-
-                @Override
-                public float getPrevRearLeftTyreDelta() {
-                    return 0;
-                }
-
-                @Override
-                public float getPrevRearRightTyreDelta() {
-                    return 0;
-                }
-            }, DUMMY_OUTPUTS, FRAMERATE).getzValue();
-            return new Vector[]{new Vector(0,0,desiredThrust), new Vector(0,0, -velocity)};
-        }
-        @Deprecated
-        private float findZero(Vector orientation, float lowerBound, float upperBound, float frameRate){
-            float droneYCoord = 20f;
-            float epsilon = 1E-6f;
-            float nbOfSteps = 100;
-            float prevYValue = Float.MAX_VALUE;
-            float velocityCenter = upperBound;
-            Vector zeroThrust = new Vector();
-            Vector velocityVector = new Vector();
-
-            for(int index = 0; index != nbOfSteps; index++){
-                //get the value for this iteration
-                velocityCenter = (lowerBound + upperBound)/2.0f;
-                velocityVector = new Vector(0.0f, 0.0f, -velocityCenter);
-                Vector velocityV = new Vector(0.0f, 0.0f, -velocityCenter);
-
-                float yNextValue = PhysXEngine.this.getTotalExternalForcesWorld(zeroThrust, new DroneState() {
-                    @Override
-                    public Vector getPosition() {
-                        return new Vector(0, DRONE_YCOORD, 0);
-                    }
-
-                    @Override
-                    public Vector getVelocity() {
-                        return velocityV;
-                    }
-
-                    @Override
-                    public Vector getOrientation() {
-                        return new Vector();
-                    }
-
-                    @Override
-                    public Vector getRotation() {
-                        return new Vector();
-                    }
-
-                    @Override
-                    public float getPrevFrontTyreDelta() {
-                        return 0;
-                    }
-
-                    @Override
-                    public float getPrevRearLeftTyreDelta() {
-                        return 0;
-                    }
-
-                    @Override
-                    public float getPrevRearRightTyreDelta() {
-                        return 0;
-                    }
-                }, DUMMY_OUTPUTS, frameRate).getyValue();
-
-                //System.out.println(yNextValue);
-
-
-                //check if the precision is good enough
-                if(yNextValue == 0.0f){
-                    System.out.println("exit with good approx");
-                    return velocityCenter;
-                // if not replace the borders
-                }else{
-                    if(yNextValue < 0){
-                        lowerBound = velocityCenter;
-                        prevYValue = yNextValue;
-                    }else{
-                        upperBound = velocityCenter;
-                        prevYValue = yNextValue;
-                    }
-                }
-            }
-            Vector velocityV = velocityVector;
-            System.out.println("Exit with bad approx");
-            System.out.println("Total External Forces: " + PhysXEngine.this.getTotalExternalForcesWorld(zeroThrust, new DroneState() {
-                @Override
-                public Vector getPosition() {
-                    return new Vector(0, DRONE_YCOORD, 0);
-                }
-
-                @Override
-                public Vector getVelocity() {
-                    return velocityV;
-                }
-
-                @Override
-                public Vector getOrientation() {
-                    return new Vector();
-                }
-
-                @Override
-                public Vector getRotation() {
-                    return new Vector();
-                }
-
-                @Override
-                public float getPrevFrontTyreDelta() {
-                    return 0;
-                }
-
-                @Override
-                public float getPrevRearLeftTyreDelta() {
-                    return 0;
-                }
-
-                @Override
-                public float getPrevRearRightTyreDelta() {
-                    return 0;
-                }
-            }, DUMMY_OUTPUTS, frameRate));
-            System.out.println("Velocity: " + velocityCenter);
-            return velocityCenter;
-        }
 
         /**
          * Calculates the maximum right wing inclination for the given angle of attack
@@ -1690,8 +1473,6 @@ public class PhysXEngine {
 
             return numerator/denominator;
         }
-
-
 
 
         private float FRAMERATE = 1/20f;
@@ -1826,7 +1607,7 @@ public class PhysXEngine {
          * calculates the velocity wherefore the airfoils generate no lift in the y-direction
          * for the case where the drone has no roll and no pitch
          * @param mainWingInclination the standard inclination of the main wings in radians
-         * @return the velocity where fore getAirborneForces() returns 0 in the y-component
+         * @return the velocity where fore getNoThrustAirborneForces() returns 0 in the y-component
          *         the velocity is specified in m/s
          */
         public float calcStableZeroPitchVelocity(float mainWingInclination){

@@ -69,14 +69,56 @@ public abstract class WingPhysX {
      * @param velocity the velocity of the center of mass of the drone in the world axis system
      * @return N*liftSlope*AOA*s^2
      */
+    @Deprecated
     public Vector getLift(Vector orientation, Vector rotation, Vector velocity){
 
-        Vector normal = PhysXEngine.droneOnWorld(this.getNormal(), orientation);
+        FastTransformations fastTransformations = new FastTransformations();
+        //call the other
+        return getLift(fastTransformations,orientation, rotation, velocity);
+//        Vector normal = fastTransformations.droneOnWorld(this.getNormal(), orientation);
+//        Vector airspeed = this.getAbsoluteVelocity(orientation, rotation,  velocity);
+//        Vector axisVector = PhysXEngine.droneOnWorld(this.getAxisVector(), orientation);
+//        Vector projectedAirspeed = airspeed.orthogonalProjection(axisVector);
+//
+//        float angleOfAttack = this.calcAngleOfAttack(orientation, rotation, velocity);
+//        float liftSlope = this.getLiftSlope();
+//        //System.out.println("angle of attack: " + angleOfAttack);
+//
+//
+//        // calculate s^2
+//        float airspeedSquared = projectedAirspeed.scalarProduct(projectedAirspeed);
+//
+//        float scalarPart =  airspeedSquared*angleOfAttack*liftSlope;
+//        Vector lift = normal.scalarMult(-scalarPart);
+//
+//        //if the lift on the wing is lower than the threshold, AOA is disabled
+//        if(lift.getSize() >= AOA_LIFT_THRESHOLD &&  Math.abs(angleOfAttack) >= this.getMaximumAngleOfAttack()) {
+////            System.out.println("wing: " + this.getRelativePosition());
+////            System.out.println("AOA exception thrown, AOA: " + angleOfAttack*180/PI);
+////            System.out.println("Wing inclination: " + this.getWingInclination()*180/PI);
+////            System.out.println("AOA exception with orientation: " + orientation.scalarMult((float) (180/PI)));
+////            System.out.println();
+//            //throw new AngleOfAttackException(this);
+//        }
+//
+//        return lift;
+    }
+
+    /**
+     * Calculates the lift of the Airfoil expressed in world axis
+     * @param orientation the orientation of the drone (heading, pitch, roll)
+     * @param rotation the absolute rotation of the drone (rotation vector)
+     * @param velocity the velocity of the center of mass of the drone in the world axis system
+     * @return N*liftSlope*AOA*s^2
+     */
+    public Vector getLift(FastTransformations fastTransformations, Vector orientation, Vector rotation, Vector velocity){
+
+        Vector normal = fastTransformations.droneOnWorld(this.getNormal(), orientation);
         Vector airspeed = this.getAbsoluteVelocity(orientation, rotation,  velocity);
-        Vector axisVector = PhysXEngine.droneOnWorld(this.getAxisVector(), orientation);
+        Vector axisVector = fastTransformations.droneOnWorld(this.getAxisVector(), orientation);
         Vector projectedAirspeed = airspeed.orthogonalProjection(axisVector);
 
-        float angleOfAttack = this.calcAngleOfAttack(orientation, rotation, velocity);
+        float angleOfAttack = this.calcAngleOfAttack(fastTransformations, orientation, rotation, velocity);
         float liftSlope = this.getLiftSlope();
         //System.out.println("angle of attack: " + angleOfAttack);
 
@@ -149,17 +191,18 @@ public abstract class WingPhysX {
 
     /**
      * Calculates the angle of attack and stores it in the designated variable
+     * @param fastTransformations the fast transformations object used to speed up the calculations
      * @param orientation the orientation of the drone (heading, pitch, roll)
      * @param rotation the rotation of the drone, given in the world axis system
      * @param velocity the velocity of the center of mass of the drone given in the world axis system
      * @post new angleOfAttack = -atan2(Airspeed*Normal, Airspeed*attackvector)
      */
-    public float calcAngleOfAttack(Vector orientation, Vector rotation, Vector velocity){
+    public float calcAngleOfAttack(FastTransformations fastTransformations, Vector orientation, Vector rotation, Vector velocity){
         //need for the projected version of all the vectors because the airspeed is in the world axis
         Vector airspeed = this.getAbsoluteVelocity(orientation, rotation, velocity);
-        Vector normal = PhysXEngine.droneOnWorld(this.getNormal(), orientation);
-        Vector axisVector = PhysXEngine.droneOnWorld(this.getAxisVector(), orientation);
-        Vector attackVector = PhysXEngine.droneOnWorld(this.getAttackVector(), orientation);
+        Vector normal = fastTransformations.droneOnWorld(this.getNormal(), orientation);
+        Vector axisVector = fastTransformations.droneOnWorld(this.getAxisVector(), orientation);
+        Vector attackVector = fastTransformations.droneOnWorld(this.getAttackVector(), orientation);
 
 
         Vector projectedAirspeed = airspeed.orthogonalProjection(axisVector);//.orthogonalProjection(normal);

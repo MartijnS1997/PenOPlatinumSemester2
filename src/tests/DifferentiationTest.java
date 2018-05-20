@@ -3,7 +3,6 @@ package tests;
 import AutopilotInterfaces.AutopilotOutputs;
 import internal.Testbed.Drone;
 import internal.Helper.Vector;
-import internal.Testbed.WorldBuilder;
 import org.junit.Before;
 import org.junit.Test;
 

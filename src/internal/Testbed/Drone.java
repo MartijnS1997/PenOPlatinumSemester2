@@ -110,10 +110,11 @@ public class Drone implements Callable<Void> {
 	public Void call() throws Exception {
 		float deltaTime = this.getDeltaTime();
 		int nbIterations = this.getNbIterations();
-		for(int counter = 0; counter != nbIterations; counter++) {
+		for (int counter = 0; counter != nbIterations; counter++) {
 			toNextState(deltaTime);
 		}
 		return null;
+
 	}
 
 

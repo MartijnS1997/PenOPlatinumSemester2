@@ -9,6 +9,8 @@ import math.Vector3f;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import static java.lang.StrictMath.abs;
 //import be.kuleuven.cs.som.annotate.*;
 
 /**
@@ -344,14 +346,14 @@ public class Vector {
 	 * checks if the two vectors are equal within a given error range
 	 * @param other the other vector
 	 * @param range the range of the error
-	 * @return true and only if all the components are equal within a given range (see floatEquals)
+	 * @return true and only if all the components are equal within a given range (see floatAbsEquals)
 	 * @author Martijn Sauwens
 	 */
 	public boolean rangeEquals(Vector other, float range){
 
-		boolean xPart = floatEquals(this.getxValue(), other.getxValue(), range);
-		boolean yPart = floatEquals(this.getyValue(), other.getyValue(), range);
-		boolean zPart = floatEquals(this.getzValue(), other.getzValue(), range);
+		boolean xPart = floatAbsEquals(this.getxValue(), other.getxValue(), range);
+		boolean yPart = floatAbsEquals(this.getyValue(), other.getyValue(), range);
+		boolean zPart = floatAbsEquals(this.getzValue(), other.getzValue(), range);
 
 		return xPart&&yPart&&zPart;
 	}
@@ -364,9 +366,45 @@ public class Vector {
 	 * @return true if and only if value1-value2 is in range of [-epsilon, epsilon]
 	 * @author Martijn Sauwens
 	 */
-	private static boolean floatEquals(float value1, float value2, float epsilon){
+	private static boolean floatAbsEquals(float value1, float value2, float epsilon){
 		float diff = value1 - value2;
 		return  diff >= - epsilon && diff <= epsilon;
+	}
+
+	/**
+	 * Checks if the provided vector equals to the error if all the components of the vector are
+	 * relatively the same in a given range
+	 * @param other the other vector
+	 * @param relError the relative error to determine if they equal
+	 * @return true if and only if all the components are within the provided relative error margin
+	 */
+	public boolean relativeEquals(Vector other, float relError){
+		//first check if the other isn't a null
+		if(other == null){
+			return false;
+		}
+
+		//get all the components
+		boolean xPart = relativeFloatEquals(this.getxValue(), other.getxValue(), relError);
+		boolean yPart = relativeFloatEquals(this.getyValue(), other.getyValue(), relError);
+		boolean zPart = relativeFloatEquals(this.getzValue(), other.getzValue(), relError);
+
+		return xPart&&yPart&&zPart;
+	}
+
+	/**
+	 * Returns true if and only if the relative error of f1 and f2 is smaller than the provided margin
+	 * @param f1 the first float to check
+	 * @param f2 the second float to check
+	 * @param epsilon the relativer error
+	 */
+	private boolean relativeFloatEquals(float f1, float f2, float epsilon){
+		//get the difference between f1 and f2
+		float diff = f1 - f2;
+		//get the relative error
+		float relError = diff/f2;
+		//check if it's within the acceptable range
+		return abs(relError) < epsilon;
 	}
 
 	/**
@@ -375,7 +413,7 @@ public class Vector {
 	 * @param driftRange the range for the allowed drift
 	 * @return a vector containing the values of the newVector if and only if the new value
 	 * 		   has sufficient change to the previous one (the one which it is invoked against)
-	 * 		   see floatEquals for the details on the range.
+	 * 		   see floatAbsEquals for the details on the range.
 	 * @author Martijn Sauwens
 	 */
 	public Vector driftRejection(Vector newVector, float driftRange){
@@ -388,11 +426,11 @@ public class Vector {
 		float newZPart = newVector.getzValue();
 
 
-		if(floatEquals(newXPart, thisXPart, driftRange))
+		if(floatAbsEquals(newXPart, thisXPart, driftRange))
 			 newXPart = thisXPart;
-		if(floatEquals(newYPart, thisYPart, driftRange))
+		if(floatAbsEquals(newYPart, thisYPart, driftRange))
 			newYPart = thisYPart;
-		if(floatEquals(newZPart, thisZPart, driftRange))
+		if(floatAbsEquals(newZPart, thisZPart, driftRange))
 			newZPart = thisZPart;
 
 		return new Vector(newXPart, newYPart, newZPart);

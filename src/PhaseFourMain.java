@@ -33,8 +33,8 @@ public class PhaseFourMain {
         //set the seed so we generate the same world
         generator.setRandomSeed(0);
         //create the simulation environment
-//        SimulationEnvironment environment = generator.generateBigWorld();
-        SimulationEnvironment environment = generator.generate4AirportWorld();
+        SimulationEnvironment environment = generator.generateBigWorld();
+//        SimulationEnvironment environment = generator.generate4AirportWorld();
         // generator.generateGridWorld(gridWorldRows, gridWorldColumns);
         //print the environment
         System.out.println(SimulationGen.environmentToString(environment));

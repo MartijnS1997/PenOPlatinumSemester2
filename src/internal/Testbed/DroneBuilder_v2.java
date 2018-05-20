@@ -258,7 +258,7 @@ public class DroneBuilder_v2 {
         //generate the optimisations
         PhysXEngine.PhysXOptimisations optimisations = drone.getPhysXEngine().createPhysXOptimisations();
         //calculate the balance
-        Vector velocity = (optimisations.balanceDrone(drone.getOrientation(), MAIN_STABLE_INCLINATION, HOR_STABLE_INCLINATION))[1];
+        Vector velocity = new Vector();//(optimisations.balanceDrone(drone.getOrientation(), MAIN_STABLE_INCLINATION, HOR_STABLE_INCLINATION))[1];
 
         drone.setOrientation(trueOrientation);
 
