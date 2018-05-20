@@ -229,6 +229,7 @@ public class SimulationGen {
         DeliverySpec delivery2 = generateDelivery(0,0,2,0);
         DeliverySpec delivery3 = generateDelivery(0,0,3,0);
         DeliverySpec delivery4 = generateDelivery(3, 0,0,1);
+        DeliverySpec delivert5 = generateDelivery(0,0,1,0);
 
 
         //generate the lists
@@ -578,23 +579,29 @@ public class SimulationGen {
      * (runway one heading is runwayZeroHeading.scalarMult(-1))
      * the orientation of the drone is aligned with the takeoff direction of the runway
      * @param drones the list to add the result to
-     * @param airportLocation the location of the airport
+     * @param startGateLocation the location of the airport
      * @param runwayHeading the heading of the runway to place the drone along at
      */
-    private void addDroneToAirport(List<DroneSpec> drones, Vector airportLocation, Vector runwayHeading){
+    private void addDroneToAirport(List<DroneSpec> drones, Vector startGateLocation, Vector runwayHeading){
 
-        //get the offset along the runway from the center
-        float getOffset = this.getDroneGenerationOffset();
-
-        //calculate the offset
-        Vector runwayZeroOffset = runwayHeading.normalizeToLength(getOffset);
-
-        //get the location of the drone
-        Vector dronePosition = airportLocation.vectorSum(runwayZeroOffset);
-        //also account for the height of the drone
-        dronePosition = dronePosition.vectorSum(getDroneYPos());
-        //we need to do this because of our favorite autistic child named Java
-        Vector dronePos =  dronePosition;
+//        //get the right orthogonal of the runway heading
+//        Vector rightOrthonormal = runwayHeading.getRightOrthonormal();
+//        //set the drone to the left (multiply with -1)
+//        Vector leftOrthonormal = rightOrthonormal.scalarMult(-1);
+//        //take the offset (=1/2 width)
+//        float offset = this.getAirportRunwayWidth()/2f;
+//
+//        //scale the left orthonormal
+//        Vector droneRelGroundPos = leftOrthonormal.normalizeToLength(offset);
+//
+//        //add the drone airport position to get the absolute drone pos
+//        Vector droneGroundPos = droneRelGroundPos.vectorSum(startGateLocation);
+//        System.out.println("airport location: " + startGateLocation);
+//
+//        System.out.println("rel pos drone " + droneRelGroundPos.getSize());
+//        System.out.println("abs pos drone " + droneGroundPos);
+        //add the extra offset for the height of the drone
+        Vector dronePos = startGateLocation.vectorSum(getDroneYPos());
 
         //get the orientation of the drone
         Vector droneOrientation = new Vector(getHeadingAngle(runwayHeading), 0, 0);
@@ -1156,22 +1163,7 @@ public class SimulationGen {
         this.host = host;
     }
 
-    /**
-     * Getter for the offset from the center (along the heading of the runway) where
-     * the drones are generated
-     * @return the offset used from the center to generate the drones
-     */
-    private float getDroneGenerationOffset() {
-        return droneGenerationOffset;
-    }
 
-    /**
-     * Setter for the generation distance from the center of the airports (along the heading of the runway)
-     * @param droneGenerationOffset the offset to set for the drones
-     */
-    public void setDroneGenerationOffset(float droneGenerationOffset) {
-        this.droneGenerationOffset = droneGenerationOffset;
-    }
 
     /**
      * Getter for the seed used for the random number generators, used to generate the same simulation
@@ -1242,11 +1234,6 @@ public class SimulationGen {
      * The hostname where the server is listening for connections
      */
     private String host = "localhost";
-
-    /**
-     * The offset from the drone to the center of the airport
-     */
-    private float droneGenerationOffset = 10f;
 
     /**
      * The seed used for the random number generators, used to test on the same world

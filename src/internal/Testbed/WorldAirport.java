@@ -50,6 +50,14 @@ public class WorldAirport extends MapAirport {
 
 		boolean isWithinOrth = isBetween(orthSize, 0,runwayWidth);
 		boolean isWithinHeading = isBetween(headingSize, 0, runwayWidth/2);
+//		if(droneID.equals("0")){
+//			System.out.println("isWithinOrth: " + isWithinOrth + ", isWithinHeading: " + isWithinHeading);
+//			System.out.println("headingSize: " + headingSize);
+//			System.out.println("orthSize: " + orthSize);
+//			System.out.println("Heading: " + airportHeading);
+//			System.out.println("Airportlocation: "+  airportLocation);
+//			System.out.println("drone location: " + droneGroundPos);
+//		}
 		return isWithinOrth && isWithinHeading;
 	}
 

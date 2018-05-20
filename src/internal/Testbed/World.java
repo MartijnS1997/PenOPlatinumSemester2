@@ -236,9 +236,9 @@ public class World {
 
 		//map used to look into if the drone can deliver, string --> drone ID and boolean to indicate if it can deliver
 		Map<String, Boolean> ableToDeliverMap = new HashMap<>();
-
 		//start iterating trough all the elements
 		for(WorldDelivery delivery: unDelivered){
+
 			String deliveryDroneID = delivery.getDeliveryDroneID();
 			//get the drone
 			Drone drone = droneMap.get(deliveryDroneID);
@@ -251,7 +251,14 @@ public class World {
 				ableToDeliverMap.put(deliveryDroneID, readyToPickUp);
 			}
 
+
 			if(readyToPickUp){
+				if(delivery.getDeliveryDroneID().equals("0")){
+					System.out.println();
+					System.out.println("Delivery: seq nb: " + delivery.getSequenceNumber() + ", source: " + delivery.getSourceAirport() + ", dest: " + delivery.getDestinationAirport());
+					System.out.println("lowest seq nb: " +  lowestSequenceNumberMap.get("0"));
+					System.out.println("assignedDelivery: " + deliverySequenceMap.get("0"));
+				}
 				//first check the lowest encountered so far map, if the sequence number of the package is higher, ignore
 				Long lowestSequenceSoFar = lowestSequenceNumberMap.get(deliveryDroneID);
 				long deliverySequenceNumber = delivery.getSequenceNumber();
@@ -262,7 +269,10 @@ public class World {
 					//also remove the current entry from the delivery sequence map, regardless from
 					//the fact if we can deliver the current package. Only the lowest sequence number should be
 					//delivered
-					deliverySequenceMap.remove(deliveryDroneID);
+					WorldDelivery removedDelivery = deliverySequenceMap.remove(deliveryDroneID);
+					if(delivery.getDeliveryDroneID().equals("0")){
+						System.out.println("removed delivery: " + removedDelivery);
+					}
 				}else{
 					//if the sequence number is not lower than the lowest so far, we may not deliver the package, continue
 					continue;
@@ -271,6 +281,9 @@ public class World {
 				//then check if the package can be picked up
 				if(canPickUpPackage(drone, delivery)){
 					//if so, put the package in the map
+//					if(delivery.getDeliveryDroneID().equals("0"))
+//						System.out.println("added delivery: " + delivery);
+
 					deliverySequenceMap.put(deliveryDroneID, delivery);
 				}
 				//if not we continue
@@ -278,7 +291,7 @@ public class World {
 			}
 
 		}
-
+//		System.out.println("all drones that will load a package: " + deliverySequenceMap.keySet());
 		//after the loop, load the packages for all the drones
 		for(String deliveryID : deliverySequenceMap.keySet()){
 			//get the corresponding drone
@@ -333,6 +346,7 @@ public class World {
 	 * 		   package transfer velocity
 	 */
 	private static boolean readyToPickUp(Drone drone){
+
 		//check first if the drone is already delivering a package
 		if(drone.isDelivering()){
 			return false;
@@ -558,6 +572,7 @@ public class World {
 		String deliveryDroneID = delivery.getDeliveryDroneID();
 		//if not return false
 		if(!droneID.equals(deliveryDroneID)){
+
 			return false;
 		}
 		//get the package source airport and position
@@ -569,7 +584,10 @@ public class World {
 //		Vector dronePos = drone.getPosition();
 //		float distanceToGate = airport.distanceToGate(sourceGateNumber, dronePos);
 //
-//		return distanceToGate <= MAX_TRANSFER_DISTANCE;
+//		return distanceToGate <= MAX_TRANSFER_DISTANCE
+//		if(drone.getDroneID().equals("0")){
+//			System.out.println("drone is at gate zone: " + airport.isAtGateZone(drone.getPosition(), drone.getDroneID()));
+//		}
 		return airport.isAtGateZone(drone.getPosition());
 	}
 

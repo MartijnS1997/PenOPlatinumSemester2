@@ -30,6 +30,8 @@ public class PhaseFourMain {
 
         //create a simulation generator
         SimulationGen generator = new SimulationGen(worldXSize, worldZSize);
+        generator.setAirportRunwayLength(runwayLength);
+        generator.setAirportRunwayWidth(runwayWidth);
         //set the seed so we generate the same world
         generator.setRandomSeed(0);
         //create the simulation environment
@@ -184,7 +186,7 @@ public class PhaseFourMain {
     private static int tcpPort = 4242;
     private static String host = "localhost";
 
-    private static float runwayLength = 280f;
+    private static float runwayLength = 400f;
     private static float runwayWidth = 10f;
 
 

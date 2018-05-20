@@ -106,11 +106,11 @@ public class TestbedServer implements Runnable {
         boolean simulationActive = true;
         while(simulationActive){
             try{
-                long startMillis = System.currentTimeMillis();
+//                long startMillis = System.currentTimeMillis();
                 //simulate the next step
                 this.simulateStep();
-                long endMillis = System.currentTimeMillis();
-                errorLog(endMillis-startMillis);
+//                long endMillis = System.currentTimeMillis();
+//                errorLog(endMillis-startMillis);
 
             }catch(java.io.EOFException | SimulationEndedException e) {
                 //the connection at the other side has closed or the simulation has ended

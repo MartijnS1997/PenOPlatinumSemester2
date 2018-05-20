@@ -243,7 +243,9 @@ public class AutopilotFiniteStateMachine {
 //            System.out.println("need to pick up package at source airport");
             int sourceAirportID = currentDelivery.getSourceAirport();
             MapAirport targetAirport = communicator.getAirportByID(sourceAirportID);
-//            System.out.println("target airport: " + targetAirport);
+            System.out.println("\nId: " + this.getAutopilot().getID());
+            System.out.println("Delivery: source: " + sourceAirportID + ", dest: " + currentDelivery.getDestinationAirport());
+            System.out.println("Target airport: " + targetAirport);
             //generate the path generator for the controller
             PathGenerator_v2 pathGenerator = new PathGenerator_v2(inputs, targetAirport, cruisingAltitude, descendThreshold, standardLandingAlt);
             navigationController.configureNavigation(config, pathGenerator);
