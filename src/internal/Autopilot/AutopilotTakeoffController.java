@@ -35,11 +35,11 @@ public class AutopilotTakeoffController extends Controller {
         //generate the control outputs
         ControlOutputs outputs = new ControlOutputs(getStandardOutputs());
         //check if it has a package to deliver
-        if(!hasPackageToDeliver()){
-            //if not, we do not take off yet
-            setMaxBrake(outputs);
-            return outputs;
-        }
+//        if(!hasPackageToDeliver()){
+//            //if not, we do not take off yet
+//            setMaxBrake(outputs);
+//            return outputs;
+//        }
         //do the cas control
         CasControls(currentInputs, previousInputs);
         //resume normal controls
@@ -87,16 +87,16 @@ public class AutopilotTakeoffController extends Controller {
         this.setTakeoffCAS(takeoffCAS);
     }
 
-    /**
-     * Checks if the drone has any packages to deliver, if not the drone remains idle and does not take off
-     * @return true if the drone has a package to deliver
-     */
-    private boolean hasPackageToDeliver(){
-        //get the autopilot
-        AutopilotCommunicator communicator = this.getAutopilot().getCommunicator();
-        AutopilotDelivery delivery = communicator.getCurrentRequest();
-        return delivery != null;
-    }
+//    /**
+//     * Checks if the drone has any packages to deliver, if not the drone remains idle and does not take off
+//     * @return true if the drone has a package to deliver
+//     */
+//    private boolean hasPackageToDeliver(){
+//        //get the autopilot
+//        AutopilotCommunicator communicator = this.getAutopilot().getCommunicator();
+//        AutopilotDelivery delivery = communicator.getCurrentRequest();
+//        return delivery != null;
+//    }
 
     /**
      * Generates the control actions concerning the pitch of the drone during takeoff

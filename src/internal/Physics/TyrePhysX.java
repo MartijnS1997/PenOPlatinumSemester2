@@ -50,7 +50,6 @@ public class TyrePhysX {
         if(groundDist >= this.getTyreRadius()){
             return new Vector();
         }
-        //not so easy case:
 
         //first calculate the normal force:
         Vector verticalForce = this.getNormalForce(orientation, position, deltaTime, prevTyreDelta); //naming for consistency
@@ -110,7 +109,10 @@ public class TyrePhysX {
         //transform the net forces to the drone axis system
         Vector nonChassisForcesDrone = fastTransformations.worldOnDrone(nonChassisForces, orientation);
 //        System.out.println("Non chassis forces: " + nonChassisForces);
-        float neededBrakeForce = this.calcNeededBrakeForce(velocityDrone, nonChassisForcesDrone, deltaTime/* *10*/);
+        float neededBrakeForce;
+
+        neededBrakeForce = this.calcNeededBrakeForce(velocityDrone, nonChassisForcesDrone, deltaTime);
+
 
         //check if we can exert the force
         float exerted = signum(neededBrakeForce) * min(abs(neededBrakeForce), brakeForce);

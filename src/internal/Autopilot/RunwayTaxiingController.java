@@ -232,7 +232,7 @@ public class RunwayTaxiingController extends TaxiingController{
      * an error angle of 1 degree results in an error of 1.75m every 100m of the takeoff
      * and an error angle of 0.5 degree results in an error of 0.85m per 100m (see which works best)
      */
-    private final static float maxTakeoffErrorAngle = (float) (1*PI/180f);
+    private final static float maxTakeoffErrorAngle = (float) (0.5*PI/180f);
 
     /**
      * The lookahead distance, this is the distance between the target and the drone

@@ -10,7 +10,7 @@ package internal.Autopilot;
  * TAXIINg: the autopilot objective is taxiing to a specified point on the ground
  */
 public enum AutopilotState {
-    INIT_FLIGHT, TAKEOFF, STABILIZE_TAKEOFF, FLIGHT, DESCEND_WAIT, DESCEND,  LANDING, TAXIING_TO_GATE, TAXIING_TO_RUNWAY;
+    INIT_FLIGHT, TAKEOFF, STABILIZE_TAKEOFF, FLIGHT, DESCEND_WAIT, DESCEND,  LANDING, TAXIING_TO_GATE, TAXIING_TO_RUNWAY, IDLE;
 
     /**
      * Converts the provided state into a string describing that state

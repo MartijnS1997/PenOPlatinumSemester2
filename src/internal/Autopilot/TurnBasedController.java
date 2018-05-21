@@ -57,7 +57,7 @@ public abstract class TurnBasedController extends Controller{
         //take the scalar product of  the relative position of the drone with  the vector pointing from the center to the exit point
         float scalarProd = currentPositionRelativeDrone.scalarProduct(turnExit);
         //check if the sign is positive, if so, the drone is located at the same half of the turn as the exit point
-        return scalarProd > 0;
+        return scalarProd >= 0;
     }
 
     /**
@@ -79,7 +79,7 @@ public abstract class TurnBasedController extends Controller{
 
         //check if the sign of the scalar product of the projections, if positive, they are faced in the same
         //direction and the drone has not yet passed the end point, if negative, it has.
-        return signum(currentProj.scalarProduct(previousProj)) < 0;
+        return signum(currentProj.scalarProduct(previousProj)) <= 0;
     }
 
     /**

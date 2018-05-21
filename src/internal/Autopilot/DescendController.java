@@ -34,6 +34,10 @@ public class DescendController extends TurnBasedController {
         AutopilotTurn turn = this.getTurn();
         updateAngleToGo(currentInputs, previousInputs, turn);
 
+        if(this.getTargetAltitude() > extractAltitude(currentInputs)){
+            this.setDescendRate(0);
+        }
+
         //get the cas commands to avoid collisions
         DescendTurnCAS descendTurnCAS = this.getDescendTurnCAS();
         CasCommand command = descendTurnCAS.getCASCommand(currentInputs, previousInputs);
@@ -179,7 +183,6 @@ public class DescendController extends TurnBasedController {
         float currentAltitude = extractAltitude(currentInputs);
         float descendRate = (currentAltitude - targetAltitude)/(turn.getTurnAngle());
         this.setDescendRate(descendRate);
-        System.out.println("descend rate: " + descendRate + ", will reach altitude: " + (currentAltitude - turnAngle*descendRate) );
 
         this.angleToGo = turnAngle;
 
@@ -1191,6 +1194,7 @@ public class DescendController extends TurnBasedController {
          * @param previousInputs the inputs previously received from the testbed
          */
         private void casPitchControls(ControlOutputs outputs, AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs){
+            System.out.println("using cas Controls");
             //get the set point for the pitch
             float referencePitch = this.getReferencePitch();
             //get the current pitch from the inputs
@@ -1238,7 +1242,7 @@ public class DescendController extends TurnBasedController {
             //use the fitted poly
             float a0 = 15.93f;
             float a1 = 0.1722f;
-            float radiusMult = 2;
+            float radiusMult = 1;
 
             return (a0 + abs(descendRate)*a1)*radiusMult;
         }

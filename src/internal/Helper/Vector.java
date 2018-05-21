@@ -176,8 +176,8 @@ public class Vector {
 		
 		
 		if (Math.abs(breuk) > 1f && Math.abs(breuk)*PRECISION < 1f)breuk = 1*Math.signum(breuk);
-		
-		return (float)Math.acos(breuk);
+		float result = (float)Math.acos(breuk);
+		return Float.isNaN(result) ? 0 : result;
 	}
 
 

@@ -59,9 +59,9 @@ public class SimulationGen {
      */
     public SimulationEnvironment generateBigWorld(){
         //first overwrite the provided parameters
-        this.worldXSize = 4E4f;
-        this.worldZSize = 4E4f;
-        this.nbDrones = 10;
+        this.worldXSize = 15E3f;
+        this.worldZSize = 15E3f;
+        this.nbDrones = 25;
         this.nbAirports = 25;
         this.nbPackages = 40;
 

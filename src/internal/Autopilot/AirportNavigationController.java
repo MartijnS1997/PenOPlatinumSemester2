@@ -892,6 +892,7 @@ public class AirportNavigationController extends TurnBasedController {
             setConnectionVector(connectionVector);
 
             //must we add other features?
+
         }
 
         /**

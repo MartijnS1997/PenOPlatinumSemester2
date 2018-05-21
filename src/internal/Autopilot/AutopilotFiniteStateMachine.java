@@ -34,6 +34,7 @@ public class AutopilotFiniteStateMachine {
         this.landingController = new AutopilotLandingController(autopilot);
         this.gateTaxiingController = new GateTaxiingController(autopilot);
         this.runwayTaxiingController = new RunwayTaxiingController(autopilot);
+        this.idleController = new IdleController(autopilot);
         this.autopilot = autopilot;
 
     }
@@ -81,11 +82,14 @@ public class AutopilotFiniteStateMachine {
             case STABILIZE_TAKEOFF:
                 //get the takeoff stabilization controller
                 AutopilotStabilization stabilizationController = this.getTakeoffStabilizerController();
-                return stabilizationController.hasReachedObjective(currentInputs, previousInputs) ? /*DESCEND_WAIT*/ FLIGHT: STABILIZE_TAKEOFF;
+                return stabilizationController.hasReachedObjective(currentInputs, previousInputs) ? IDLE: STABILIZE_TAKEOFF;
+            case IDLE:
+                IdleController idleController = this.getIdleController();
+                return idleController.hasReachedObjective(currentInputs, previousInputs) ? FLIGHT :  IDLE;
             case FLIGHT:
                 AirportNavigationController flightController = this.getAirportNavigationController();
                 //check if the controller has finished doing its job
-                return flightController.hasReachedObjective(currentInputs, previousInputs) ? /*DESCEND*/ DESCEND_WAIT : FLIGHT;
+                return flightController.hasReachedObjective(currentInputs, previousInputs) ?  DESCEND_WAIT : FLIGHT;
             case DESCEND_WAIT:
                 DescendWaitController descendWaitController = this.getDescendWaitController();
                 return descendWaitController.hasReachedObjective(currentInputs, previousInputs) ? DESCEND : DESCEND_WAIT;
@@ -175,6 +179,9 @@ public class AutopilotFiniteStateMachine {
                 break;
             case TAXIING_TO_RUNWAY:
                 configureRunwayTaxiing(inputs);
+                break;
+            case IDLE:
+                configureIdleController(inputs);
                 break;
         }
     }
@@ -360,6 +367,19 @@ public class AutopilotFiniteStateMachine {
 
     }
 
+    /**
+     * Configures the controller that is responsible for the drone when it is idle
+     * @param inputs the inputs used to configure the drone
+     */
+    private void configureIdleController(AutopilotInputs_v2 inputs){
+        IdleController idleController = this.getIdleController();
+        idleController.reset();
+        AutopilotCommunicator communicator = this.getAutopilot().getCommunicator();
+        float cruisingAltitude = communicator.getAssignedCruiseAltitude();
+        idleController.configureIdleController(inputs,cruisingAltitude);
+        idleController.setConfig(this.getAutopilot().getConfig());
+    }
+
     private void configureRunwayTaxiing(AutopilotInputs_v2 inputs){
         //TODO implement, set the taxiing target to the runway to takeoff to the next airport
         //TODO first acquire the takeoff direction from the overseer and then get in position
@@ -480,6 +500,8 @@ public class AutopilotFiniteStateMachine {
             case TAKEOFF:
                 return STABILIZE_TAKEOFF;
             case STABILIZE_TAKEOFF:
+                return IDLE;
+            case IDLE:
                 return FLIGHT;
             case FLIGHT:
                 return DESCEND_WAIT;
@@ -523,6 +545,8 @@ public class AutopilotFiniteStateMachine {
                 return this.getGateTaxiingController();
             case TAXIING_TO_RUNWAY:
                 return this.getRunwayTaxiingController();
+            case IDLE:
+                return this.getIdleController();
             default:
                 return this.getInitController();
         }
@@ -607,6 +631,16 @@ public class AutopilotFiniteStateMachine {
      */
     private RunwayTaxiingController getRunwayTaxiingController() {
         return runwayTaxiingController;
+    }
+
+
+    /**
+     * Getter for the controller responsible for controlling the drone when idle (a drone is idle
+     * if there are currently no deliveries assigned to it)
+     * @return the controller responsible for keeping the drone up in the air while waiting for a new delivery
+     */
+    private IdleController getIdleController() {
+        return idleController;
     }
 
     /**
@@ -726,7 +760,7 @@ public class AutopilotFiniteStateMachine {
      * The threshold wherefore the descend phase will be activating previous to the actual landing
      * --> used to get a safe altitude to initiate the landing
      */
-    private final float landingDescendThreshold = 35f;
+    private final float landingDescendThreshold = 50f;
 
     /**
      * The controllers used by the finite state machine to generate the control actions
@@ -739,6 +773,7 @@ public class AutopilotFiniteStateMachine {
     private AutopilotLandingController landingController;
     private GateTaxiingController gateTaxiingController;
     private RunwayTaxiingController runwayTaxiingController;
+    private IdleController idleController;
 
     private Controller initController = new Controller(null) {
         @Override
