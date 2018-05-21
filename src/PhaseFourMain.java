@@ -181,13 +181,13 @@ public class PhaseFourMain {
     private static int stepsPerCycle = 50;
     private static int stepsPerSubCycle = 10;
     private static float timeStep = 0.001f;
-    private static int playbackSpeed = 25;
+    private static int playbackSpeed = 10;
 
     private static int tcpPort = 4242;
     private static String host = "localhost";
 
     private static float runwayLength = 400f;
-    private static float runwayWidth = 10f;
+    private static float runwayWidth = 15f;
 
 
     //TODO create a random map generator and drone locator

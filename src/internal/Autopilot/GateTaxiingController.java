@@ -5,6 +5,9 @@ import AutopilotInterfaces.AutopilotOutputs;
 import TestbedAutopilotInterface.Overseer.AutopilotDelivery;
 import TestbedAutopilotInterface.Overseer.MapAirport;
 import internal.Helper.Vector;
+import internal.Physics.PhysXEngine;
+
+import static java.lang.Math.signum;
 
 /**
  * Created by Martijn on 2/05/2018.
@@ -29,6 +32,12 @@ public class GateTaxiingController extends TaxiingController{
 
         brakeTurningControls(outputs, currentInputs, previousInputs, getTaxiTarget(), getBrakeController());
         cruiseControl(outputs, previousInputs, currentInputs);
+
+//        if(this.getAutopilot().getID().equals("0")){
+//            trajectoryLog(currentInputs);
+//            errorLog(angleToTarget(currentInputs, this.getTaxiTarget()));
+//            vectorErrorLog(new Vector(outputs.getLeftBrakeForce(), outputs.getRightBrakeForce(), currentInputs.getElapsedTime()));
+//        }
 
         //the borders of the Airport we're currently in
         //Vector[] airportBorders = getAutopilot().getCommunicator().getAirportAtCurrentLocation().getAirportBorders();
@@ -80,6 +89,7 @@ public class GateTaxiingController extends TaxiingController{
      * @param packageToDeliver the package the drone needs to deliver
      */
     public void configureGateTaxiing(AutopilotInputs_v2 inputs, AutopilotDelivery packageToDeliver) {
+
         //airport to go to
         int targetAirportID;
         //gate to go to
@@ -91,9 +101,9 @@ public class GateTaxiingController extends TaxiingController{
             //the package is not picked up yet, we need to taxi to the source gate
             targetAirportID = packageToDeliver.getSourceAirport();
             targetGateID = packageToDeliver.getSourceAirportGate();
-            System.out.println("taxiing to source airport");
+//            System.out.println("taxiing to source airport");
         } else {
-            System.out.println("taxiing to destination airport");
+//            System.out.println("taxiing to destination airport");
             targetAirportID = packageToDeliver.getDestinationAirport();
             targetGateID = packageToDeliver.getDestinationAirportGate();
         }
@@ -104,6 +114,11 @@ public class GateTaxiingController extends TaxiingController{
 
         //get the location of the gate at the target airport
         taxiTarget = targetAirport.getGateLocation(targetGateID);
+        System.out.println("airport: " + targetAirport);
+        System.out.println("Delivery: " + packageToDeliver);
+
+        //take some distance behind the gate for better controls as a reference
+        //take the scalar product to get the direction
 
 
         //set the destination of where the drone has to go to, orientation doesn't matter
@@ -183,8 +198,8 @@ public class GateTaxiingController extends TaxiingController{
     /**
      * The PID controller used to determine the force that needs to be exerted on the brakes
      */
-    private final static float BRAKE_GAIN = 500;
-    private final static float BRAKE_INTEGRAL = 0;
+    private final static float BRAKE_GAIN = 600;
+    private final static float BRAKE_INTEGRAL = 5;
     private final static float BRAKE_DERIVATIVE = 0;
     private PIDController brakeController = new PIDController(BRAKE_GAIN, BRAKE_INTEGRAL, BRAKE_DERIVATIVE);
 

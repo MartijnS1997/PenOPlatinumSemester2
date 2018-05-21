@@ -12,19 +12,20 @@ public class RearTyrePhysX extends TyrePhysX {
     }
 
     @Override
-    public Vector getNetForceTyre(DroneState state, Vector nonChassisForces, float brakeForce, float deltaTime, float prevTyreDelta) {
-        Vector base =  super.getNetForceTyre(state, nonChassisForces, brakeForce, deltaTime, prevTyreDelta);
-        Vector lateralForce = this.getLateralForce(state, deltaTime, prevTyreDelta);
+    public Vector getNetForceTyre(FastTransformations transformations, DroneState state, Vector nonChassisForces, float brakeForce, float deltaTime, float prevTyreDelta) {
+        Vector base =  super.getNetForceTyre(transformations, state, nonChassisForces, brakeForce, deltaTime, prevTyreDelta);
+        Vector lateralForce = this.getLateralForce(transformations, state, deltaTime, prevTyreDelta);
         return base.vectorSum(lateralForce);
     }
 
     /**
      * Calculates the lateral force exerted on the tyre
+     * @param transformations the fast transformation matrices used by the simulation
      * @param state the state of the drone at instance of invocation
      * @param deltaTime the time passed
      * @return the lateral force exerted on the tyre
      */
-    public Vector getLateralForce(DroneState state, float deltaTime, float prevTyreDelta) {
+    public Vector getLateralForce(FastTransformations transformations, DroneState state, float deltaTime, float prevTyreDelta) {
 
         Vector orientation = state.getOrientation();
         Vector position = state.getPosition();
@@ -32,7 +33,7 @@ public class RearTyrePhysX extends TyrePhysX {
         //1. get the velocity
         Vector velocityWorld = this.getAbsoluteVelocity(state);
         //2. transform the world coordinates to drone coordinates
-        Vector velocityDrone = PhysXEngine.worldOnDrone(velocityWorld, orientation);
+        Vector velocityDrone = transformations.worldOnDrone(velocityWorld, orientation);
         //3. calculate the normal force of the wheel
         Vector normalForce = this.getNormalForce(orientation, position, deltaTime, prevTyreDelta);
 

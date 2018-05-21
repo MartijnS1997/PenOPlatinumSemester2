@@ -20,10 +20,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 /**
@@ -161,9 +158,8 @@ public class TestbedServer implements Runnable {
 
         //now that all the communication is done, we can simulate the next step
         //(all the drones have received their commands for the next step)
-        long start = System.currentTimeMillis();
         advanceWorld();
-        long end = System.currentTimeMillis();
+
 //        System.out.println("Elapsed time: " + (end - start) + "millis");
         //once the world is advanced, we are finished here
     }
@@ -291,11 +287,20 @@ public class TestbedServer implements Runnable {
      * Initializes the thread pool needed to simulate the world
      */
     private void initThreads() {
-        ExecutorService threadPool = Executors.newFixedThreadPool(this.getMaxNbOfThreads());
+        ThreadFactory factory = new ThreadFactory() {
+            @Override
+            public Thread newThread(Runnable r) {
+                Thread thread = new Thread(r);
+                thread.setPriority(Thread.MAX_PRIORITY);
+                return thread;
+            }
+        };
+        ExecutorService threadPool = Executors.newFixedThreadPool(this.getMaxNbOfThreads() , factory);
         //set the thread pool
 //        System.out.println(threadPool);
         this.setThreadPool(threadPool);
     }
+
 
     private void initGui() {
         ConcurrentLinkedQueue<GUIQueueElement> guiQueue = this.getRendererQueue();

@@ -38,9 +38,29 @@ public abstract class TaxiingController extends Controller {
         float pidOutputs = brakeController.getPIDOutput(angle, deltaTime);
         //will give negative output if we need to go right, positive if we need to go to the left
 //        System.out.println("brakePidOutputs " + pidOutputs);
-        outputs.setLeftBrakeForce(min(abs(min(pidOutputs, 0)), maxBrake));
-        outputs.setRightBrakeForce(min(abs(max(pidOutputs, 0)), maxBrake));
+//        outputs.setLeftBrakeForce(min(abs(min(pidOutputs, 0)), maxBrake));
+//        outputs.setRightBrakeForce(min(abs(max(pidOutputs, 0)), maxBrake));
+        float absPID = abs(pidOutputs);
+        if(signum(pidOutputs) < 0){
+            outputs.setRightBrakeForce(0);
+            outputs.setLeftBrakeForce(capBrakeForce(absPID, 0, maxBrake));
+        }else{
+            outputs.setRightBrakeForce(capBrakeForce(absPID, 0, maxBrake));
+            outputs.setLeftBrakeForce(0);
+        }
 //        System.out.println("Turning " + (outputs.getRightBrakeForce() > 0? "right" : "left"));
+    }
+
+    private float capBrakeForce(float desired, float lower, float upper){
+        if(desired < lower){
+            return lower;
+        }
+
+        if(desired > upper){
+            return upper;
+        }
+
+        return desired;
     }
 
     public void stayWithinAirportBorders(Vector[] airportBorders, ControlOutputs outputs, AutopilotInputs_v2 inputs){
@@ -152,34 +172,78 @@ public abstract class TaxiingController extends Controller {
      *                      of the drone is unknown
      */
     protected void cruiseControl(ControlOutputs outputs, AutopilotInputs_v2 prevInputs, AutopilotInputs_v2 currentInputs) {
-        //we need to get an approx for the velocity before we can make any further calculations
-        Vector approxVel = Controller.getVelocityApprox(currentInputs, prevInputs);
-        float totalVelocityApprox = approxVel.getSize();
-        //get the total mass of the drone (needed for the calculations)
+
+        //get the mass of the drone
         float totalMass = this.getTotalMass();
-        //get the velocity controller
+        //get the current velocity of the drone
+        Vector velocityApprox = getVelocityApprox(currentInputs, prevInputs);
+        float velocitySize = velocityApprox.getSize();
+        //get the velocity error
+        float refVelocity = this.getTaxiVelocity();
+
+        //get the error on the velocity
+        float error = refVelocity - velocitySize;
+        float deltaTime = getDeltaTime(currentInputs, prevInputs);
+
+        //put the error into the PID controller
         PIDController velocityController = this.getVelocityController();
-        //get the delta time, note this is an extrapolation, we assume the time step stays the same across the simulation
-        float deltaTime = Controller.getDeltaTime(currentInputs, prevInputs);
-        float errorVelocity = this.getTaxiVelocity() - totalVelocityApprox;
-//        System.out.println(approxVel);
-        //now calculate the output of the PID
-        float errorVelPID = velocityController.getPIDOutput(-errorVelocity, deltaTime);
-//        System.out.println("error on velocity: "+ errorVelPID);
-        //based on the error in the velocity we can calculate our control actions
-        //if the error is positive we need to accelerate (setpoint - velocity = error)
-        //if the error is negative we need to brake
-        if (errorVelPID > 0) {
-//            System.out.println("Adjusting thrust");
-            float maxThrust = this.getConfig().getMaxThrust();
-            float thrust = getCorrectionThrust(totalMass, errorVelPID, maxThrust, deltaTime);
-            outputs.setThrust(thrust);
-        } else if (errorVelPID < 0) {
-//            System.out.println("Adjusting brakes");
-            float maxBrake = this.getConfig().getRMax();
-            Vector brakeVector = getCorrectionBrakes(totalMass, errorVelPID, maxBrake, deltaTime, outputs);
-            setBrakeVector(outputs, brakeVector);
+        float pidOutput = velocityController.getPIDOutput(error, deltaTime);
+
+        if(signum(pidOutput) > 0){
+            //we're going too fast
+            outputs.setThrust(0);
         }
+        else{
+            //calculate the thrust needed to get up to speed in delta time
+            float desiredThrust = totalMass*abs(pidOutput)/deltaTime;
+            //get the max thrust
+            float maxThrust = this.getConfig().getMaxThrust();
+            float capThrust = capThrust(desiredThrust, maxThrust);
+
+            outputs.setThrust(capThrust);
+
+        }
+
+//        //we need to get an approx for the velocity before we can make any further calculations
+//        Vector approxVel = Controller.getVelocityApprox(currentInputs, prevInputs);
+//        float totalVelocityApprox = approxVel.getSize();
+//        //get the total mass of the drone (needed for the calculations)
+//        float totalMass = this.getTotalMass();
+//        //get the velocity controller
+//        PIDController velocityController = this.getVelocityController();
+//        //get the delta time, note this is an extrapolation, we assume the time step stays the same across the simulation
+//        float deltaTime = Controller.getDeltaTime(currentInputs, prevInputs);
+//        float errorVelocity = this.getTaxiVelocity() - totalVelocityApprox;
+////        System.out.println(approxVel);
+//        //now calculate the output of the PID
+//        float errorVelPID = velocityController.getPIDOutput(-errorVelocity, deltaTime);
+////        System.out.println("error on velocity: "+ errorVelPID);
+//        //based on the error in the velocity we can calculate our control actions
+//        //if the error is positive we need to accelerate (setpoint - velocity = error)
+//        //if the error is negative we need to brake
+//        if (errorVelPID > 0) {
+////            System.out.println("Adjusting thrust");
+//            float maxThrust = this.getConfig().getMaxThrust();
+//            float thrust = getCorrectionThrust(totalMass, errorVelPID, maxThrust, deltaTime);
+//            outputs.setThrust(thrust);
+//        } else if (errorVelPID < 0) {
+////            System.out.println("Adjusting brakes");
+//            float maxBrake = this.getConfig().getRMax();
+//            Vector brakeVector = getCorrectionBrakes(totalMass, errorVelPID, maxBrake, deltaTime, outputs);
+//            setBrakeVector(outputs, brakeVector);
+//        }
+    }
+
+    private static float capThrust(float thrust, float maxThrust){
+        if(thrust > maxThrust){
+            return maxThrust;
+        }
+
+        if(thrust < 0){
+            return 0;
+        }
+
+        return thrust;
     }
 
     /**
@@ -352,7 +416,7 @@ public abstract class TaxiingController extends Controller {
     /**
      * The velocity that is used as a reference for the cruise control of the taxi controller
      */
-    private float taxiVelocity = 2f;
+    private float taxiVelocity = 3f;
 
     /**
      * The velocity wherefore the drone is practically in standstill, this constant is used by the controllers

@@ -347,9 +347,11 @@ public class AutopilotFiniteStateMachine {
 
         GateTaxiingController taxiingController = this.getGateTaxiingController();
         taxiingController.reset();
+        System.out.println("Gate taxiing config for drone: " + this.getAutopilot().getID());
         //package that has to be delivered
+        System.out.println("CONFIGURING GATE TAXIING");
         AutopilotDelivery packageToDeliver = this.getAutopilot().getCommunicator().getCurrentRequest();
-
+        System.out.println("package to deliver " + packageToDeliver);
         taxiingController.configureGateTaxiing(inputs, packageToDeliver);
 
         //set the config for the controller

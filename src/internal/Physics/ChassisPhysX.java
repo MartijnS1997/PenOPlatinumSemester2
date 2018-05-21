@@ -65,32 +65,22 @@ public class ChassisPhysX {
      * @param inputs the inputs from the autopilot (containing the commands for the brake force)
      * @param deltaTime the time step used for the simulation
      */
-    public void netChassisForces(DroneForces droneForces, DroneState state, AutopilotOutputs inputs, float deltaTime /*Vector nonChassisForces*/){
-        int nbOfActiveTyres = nbOfActiveTyres(inputs);
+    public void netChassisForces(FastTransformations fastTransformations, DroneForces droneForces, DroneState state, AutopilotOutputs inputs, float deltaTime /*Vector nonChassisForces*/){
         Vector scaledNonChassisForces = droneForces.getTotalAirborneForces();//nonChassisForces.scalarMult(nbOfActiveTyres);
         //first calculate the known forces exerted by the tires
         TyrePhysX frontTyre = this.getFrontTyre();
 //        System.out.println("front: ");
-        Vector frontTyreForce = frontTyre.getNetForceTyre(state, scaledNonChassisForces, inputs.getFrontBrakeForce(), deltaTime, state.getPrevFrontTyreDelta() );
+        Vector frontTyreForce = frontTyre.getNetForceTyre(fastTransformations, state, scaledNonChassisForces, inputs.getFrontBrakeForce(), deltaTime, state.getPrevFrontTyreDelta() );
 //        System.out.println("Left: ");
         TyrePhysX rearLeftTyre = this.getRearLeftTyre();
-        Vector rearLeftTyreForce = rearLeftTyre.getNetForceTyre(state, scaledNonChassisForces, inputs.getLeftBrakeForce(), deltaTime, state.getPrevRearLeftTyreDelta());
+        Vector rearLeftTyreForce = rearLeftTyre.getNetForceTyre(fastTransformations, state, scaledNonChassisForces, inputs.getLeftBrakeForce(), deltaTime, state.getPrevRearLeftTyreDelta());
 //        System.out.println("Right: ");
         TyrePhysX rearRightTyre = this.getRearRightTyre();
-        Vector rearRightTyreForce = rearRightTyre.getNetForceTyre(state,scaledNonChassisForces, inputs.getRightBrakeForce(), deltaTime, state.getPrevRearRightTyreDelta());
+        Vector rearRightTyreForce = rearRightTyre.getNetForceTyre(fastTransformations, state,scaledNonChassisForces, inputs.getRightBrakeForce(), deltaTime, state.getPrevRearRightTyreDelta());
 
 //        System.out.println();
         //save the forces so the moments can access them
         droneForces.setWheelForces(frontTyreForce, rearLeftTyreForce, rearRightTyreForce);
-//        this.setFrontTyreForces(frontTyreForce);
-//        this.setRearLeftTyreForces(rearLeftTyreForce);
-//        this.setRearRightTyreForces(rearRightTyreForce);
-
-//        Vector[] forces = {frontTyreForce, rearLeftTyreForce, rearRightTyreForce};
-
-        //System.out.println("Total chassis force: " + Vector.sumVectorArray(forces));
-
-        //return droneForces.getTotalWheelForces();//Vector.sumVectorArray(forces);
     }
 
     private static int nbOfActiveTyres(AutopilotOutputs inputs){
@@ -111,10 +101,9 @@ public class ChassisPhysX {
     /**
      * Calculates the net moment exerted by the chassis on the drone (in drone axis system)
      * @param state the state of the drone at moment of invoking the method
-     * @param deltaTime the time passed between two simulation steps
      * @return the net chassis moment in the drone axis system
      */
-    public Vector netChassisMoment(DroneForces droneForces, DroneState state){
+    public Vector netChassisMoment(FastTransformations transformations, DroneForces droneForces, DroneState state){
 
         //get the tyres
         TyrePhysX frontTyre = this.getFrontTyre();
@@ -122,40 +111,13 @@ public class ChassisPhysX {
         TyrePhysX rearRightTyre = this.getRearRightTyre();
 
         //calculate the moment for every tyre based on the force of the tyre saved in the drone forces object
-        Vector frontTyreMoment = frontTyre.getNetMomentTyre(state, droneForces.getFrontWheelForce());
-        Vector rearLeftTyreMoment = rearLeftTyre.getNetMomentTyre(state, droneForces.getRearLeftWheelForce());
-        Vector rearRightTyreMoment = rearRightTyre.getNetMomentTyre(state, droneForces.getRearRightWheelForce());
+        Vector frontTyreMoment = frontTyre.getNetMomentTyre(transformations, state, droneForces.getFrontWheelForce());
+        Vector rearLeftTyreMoment = rearLeftTyre.getNetMomentTyre(transformations, state, droneForces.getRearLeftWheelForce());
+        Vector rearRightTyreMoment = rearRightTyre.getNetMomentTyre(transformations, state, droneForces.getRearRightWheelForce());
 
         Vector[] moments = new Vector[]{frontTyreMoment, rearLeftTyreMoment, rearRightTyreMoment};
         return Vector.sumVectorArray(moments);
-//        //System.out.println("NEW ITERATION, ROLL: " + state.getOrientation().getzValue());
-//        //use the stored values for the forces
-//        TyrePhysX frontTyre = this.getFrontTyre();
-////        System.out.println("Front-tyre: ");
-//        Vector frontTyreForce = this.getFrontTyreForces(); //frontTyre.getNetForceTyre(state, inputs.getFrontBrakeForce(), deltaTime, state.getPrevFrontTyreDelta() );
-////        System.out.println("front Force: " + frontTyreForce);
-//        TyrePhysX rearLeftTyre = this.getRearLeftTyre();
-////        System.out.println("Left-Tyre: ");
-//        Vector rearLeftTyreForce = this.getRearLeftTyreForces();//rearLeftTyre.getNetForceTyre(state, inputs.getLeftBrakeForce(), deltaTime, state.getPrevRearLeftTyreDelta());
-////        System.out.println("rear left Force" + rearLeftTyreForce);
-//        TyrePhysX rearRightTyre = this.getRearRightTyre();
-////        System.out.println("Right-trye: ");
-//        Vector rearRightTyreForce = this.getRearRightTyreForces();//rearRightTyre.getNetForceTyre(state, inputs.getRightBrakeForce(), deltaTime, state.getPrevRearRightTyreDelta());
-////        System.out.println("rear right Force" + rearRightTyreForce);
-//
-//        Vector frontTyreMoment = frontTyre.getNetMomentTyre(state, frontTyreForce);
-////        System.out.println("Front tyre moment: " + frontTyreMoment);
-//        Vector rearLeftTyreMoment = rearLeftTyre.getNetMomentTyre(state, rearLeftTyreForce);
-////        System.out.println("Rear left tyre moment: " + rearLeftTyreMoment);
-//        Vector rearRightTyreMoment = rearRightTyre.getNetMomentTyre(state, rearRightTyreForce);
-////        System.out.println("Rear right tyre moment: " + rearRightTyreMoment);
-//
-//        Vector[] moments = {frontTyreMoment, rearLeftTyreMoment, rearRightTyreMoment};
-////        System.out.println("Net moment on chassis: " + Vector.sumVectorArray(moments));
-////        System.out.println("Net moment: " + Vector.sumVectorArray(moments));
-////        System.out.println("\n");
-//
-//        return Vector.sumVectorArray(moments);
+
     }
 
     /**
@@ -211,30 +173,6 @@ public class ChassisPhysX {
 
     public TyrePhysX getRearRightTyre() {
         return rearRightTyre;
-    }
-
-    private Vector getFrontTyreForces() {
-        return frontTyreForces;
-    }
-
-    private void setFrontTyreForces(Vector frontTyreForces) {
-        this.frontTyreForces = frontTyreForces;
-    }
-
-    private Vector getRearLeftTyreForces() {
-        return rearLeftTyreForces;
-    }
-
-    private void setRearLeftTyreForces(Vector rearLeftTyreForces) {
-        this.rearLeftTyreForces = rearLeftTyreForces;
-    }
-
-    public Vector getRearRightTyreForces() {
-        return rearRightTyreForces;
-    }
-
-    public void setRearRightTyreForces(Vector rearRightTyreForces) {
-        this.rearRightTyreForces = rearRightTyreForces;
     }
 
     public PhysXEngine getAssociatedPhysicsEngine() {

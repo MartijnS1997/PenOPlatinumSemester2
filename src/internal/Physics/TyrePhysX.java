@@ -39,7 +39,7 @@ public class TyrePhysX {
      * @param deltaTime the time that has passed between two simulation steps
      * @return the net forces exerted by the tyres in the world axis system
      */
-    public Vector getNetForceTyre(DroneState  state, Vector nonChassisForces, float brakeForce, float deltaTime, float prevTyreDelta){
+    public Vector getNetForceTyre(FastTransformations transformations, DroneState  state, Vector nonChassisForces, float brakeForce, float deltaTime, float prevTyreDelta){
 
         Vector orientation = state.getOrientation();
         Vector rotation = state.getRotation();
@@ -56,7 +56,7 @@ public class TyrePhysX {
         Vector verticalForce = this.getNormalForce(orientation, position, deltaTime, prevTyreDelta); //naming for consistency
 
         //then get the brake force
-        Vector brakes = this.getBrakeForce(orientation, rotation, velocity, brakeForce, nonChassisForces, deltaTime);
+        Vector brakes = this.getBrakeForce(transformations, orientation, rotation, velocity, brakeForce, nonChassisForces, deltaTime);
 
         // the resulting force on the tyres
         return brakes.vectorSum(verticalForce);
@@ -69,7 +69,7 @@ public class TyrePhysX {
      * @param netForce the net force exerted on the drone
      * @return the net moment in the drone axis system
      */
-    public Vector getNetMomentTyre(DroneState state, Vector netForce){
+    public Vector getNetMomentTyre(FastTransformations transformations, DroneState state, Vector netForce){
         Vector orientation = state.getOrientation();
         Vector position = state.getPosition();
         float groundDist = this.getTyreDistanceToGround(orientation, position);
@@ -85,7 +85,7 @@ public class TyrePhysX {
 
         //all the forces apply to the bottom of the tyre
         //1. transform the net forces to the drone axis system
-        Vector netForceDrone = PhysXEngine.worldOnDrone(netForce, orientation);
+        Vector netForceDrone = transformations.worldOnDrone(netForce, orientation);
         //System.out.println("Tyre position: " + relPosTyreBottomDrone);
         return relPosTyreBottomDrone.crossProduct(netForceDrone);
     }
@@ -99,16 +99,16 @@ public class TyrePhysX {
      * @return  zero vector if the cannot be a brake force exerted (@see canExertBrakeForce)
      *          the brakeForce set in the opposite direction of the velocity in the drone axis system
      */
-    private Vector getBrakeForce(Vector orientation, Vector rotation, Vector velocity, float brakeForce, Vector nonChassisForces, float deltaTime){
+    private Vector getBrakeForce(FastTransformations fastTransformations, Vector orientation, Vector rotation, Vector velocity, float brakeForce, Vector nonChassisForces, float deltaTime){
         //calculate the brake force in the world axis system
         //get the sign of the velocity component amongst the z-axis of the drone
         Vector absVelocity = this.absoluteVelocityWorld(orientation, rotation, velocity);
 //        System.out.println("deltaTime: " + deltaTime);
 //        System.out.println("absolute velocity : " + absVelocity);
-        Vector velocityDrone = PhysXEngine.worldOnDrone(absVelocity, orientation);
+        Vector velocityDrone = fastTransformations.worldOnDrone(absVelocity, orientation);
 //        System.out.println("Absolute velocity drone: " + absVelocity);
         //transform the net forces to the drone axis system
-        Vector nonChassisForcesDrone = PhysXEngine.worldOnDrone(nonChassisForces, orientation);
+        Vector nonChassisForcesDrone = fastTransformations.worldOnDrone(nonChassisForces, orientation);
 //        System.out.println("Non chassis forces: " + nonChassisForces);
         float neededBrakeForce = this.calcNeededBrakeForce(velocityDrone, nonChassisForcesDrone, deltaTime/* *10*/);
 
@@ -120,33 +120,7 @@ public class TyrePhysX {
         //now create a vector for the brake force
         Vector brakeForceDrone = new Vector(0,0,exerted);
         //transform it to the world axis system
-        return PhysXEngine.droneOnWorld(brakeForceDrone, orientation);
-        //check if we may brake
-//        if(canExertBrakeForce(velocityDrone)){
-//            return new Vector(); // if not, return zero vector
-//        }
-
-//        //get the sign
-//        float zVelSign = signum(velocityDrone.getzValue());
-//
-//        //if the velocity is zero, we must counteract only the forces exerted on the chassis
-//        if(velocityDrone.getzValue() == 0){
-//            //brake force == z-component of non chassis forces (or max if not high enough)
-//            float exertedBrakeForce = min(abs(nonChassiForcesDroneZ), brakeForce);
-//            //set the signum and create the vector
-//            Vector netBrakeForce = new Vector(0,0, -signum(nonChassiForcesDroneZ)*exertedBrakeForce);
-//            return PhysXEngine.droneOnWorld(netBrakeForce, orientation);
-//        }
-//
-//        //if we may brake, set the brake force opposite to the sign of the velocity in the drone axis system
-//        Vector brakeForceDrone =  new Vector(0,0, - min(abs(brakeForce), this.getMaxBrake())*zVelSign);
-//        System.out.println("brake force: " + brakeForceDrone);
-//
-//        //then transform the brake force to the world axis system
-//        //all the y-components of the brake force need to be set to zero (can be a result of the transformation)
-//        Vector tBrakeForceDrone= PhysXEngine.droneOnWorld(brakeForceDrone, orientation);
-//        System.out.println("transformed brake force: " + tBrakeForceDrone);
-//        return new Vector(tBrakeForceDrone.getxValue(), 0f, tBrakeForceDrone.getzValue());
+        return fastTransformations.droneOnWorld(brakeForceDrone, orientation);
 
     }
 

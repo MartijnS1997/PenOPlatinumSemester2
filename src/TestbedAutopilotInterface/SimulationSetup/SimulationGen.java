@@ -584,23 +584,6 @@ public class SimulationGen {
      */
     private void addDroneToAirport(List<DroneSpec> drones, Vector startGateLocation, Vector runwayHeading){
 
-//        //get the right orthogonal of the runway heading
-//        Vector rightOrthonormal = runwayHeading.getRightOrthonormal();
-//        //set the drone to the left (multiply with -1)
-//        Vector leftOrthonormal = rightOrthonormal.scalarMult(-1);
-//        //take the offset (=1/2 width)
-//        float offset = this.getAirportRunwayWidth()/2f;
-//
-//        //scale the left orthonormal
-//        Vector droneRelGroundPos = leftOrthonormal.normalizeToLength(offset);
-//
-//        //add the drone airport position to get the absolute drone pos
-//        Vector droneGroundPos = droneRelGroundPos.vectorSum(startGateLocation);
-//        System.out.println("airport location: " + startGateLocation);
-//
-//        System.out.println("rel pos drone " + droneRelGroundPos.getSize());
-//        System.out.println("abs pos drone " + droneGroundPos);
-        //add the extra offset for the height of the drone
         Vector dronePos = startGateLocation.vectorSum(getDroneYPos());
 
         //get the orientation of the drone
@@ -717,28 +700,9 @@ public class SimulationGen {
                 float headingZ = random.nextFloat() - 0.5f;
 
 
-
-                AirportSpec airportSpec = new AirportSpec() {
-                    @Override
-                    public Vector getPosition() {
-                        return new Vector(xCoord, 0, zCoord);
-                    }
-
-                    @Override
-                    public Vector getPrimaryRunWay() {
-                        return new Vector(headingX, 0, headingZ).normalizeVector();
-                    }
-
-                    @Override
-                    public float getRunwayWidth() {
-                        return runwayWidth;
-                    }
-
-                    @Override
-                    public float getRunwayLength() {
-                        return runwayLength;
-                    }
-                };
+                Vector location = new Vector(xCoord, 0, zCoord);
+                Vector heading = new Vector(headingX, 0, headingZ);
+                AirportSpec airportSpec = generateAirportAt(location, heading);
 
                 airportSpecs.add(airportSpec);
             }

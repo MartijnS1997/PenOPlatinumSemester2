@@ -337,7 +337,7 @@ public class AutopilotOverseer implements AutopilotModule, Callable<Void>, Packa
      * @return the next autopilot delivery
      *         if the queue is empty, returns null
      */
-    public AutopilotDelivery getNextDeliveryRequest(AutoPilot autoPilot){
+    public synchronized AutopilotDelivery getNextDeliveryRequest(AutoPilot autoPilot){
         //get the ID from the autopilot that is invoking the getter
         String value = autoPilot.getID();
         //retrieve the corresponding queue for the drone

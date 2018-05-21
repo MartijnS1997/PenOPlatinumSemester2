@@ -48,7 +48,7 @@ public class AutopilotLandingController extends Controller {
     @Override
     public boolean hasReachedObjective(AutopilotInputs_v2 currentInputs, AutopilotInputs_v2 previousInputs) {
         float absVel = getVelocityApprox(currentInputs, previousInputs).getSize();
-        return absVel < 1.0;
+        return absVel < 0.1;
     }
 
 
